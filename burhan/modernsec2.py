@@ -958,6 +958,9 @@ def _shadow_api(st: "_St2", eps, spec, target_url: str):
     # deprecated = the op carries deprecated:true and still responds.
     raw_paths = (spec or {}).get("paths") or {}
     zomb_dead, zomb_dep = [], []
+    zomb_status = []                         # BFLA-2b: refused probes must
+    # never support an "agreement" claim — a probe the scope gate (or the
+    # transport) refused read HTTP 0 and proves NOTHING about liveness
     for e in spec_eps[:ZOMBIE_PROBE_CAP]:
         path = urlsplit(e.url).path
         op = {}
@@ -967,6 +970,7 @@ def _shadow_api(st: "_St2", eps, spec, target_url: str):
                 break
         r = st.probe(fam, e, note="m2-zombie-check")
         status = getattr(r, "status", 0)
+        zomb_status.append(int(status or 0))
         if status in (404, 410):
             zomb_dead.append((e, path, status))
             st.find("zombie_api_endpoint", Severity.LOW, e, "-", [
@@ -997,10 +1001,23 @@ def _shadow_api(st: "_St2", eps, spec, target_url: str):
                     f"unchecked (ZOMBIE_PROBE_CAP={ZOMBIE_PROBE_CAP}, "
                     f"documented)")
     if not (shadow_hits or zomb_dead or zomb_dep):
-        st.boundary(fam, "TESTED_NEGATIVE",
-                    "the supplied spec and the live surface agree: every "
-                    "declared path is alive and unflagged, every crawled "
-                    "in-namespace JSON endpoint is declared")
+        if zomb_status and all(s == 0 for s in zomb_status):
+            # BFLA-2b (crAPI live round, 2026-11-02): the spec's servers
+            # entry pointed at a host outside the scan's scope, so every
+            # declared-path probe was refused before it left the engine —
+            # the OLD code called that "the spec and the live surface
+            # agree", a vacuous negative over probes that never ran
+            st.boundary(fam, "UNTESTABLE",
+                        "every declared-path probe was refused (HTTP 0 — "
+                        "scope policy or transport): no liveness claim is "
+                        "possible. Check that the spec's servers entry "
+                        "matches the scan target (loopback equivalences "
+                        "are normalized at ingestion)")
+        else:
+            st.boundary(fam, "TESTED_NEGATIVE",
+                        "the supplied spec and the live surface agree: every "
+                        "declared path is alive and unflagged, every crawled "
+                        "in-namespace JSON endpoint is declared")
 
 
 def run_modern_battery_v2(engine: RequestEngine, endpoints, seed=None,

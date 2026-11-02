@@ -83,3 +83,42 @@ def test_degrade_classify_never_raises_on_non_string():
     # a plain string still classifies exactly as before (no coercion)
     assert Parameter("id", ParamLocation.QUERY, "7").classify().kind \
         == ParamKind.NUMERIC
+
+
+# ── BFLA-2b (crAPI live round, 2026-11-02, run 41491090217): the spec's
+# servers entry pointed at localhost while the scan targeted 127.0.0.1 —
+# the endpoints sat OUTSIDE the scan's host scope, every battery replay
+# through a scope-checked engine was silently refused, the BFLA oracle
+# read "failed" on a request that never left the engine, and the zombie
+# family recorded a VACUOUS TESTED_NEGATIVE over all-refused probes. ──
+def _srv_spec(url):
+    return {"openapi": "3.0.3", "info": {"title": "srv", "version": "t"},
+            "servers": [{"url": url}],
+            "paths": {"/x": {"get": {"responses": {"200": {"description": "ok"}}}}}}
+
+
+def test_loopback_spec_server_normalizes_onto_scan_base():
+    eps = parse_openapi(_srv_spec("http://localhost:8888"),
+                        "http://127.0.0.1:8888")
+    assert eps[0].url == "http://127.0.0.1:8888/x", eps[0].url
+    # both directions of the loopback equivalence
+    eps = parse_openapi(_srv_spec("http://127.0.0.1:8888"),
+                        "http://localhost:8888")
+    assert eps[0].url == "http://localhost:8888/x", eps[0].url
+    # a spec server with a base PATH keeps the path on the normalized root
+    eps = parse_openapi(_srv_spec("http://localhost:8888/api"),
+                        "http://127.0.0.1:8888")
+    assert eps[0].url == "http://127.0.0.1:8888/api/x", eps[0].url
+
+
+def test_non_loopback_spec_server_stands_verbatim():
+    # a genuinely different host (or port) keeps DISC-13 semantics: the
+    # spec's declaration stands, the scope gate decides — never a silent
+    # rewrite of what the spec actually claims
+    eps = parse_openapi(_srv_spec("http://api.example.com:8888"),
+                        "http://127.0.0.1:8888")
+    assert eps[0].url == "http://api.example.com:8888/x", eps[0].url
+    # port mismatch on loopback: a DIFFERENT service, not an equivalence
+    eps = parse_openapi(_srv_spec("http://localhost:9999"),
+                        "http://127.0.0.1:8888")
+    assert eps[0].url == "http://localhost:9999/x", eps[0].url

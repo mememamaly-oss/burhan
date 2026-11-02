@@ -129,3 +129,35 @@ def test_no_spec_no_diff(shadow_base):
     assert fam_b and fam_b[0]["kind"] == "NOT_DISCOVERED", fam_b
     assert m2["probe_counts"]["shadow_api"]["sent"] == 0, \
         m2["probe_counts"]["shadow_api"]
+
+
+def test_refused_probes_never_claim_agreement(shadow_base):
+    """BFLA-2b (crAPI live round, 2026-11-02, run 41491090217): crAPI's
+    spec declares its server as localhost while the scan targeted
+    127.0.0.1 — every declared-path probe was REFUSED by the scope gate
+    (HTTP 0) and the family still recorded "the spec and the live surface
+    agree", a vacuous negative over probes that never ran. A non-loopback
+    host mismatch keeps that shape (loopback mismatches are now normalized
+    at ingestion): all-refused probes must record the honest UNTESTABLE,
+    never an agreement claim."""
+    spec = {"openapi": "3.0.0",
+            "info": {"title": "host-mismatch", "version": "1.0.0"},
+            "servers": [{"url": "http://spec-other-host.invalid:8888"}],
+            "paths": {
+                "/api/filter": {"get": {
+                    "responses": {"200": {"description": "ok"}}}},
+                # declared so the SHADOW side stays clean — this test pins
+                # the ZOMBIE side's all-refused honesty, not the shadow diff
+                "/api/v2/internal/telemetry": {"get": {
+                    "responses": {"200": {"description": "ok"}}}},
+                "/api/v1/users": {"get": {
+                    "responses": {"200": {"description": "ok"}}}}}}
+    data = _scan(shadow_base, spec)
+    assert not [f for f in data["findings"]
+                if f["type"] in ("shadow_api_endpoint", "zombie_api_endpoint")]
+    m2 = data["stats"].get("modern_v2") or {}
+    fam_b = [b for b in m2.get("boundaries", []) if b["family"] == "shadow_api"]
+    assert any(b["kind"] == "UNTESTABLE" and "refused" in b["detail"]
+               for b in fam_b), fam_b
+    assert not any(b["kind"] == "TESTED_NEGATIVE" and "agree" in b["detail"]
+                   for b in fam_b), fam_b
