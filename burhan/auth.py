@@ -77,6 +77,10 @@ class AuthProfile:
 class AuthState:
     authenticated: bool = False
     login_endpoint: object = None      # AUTH-06: the credentialed POST endpoint (json_login)
+    login_response: object = None      # AUTH-06: the login Response itself (json_login) —
+                                       # a JSON-API login carries the token in the body;
+                                       # callers that must ARM the token (the authz
+                                       # battery's session engines) mine it from here
     landing_url: str = ""
     logins: int = 0
     reauths: int = 0
@@ -182,6 +186,7 @@ class AuthEngine:
                 # enters the endpoint map — the JWT differential target.
                 self.state.landing_url = (self.p.validate_url or base)
                 self.state.login_endpoint = ep
+                self.state.login_response = r
                 self.bus.emit("AuthSuccess", mode="json", url=base,
                               status=r.status)
                 return True

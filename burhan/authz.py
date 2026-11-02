@@ -119,6 +119,15 @@ class AuthzConfig:
                                   # (link extraction + access-matrix rows)
     token_validate_url: str = ""  # V411: token-mode validation URL (a page the
                                   # token must open; default = login_url)
+    json_login: bool = False      # AUTH-06 for the authz battery: JSON-API
+                                  # targets answer the login with 200 + a token
+                                  # in the BODY (no cookie session). The login
+                                  # runs as AuthProfile(json_login=True); on
+                                  # success the harvested token is armed as
+                                  # "Authorization: Bearer <token>" on that
+                                  # account's session engine, so every later
+                                  # replay (matrix, role-view, BFLA's
+                                  # differential) carries the identity.
 
     @classmethod
     def from_dict(cls, d: dict, target_url: str = "") -> "AuthzConfig":
@@ -153,7 +162,8 @@ class AuthzConfig:
                    max_idor_endpoints=int(d.get("max_idor_endpoints", 40)),
                    max_idor_probes=int(d.get("max_idor_probes", 60)),
                    max_role_view=int(d.get("max_role_view", 20)),
-                   token_validate_url=tvurl)
+                   token_validate_url=tvurl,
+                   json_login=bool(d.get("json_login", False)))
 
 
 class AuthzEngine:
@@ -206,9 +216,29 @@ class AuthzEngine:
                 login_url=self.cfg.login_url, username=acc.username,
                 password=acc.password, user_field=self.cfg.user_field,
                 pass_field=self.cfg.pass_field, success_marker=self.cfg.success_marker,
-                login_marker=self.cfg.login_marker)
+                login_marker=self.cfg.login_marker,
+                json_login=self.cfg.json_login)
             auth = AuthEngine(profile, eng, self.bus)
             if auth.login():
+                # AUTH-06 json_login: the token arrived in the login response
+                # BODY (no cookie session exists on a JSON-API target) — arm
+                # it as the account's Bearer header so every later replay
+                # (matrix, role-view, the BFLA differential) carries the
+                # identity. Reuse modernsec2's body miner (same extraction
+                # rule the JWT families use — one bug would hide itself if
+                # each site re-implemented it).
+                if self.cfg.json_login:
+                    from .modernsec2 import _mine_jwt
+                    token = _mine_jwt(auth.state.login_response) \
+                        if getattr(auth.state, "login_response", None) else None
+                    if not token:
+                        self.errors.append(
+                            f"{acc.name}: json login succeeded but no token "
+                            f"harvestable from the login response body")
+                        continue
+                    eng.default_headers[acc.auth_header] = (
+                        token if not acc.auth_scheme
+                        else f"{acc.auth_scheme} {token}")
                 self.sessions[acc.name] = {"account": acc, "engine": eng,
                                            "landing": auth.state.landing_url,
                                            "rank": _rank(acc.role)}

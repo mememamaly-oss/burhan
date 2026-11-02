@@ -14,6 +14,36 @@ name: Live validation (crAPI + DVGA — modern battery v2)
 #                                   engine miss is an honest NOT-FOUND)
 #     3D excessive_data_exposure  — docs challenges 4+5 (sensitive data of
 #                                   other users; internal video property)
+#
+#   PART 4 (owner order 2026-11-02) — the four new layers, same contract:
+#     PART 0 jwt_signature_not_enforced + fam1 jwt_algorithm_confusion +
+#          fam2 jwt_none_acceptance — challenge 15 ("find ANY one way to
+#          forge"); run 9 live-proved the dashboard reads claims without
+#          verifying the signature.
+#     3E  bfla                    — docs challenge 7, under the LITERAL
+#                                  "## BFLA" heading: the admin delete
+#                                  route (ProfileController.java, in BOTH
+#                                  v1.1.5 and main — checksums below pin
+#                                  both eras) performs no role check. The
+#                                  authz battery logs in BOTH official
+#                                  seeded accounts (TestUsers.java:
+#                                  test@ ROLE_USER / admin@ ROLE_ADMIN)
+#                                  via json_login — the token arrives in
+#                                  the login response BODY and is armed
+#                                  as each session's Bearer header.
+#     3F  race_condition         — ONE operator-declared candidate only
+#                                  (order 2.2 — never blind): POST
+#                                  /workshop/api/mechanic/signup, the
+#                                  v1.1.5 check-then-insert handler with
+#                                  a UNIQUE email constraint; the burst
+#                                  email is fresh per run so weekly runs
+#                                  never fight over consumed state.
+#     3G  shadow_api_endpoint +  — diffs the crawl against crAPI's own
+#         zombie_api_endpoint      openapi-spec/crapi-openapi-spec.json
+#                                  (main). The spec does NOT exist at the
+#                                  v1.1.5 tag (HTTP 404, verified) — the
+#                                  version drift is part of the recorded
+#                                  ground truth, never silent.
 #   DVGA (dolevf/dvga, Docker Hub)
 #     3C graphql_aliasing         — README "Aliases based Attack" scenario
 
@@ -96,10 +126,19 @@ jobs:
           docker run -d --name dvga -p 5013:5013 -e WEB_HOST=0.0.0.0 dolevf/dvga
           # readiness probed from the scan container (same path as the scan)
 
-      - name: Record pre-scan ground-truth checksums
+      - name: Record pre-scan ground-truth checksums + fetch the operator spec
+        # PART 4: the checksums pin every ground-truth source this run
+        # scores against — including BOTH eras of ProfileController.java
+        # (v1.1.5 + main: challenge 7's no-role-check admin delete route
+        # exists in the pinned deployment era, not only on main) and the
+        # seeded TestUsers.java ladder the authz battery logs into. The
+        # openapi spec is FETCHED here (main branch — it does not exist
+        # at the v1.1.5 tag, HTTP 404 verified: the documented drift)
+        # into .live-spec/ so the scan step's tar staging carries it
+        # into scanbox; its sha256 rides in the same checksum artifact.
         run: |
           python3 - <<'PY'
-          import hashlib, json, urllib.request
+          import hashlib, json, os, urllib.request
           def sha(url):
               with urllib.request.urlopen(url, timeout=30) as r:
                   return hashlib.sha256(r.read()).hexdigest()
@@ -107,17 +146,28 @@ jobs:
             "crapi_challenges_md": sha("https://raw.githubusercontent.com/OWASP/crAPI/main/docs/challenges.md"),
             "crapi_jwtprovider": sha("https://raw.githubusercontent.com/OWASP/crAPI/main/services/identity/src/main/java/com/crapi/config/JwtProvider.java"),
             "dvga_readme": sha("https://raw.githubusercontent.com/dolevf/Damn-Vulnerable-GraphQL-Application/master/README.md"),
+            # PART 4 ground truth (2026-11-02)
+            "crapi_profilecontroller_v115": sha("https://raw.githubusercontent.com/OWASP/crAPI/v1.1.5/services/identity/src/main/java/com/crapi/controller/ProfileController.java"),
+            "crapi_profilecontroller_main": sha("https://raw.githubusercontent.com/OWASP/crAPI/main/services/identity/src/main/java/com/crapi/controller/ProfileController.java"),
+            "crapi_testusers": sha("https://raw.githubusercontent.com/OWASP/crAPI/main/services/identity/src/main/java/com/crapi/constant/TestUsers.java"),
           }
+          # the operator-supplied spec (main) — fetched to .live-spec/ so
+          # the tar staging below carries it into scanbox
+          spec_url = "https://raw.githubusercontent.com/OWASP/crAPI/main/openapi-spec/crapi-openapi-spec.json"
+          os.makedirs(".live-spec", exist_ok=True)
+          with urllib.request.urlopen(spec_url, timeout=30) as r:
+              body = r.read()
+          open(os.path.join(".live-spec", "crapi-openapi-spec.json"), "wb").write(body)
+          gt["crapi_openapi_spec_main"] = hashlib.sha256(body).hexdigest()
           print(json.dumps(gt, indent=1))
           # RUNNER_TEMP via os.environ — the quoted heredoc does not
           # expand $RUNNER_TEMP, and a literal '$RUNNER_TEMP/...' path
           # does not exist (run 41310908793: FileNotFoundError)
-          import os
           out = os.path.join(os.environ["RUNNER_TEMP"], "ground-truth-sha.json")
           open(out, "w").write(json.dumps(gt))
           PY
 
-      - name: Run live validation (3A + 3D vs crAPI, 3C vs DVGA)
+      - name: Run live validation (PART 0/1/2 + 3A/3D/3E/3F/3G vs crAPI, 3C vs DVGA)
         # run 41286864928: the whole crAPI stack was healthy and ports
         # published on the dind's 0.0.0.0 — but the JOB RUNNER could not
         # reach them (the dind service container's network namespace is
@@ -137,6 +187,8 @@ jobs:
             -v scanout:/out python:3.12-slim sleep 900 >/dev/null
           docker exec scanbox mkdir -p /ws
           # stage the engine (tar-pipe through the API; skip .git etc.)
+          # .live-spec/ rides along — the checksums step fetched crAPI's
+          # main-branch openapi spec there before this step
           tar --exclude=.git --exclude=node_modules --exclude=.next \
             -cf - . | docker exec -i scanbox tar -xf - -C /ws
           # readiness: both targets, through the scan's own network path
@@ -164,6 +216,8 @@ jobs:
           docker exec scanbox python3 /ws/scripts/live_validate_modern2.py \
             --crapi http://127.0.0.1:8888 \
             --dvga http://127.0.0.1:5013 \
+            --crapi-spec /ws/.live-spec/crapi-openapi-spec.json \
+            --max-requests 4000 \
             --out-dir /out/live
           # pull the results back to the runner through the docker API
           mkdir -p "$RUNNER_TEMP/live"
