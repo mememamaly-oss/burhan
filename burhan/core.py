@@ -191,6 +191,12 @@ class Parameter:
     is_file: bool = False
 
     def classify(self) -> "Parameter":
+        # LIVE-CAUGHT (crAPI live run 41424841547): a spec/crawl source can
+        # hand a NON-STRING value (OpenAPI "example": 30 is a JSON int).
+        # Coerce before touching string methods — a bad example value must
+        # degrade to "", never kill the whole scan.
+        if not isinstance(self.value, str):
+            self.value = "" if self.value is None else str(self.value)
         v, n = (self.value or "").strip(), (self.name or "").lower()
         # Phase 50: CSRF/anti-CSRF tokens are flow-control values, never injection
         # targets — mutating them breaks the request (token mismatch) and can only

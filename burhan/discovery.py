@@ -790,7 +790,16 @@ def parse_openapi(spec: dict, base_url: str) -> list[Endpoint]:
                                       or prm.get("example", "") or "burhan")
                 else:
                     loc = ParamLocation.QUERY
-                    default_val = prm.get("schema", {}).get("example", "") or ""
+                    # LIVE-CAUGHT (crAPI live run 41424841547 — the first
+                    # real-world spec through this parser): a query param
+                    # may declare a NON-STRING example ("limit": 30, an
+                    # int). The path/header/cookie branches above already
+                    # str()-wrap theirs; the query branch did not, and
+                    # Parameter.classify called .strip() on the raw int
+                    # -> AttributeError, killing the whole scan. Every
+                    # example value enters Parameter as a string.
+                    default_val = str(prm.get("schema", {}).get("example", "")
+                                      or "")
                 params.append(Parameter(prm["name"], loc, default_val).classify())
             body = (op.get("requestBody") or {}).get("content", {})
             if "application/json" in body:
