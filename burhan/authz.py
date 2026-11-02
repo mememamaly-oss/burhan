@@ -44,6 +44,7 @@ False-positive disciplines:
 """
 from __future__ import annotations
 import difflib
+import json
 import re
 import urllib.parse
 from dataclasses import dataclass, field
@@ -176,11 +177,36 @@ class AuthzEngine:
         self._extra_requests = 0                  # anon-engine honesty counter
         self.matrix: dict[str, dict[str, int]] = {}
         self.errors: list[str] = []
+        # BFLA-2 (crAPI live round, 2026-11-02): id(engine) -> owning session,
+        # so _fetch can attach every JSON body it fetches through a session
+        # engine to THAT identity's view cache (see _cache_view).
+        self._engine_sess: dict[int, dict] = {}
         # OWSP-28: cross-object-management surfaces collected during role-view
         # replay (state-change forms over OTHER accounts' object ids).
         self._crossobj_paths: set[str] = set()
 
     # ---------------------------------------------------------------- helpers
+    def _cache_view(self, engine, body: str) -> None:
+        """BFLA-2 (crAPI live round, 2026-11-02): remember the JSON bodies
+        this battery fetched under a logged-in session — they are that
+        identity's OWN view of the application (its object ids, role,
+        profile). The 3E BFLA replay substitutes spec-path parameters
+        ({video_id} ...) with a REAL id from the replaying session's view
+        instead of the spec's documentation example: crAPI's own spec
+        declares example 12345 — no such object exists, the privileged
+        oracle replayed it, got 404, and the honest record said UNTESTABLE
+        (live run 41436129520). Bounded: parsed dict/list roots only,
+        first 32 bodies per session."""
+        sess = self._engine_sess.get(id(engine))
+        if sess is None or len(sess.setdefault("view_json", [])) >= 32:
+            return
+        try:
+            obj = json.loads(body)
+        except (ValueError, TypeError):
+            return
+        if isinstance(obj, (dict, list)):
+            sess["view_json"].append(obj)
+
     def _login_all(self) -> int:
         ok = 0
         for acc in self.cfg.accounts:
@@ -206,6 +232,9 @@ class AuthzEngine:
                     self.sessions[acc.name] = {
                         "account": acc, "engine": eng,
                         "landing": vurl, "rank": _rank(acc.role)}
+                    self._engine_sess[id(eng)] = self.sessions[acc.name]
+                    if r is not None and not r.error and r.body:
+                        self._cache_view(eng, r.body)
                     ok += 1
                 else:
                     self.errors.append(
@@ -242,6 +271,7 @@ class AuthzEngine:
                 self.sessions[acc.name] = {"account": acc, "engine": eng,
                                            "landing": auth.state.landing_url,
                                            "rank": _rank(acc.role)}
+                self._engine_sess[id(eng)] = self.sessions[acc.name]
                 ok += 1
             else:
                 self.errors.append(f"{acc.name}: {auth.state.last_error[:120]}")
@@ -264,8 +294,9 @@ class AuthzEngine:
         return difflib.SequenceMatcher(None, na, nb).ratio()
 
     def _landing_links(self, sess) -> set[str]:
-        r = sess["engine"].send(RequestMutation(
-            endpoint=Endpoint(url=sess["landing"], method="GET"), note="authz-landing"))
+        r = self._fetch(sess["engine"],
+                        Endpoint(url=sess["landing"], method="GET"),
+                        "authz-landing")
         if r.error:
             return set()
         return self._page_links(r.body or "", sess["landing"])
@@ -378,6 +409,11 @@ class AuthzEngine:
         r = engine.send(m)
         if engine is self._anon:
             self._extra_requests += engine.requests_sent - before
+        elif r is not None and not getattr(r, "error", None) and r.body:
+            # BFLA-2: every JSON body fetched under a session engine feeds
+            # that identity's view cache (zero extra requests — the role-view
+            # replay already fetches the crawl set under each account).
+            self._cache_view(engine, r.body)
         return r
 
     def _mx(self, url: str, key: str, status, resp=None) -> None:

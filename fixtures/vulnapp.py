@@ -573,6 +573,29 @@ _BFLA_DIVS = """
 <div>End of lab.</div>"""
 if os.environ.get("BFLA") == "1":
     LAB_PAGE = LAB_PAGE.replace("<div>End of lab.</div>", _BFLA_DIVS)
+
+# 3E BFLA-2 (crAPI live round, 2026-11-02): the spec-template surface. The
+# lab page links the per-session JSON view /api/me (the crAPI dashboard
+# shape — every seeded account owns one video of EACH kind and its dashboard
+# response carries those ids); the admin DELETE routes carry a PATH
+# parameter, exactly like crAPI's own spec declares DELETE /identity/api/v2/
+# admin/videos/{video_id} with example 12345 (a documentation placeholder
+# that matches no real object). Two DISTINCT object kinds on purpose: a
+# destructive oracle CONSUMES the session's object of that kind, so a second
+# admin function over the SAME kind would find it gone (the honest
+# UNTESTABLE) — distinct kinds model the real shape (admin functions over
+# different resource types). Broken twin: any authenticated session deletes
+# (no role check — deleteAdminProfileVideo's dead-assignment shape).
+# Secure twin: role enforced. Gated so stock benchmark scans stay
+# byte-identical.
+BFLA_VIDEOS = {"demo": 101, "bob": 202, "carol": 303}   # one video per account
+BFLA_CLIPS = {"demo": 151, "bob": 252, "carol": 353}    # one clip per account
+_BFLA_VIDEOS_GONE: set = set()                          # consumed by DELETE
+_BFLA_CLIPS_GONE: set = set()
+if os.environ.get("BFLA") == "2":
+    LAB_PAGE = LAB_PAGE.replace(
+        "<div>End of lab.</div>",
+        '<a href="/api/me">my view</a>\n<div>End of lab.</div>')
 # 3G: the shadow endpoint must be CRAWL-discovered (a live link); the
 # deprecated /api/v1/users needs no link — the zombie check probes every
 # spec-declared path directly.
@@ -840,6 +863,23 @@ class Handler(BaseHTTPRequestHandler):
             if su is None:
                 return self._redirect("/login")
             return self._send(200, json.dumps(ADMIN_STATS), {"Content-Type": "application/json"})
+        if path == "/api/me":
+            # BFLA=2 (crAPI live round, 2026-11-02): the per-session JSON VIEW —
+            # the dashboard shape (crAPI answers the AUTH-required dashboard
+            # with the caller's own object graph, video_id included). The authz
+            # battery's role-view replay fetches this under each account, and
+            # the 3E BFLA replay harvests each session's OWN {video_id} from
+            # it to substitute the spec's documentation example (12345).
+            su = _sess_user(self)
+            if su is None:
+                return self._send(401, json.dumps({"error": "authentication required"}),
+                                  {"Content-Type": "application/json"})
+            _, s = su
+            return self._send(200, json.dumps(
+                {"uid": s["uid"], "name": s["user"], "role": s["role"],
+                 "video_id": BFLA_VIDEOS.get(s["user"], 0),
+                 "clip_id": BFLA_CLIPS.get(s["user"], 0)}),
+                {"Content-Type": "application/json"})
         if path == "/api/secure/admin/stats":
             # Hardened twin: admin role enforced — lower roles get 403.
             su = _sess_user(self)
@@ -1631,6 +1671,43 @@ class Handler(BaseHTTPRequestHandler):
         else:
             n = sum(ord(c) for c in sid) % 997 + 1          # entity content -> response
         return self._send(200, f"{n} units", {"Content-Type": "text/plain"})
+
+    def do_DELETE(self):
+        # 3E BFLA-2 (crAPI live round, 2026-11-02): the spec-template surface —
+        # DELETE admin functions with a PATH parameter, mirroring crAPI's
+        # deleteAdminProfileVideo(videoId, request): auth required, then
+        # findById; a MISSING object reads 404 exactly like the pinned
+        # v1.1.5 source (SORRY_DIDNT_GET_PROFILE). Broken twin performs NO
+        # role check (the dead getUserFromToken assignment); secure twin
+        # enforces the admin role (403). Two object kinds (videos + clips).
+        u = urlparse(self.path)
+        path = unquote(u.path)
+        m = re.fullmatch(r"/api/(secure/)?admin/(videos|clips)/([^/]+)", path)
+        if not m:
+            return self._send(404, json.dumps({"error": "no such route"}),
+                              {"Content-Type": "application/json"})
+        su = _sess_user(self)
+        if su is None:
+            return self._send(401, json.dumps({"error": "authentication required"}),
+                              {"Content-Type": "application/json"})
+        _, s = su
+        if m.group(1) and s["role"] != "admin":
+            return self._send(403, json.dumps({"error": "admin role required"}),
+                              {"Content-Type": "application/json"})
+        oid = m.group(3)
+        store, gone = ((BFLA_VIDEOS, _BFLA_VIDEOS_GONE) if m.group(2) == "videos"
+                       else (BFLA_CLIPS, _BFLA_CLIPS_GONE))
+        owner = next((acc for acc, v in store.items() if str(v) == oid), None)
+        if owner is None or oid in gone:
+            # the crAPI shape: the object is gone -> 404, no role claim made
+            return self._send(404, json.dumps({"error": "sorry didnt get profile"}),
+                              {"Content-Type": "application/json"})
+        gone.add(oid)
+        return self._send(200, json.dumps(
+            {"message": "object deleted successfully",
+             "kind": m.group(2), "object_id": int(oid),
+             "deleted_by": s["user"]}),
+            {"Content-Type": "application/json"})
 
 
 if __name__ == "__main__":
