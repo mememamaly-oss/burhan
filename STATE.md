@@ -851,6 +851,111 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   = NOT_DISCOVERED, 0 probes. Evidence: evidence/layers/shadow-api/
   (RED + BLUE + SHA256SUMS).
 
+## 2026-11-02 — PART 4 live chain (PRs #21–#23) + PART 5 final regression: the detection-layers campaign closes
+
+- PR #21 (2cbb162): PART 3 merged — CI green on 12f58d5 (all nine
+  jobs); all four detection layers of the campaign are now on main.
+
+- PART 4 (order 2026-11-02, branch live-validation-part4-chain,
+  PR #22 = 94e5b90, merged 107752a): the LIVE chain for the four new
+  layers. P4.1 json_login arming (burhan/auth.py + authz.py): AuthState
+  keeps the login Response (login_response); AuthzConfig.json_login
+  arms the body-mined token as each account session's Bearer header
+  (crAPI has NO cookie session; a form-mode POST 415s — live-proven
+  run 41314804418). RED/BLUE/regression/chain pytest coverage
+  (tests/test_authz_json_login.py, 4 tests) — suite 253 -> 257.
+  P4.2 scripts/live_validate_modern2.py: ground truth extended with
+  challenge 7 (the literal '## BFLA' heading; the admin delete route
+  verified in BOTH the v1.1.5 tag and main) and the spec version drift
+  (main's spec supplied, HTTP 404 at v1.1.5 — recorded, never silent);
+  authz = BOTH official seeded accounts (TestUsers.java:
+  admin@example.com ROLE_ADMIN + test@example.com ROLE_USER); the ONE
+  declared race candidate (mechanic signup — the check-then-insert
+  handler + UNIQUE email constraint verified in the pinned v1.1.5
+  source; fresh per-run email); --max-requests surfaced (a budget
+  exhausted before the m2 confirm probes turns every later probe into
+  a refused HTTP 0 = false TESTED_NEGATIVE). BUG fixed in the verdict
+  writer: the boundaries key read a TOP-LEVEL report key that never
+  existed (the stats carry them under modern_v2.boundaries) and the
+  axes tuple said 'modern2' where the stats key is 'modern_v2' — every
+  prior live artifact shipped boundaries=[]. Both fixed; live
+  artifacts now carry every boundary. P4.3 .github/workflows/
+  live-validation.yml: fetches main's crapi-openapi-spec.json pre-scan
+  (sha256 in the checksum artifact), pins BOTH ProfileController.java
+  eras + TestUsers.java, passes --crapi-spec + --max-requests 4000.
+  P4.5 scripts/p44_local_chain.py: the full wiring chain (authz ladder
+  + spec diff + race candidate) proven locally before any CI minute.
+  Live run 41424841547 (on 107752a): RED — LIVE-CAUGHT crash: crAPI's
+  main spec declares INTEGER query/POST-param examples (limit=30,
+  offset=0, order_id=33, report_id=2) and parse_openapi had never met
+  a real-world spec's example block — a TypeError killed the whole
+  scan. Scope note (order 2.2, verbatim in the family): DVGA / Juice
+  Shop / WebGoat / DVWA are NOT race targets — no operator-declared
+  unique-constraint resource exists in their published sources; the
+  prober never fires blind concurrent load.
+
+- PART 5a (branch fix/openapi-int-example-crash, PR #23 = 63951bc,
+  merged ea6d6c2): discovery.py coerces INTEGER examples to str before
+  digest (core.py helper) + the degrade battery (int/None/list/dict/
+  float/str examples can never crash ingestion); tests/
+  test_openapi_ingestion.py (2) — suite 257 -> 259.
+
+- LIVE VALIDATION GREEN ON ea6d6c2 — two runs (41426955803 dispatch,
+  41436129520 schedule; artifact live-validation-crapi-dvga
+  13136996020; numbers from the latter): crAPI v1.1.5 (official
+  compose, pinned): 24.1 s wall, 513 requests, 21 findings, modern2=1.
+  CONFIRMED-POSITIVE jwt_signature_not_enforced at /identity/api/v2/
+  user/dashboard (sha256 9e847f31b904…, severity high, Verified): the
+  corrupted-signature control token was ACCEPTED (HTTP 200) by the
+  AUTH-required dashboard — original alg RS256, claims [exp, iat,
+  role, sub]; the probe recipe (login + protected + jwks URLs) rides
+  the finding. PART ZERO's class, confirmed on the real documented
+  target (challenge 15's "any way to forge"). authz axis:
+  accounts_configured=2, accounts_logged_in=2 (the official admin +
+  user via json_login), roles [admin, user], matrix_endpoints=18,
+  login_errors=[] — the BFLA privilege ladder ran end to end. Honest
+  boundaries (all recorded in the artifact, none hidden): bfla
+  UNTESTABLE on DELETE /identity/api/v2/admin/videos/{video_id} (the
+  privileged oracle failed — the function does not execute for the
+  highest-privilege session either; no authorization claim is
+  possible) + TESTED_NEGATIVE overall; race_condition TESTED_NEGATIVE
+  (mechanic signup invariant held: 1 winner <= quota 1 across a
+  6-wide burst, statuses [200, 500x5]); shadow/zombie TESTED_NEGATIVE
+  (the supplied main spec and the live v1.1.5 surface agree) + the
+  ZOMBIE_PROBE_CAP=8 cap note (36 declared paths left unchecked,
+  documented). Score classes: confirmed-positive 1 / unjudged 0 /
+  expected-miss 8, each miss with its documented reason (e.g.
+  jwt_weak_secret: challenge 15's mechanism is algorithm confusion,
+  not a wordlist secret; shadow/zombie: judged against the documented
+  main-spec-vs-v1.1.5-deployment drift). DVGA: 5.5 s, 834 requests,
+  26 findings, modern2=0; expected-miss 1 (graphql_aliasing
+  SKIPPED_NO_SURFACE — this run's endpoint map carried no GraphQL POST
+  surface). Ground truth SHA-256 pinned in-job, pre-scan:
+  challenges.md 1f526b42…, JwtProvider.java fd83c342…, TestUsers.java
+  48a12a8a…, ProfileController v1.1.5 48515ee7… / main 80c35780…, the
+  main spec 9dc66ecf…, DVGA readme e5d816a4… (artifact
+  ground-truth-sha.json).
+
+- PART 5b — FINAL REGRESSION on merged main ea6d6c2 (all real runs,
+  2026-11-02): local doctor 19/19 PASS + pytest 259/259 in 89 s.
+  CI run 41426954318: 9/9 jobs green (web / engine / secrets /
+  fixture / drift / real-targets / reproducibility / transparency /
+  action-demo local ref; the published-tag dogfood step is
+  dispatch-only by design). Fixture benchmark gate: TP=38 FP=0 FN=0
+  TN=37 — precision/recall/F1 = 1.0/1.0/1.0, "benchmark regression
+  gate OK"; scan stats 7162 requests, 79 endpoints, 91 candidates,
+  239 verified, 1 rejected, 98.9 s, authenticated, crawl 52 pages.
+  Reproducibility attestation: two genuinely separate executions —
+  run A = run B: merkle root d7cf5a0352dc20c4ff829a3e304ea1b6691f
+  3a779c1c7675e4cefdd9eecf8df5, findings count 199, full-set sha256
+  741400378e0762f6ff28af0b3e07c85bdc54bdf40e55728f07537a0d46949ac3
+  (MATCH merkle_root + MATCH findings_sha256). CodeQL + security-ops
+  (Scorecard/SBOM) + pages: green on ea6d6c2. Every workflow on main
+  green at campaign close. Suite growth across the campaign (each
+  step merged through the full CI wall): 244 (PART 0) -> 246 (PART 1)
+  -> 250 (PART 2) -> 253 (PART 3) -> 257 (PART 4 wiring) -> 259
+  (P5a) — +15 tests, zero regressions, F1=1.0 held throughout.
+
 ## Where to find things
 
 - Round-by-round history: `git log`, worklog.md (current + history).
