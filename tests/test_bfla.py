@@ -39,11 +39,11 @@ def _free_port() -> int:
     return port
 
 
-def _spawn(bfla: bool):
+def _spawn(mode: str = ""):
     port = _free_port()
     env = {**os.environ, "PORT": str(port)}
-    if bfla:
-        env["BFLA"] = "1"
+    if mode:
+        env["BFLA"] = mode
     proc = subprocess.Popen(
         [sys.executable, os.path.join(ROOT, "fixtures", "vulnapp.py")],
         env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -80,7 +80,7 @@ def _scan(base: str):
 
 
 def test_bfla_red_broken_and_blue_hardened_in_one_scan():
-    port, proc = _spawn(bfla=True)
+    port, proc = _spawn("1")
     try:
         data = _scan(f"http://127.0.0.1:{port}")
     finally:
@@ -106,7 +106,7 @@ def test_bfla_red_broken_and_blue_hardened_in_one_scan():
 def test_bfla_regression_standard_fixture_zero_findings():
     """Every existing surface the suite already exercises — correctly scoped
     or not admin-shaped — must produce ZERO bfla findings."""
-    port, proc = _spawn(bfla=False)
+    port, proc = _spawn()
     try:
         data = _scan(f"http://127.0.0.1:{port}")
     finally:
@@ -117,4 +117,93 @@ def test_bfla_regression_standard_fixture_zero_findings():
     fam_b = [b for b in m2.get("boundaries", []) if b["family"] == "bfla"]
     assert fam_b and fam_b[0]["kind"] == "NOT_DISCOVERED", fam_b
     assert m2.get("probe_counts", {}).get("bfla", {}).get("sent", 0) == 0, \
+        m2.get("probe_counts", {}).get("bfla")
+
+
+def _tpl_spec(base):
+    """crAPI's own spec shape: the admin DELETE declares its path parameter
+    with a documentation EXAMPLE id (12345) that matches no real object, and
+    a spec-only route (token_id) no session view can ever supply. Two
+    DISTINCT object kinds (videos broken / clips hardened): a destructive
+    oracle consumes the session's object of that kind, so a second admin
+    function over the SAME kind would find it gone — the honest UNTESTABLE."""
+    def _pdel(name, example):
+        return {"delete": {
+            "responses": {"200": {"description": "OK"}},
+            "parameters": [
+                {"name": name, "in": "path", "required": True,
+                 "schema": {"type": "integer", "format": "int64"},
+                 "example": example}]}}
+    return {"openapi": "3.0.0",
+            "info": {"title": "bfla-template-fixture", "version": "1.0.0"},
+            "servers": [{"url": base}],
+            "paths": {
+                "/api/me": {"get": {
+                    "responses": {"200": {"description": "OK"}}}},
+                "/api/admin/videos/{video_id}": _pdel("video_id", 12345),
+                "/api/secure/admin/clips/{clip_id}": _pdel("clip_id", 12345),
+                "/api/admin/tokens/{token_id}": _pdel("token_id", 999)}}
+
+
+def test_bfla_spec_example_id_materializes_from_session_views():
+    """BFLA-2 (crAPI live round, 2026-11-02, run 41436129520): the spec
+    declares the admin DELETE's path parameter with a documentation EXAMPLE
+    id — the privileged oracle replayed the placeholder, read 404, and the
+    honest record said UNTESTABLE although no authorization question had
+    been asked. The fix: each replaying session substitutes its OWN real
+    object id, harvested from the JSON view the authz battery already
+    fetched under that identity (/api/me — the crAPI dashboard shape).
+
+    RED   the broken twin fires on the LOW session's OWN harvested id
+          (bob -> 202, never the example 12345 nor the braces) and
+          survives VR-36 through the consumed transition (the single-use
+          video is gone: fresh replay reads 404 after the stashed 200).
+    BLUE  the hardened twin stays silent (role enforced, TESTED_NEGATIVE).
+    UNSUBSTITUTED the spec-only token_id records the wiring fact and
+          sends NOTHING."""
+    port, proc = _spawn("2")
+    try:
+        base = f"http://127.0.0.1:{port}"
+        cfg = ScanConfig(
+            allow_private=True, max_pages=8, timeout=8.0, browser=False,
+            modern_v2=True, max_requests=8000, openapi_spec=_tpl_spec(base),
+            authz={"login_url": f"{base}/login",
+                   "accounts": [
+                       {"name": "admin", "role": "admin",
+                        "username": "demo", "password": "demo123",
+                        "marker": "root-admin@burhan-fixture.local"},
+                       {"name": "bob", "role": "user",
+                        "username": "bob", "password": "bob123",
+                        "marker": "bob-user@burhan-fixture.local"}],
+                   "user_field": "uid", "pass_field": "passw",
+                   "success_marker": "Sign Off"})
+        data = BurhanScanner(base, cfg).run()
+    finally:
+        proc.terminate()
+    bfla = [f for f in data["findings"] if f["type"] == "bfla"]
+    assert bfla, sorted({f["type"] for f in data["findings"]})
+    broken = [f for f in bfla if "/api/admin/videos/" in f["url"]]
+    assert broken, [f["url"] for f in bfla]
+    # the finding names the LOW session's OWN materialized resource
+    assert broken[0]["url"].endswith("/api/admin/videos/202"), broken[0]["url"]
+    assert "12345" not in broken[0]["url"] and "{" not in broken[0]["url"]
+    # VR-36 consumed transition: single-use object, fresh replay 404
+    # after the stashed 200 — still verified (weaker, documented basis)
+    assert str(broken[0]["status"]).lower() == "verified", (
+        broken[0]["status"], broken[0].get("verification"))
+    # BLUE: the hardened twin (clips — its own object kind) stayed silent
+    assert not [f for f in bfla if "secure" in f["url"] or "clips" in f["url"]], \
+        [f["url"] for f in bfla]
+    m2 = (data["stats"].get("modern_v2") or {})
+    kinds = [b["kind"] for b in m2.get("boundaries", [])
+             if b["family"] == "bfla"]
+    # UNSUBSTITUTED: the spec-only token_id — zero probes for that endpoint.
+    # (The family-wide TESTED_NEGATIVE only records when NOTHING fired; the
+    # hardened twin's rejection shows below in the probe accounting.)
+    assert "UNSUBSTITUTED_PATH_PARAM" in kinds, kinds
+    tok = [b for b in m2.get("boundaries", [])
+           if b["family"] == "bfla" and b["kind"] == "UNSUBSTITUTED_PATH_PARAM"]
+    assert tok and "token_id" in tok[0]["detail"], tok
+    # probe accounting: broken (anon+high+low = 3) + secure (3) + ghost (0)
+    assert m2.get("probe_counts", {}).get("bfla", {}).get("sent", 0) == 6, \
         m2.get("probe_counts", {}).get("bfla")

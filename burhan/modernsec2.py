@@ -70,9 +70,11 @@ import json
 import re
 import socket
 import threading
+import urllib.parse
+from dataclasses import replace as _dc_replace
 
 from .core import (Endpoint, EventBus, Finding, FindingStatus, Severity,
-                   Evidence, ScopeRule)
+                   Evidence, ScopeRule, ParamLocation)
 from .http_engine import RequestEngine, RequestMutation
 
 MODERN2_TYPES = ("jwt_weak_secret", "graphql_aliasing",
@@ -524,6 +526,69 @@ def _rebind_toctou(st: _St2, eps, rebind_cfg: dict | None):
 
 # ------------------------------------------------------------------ entry
 # ------------------------------------------------------------------ 3E
+def _json_scalar(objs, key: str):
+    """BFLA-2 (crAPI live round, 2026-11-02): first scalar value for an
+    EXACT-key match across the session's view JSON graphs, document order.
+    Containers/bools/None never materialize a path parameter — only a real
+    id (number or string) the session's own view actually carried."""
+    stack = list(objs)
+    while stack:
+        o = stack.pop(0)
+        if isinstance(o, dict):
+            for k, v in o.items():
+                if k == key and isinstance(v, (int, float, str)) \
+                        and not isinstance(v, bool):
+                    s = str(v).strip()
+                    if s and not any(c in s for c in "/?#{}"):
+                        return s
+            stack.extend(v for v in o.values()
+                         if isinstance(v, (dict, list)))
+        elif isinstance(o, list):
+            stack.extend(v for v in o if isinstance(v, (dict, list)))
+    return None
+
+
+def _session_path_ep(sess, ep: Endpoint):
+    """BFLA-2: clone `ep` with every PATH parameter's value replaced by a
+    REAL object id harvested from THIS session's own view JSON (exact key
+    match), instead of the spec's documentation example. MAX-05 already
+    substitutes PATH params on every render — this only overrides the VALUE,
+    so the substitution itself keeps its one battle-tested code path.
+
+    Why per-session OWN ids: BFLA is FUNCTION-level (API5), not object-level
+    — the replay proves the admin FUNCTION executes for a lower-privilege
+    identity, and giving each session its own target object also keeps the
+    privileged oracle from consuming the very object the differential is
+    about to replay against (crAPI's deleteAdminProfileVideo deletes by id,
+    no role check — every seeded user owns one video, and each account's
+    dashboard response carries its own video_id). Returns None when a PATH
+    param has no harvestable value: the function is untestable through this
+    wiring, which is a WIRING fact, never an authorization claim."""
+    pps = [p for p in ep.parameters if p.location == ParamLocation.PATH]
+    if not pps:
+        return ep
+    views = sess.get("view_json") or []
+    if not views:
+        return None
+    newp = []
+    url = ep.url
+    for p in ep.parameters:
+        if p.location == ParamLocation.PATH:
+            val = _json_scalar(views, p.name)
+            if val is None:
+                return None
+            newp.append(_dc_replace(p, value=val))
+            # the concrete URL too: findings and the VR-36 stash must name
+            # the REAL attacked resource, not the spec's template token
+            # (the render-time substitution then becomes a no-op — the
+            # value already IS the parameter's value)
+            url = url.replace("{" + p.name + "}",
+                              urllib.parse.quote(str(val), safe=""))
+        else:
+            newp.append(p)
+    return _dc_replace(ep, url=url, parameters=newp)
+
+
 def _bfla(st: "_St2", eps, authz_sessions):
     """3E BFLA (Broken Function Level Authorization) — CWE-285; OWASP API
     Security Top 10 2023 API5 (Broken Function Level Authorization), whose
@@ -535,7 +600,18 @@ def _bfla(st: "_St2", eps, authz_sessions):
 
     Reuses — never duplicates — the authz battery's logged-in sessions
     (cfg.authz accounts; nothing logs in here). OFF by default with the
-    whole modern2 battery (--modern-v2)."""
+    whole modern2 battery (--modern-v2).
+
+    BFLA-2 (crAPI live round, 2026-11-02): spec-derived candidates declare
+    their PATH parameters with documentation EXAMPLE values (crAPI's own
+    spec: video_id example 12345 — no such object exists). The privileged
+    oracle replayed that placeholder, got a 404, and the honest record said
+    UNTESTABLE although no authorization question had actually been asked
+    (live run 41436129520). Now each replaying session substitutes its OWN
+    real object id, harvested from the JSON view bodies the authz battery
+    already fetched under that identity (zero extra requests); a PATH param
+    with no harvestable value records the UNSUBSTITUTED_PATH_PARAM boundary
+    and sends NOTHING."""
     fam = "bfla"
     from .authz import ADMIN_PATH_RE          # lazy: the battery's convention
     from urllib.parse import urlsplit
@@ -572,12 +648,29 @@ def _bfla(st: "_St2", eps, authz_sessions):
     import difflib
     fired = 0
     for ep in cands:
+        pathed = [p.name for p in ep.parameters
+                  if p.location == ParamLocation.PATH]
+        hi_pairs = []
+        for h in highs:
+            hep = _session_path_ep(h, ep) if pathed else ep
+            if hep is not None:
+                hi_pairs.append((h, hep))
+        if pathed and not hi_pairs:
+            st.boundary(fam, "UNSUBSTITUTED_PATH_PARAM",
+                        f"{ep.url}: the spec declares its path parameter(s) "
+                        f"({', '.join(pathed)}) only with documentation "
+                        f"EXAMPLE values and no session's own JSON view "
+                        f"supplied a real object id — the function cannot be "
+                        f"executed by ANYONE through this wiring (a wiring "
+                        f"fact, not an authorization claim; zero probes sent)")
+            continue
+        oracle_ep = hi_pairs[0][1] if pathed else ep
         if st.counts[fam]["sent"] + 3 > FAMILY2_CAPS[fam]:
             st.boundary(fam, "NOT_SUPPORTED",
                         "family request cap reached before exhausting the "
                         "candidate set (BFLA_EP_CAP x 3 replays, documented)")
             break
-        anon = st.probe_with(fam, anon_engine, ep, "m2-bfla-anon")
+        anon = st.probe_with(fam, anon_engine, oracle_ep, "m2-bfla-anon")
         hops = [u for _, u in (getattr(anon, "redirect_chain", None) or [])]
         _hop = anon.hop_location()
         if _hop:
@@ -585,11 +678,11 @@ def _bfla(st: "_St2", eps, authz_sessions):
         anon_gated = (getattr(anon, "status", 0) in (401, 403)
                       or any("login" in urlsplit(u).path.lower()
                              for u in hops if u))
-        high, high_used = None, None
-        for h in highs:
-            high = st.probe_with(fam, h["engine"], ep, "m2-bfla-high")
+        high, high_used, high_ep = None, None, None
+        for h, hep in hi_pairs:
+            high = st.probe_with(fam, h["engine"], hep, "m2-bfla-high")
             if _ok(high):
-                high_used = h
+                high_used, high_ep = h, hep
                 break
         if high_used is None:
             st.boundary(fam, "UNTESTABLE",
@@ -600,7 +693,10 @@ def _bfla(st: "_St2", eps, authz_sessions):
         for lo in lows:
             if st.counts[fam]["sent"] >= FAMILY2_CAPS[fam]:
                 break
-            low = st.probe_with(fam, lo["engine"], ep, "m2-bfla-low")
+            lep = _session_path_ep(lo, ep) if pathed else ep
+            if lep is None:
+                continue
+            low = st.probe_with(fam, lo["engine"], lep, "m2-bfla-low")
             if not _ok(low):
                 continue
             na = re.sub(r"\s+", " ", (high.body or ""))[:600]
@@ -616,7 +712,9 @@ def _bfla(st: "_St2", eps, authz_sessions):
                             f"ungated and body similarity {sim:.2f} — a "
                             f"role-agnostic surface, not a broken boundary")
                 continue
-            st.find(fam, Severity.HIGH, ep, "-", [
+            subst = "; ".join(f"{p.name}={p.value}" for p in lep.parameters
+                              if p.location == ParamLocation.PATH) or "-"
+            st.find(fam, Severity.HIGH, lep, "-", [
                 Evidence("function_level_boundary_bypass",
                          f"BFLA (CWE-285; OWASP API5:2023): the admin-only "
                          f"FUNCTION {(ep.method or 'POST').upper()} "
@@ -628,21 +726,30 @@ def _bfla(st: "_St2", eps, authz_sessions):
                          f"session (role={high_used['account'].role}) "
                          f"-> HTTP {high.status}, lower-privilege replay -> "
                          f"HTTP {low.status} with body similarity {sim:.2f} "
-                         f"to the privileged response", low.request_id),
+                         f"to the privileged response"
+                         + (f" [path params: {subst} — each session's OWN "
+                            f"object id, harvested from its view]" if pathed
+                            else ""), low.request_id),
                 Evidence("probe_recipe",
                          f"high={high_used['account'].name}; "
-                         f"low={lo['account'].name}; method={ep.method}",
+                         f"low={lo['account'].name}; method={ep.method}"
+                         + (f"; path={subst}" if pathed else ""),
                          low.request_id)])
             f = st.findings[-1]
             f.authz_context = (f"attacker={lo['account'].name}"
                                f"(role={lo['account'].role}) surface=admin-function")
             # VR-36 stash: the verifier replays the EXACT endpoint with the
             # SAME low-privilege session engine — credentials never enter
-            # finding evidence
+            # finding evidence. The original response rides along: a
+            # single-use object (DELETE) is CONSUMED by the finding probe,
+            # and the verifier's fresh replay then reads the consumed
+            # transition (orig 2xx -> 404/410) instead of a reproduction.
             stash = getattr(st.engine, "bfla_verify", None)
             if stash is None:
                 stash = st.engine.bfla_verify = {}
-            stash.setdefault(ep.url, {"engine": lo["engine"], "endpoint": ep})
+            stash[lep.url] = {"engine": lo["engine"], "endpoint": lep,
+                              "orig_status": getattr(low, "status", 0),
+                              "orig_body": (getattr(low, "body", "") or "")[:400]}
             fired += 1
             break
     if not fired:

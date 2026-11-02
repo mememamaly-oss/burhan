@@ -2037,12 +2037,46 @@ class VerificationEngine:
                     endpoint=slot["endpoint"], note="m2-vr36"))
                 from .modernsec2 import _ok as _m2ok
                 ok36 = _m2ok(r)
-                v = Verification(method="re-test:bfla-fresh-replay",
-                                 passed=ok36, confidence=0.9 if ok36 else 0.15,
-                                 rounds=2,
-                                 notes=(f"fresh lower-privilege replay of "
-                                        f"{f.method} {f.endpoint_url} -> HTTP "
-                                        f"{getattr(r, 'status', 0)}"))
+                orig = int(slot.get("orig_status") or 0)
+                if ok36:
+                    v = Verification(method="re-test:bfla-fresh-replay",
+                                     passed=True, confidence=0.9, rounds=2,
+                                     notes=(f"fresh lower-privilege replay of "
+                                            f"{f.method} {f.endpoint_url} -> "
+                                            f"HTTP {getattr(r, 'status', 0)}"))
+                elif getattr(r, "status", 0) in (404, 410) \
+                        and 200 <= orig < 300:
+                    # BFLA-2 (crAPI live round, 2026-11-02): a single-use
+                    # object (DELETE /api/v2/admin/videos/{id}) is CONSUMED by
+                    # the finding probe itself — a same-params replay can
+                    # never reproduce the 2xx. The consumed transition is the
+                    # corroboration: the finding probe recorded HTTP {orig}
+                    # on THIS object through the low-privilege session, and
+                    # the fresh replay now reads 404/410 — the object that
+                    # session destroyed is gone. A soft error page or a
+                    # transient artifact would NOT consume the object (the
+                    # replay would 2xx again); a denial would read 401/403.
+                    v = Verification(
+                        method="re-test:bfla-fresh-replay",
+                        passed=True, confidence=0.85, rounds=2,
+                        notes=(f"single-use object consumed by the finding "
+                               f"probe: orig lower-privilege replay -> HTTP "
+                               f"{orig}, fresh replay of {f.method} "
+                               f"{f.endpoint_url} -> HTTP "
+                               f"{getattr(r, 'status', 0)} — the consumed "
+                               f"transition corroborates the execution "
+                               f"(weaker basis than a reproduction; the "
+                               f"finding's own HTTP {orig} response is the "
+                               f"primary evidence)"))
+                else:
+                    v = Verification(method="re-test:bfla-fresh-replay",
+                                     passed=False, confidence=0.15, rounds=2,
+                                     notes=(f"fresh lower-privilege replay of "
+                                            f"{f.method} {f.endpoint_url} -> "
+                                            f"HTTP {getattr(r, 'status', 0)} "
+                                            f"(orig HTTP {orig}) — neither a "
+                                            f"reproduction nor the consumed "
+                                            f"transition; fail closed"))
             f.verification, f.confidence = v, v.confidence
             f.status = FindingStatus.VERIFIED if v.passed else FindingStatus.REJECTED
 
