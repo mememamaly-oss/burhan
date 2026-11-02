@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""LIVE VALIDATION v2 (owner order 2026-10-31, part 3): crAPI + DVGA.
+"""LIVE VALIDATION v2 (owner order 2026-10-31 part 3, extended 2026-11-02
+part 4): crAPI + DVGA.
 
-Runs the modern battery v2 (owner order part 3 layers) against the two
-official targets and scores every finding against the GROUND TRUTH
-recorded from each project's official documentation BEFORE any scan:
+Runs the modern battery v2 (owner order part 3 layers + the part-4 live
+chain) against the two official targets and scores every finding against
+the GROUND TRUTH recorded from each project's official documentation
+BEFORE any scan:
 
-  crAPI (OWASP/crAPI, v1.1.5, docs/challenges.md):
+  crAPI (OWASP/crAPI, compose pinned v1.1.5, docs/challenges.md):
     3A jwt_weak_secret   — challenge 15 documents JWT forgery (the docs
                            describe algorithm confusion via the RSA public
                            key as HMAC secret; a WEAK-WORDLIST secret is a
@@ -13,8 +15,48 @@ recorded from each project's official documentation BEFORE any scan:
                            confirmed-positive; a miss is scored NOT FOUND,
                            honestly, not as a false negative).
     3D excessive_data_exposure — challenges 4+5 document endpoints leaking
-                           sensitive data of other users / internal video
-                           properties.
+                           sensitive data of other users / an internal video
+                           property.
+    fam1 jwt_algorithm_confusion + fam2 jwt_none_acceptance + PART 0
+    jwt_signature_not_enforced — challenge 15 ("find any one way to forge");
+                           run 9 live-proved the dashboard accepts ANY
+                           token with a registered sub, so PART 0's
+                           corrupted-control acceptance is the documented
+                           mechanism's own shape.
+    3E bfla              — challenge 7 sits under the literal "## BFLA"
+                           heading ("Delete a video of another user ...
+                           find an admin endpoint to delete videos"). The
+                           scanned deployment pins compose v1.1.5, and the
+                           admin delete route exists in BOTH eras
+                           (ProfileController.java @DeleteMapping
+                           "/api/v2/admin/videos/{video_id}" — verified in
+                           the v1.1.5 tag AND main), with the handler
+                           (ProfileServiceImpl.deleteAdminProfileVideo in
+                           both eras) performing NO role check: any
+                           authenticated user deletes any video by id.
+    3G shadow/zombie     — the operator-supplied spec is crAPI's own
+                           openapi-spec/crapi-openapi-spec.json. It EXISTS
+                           on main but NOT at the v1.1.5 tag (verified:
+                           HTTP 404) — an explicit, documented version
+                           drift; scoring uses main's spec against the
+                           pinned v1.1.5 deployment and every hit is
+                           judged against that drift, never silently.
+    3F race_condition    — ONE operator-declared candidate ONLY
+                           (order 2.2: the prober NEVER fires concurrent
+                           load at endpoints the operator did not name —
+                           crAPI is a shared public image on a shared
+                           runner): POST /workshop/api/mechanic/signup —
+                           declared on the official spec, and the v1.1.5
+                           handler is the classic check-then-insert race
+                           (filter(email).exists() -> User.objects.create)
+                           with a UNIQUE email constraint as the
+                           single-winner invariant. The email is UNIQUE
+                           PER RUN (fresh burhan-<timestamp>@... each
+                           scan) so repeated weekly runs never fight over
+                           a consumed resource; a 2xx winner burst is a
+                           confirmed positive (multiple mechanics created
+                           from one email), a single winner is an honest
+                           TESTED_NEGATIVE (the DB constraint held).
   DVGA (dolevf/Damn-Vulnerable-GraphQL-Application, port 5013):
     3C graphql_aliasing  — the official scenario list documents "Aliases
                            based Attack" under Denial of Service.
@@ -22,6 +64,16 @@ recorded from each project's official documentation BEFORE any scan:
      deep recursion, field duplication, injections, JWT forge — map to the
      EXISTING v4.4.0 families (graphql.py / modernsec.py), not to 3C; the
      full-family run against DVGA is out of scope for this driver.)
+
+Part 4 (2026-11-02) — why DVGA/Juice Shop/WebGoat/DVWA get NO race
+candidate and NO authz/spec battery: order 2.2 forbids concurrent load
+at endpoints the operator did not name, and a declared candidate needs a
+VERIFIED unique-constraint resource in the target's published source.
+DVGA's in-memory stores carry no uniqueness guarantee (no per-resource
+constraint is documented in its source); Juice Shop's request bodies are
+not verifiable this way from its published docs; WebGoat/DVWA are not in
+this battery. Declaring a candidate on an unverified constant would be
+blind concurrency — the exact thing the order forbids.
 
 Verdicts (per finding): confirmed-positive (type in the documented ground
 truth for that target) / unjudged (engine finding with no matching
@@ -44,11 +96,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-# ── ground truth, recorded 2026-10-31 from the official docs (pre-scan) ──────
+# ── ground truth, recorded 2026-10-31 from the official docs (pre-scan),
+#    extended 2026-11-02 (part 4) with challenge 7 (BFLA) and the spec
+#    version drift — every entry below was re-verified against the
+#    official sources BEFORE this scan ran (see the docstring). ──────────
 GROUND_TRUTH = {
     "crapi": {
-        "source": "github.com/OWASP/crAPI @ main (VERSION 1.1.5), "
-                  "docs/challenges.md + services/identity JwtProvider.java",
+        "source": "github.com/OWASP/crAPI @ main (compose pinned 1.1.5), "
+                  "docs/challenges.md + services/identity JwtProvider.java "
+                  "+ ProfileController.java + openapi-spec/"
+                  "crapi-openapi-spec.json",
         "jwt_weak_secret": {
             "documented": True,
             "mechanism": "challenge 15: forge valid JWT tokens. Mechanism in "
@@ -79,6 +136,72 @@ GROUND_TRUTH = {
                          "with that public key (the confusion differential "
                          "fam1 runs verbatim).",
         },
+        "jwt_none_acceptance": {
+            "documented": True,
+            "mechanism": "challenge 15 ('find ANY one way to forge'): run 9 "
+                         "live-proved the dashboard reads the token's sub "
+                         "claim without signature verification, so the "
+                         "alg=none differential shares the documented "
+                         "mechanism's root cause (CWE-347).",
+        },
+        "jwt_signature_not_enforced": {
+            "documented": True,
+            "mechanism": "challenge 15 ('find ANY one way to forge'): run 9 "
+                         "live-proved the dashboard accepts a CORRUPTED-"
+                         "signature token with the account data — the "
+                         "endpoint does not verify JWT signatures at all "
+                         "(CWE-347); PART 0's corrupted-control finding is "
+                         "this exact live-proven shape.",
+        },
+        # PART 4 (2026-11-02): challenge 7 under the LITERAL "## BFLA"
+        # heading. The admin delete route + the no-role-check handler are
+        # verified present in BOTH the pinned v1.1.5 tag and main, so the
+        # pinned deployment carries the documented vulnerability.
+        "bfla": {
+            "documented": True,
+            "mechanism": "challenge 7 (docs heading '## BFLA'): delete a "
+                         "video of another user via the admin endpoint "
+                         "DELETE /identity/api/v2/admin/videos/{video_id} — "
+                         "the handler (deleteAdminProfileVideo, v1.1.5 and "
+                         "main alike) performs NO role check: any "
+                         "authenticated user executes the admin function. A "
+                         "bfla hit is a CONFIRMED POSITIVE; a miss is a REAL "
+                         "coverage gap.",
+        },
+        # PART 4: the operator-supplied spec is main's; the deployment is
+        # pinned v1.1.5. The spec file does not exist at the v1.1.5 tag
+        # (verified HTTP 404) — the drift is part of the ground truth, and
+        # 3G's findings are judged WITH it, never silently.
+        "shadow_api_endpoint": {
+            "documented": True,
+            "mechanism": "challenge 8 names a 'shadow API endpoint' "
+                         "(undocumented surface); the spec supplied is "
+                         "main's crapi-openapi-spec.json against the pinned "
+                         "v1.1.5 deployment — a hit is judged against the "
+                         "documented spec/deployment version drift (the "
+                         "spec does not exist at the v1.1.5 tag).",
+        },
+        "zombie_api_endpoint": {
+            "documented": True,
+            "mechanism": "spec-declared-but-dead (spec drift) and "
+                         "deprecated-but-alive are the OWASP API8:2023 "
+                         "'outdated API versions' class; the supplied spec "
+                         "is main's against the pinned v1.1.5 deployment — "
+                         "the version drift is the documented context.",
+        },
+        # PART 4: the ONE operator-declared race candidate (order 2.2).
+        "race_condition": {
+            "documented": True,
+            "mechanism": "the declared candidate POST /workshop/api/"
+                         "mechanic/signup (on the official spec) has the "
+                         "classic check-then-insert handler in the pinned "
+                         "v1.1.5 source (filter(email).exists() then "
+                         "User.objects.create) with a UNIQUE email "
+                         "constraint — the single-winner invariant. The "
+                         "burst email is unique per run; >1 winner is a "
+                         "confirmed positive, 1 winner an honest "
+                         "TESTED_NEGATIVE (constraint held).",
+        },
     },
     "dvga": {
         "source": "github.com/dolevf/Damn-Vulnerable-GraphQL-Application @ "
@@ -91,6 +214,31 @@ GROUND_TRUTH = {
         },
     },
 }
+
+# The ONE operator-declared race candidate (order 2.2: never blind). The
+# email is UNIQUE PER RUN so the weekly cron never fights a consumed
+# resource; the unique constraint on workshop user.email is the declared
+# invariant (quota=1 winner).
+def _crapi_race_candidate(base: str) -> dict:
+    email = f"burhan-race-{int(time.time())}@integration.test"
+    return {
+        "url": base + "/workshop/api/mechanic/signup",
+        "method": "POST",
+        "params": {
+            "name": "Burhan Race Probe",
+            "email": email,
+            "number": "5550001111",
+            "password": "Burhan-Race-123!",
+            "mechanic_code": f"BRH{int(time.time()) % 1000000}",
+        },
+        "quota": 1,
+        "concurrent": 6,
+        "win_statuses": [200, 201],
+        # VR-37 verify_params: a SECOND unique email — the first burst's
+        # email is consumed (or duplicated) already; the fresh burst must
+        # reproduce the same winner-count shape on fresh state.
+        "verify_params": None,  # filled in main() with a second email
+    }
 
 
 def finding_sha(f: dict) -> str:
@@ -114,7 +262,8 @@ def write_report(out: Path, name: str, rep: dict) -> None:
 
 
 def run_target(name: str, base: str, modern_types: list[str], out: Path,
-               max_requests: int = 2000, auth=None) -> dict:
+               max_requests: int = 2000, auth=None, authz=None,
+               openapi_spec=None, race_candidates=None) -> dict:
     from burhan.orchestrator import ScanConfig, BurhanScanner
     from burhan.oast import OastServer
 
@@ -124,6 +273,8 @@ def run_target(name: str, base: str, modern_types: list[str], out: Path,
         cfg = ScanConfig(allow_private=True, max_pages=50, timeout=15.0,
                          seed=f"lv2-{name}" * 8, oast=oast, workflow=False,
                          logic_active=False, modern_v2=True, auth=auth,
+                         authz=authz, openapi_spec=openapi_spec,
+                         race_candidates=race_candidates,
                          max_requests=max_requests)
         sc = BurhanScanner(base, cfg)
         rep = sc.run()
@@ -147,12 +298,19 @@ def run_target(name: str, base: str, modern_types: list[str], out: Path,
             {k: f.get(k) for k in ("type", "url", "severity", "status",
                                     "evidence", "sha256")}
             for f in m2],
-        "boundaries": rep.get("boundaries", [])[:40],
+        # P4.4 catch (local chain smoke): the m2 battery records its
+        # boundaries in stats["modern_v2"]["boundaries"] — the previous
+        # rep.get("boundaries") read a TOP-LEVEL report key that never
+        # exists, so every prior live verdict carried boundaries=[]. The
+        # axes tuple had the same bug ("modern2" vs the real key
+        # "modern_v2").
+        "boundaries": ((stats.get("modern_v2") or {}).get("boundaries")
+                       or [])[:40],
         # "modern" = the LEGACY battery (axis 13) — fam1/fam2 boundaries and
         # probe counts. Run 41314804418's summary hid fam1's NOT_DISCOVERED
         # there; surfacing it keeps the JWT story auditable.
         "axes": {k: stats.get(k) for k in
-                 ("modern", "modern2", "graphql") if k in stats},
+                 ("modern", "modern_v2", "graphql", "authz") if k in stats},
     }
     # plaintext by design — the product's evidence output; see write_report
     write_report(out, name, rep)
@@ -184,6 +342,18 @@ def main() -> int:
     ap.add_argument("--crapi", default="", help="crAPI base URL")
     ap.add_argument("--dvga", default="", help="DVGA base URL")
     ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--crapi-spec", default="",
+                    help="local path to crAPI's openapi spec (main-branch "
+                         "crapi-openapi-spec.json, fetched by the workflow "
+                         "pre-scan with its SHA-256 recorded)")
+    ap.add_argument("--max-requests", type=int, default=2000,
+                    help="scan request budget (RT-07). Default 2000. P4.4 "
+                         "lesson: on a surface dense enough to exhaust the "
+                         "budget BEFORE the m2 battery's confirm probes, "
+                         "every later probe is refused (HTTP 0) and records "
+                         "false TESTED_NEGATIVEs — raise the budget when "
+                         "the target's surface needs it; the budget itself "
+                         "stays a hard runaway cap")
     args = ap.parse_args()
     out = Path(args.out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -210,7 +380,7 @@ def main() -> int:
             urllib.request.urlopen(req, timeout=15)
             print(f"crAPI signup ok: {email}")
         except Exception as e:  # noqa: BLE001
-            print(f"crAPI signup failed (continuing unauthenticated): {e}")
+            print(f"crAPI signup failed (continuing): {e}")
         try:
             from burhan.auth import AuthProfile
             # crAPI's own OFFICIAL seeded demo user (services/identity/
@@ -230,15 +400,66 @@ def main() -> int:
                 validate_url=args.crapi + "/identity/api/v2/user/dashboard")
         except Exception:  # noqa: BLE001
             login = None
+
+        # PART 4 (2026-11-02): the authz battery with BOTH official seeded
+        # accounts (TestUsers.java): test@example.com (ROLE_USER) and
+        # admin@example.com (ROLE_ADMIN) — a real privilege ladder for the
+        # BFLA differential (challenge 7's admin function must execute for
+        # the admin session and be denied... or not, which is the finding).
+        # json_login (new AuthzConfig field): the login response carries the
+        # JWT in the BODY — the harvested token is armed as each account's
+        # Bearer header, so the matrix/role-view/BFLA replays carry the
+        # identity (crAPI has NO cookie session).
+        authz = {
+            "login_url": args.crapi + "/identity/api/auth/login",
+            "json_login": True,
+            "user_field": "email",
+            "pass_field": "password",
+            "success_marker": '"token"',
+            "login_marker": "login",
+            "accounts": [
+                {"name": "admin", "role": "admin",
+                 "username": "admin@example.com", "password": "Admin!123"},
+                {"name": "test", "role": "user",
+                 "username": "test@example.com", "password": "Test!123"},
+            ],
+        }
+
+        # PART 4: the operator-supplied spec (main-branch) for the 3G
+        # shadow/zombie diff, with the version drift documented in the
+        # ground truth above.
+        openapi_spec = None
+        if args.crapi_spec:
+            try:
+                openapi_spec = json.loads(
+                    Path(args.crapi_spec).read_text(encoding="utf-8"))
+                print(f"crAPI spec loaded: {args.crapi_spec} "
+                      f"({len(openapi_spec.get('paths') or {})} paths)")
+            except Exception as e:  # noqa: BLE001
+                print(f"crAPI spec load failed (3G will record the honest "
+                      f"boundary): {e}")
+
+        # PART 4: the ONE declared race candidate (order 2.2 — never blind;
+        # see the module docstring for why crAPI only).
+        race = _crapi_race_candidate(args.crapi)
+        race["verify_params"] = dict(race["params"], email=f"burhan-race-"
+                                 f"v{int(time.time())}@integration.test")
+
         results["crapi"] = run_target(
             "crapi", args.crapi,
             ["jwt_weak_secret", "excessive_data_exposure",
-             "jwt_algorithm_confusion", "jwt_none_acceptance"], out, auth=login)
+             "jwt_algorithm_confusion", "jwt_none_acceptance",
+             "jwt_signature_not_enforced", "bfla",
+             "shadow_api_endpoint", "zombie_api_endpoint",
+             "race_condition"], out, auth=login, authz=authz,
+            openapi_spec=openapi_spec, race_candidates=[race],
+            max_requests=args.max_requests)
         scores["crapi"] = score("crapi", results["crapi"])
 
     if args.dvga:
         results["dvga"] = run_target("dvga", args.dvga,
-                                     ["graphql_aliasing"], out)
+                                     ["graphql_aliasing"], out,
+                                     max_requests=args.max_requests)
         scores["dvga"] = score("dvga", results["dvga"])
 
     if not results:
