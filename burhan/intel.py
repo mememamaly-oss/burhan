@@ -1948,6 +1948,39 @@ class VerificationEngine:
             f.verification, f.confidence = v, v.confidence
             f.status = FindingStatus.VERIFIED if ok29 else FindingStatus.REJECTED
 
+        elif f.type in ("shadow_api_endpoint", "zombie_api_endpoint"):
+            # VR-38 (3G): the reachability claim must reproduce — a fresh
+            # fetch of the same endpoint through the scan's own engine.
+            r = self.engine.send(RequestMutation(
+                endpoint=Endpoint(url=f.endpoint_url,
+                                  method=f.method or "GET"),
+                note="m2-vr38"))
+            status = getattr(r, "status", 0)
+            if f.type == "shadow_api_endpoint":
+                ctype = ""
+                for k, v in (getattr(r, "headers", None) or {}).items():
+                    if k.lower() == "content-type":
+                        ctype = v.lower()
+                ok38 = status not in (0, 404, 410, 502, 503) and "json" in ctype
+                note = (f"fresh fetch -> HTTP {status}, content-type "
+                        f"{ctype or '?'} (shadow must stay live+JSON)")
+            else:
+                dep = any(e.kind == "deprecated_still_live"
+                          for e in (f.evidence or []))
+                if dep:
+                    ok38 = status not in (0, 404, 410)
+                    note = (f"fresh fetch -> HTTP {status} (the deprecated "
+                            f"version must still respond)")
+                else:
+                    ok38 = status in (404, 410)
+                    note = (f"fresh fetch -> HTTP {status} (the dead "
+                            f"declaration must still 404)")
+            v = Verification(method="re-test:spec-diff-reachability",
+                             passed=ok38, confidence=0.9 if ok38 else 0.15,
+                             rounds=2, notes=note)
+            f.verification, f.confidence = v, v.confidence
+            f.status = FindingStatus.VERIFIED if ok38 else FindingStatus.REJECTED
+
         elif f.type == "race_condition":
             # VR-37 (3F): a FRESH concurrent burst — the invariant violation
             # must reproduce. With verify_params declared (a second sample

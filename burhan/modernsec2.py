@@ -77,14 +77,14 @@ from .http_engine import RequestEngine, RequestMutation
 
 MODERN2_TYPES = ("jwt_weak_secret", "graphql_aliasing",
                  "excessive_data_exposure", "rebind_toctou", "bfla",
-                 "race_condition")
+                 "race_condition", "shadow_api")
 
 # request caps per family (offline wordlist attempts are counted separately:
 # jwt_weak_secret sends at most 2 harvest requests; its 27 offline signature
 # verifications are the documented wordlist cap, not network traffic)
 FAMILY2_CAPS = {"jwt_weak_secret": 2, "graphql_aliasing": 2,
                 "excessive_data_exposure": 8, "rebind_toctou": 4,
-                "bfla": 18, "race_condition": 48}
+                "bfla": 18, "race_condition": 48, "shadow_api": 14}
 
 # 3A: the COMPLETE, EXPLICIT wordlist — the cap is its length (27). This is a
 # detection capability, not an open brute-force tool: no user-extensible
@@ -99,6 +99,9 @@ WEAK_SECRET_WORDLIST = (
 
 ALIAS_CAP = 20          # aliases in the single probe request (3C)
 EXPOSURE_EP_CAP = 8     # JSON endpoints examined (3D)
+SHADOW_PROBE_CAP = 6    # live-confirmation fetches for SHADOW candidates (3G)
+ZOMBIE_PROBE_CAP = 8    # live checks of spec-declared paths (3G); the two
+                         # caps together are the family cap 14 above
 RACE_CAND_CAP = 4       # operator-named candidates per scan (3F)
 RACE_DEFAULT_N = 6      # concurrent requests per burst (3F default)
 RACE_MAX_N = 12         # hard ceiling on the operator-declared N (3F);
@@ -756,10 +759,149 @@ def _race_prober(st: "_St2", eps, candidates):
         pass  # per-candidate boundaries above already carry the record
 
 
+# ------------------------------------------------------------------ 3G
+def _shadow_api(st: "_St2", eps, spec, target_url: str):
+    """3G — Shadow / Zombie API detection. Diffs the crawl-discovered set
+    against an operator-supplied OpenAPI/Swagger spec, both directions:
+    SHADOW = live, reachable, JSON-responding, absent from the spec;
+    ZOMBIE = spec-declared but dead live (404), or deprecated:true and
+    still responding (OWASP API8:2023 names exactly this: "outdated API
+    versions").
+
+    Spec ingestion reuse (order 3.1, the explicit case statement): this
+    project already ingests specs — discovery.parse_openapi (DISC-13,
+    Phase 54) builds standard Endpoints the orchestrator merges into the
+    endpoint map; 3G reuses it for the spec-side endpoint set and reads
+    the raw paths dict only for the deprecated flag, which parse_openapi
+    does not carry. No new parsing was built.
+
+    Diff scope: the spec's namespaces (the first path segment of every
+    declared path) bound the diff — pages outside the namespaces the
+    spec claimed are not "undocumented API"."""
+    fam = "shadow_api"
+    from urllib.parse import urlsplit
+    if not spec:
+        st.boundary(fam, "NOT_DISCOVERED",
+                    "no OpenAPI/Swagger spec supplied (cfg.openapi_spec) — "
+                    "the shadow/zombie diff needs the declared surface to "
+                    "diff against")
+        return
+    from .discovery import parse_openapi
+    from .authz import ASSET_EXT_RE
+    spec_eps = parse_openapi(spec, target_url)
+    if not spec_eps:
+        st.boundary(fam, "UNTESTABLE",
+                    "the supplied spec declares no parseable paths — nothing "
+                    "to diff against")
+        return
+    spec_paths = {urlsplit(e.url).path for e in spec_eps}
+    namespaces = {("/" + p.lstrip("/").split("/")[0]) if p != "/" else "/"
+                  for p in spec_paths if p.count("/") >= 1}
+    root = (target_url or "").rstrip("/")
+
+    # ---- SHADOW: crawl-discovered, in-namespace, absent from the spec.
+    # Spec-derived endpoints carry the "openapi" tag (DISC-13) — excluded:
+    # the shadow side of the diff is the CRAWL's own discoveries only.
+    cands, seen = [], set()
+    for e in sorted(eps, key=lambda x: x.url):
+        path = urlsplit(e.url).path
+        if path in seen or path in spec_paths or ASSET_EXT_RE.search(path):
+            continue
+        if "openapi" in (e.tags or []):
+            continue
+        ns = "/" + path.lstrip("/").split("/")[0] if path != "/" else "/"
+        if ns not in namespaces:
+            continue
+        seen.add(path)
+        cands.append((e, path))
+    shadow_hits = []
+    for e, path in cands[:SHADOW_PROBE_CAP]:
+        r = st.probe(fam, e, note="m2-shadow-confirm")
+        ctype = ""
+        for k, v in (getattr(r, "headers", None) or {}).items():
+            if k.lower() == "content-type":
+                ctype = v.lower()
+        live_json = (getattr(r, "status", 0) not in (0, 404, 410, 502, 503)
+                     and "json" in ctype)
+        if live_json:
+            shadow_hits.append((e, path, getattr(r, "status", 0)))
+            st.find("shadow_api_endpoint", Severity.MEDIUM, e, "-", [
+                Evidence("undocumented_live_api",
+                         f"shadow API (CWE-668; OWASP API8:2023 scope): the "
+                         f"crawl discovered a LIVE JSON endpoint the supplied "
+                         f"spec does not declare — GET {path} answered HTTP "
+                         f"{getattr(r, 'status', 0)} with content-type "
+                         f"{ctype or '?'}. Undocumented surface is unreviewed "
+                         f"attack surface: no spec governance, no deprecation "
+                         f"path, no security review trail.", r.request_id),
+                Evidence("probe_recipe", f"live={e.url}; spec_paths="
+                         f"{sorted(spec_paths)[:12]}", r.request_id)])
+        else:
+            st.boundary(fam, "TESTED_NEGATIVE",
+                        f"{path}: crawled but not a live JSON API endpoint "
+                        f"(HTTP {getattr(r, 'status', 0)}, content-type "
+                        f"{ctype or '?'}) — not shadow")
+    if len(cands) > SHADOW_PROBE_CAP:
+        st.boundary(fam, "NOT_SUPPORTED",
+                    f"{len(cands) - SHADOW_PROBE_CAP} shadow candidates left "
+                    f"unconfirmed (SHADOW_PROBE_CAP={SHADOW_PROBE_CAP}, "
+                    f"documented)")
+
+    # ---- ZOMBIE: every declared path checked live. dead = 404/410 live;
+    # deprecated = the op carries deprecated:true and still responds.
+    raw_paths = (spec or {}).get("paths") or {}
+    zomb_dead, zomb_dep = [], []
+    for e in spec_eps[:ZOMBIE_PROBE_CAP]:
+        path = urlsplit(e.url).path
+        op = {}
+        for pth, ops in (raw_paths.items() if isinstance(raw_paths, dict) else []):
+            if pth == path and isinstance(ops, dict):
+                op = ops.get((e.method or "GET").lower()) or {}
+                break
+        r = st.probe(fam, e, note="m2-zombie-check")
+        status = getattr(r, "status", 0)
+        if status in (404, 410):
+            zomb_dead.append((e, path, status))
+            st.find("zombie_api_endpoint", Severity.LOW, e, "-", [
+                Evidence("spec_dead_endpoint",
+                         f"zombie API — dead declaration (spec drift): the "
+                         f"spec declares {e.method} {path} but the live "
+                         f"endpoint answers HTTP {status}. The spec misleads "
+                         f"every consumer built on it (clients, gateways, "
+                         f"reviewers) — the declaration is a lie about the "
+                         f"surface.", r.request_id),
+                Evidence("probe_recipe", f"declared={e.url}; live_status="
+                         f"{status}", r.request_id)])
+        elif op.get("deprecated") and status not in (0, 404, 410):
+            zomb_dep.append((e, path, status))
+            st.find("zombie_api_endpoint", Severity.MEDIUM, e, "-", [
+                Evidence("deprecated_still_live",
+                         f"zombie API — deprecated but alive (CWE-1104; "
+                         f"OWASP API8:2023 'outdated API versions'): the spec "
+                         f"DECLARES {e.method} {path} deprecated:true, yet "
+                         f"the live endpoint still answers HTTP {status}. "
+                         f"Deprecated versions stop receiving security fixes "
+                         f"while remaining fully reachable.", r.request_id),
+                Evidence("probe_recipe", f"declared={e.url}; deprecated=true; "
+                         f"live_status={status}", r.request_id)])
+    if len(spec_eps) > ZOMBIE_PROBE_CAP:
+        st.boundary(fam, "NOT_SUPPORTED",
+                    f"{len(spec_eps) - ZOMBIE_PROBE_CAP} declared paths left "
+                    f"unchecked (ZOMBIE_PROBE_CAP={ZOMBIE_PROBE_CAP}, "
+                    f"documented)")
+    if not (shadow_hits or zomb_dead or zomb_dep):
+        st.boundary(fam, "TESTED_NEGATIVE",
+                    "the supplied spec and the live surface agree: every "
+                    "declared path is alive and unflagged, every crawled "
+                    "in-namespace JSON endpoint is declared")
+
+
 def run_modern_battery_v2(engine: RequestEngine, endpoints, seed=None,
                           rebind_cfg: dict | None = None,
                           authz_sessions: dict | None = None,
-                          race_candidates: list | None = None) -> Modern2Result:
+                          race_candidates: list | None = None,
+                          spec: dict | None = None,
+                          target_url: str = "") -> Modern2Result:
     """Entry point — mirrors modernsec.run_modern_battery (deterministic order)."""
     st = _St2(engine, seed)
     eps = sorted(endpoints or [], key=lambda e: (e.url, e.method))
@@ -769,5 +911,6 @@ def run_modern_battery_v2(engine: RequestEngine, endpoints, seed=None,
     _rebind_toctou(st, eps, rebind_cfg)
     _bfla(st, eps, authz_sessions or {})
     _race_prober(st, eps, race_candidates or [])
+    _shadow_api(st, eps, spec, target_url)
     return Modern2Result(st.findings, st.boundaries, probe_counts_of(st),
                          st.requests)

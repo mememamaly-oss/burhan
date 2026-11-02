@@ -818,6 +818,39 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   Evidence: evidence/layers/race-prober/ (RED_DISTRIBUTION +
   BLUE_DISTRIBUTION + WIRING_VR37 + SHA256SUMS).
 
+- PART 3 (order 2026-11-01, branch detection-layer-shadow-api): 3G
+  Shadow / Zombie API detection — a modern2 family (modern_v2 flag,
+  OFF by default; runs only when an operator-supplied spec exists:
+  cfg.openapi_spec). Both directions of the diff: SHADOW
+  (shadow_api_endpoint, CWE-668, MEDIUM, Burhan-API-001) = crawled,
+  in-namespace, LIVE JSON endpoint absent from the spec; ZOMBIE
+  (zombie_api_endpoint, CWE-1104, Burhan-API-002) = spec-declared but
+  dead live (404/410, LOW — spec drift) or deprecated:true and still
+  responding (MEDIUM — OWASP API8:2023's "outdated API versions").
+  Spec-ingestion reuse case stated explicitly (order 3.1): the project
+  already ingests specs — discovery.parse_openapi (DISC-13, Phase 54)
+  builds the spec-side endpoint set (reused verbatim; spec-derived
+  endpoints carry the openapi tag and are excluded from the shadow
+  side); only the deprecated FLAG is read from the raw paths dict,
+  which parse_openapi does not carry. No new parsing was built.
+  Diff-scope rule (documented): the spec's namespaces (first path
+  segment of every declared path) bound the diff — pages outside the
+  claimed namespaces are not "undocumented API". Caps:
+  SHADOW_PROBE_CAP=6 live confirmations + ZOMBIE_PROBE_CAP=8 declared
+  path checks = the family's 14. VR-38: a fresh fetch through the
+  scan's engine must reproduce the reachability claim (shadow stays
+  live+JSON; the dead declaration still 404s; the deprecated version
+  still responds). Fixture (SHADOW=1): /api/v2/internal/telemetry
+  (live, undocumented) + /api/v1/users (the deprecated version kept
+  alive) + the RED spec's /api/v2/ghost (never existed). RED/BLUE
+  (tests/test_shadow_api.py 3/3, suite 253/253): the RED spec
+  mismatches reality in EXACTLY the two documented ways — shadow fires
+  on telemetry alone, zombie fires exactly on v1/users (deprecated)
+  + ghost (dead), all three Verified by VR-38; the BLUE twin (spec
+  matches reality) = zero findings + TESTED_NEGATIVE; a no-spec scan
+  = NOT_DISCOVERED, 0 probes. Evidence: evidence/layers/shadow-api/
+  (RED + BLUE + SHA256SUMS).
+
 ## Where to find things
 
 - Round-by-round history: `git log`, worklog.md (current + history).

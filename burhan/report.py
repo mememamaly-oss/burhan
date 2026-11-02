@@ -215,6 +215,8 @@ SARIF_RULES = {
     "vertical_privilege_escalation":    "Burhan-AUT-001",
     "bfla":                               "Burhan-AUT-002",
     "race_condition":                      "Burhan-RACE-001",
+    "shadow_api_endpoint":                 "Burhan-API-001",
+    "zombie_api_endpoint":                 "Burhan-API-002",
     "credential_exposure":              "Burhan-SEC-001",
     # v3.0.0/v4.0.0: workflow/business-logic + detector classes with stable rule ids
     "csrf":                             "Burhan-CSRF-001",

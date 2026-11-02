@@ -344,6 +344,16 @@ COMPLIANCE: dict[str, dict[str, str]] = {
         "owasp_2021": "A07:2021", "owasp_2021_src": "scope",
         "owasp_2025": "A07:2025", "owasp_2025_src": "scope",
     },
+    "shadow_api_endpoint": {
+        "cwe": "CWE-668",
+        "owasp_2021": "A05:2021", "owasp_2021_src": "scope",
+        "owasp_2025": "A05:2025", "owasp_2025_src": "scope",
+    },
+    "zombie_api_endpoint": {
+        "cwe": "CWE-1104",
+        "owasp_2021": "A05:2021", "owasp_2021_src": "scope",
+        "owasp_2025": "A05:2025", "owasp_2025_src": "scope",
+    },
     "race_condition": {
         "cwe": "CWE-362",
         "owasp_2021": "A04:2021", "owasp_2021_src": "scope",

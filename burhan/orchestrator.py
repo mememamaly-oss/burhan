@@ -1462,7 +1462,9 @@ class BurhanScanner:
                                            seed=self.seed,
                                            rebind_cfg=rebind_cfg,
                                            authz_sessions=authz_sessions,
-                                           race_candidates=self.cfg.race_candidates)
+                                           race_candidates=self.cfg.race_candidates,
+                                           spec=self.cfg.openapi_spec,
+                                           target_url=self.target.url)
                 for f in m2.findings:
                     f.run_id = self.run_id
                     self.stats["candidates"] += 1

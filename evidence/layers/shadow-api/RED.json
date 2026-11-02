@@ -1,0 +1,76 @@
+{
+  "layer": "shadow-api",
+  "generated": "2026-11-02T00:08:19Z",
+  "target": "fixtures/vulnapp.py (env SHADOW=1) — full BurhanScanner scan",
+  "label": "RED — the spec mismatches reality in EXACTLY the two documented ways",
+  "spec": "declares: /api/filter (live), /api/v1/users (deprecated:true, live), /api/v2/ghost (never existed); MISSING /api/v2/internal/telemetry (live JSON)",
+  "probe_counts": {
+    "sent": 7,
+    "offline": 0,
+    "cap": 14
+  },
+  "boundaries": [
+    {
+      "family": "shadow_api",
+      "kind": "TESTED_NEGATIVE",
+      "detail": "/api/: crawled but not a live JSON API endpoint (HTTP 404, content-type text/html; charset=utf-8) — not shadow"
+    },
+    {
+      "family": "shadow_api",
+      "kind": "TESTED_NEGATIVE",
+      "detail": "/api/nosql-lockout: crawled but not a live JSON API endpoint (HTTP 200, content-type text/html; charset=utf-8) — not shadow"
+    },
+    {
+      "family": "shadow_api",
+      "kind": "TESTED_NEGATIVE",
+      "detail": "/api/users: crawled but not a live JSON API endpoint (HTTP 404, content-type text/html; charset=utf-8) — not shadow"
+    }
+  ],
+  "findings": [
+    {
+      "type": "shadow_api_endpoint",
+      "url": "api/v2/internal/telemetry",
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "undocumented_live_api",
+          "detail": "shadow API (CWE-668; OWASP API8:2023 scope): the crawl discovered a LIVE JSON endpoint the supplied spec does not declare — GET /api/v2/internal/telemetry answered HTTP 200 with content-type application/json. Undocumented surface is unreviewed attack surface: no spec governance, no deprecation path,"
+        },
+        {
+          "kind": "probe_recipe",
+          "detail": "live=http://127.0.0.1:50533/api/v2/internal/telemetry; spec_paths=['/api/filter', '/api/v1/users', '/api/v2/ghost']"
+        }
+      ]
+    },
+    {
+      "type": "zombie_api_endpoint",
+      "url": "api/v1/users",
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "deprecated_still_live",
+          "detail": "zombie API — deprecated but alive (CWE-1104; OWASP API8:2023 'outdated API versions'): the spec DECLARES GET /api/v1/users deprecated:true, yet the live endpoint still answers HTTP 200. Deprecated versions stop receiving security fixes while remaining fully reachable."
+        },
+        {
+          "kind": "probe_recipe",
+          "detail": "declared=http://127.0.0.1:50533/api/v1/users; deprecated=true; live_status=200"
+        }
+      ]
+    },
+    {
+      "type": "zombie_api_endpoint",
+      "url": "api/v2/ghost",
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "spec_dead_endpoint",
+          "detail": "zombie API — dead declaration (spec drift): the spec declares GET /api/v2/ghost but the live endpoint answers HTTP 404. The spec misleads every consumer built on it (clients, gateways, reviewers) — the declaration is a lie about the surface."
+        },
+        {
+          "kind": "probe_recipe",
+          "detail": "declared=http://127.0.0.1:50533/api/v2/ghost; live_status=404"
+        }
+      ]
+    }
+  ]
+}

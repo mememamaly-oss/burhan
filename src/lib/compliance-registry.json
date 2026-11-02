@@ -949,6 +949,19 @@
       "owasp_2025_src": "official",
       "pci_dss": "6.4.2"
     },
+    "shadow_api_endpoint": {
+      "type": "shadow_api_endpoint",
+      "mapped": true,
+      "cwe": "CWE-668",
+      "cwe_label": "",
+      "owasp_2021": "A05:2021",
+      "owasp_2021_title": "Security Misconfiguration",
+      "owasp_2021_src": "scope",
+      "owasp_2025": "A05:2025",
+      "owasp_2025_title": "Injection",
+      "owasp_2025_src": "scope",
+      "pci_dss": "6.4.2"
+    },
     "sql_injection": {
       "type": "sql_injection",
       "mapped": true,
@@ -1116,6 +1129,19 @@
       "owasp_2025": "A02:2025",
       "owasp_2025_title": "Security Misconfiguration",
       "owasp_2025_src": "official",
+      "pci_dss": "6.4.2"
+    },
+    "zombie_api_endpoint": {
+      "type": "zombie_api_endpoint",
+      "mapped": true,
+      "cwe": "CWE-1104",
+      "cwe_label": "Use of Unmaintained Third-Party Components",
+      "owasp_2021": "A05:2021",
+      "owasp_2021_title": "Security Misconfiguration",
+      "owasp_2021_src": "scope",
+      "owasp_2025": "A05:2025",
+      "owasp_2025_title": "Injection",
+      "owasp_2025_src": "scope",
       "pci_dss": "6.4.2"
     }
   },

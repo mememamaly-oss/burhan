@@ -573,6 +573,14 @@ _BFLA_DIVS = """
 <div>End of lab.</div>"""
 if os.environ.get("BFLA") == "1":
     LAB_PAGE = LAB_PAGE.replace("<div>End of lab.</div>", _BFLA_DIVS)
+# 3G: the shadow endpoint must be CRAWL-discovered (a live link); the
+# deprecated /api/v1/users needs no link — the zombie check probes every
+# spec-declared path directly.
+if os.environ.get("SHADOW") == "1":
+    LAB_PAGE = LAB_PAGE.replace(
+        "<div>End of lab.</div>",
+        '<a href="/api/v2/internal/telemetry">telemetry</a>'
+        ' - <a href="/api/v1/users">users v1</a>\n<div>End of lab.</div>')
 
 NOSQL_VALID = {"user": "admin", "pass": "hunter2"}   # the only literal credentials that match
 
@@ -813,6 +821,18 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(403, json.dumps({"error": "not your object"}),
                                   {"Content-Type": "application/json"})
             return self._send(200, json.dumps(prof), {"Content-Type": "application/json"})
+        if path == "/api/v2/internal/telemetry":
+            # 3G SHADOW surface (SHADOW=1): live, JSON, deliberately absent
+            # from the RED spec — the undocumented attack surface.
+            return self._send(200, '{"requests": 42, "errors": 0}',
+                              {"Content-Type": "application/json"})
+        if path == "/api/v1/users":
+            # 3G ZOMBIE surface (SHADOW=1): the deprecated version kept
+            # alive — the RED spec declares it deprecated:true and it still
+            # answers.
+            return self._send(200,
+                              json.dumps({"users": [{"uid": 1001}, {"uid": 2002}]}),
+                              {"Content-Type": "application/json"})
         if path == "/api/admin/stats":
             # VULNERABLE (role-level): authentication WITHOUT a role check —
             # any logged-in user receives the admin-only view.
