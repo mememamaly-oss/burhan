@@ -74,6 +74,17 @@ UPDATE_NAMES = ("profile", "settings", "account", "user")
 MERGE_NAMES = ("settings", "config", "preferences", "save", "update")
 PROTECTED_WORDS = ("protected", "private", "secured", "admin", "api",
                    "account", "session", "dashboard", "member")
+# BFLA-2b round 6 (crAPI live run 41591566412): 'api' is PROTECTED_WORDS'
+# weak catch-all — EVERY /community/api/... and /identity/api/... endpoint
+# hits it, so which protected surface a differential takes first is an
+# accident of the endpoint map's order. Live-caught: after the loopback
+# normalization a spec-declared community endpoint (weak, 'api'-only)
+# began preceding crAPI's known-vulnerable dashboard, and the differential
+# ran against the wrong surface (honest TESTED_NEGATIVE, missed finding).
+# A surface that NAMES its protectedness sorts FIRST (stable — the first
+# strong candidate in eps order wins); 'api'-only surfaces stay fallbacks.
+STRONG_PROTECTED = ("protected", "private", "secured", "admin", "dashboard",
+                    "account", "member", "session")
 AUTHISH = ("login", "signin", "sign-in", "auth", "token", "jwt", "session",
            "apikey", "api-key", "credential", "oauth")
 # BFLA-2b round 5 (crAPI live run 41589420101): LOGIN-shaped surfaces are the
@@ -318,8 +329,12 @@ def _jwt_families(st: _St, eps):
     # ("/auth/api/login" contains "api") — but the differential needs a
     # DIFFERENT protected surface; probing the login endpoint answers
     # identically for forged and corrupt tokens and swallows the signal.
-    prot_eps = [ep for ep in eps if ep is not auth_ep
-                and _word_hit(ep.url, PROTECTED_WORDS)][:3]
+    # round 6: strong-named surfaces sort first (stable) — see
+    # STRONG_PROTECTED above for the live root cause.
+    _prot_all = [ep for ep in eps if ep is not auth_ep
+                 and _word_hit(ep.url, PROTECTED_WORDS)]
+    _prot_all.sort(key=lambda ep: 0 if _word_hit(ep.url, STRONG_PROTECTED) else 1)
+    prot_eps = _prot_all[:3]
     if auth_ep is None:
         for f in (fam1, fam2):
             st.boundary(f, "NOT_DISCOVERED", "no auth-shaped endpoint in flight")
