@@ -281,3 +281,73 @@ def test_harvest_clean_boundary_names_its_cause():
     for _, _, detail in st2.boundaries:
         assert "HTTP 0" in detail, detail
         assert "engine error: budget:BUDGET_REACHED" in detail, detail
+
+
+def test_harvest_prefers_login_shaped_surfaces():
+    """BFLA-2b round 5 (crAPI live run 41589420101): the round-4 diagnostic
+    boundary named the culprit — the harvest picked the SPEC-declared
+    /identity/api/auth/forget-password (auth-word but NOT login-shaped;
+    answers HTTP 400 to a replay) over the credentialed json_login endpoint,
+    because after the loopback normalization every endpoint sits under
+    127.0.0.1 and forget-password precedes login alphabetically. Before the
+    normalization the spec's localhost URLs sorted after every 127.0.0.1
+    URL, so the login won the first-AUTHISH pick BY ACCIDENT. The harvest
+    must PREFER login-shaped surfaces explicitly — never by the luck of URL
+    sorting — while auth-word-only surfaces stay the fallback for targets
+    without a login path (the round-4 shape, pinned below)."""
+    from types import SimpleNamespace
+
+    from burhan.modernsec import _jwt_families
+
+    TOKEN = ("eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9."
+             "eyJzdWIiOiAidUB4IiwgImV4cCI6IDk5OTk5OTk5OTl9.sig")
+
+    class _St:
+        def __init__(self):
+            self.sends, self.boundaries = [], []
+
+        def send(self, ep, note="", **kw):
+            self.sends.append((ep.url, note))
+            if "login" in ep.url and note == "modern-jwt-harvest":
+                return SimpleNamespace(status=200, error=None,
+                                       body='{"token": "' + TOKEN + '"}',
+                                       headers={})
+            return SimpleNamespace(status=401, error=None, body="", headers={})
+
+        def boundary(self, fam, kind, detail):
+            self.boundaries.append((fam, kind, detail))
+
+        def find(self, *a, **k):
+            raise AssertionError("no finding may fire from this stub")
+
+        def __getattr__(self, name):
+            # the differential tail (probe/counts/...) is not under test
+            # here — the HARVEST TARGET is; route anything else to a no-op
+            if name.startswith("_"):
+                raise AttributeError(name)
+            return lambda *a, **k: SimpleNamespace(status=401, error=None,
+                                                   body="", headers={})
+
+    base = "http://127.0.0.1:59997"
+    # forget-password FIRST in eps order — the old rule picked it (round 4)
+    eps = [Endpoint(url=f"{base}/identity/api/auth/forget-password",
+                    method="POST"),
+           Endpoint(url=f"{base}/identity/api/auth/login", method="POST"),
+           Endpoint(url=f"{base}/identity/api/v2/user/dashboard",
+                    method="GET")]
+
+    st = _St()
+    _jwt_families(st, eps)
+    assert st.sends[0] == (f"{base}/identity/api/auth/login",
+                           "modern-jwt-harvest"), st.sends[:3]
+    assert not any("harvest clean" in d for _, _, d in st.boundaries), \
+        st.boundaries
+
+    # fallback shape: no login-shaped surface at all -> the first auth-ish
+    # candidate is used exactly as before (round-4 diagnostic preserved)
+    st2 = _St()
+    _jwt_families(st2, [eps[0], eps[2]])
+    assert st2.sends[0] == (f"{base}/identity/api/auth/forget-password",
+                            "modern-jwt-harvest"), st2.sends[:3]
+    assert any("harvest clean" in d and "forget-password" in d
+               for _, _, d in st2.boundaries), st2.boundaries
