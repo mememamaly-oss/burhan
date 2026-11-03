@@ -137,6 +137,18 @@ def predict_double_int(s0: int) -> int:
     return (a << 27) + b
 
 
+def numpy_available() -> bool:
+    """FM-21d: the seed-relation solve is numpy-only (no pure fallback —
+    the 16.7M-value window scan is prohibitive in pure Python). The weakrand
+    battery asks THIS before the relation family runs, so absence is a
+    LOUD UNTESTABLE, never a silent negative."""
+    try:
+        import numpy  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
 def uniquifier_relation_solve(s1_low48: int, s2_low48: int, t1_center: int,
                               t2_center: int, window: int = 1 << 22,
                               gap_max: int = 300_000_000) -> list[tuple[int, int, int]]:

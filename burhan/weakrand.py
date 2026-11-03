@@ -241,7 +241,17 @@ class WeakRandomPhase:
         # relation solve on requests 1-2 (window covers HTTP RTT jitter),
         # confirm forward on request 3 — over the candidates cross-product
         # (bounded: recover_state_nextdouble caps at 4 per sample, the
-        # solver caps at 8 solutions per pair — FM-21c)
+        # solver caps at 8 solutions per pair — FM-21c).
+        # FM-21d: the solve is numpy-only (no pure fallback) — absence is
+        # recorded LOUDLY as UNTESTABLE, never a silent negative.
+        if not jrand.numpy_available():
+            self.bus.emit(
+                "WeakRandRelationUnavailable", ep.url,
+                note="the per-request seed-relation family needs numpy "
+                     "(vectorized window scan, no pure fallback) and it is "
+                     "not importable — family UNTESTABLE on this surface "
+                     "(requirements.txt declares numpy)")
+            return None
         for c1 in cand_sets[0]:
             for c2 in cand_sets[1]:
                 sols = jrand.uniquifier_relation_solve(c1[0], c2[0],
