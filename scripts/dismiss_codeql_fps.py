@@ -69,6 +69,17 @@ DISMISSALS = {
     30: ("false positive", "slugify regex measured LINEAR on V8 (1 MB input = 3.8 ms) — negated character classes, no catastrophic backtracking. Input length caps added anyway in PR #7. Triage 2026-10-31, STATE.md."),
     29: ("false positive", "Email validation regex measured LINEAR on V8 (3 MB pathological input = 7.1 ms). RFC 5321 length cap added before the regex in PR #7. Triage 2026-10-31, STATE.md."),
     28: ("false positive", "Same regex class as #29, measured linear, capped in PR #7. Triage 2026-10-31, STATE.md."),
+    # py/clear-text-storage-sensitive-data — the live-validation script's
+    # OWN seeded throwaway accounts (Burhan-Live-123! / Burhan-Race-123!
+    # / marker passwords) for DISPOSABLE local crAPI/DVGA containers that
+    # the CI job builds from scratch and tears down in the same run. The
+    # verdict file it writes was inspected (run 41730556960 artifact): no
+    # credential material beyond the tool's own canary markers — "plaintext
+    # by design, the product's evidence output" (the script's own comment
+    # at the write_report call). Same triage class as #4/#3/#2/#1. No real
+    # credential exists anywhere in this flow — every password literal is
+    # minted by the script itself for a container that dies with the job.
+    256: ("used in tests", "Script's own seeded throwaway accounts for disposable CI containers (built and torn down in the same job) plus scanner canary markers — evidence output, plaintext by design; no real credential exists in the flow (verified vs run 41730556960 artifact). Round-7 triage 2026-11-03."),
 }
 
 
