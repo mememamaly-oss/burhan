@@ -956,6 +956,120 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   -> 250 (PART 2) -> 253 (PART 3) -> 257 (PART 4 wiring) -> 259
   (P5a) — +15 tests, zero regressions, F1=1.0 held throughout.
 
+## 2026-11-03 — BFLA live rounds 1-6: confirmed live + the order-sensitivity class closed on both sides of the differential
+
+- PR #25 (cd9b5c0, merged 7032c71) ROUND 1 — spec EXAMPLE path-ids made
+  the oracle untestable: crAPI's spec declares DELETE /identity/api/v2/
+  admin/videos/{video_id} with example 12345 (a documentation
+  placeholder); the oracle replayed /admin/videos/12345, findById
+  matched nothing, 404 for ANY caller. FIX: authz view cache (bounded,
+  32 bodies, zero extra requests) + per-session materialization of each
+  account's OWN real object id for every PATH param + the
+  UNSUBSTITUTED_PATH_PARAM boundary (sends NOTHING when a param has no
+  harvestable value) + VR-36 consumed-transition (a single-use object
+  is consumed by the finding probe itself; fresh replay reads 404/410
+  after the stashed 2xx). Suite 260/260.
+
+- RUN 41491090217 (first live run of round 1) — machinery worked
+  (sessions logged in, views cached, ids materialized) but the oracle
+  still UNTESTABLE, and — worse — a pre-existing silent lie surfaced:
+  the zombie family recorded "the spec and the live surface agree", a
+  VACUOUS TESTED_NEGATIVE over all-refused probes. ROOT CAUSE (round 2,
+  empirical): a scan of http://127.0.0.1:8888 allows only host
+  127.0.0.1; crAPI's own spec declares its server as localhost:8888 —
+  every spec-derived replay was silently refused by the scope gate.
+
+- PR #26 (eb907ed, merged a5f9e3f) ROUND 2 — two fixes:
+  (1) discovery.parse_openapi loopback normalization: loopback<->
+  loopback (localhost/127.0.0.1/::1/0.0.0.0) with matching scheme+port
+  is the SAME machine by definition — the spec root is normalized onto
+  the scan base (base path preserved); non-loopback mismatches keep
+  DISC-13 semantics verbatim. (2) the zombie all-refused guard: every
+  declared-path probe refused (HTTP 0) records the honest UNTESTABLE,
+  never an agreement claim. Suite 263/263 (+3 pins: both normalization
+  directions + base-path preservation, non-loopback verbatim, the
+  refused-probes-never-claim-agreement guard).
+
+- RUN 41584520525 (first live run of round 2, on a5f9e3f) — THE
+  CAMPAIGN RESULT: BFLA CONFIRMED LIVE for the first time. The fix put
+  crAPI's 44 spec paths in scope (42 new endpoints; findings 21 -> 91),
+  and the admin-only DELETE /identity/api/v2/admin/videos/4 EXECUTED
+  for the lower-privilege user session (challenge 7's documented BFLA):
+  anonymous replay gated (HTTP 401), admin session -> HTTP 200, user
+  session -> HTTP 200 — function_level_boundary_bypass, verified, HIGH.
+  The authz ladder: 2/2 official accounts logged in via json_login,
+  18-endpoint matrix. BUT the run starved its own later stages: the
+  legacy battery consumed the whole 4000-request cap over the new
+  surface (total 4046) BEFORE the JWT differentials (harvest clean),
+  the zombie checks (all probes BUDGET_REACHED) and the crawler.
+
+- PR #27 (a833c3f, merged 7cd23f8) ROUND 3 — the zombie guard names
+  the OBSERVED refusal cause (read from the refusal response's error
+  prefix: budget:/scope:/transport — a refusal-cause guess sends the
+  operator hunting the wrong thing), and live-validation.yml
+  --max-requests 4000 -> 12000 (the budget must fit the surface the
+  spec brings in). Suite 264/264 (+1 budget-refused stub test).
+
+- RUN 41586612972 (first live run of round 3) — BFLA confirmed again
+  (4825 requests, budget no longer exhausted), the zombie boundary now
+  a REAL TESTED_NEGATIVE (probes actually ran) — but fam1/fam2 went to
+  ZERO probes ("harvest clean"): the same credentialed json_login
+  replay that fed run 41436129520 (confirmed-positive
+  jwt_signature_not_enforced) came back without a token.
+
+- PR #28 (942294a, merged d29cde4) ROUND 4 — the harvest-clean
+  boundary became self-describing: the auth surface URL + HTTP status
+  + engine error. Suite 265/265 (+1 stub test both ways: HTTP 401 and
+  BUDGET_REACHED shapes).
+
+- RUN 41589420101 (first live run of round 4) — THE DIAGNOSIS: "the
+  auth surface http://127.0.0.1:8888/identity/api/auth/forget-password
+  answered HTTP 400" — the harvest replayed forget-password, NOT the
+  login. ROOT CAUSE (round 5): before the loopback normalization the
+  spec's localhost URLs sorted AFTER every 127.0.0.1 URL, so the login
+  won the first-AUTHISH pick BY ACCIDENT; normalized, everything is
+  127.0.0.1 and forget-password precedes login alphabetically.
+
+- PR #29 (05d1903, merged 3b19d6f) ROUND 5 — LOGINISH ('login'/
+  'signin'/'sign-in') surfaces sort FIRST in the harvest candidate
+  list (stable); auth-word-only surfaces remain the fallback. Suite
+  266/266 (+1 preference test both directions).
+
+- RUN 41591566412 (first live run of round 5) — fam1/fam2 BACK (2/2
+  probes through the credentialed login) but the differential still
+  missed: "forged rejected (401), control rejected (401)" — the
+  PROTECTED side has the same order-sensitivity. 'api' is
+  PROTECTED_WORDS' weak catch-all (every /community/api/... and
+  /identity/api/... endpoint hits it); normalized, a spec-declared
+  community endpoint (posts/recent) preceded the known-vulnerable
+  dashboard, and the differential ran against a properly verifying
+  surface — an honest-but-wrong-target negative (run 41436129520 had
+  confirmed jwt_signature_not_enforced on the dashboard through the
+  same login: control token ACCEPTED, HTTP 200).
+
+- ROUND 6 (branch differential-targets-strong-named-surfaces, PR #30,
+  commit 26e4d4a, suite 267/267 local, CI pending at record time) —
+  STRONG_PROTECTED (protected/private/secured/admin/dashboard/account/
+  member/session) surfaces sort FIRST in the protected candidate list
+  (stable); 'api'-only surfaces remain the fallback. Selection by
+  surface SHAPE, never by map order — the order-sensitivity class now
+  closed on BOTH sides of the differential. NEXT STEP (documented for
+  the follow-up): merge PR #30 when green, dispatch live validation,
+  expect the confirmed-positive jwt_signature_not_enforced to return
+  on the dashboard alongside the standing BFLA confirmation.
+
+- THE PATTERN OF THE WHOLE CHAIN (worth naming): the pre-normalization
+  live successes rode on an accident of URL sorting (localhost URLs
+  sorted last); the normalization (a correct fix) exposed that three
+  independent selections — the zombie probes' host scope, the JWT
+  harvest's auth surface, the differential's protected surface — were
+  all ORDER-SENSITIVE. Four of the six rounds were closing that one
+  class. The closing discipline: every stage that picks a target by
+  list position now sorts by SURFACE SHAPE, and every refused/empty
+  stage records its observed cause. Live artifacts under
+  download/bfla-rounds/live-validation/ (run 41584520525 = the first
+  BFLA confirmation; run 41591566412 = the latest full verdict set).
+
 ## Where to find things
 
 - Round-by-round history: `git log`, worklog.md (current + history).
