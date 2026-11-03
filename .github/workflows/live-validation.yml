@@ -217,8 +217,16 @@ jobs:
             --crapi http://127.0.0.1:8888 \
             --dvga http://127.0.0.1:5013 \
             --crapi-spec /ws/.live-spec/crapi-openapi-spec.json \
-            --max-requests 4000 \
+            --max-requests 12000 \
             --out-dir /out/live
+          # 12000 (was 4000): live round 3 (run 41584520525) — the loopback
+          # normalization put crAPI's 44 spec paths IN scope, the endpoint
+          # map tripled, and the legacy battery lawfully consumed the whole
+          # 4000 cap over the new surface BEFORE the crawler (5 pages left),
+          # the JWT differentials (harvest clean), and the zombie checks
+          # (all probes BUDGET_REACHED) could run. A starved stage is an
+          # honest UNTESTABLE, never a forged negative — but the budget must
+          # fit the surface the spec brings in.
           # pull the results back to the runner through the docker API
           mkdir -p "$RUNNER_TEMP/live"
           docker cp scanbox:/out/live/. "$RUNNER_TEMP/live/"

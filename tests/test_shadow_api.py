@@ -161,3 +161,51 @@ def test_refused_probes_never_claim_agreement(shadow_base):
                for b in fam_b), fam_b
     assert not any(b["kind"] == "TESTED_NEGATIVE" and "agree" in b["detail"]
                    for b in fam_b), fam_b
+
+
+def test_budget_refused_zombie_probes_name_their_cause():
+    """BFLA-2b round 3 (crAPI live run 41584520525): the loopback
+    normalization had fixed the scope refusals, but the legacy battery
+    lawfully consumed the whole request cap over the newly spec-ingested
+    surface BEFORE the zombie checks — every declared-path probe came back
+    BUDGET_REACHED. The honest UNTESTABLE must name the BUDGET as the
+    observed cause (the refusal response's error prefix carries it) and
+    must NOT send the operator hunting the spec's servers entry, and must
+    never claim agreement. No fixture server needed: the probes are
+    stubbed at the _St2 boundary exactly as the engine refuses them."""
+    from types import SimpleNamespace
+
+    from burhan.modernsec2 import _shadow_api
+
+    class _RefusedSt:
+        def __init__(self, error):
+            self.error = error
+            self.boundaries, self.findings = [], []
+
+        def probe(self, fam, ep, note="", **kw):
+            return SimpleNamespace(status=0, error=self.error,
+                                   headers={}, request_id="r-budget-test")
+
+        def boundary(self, fam, kind, detail):
+            self.boundaries.append((fam, kind, detail))
+
+        def find(self, *a, **k):
+            self.findings.append((a, k))
+
+    base = "http://127.0.0.1:59999"
+    spec = {"openapi": "3.0.0", "info": {"title": "budget", "version": "1"},
+            "servers": [{"url": base}],
+            "paths": {"/api/filter": {"get": {
+                "responses": {"200": {"description": "ok"}}}}}}
+    st = _RefusedSt("budget:BUDGET_REACHED: stopped at 4046 requests "
+                    "(limit=4000)")
+    _shadow_api(st, [], spec, base)
+
+    assert not st.findings, st.findings
+    unt = [b for b in st.boundaries if b[1] == "UNTESTABLE"]
+    assert unt, st.boundaries
+    detail = unt[0][2]
+    assert "refused" in detail and "request budget was reached" in detail, detail
+    assert "servers entry" not in detail, detail
+    assert not [b for b in st.boundaries
+                if b[1] == "TESTED_NEGATIVE" and "agree" in b[2]]

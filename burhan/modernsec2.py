@@ -958,9 +958,10 @@ def _shadow_api(st: "_St2", eps, spec, target_url: str):
     # deprecated = the op carries deprecated:true and still responds.
     raw_paths = (spec or {}).get("paths") or {}
     zomb_dead, zomb_dep = [], []
-    zomb_status = []                         # BFLA-2b: refused probes must
-    # never support an "agreement" claim — a probe the scope gate (or the
-    # transport) refused read HTTP 0 and proves NOTHING about liveness
+    zomb_status, zomb_errs = [], []         # BFLA-2b: refused probes must
+    # never support an "agreement" claim — a probe the scope gate, the
+    # request budget (BUDGET_REACHED), or the transport refused read HTTP 0
+    # and proves NOTHING about liveness
     for e in spec_eps[:ZOMBIE_PROBE_CAP]:
         path = urlsplit(e.url).path
         op = {}
@@ -971,6 +972,7 @@ def _shadow_api(st: "_St2", eps, spec, target_url: str):
         r = st.probe(fam, e, note="m2-zombie-check")
         status = getattr(r, "status", 0)
         zomb_status.append(int(status or 0))
+        zomb_errs.append(getattr(r, "error", "") or "")
         if status in (404, 410):
             zomb_dead.append((e, path, status))
             st.find("zombie_api_endpoint", Severity.LOW, e, "-", [
@@ -1006,13 +1008,32 @@ def _shadow_api(st: "_St2", eps, spec, target_url: str):
             # entry pointed at a host outside the scan's scope, so every
             # declared-path probe was refused before it left the engine —
             # the OLD code called that "the spec and the live surface
-            # agree", a vacuous negative over probes that never ran
+            # agree", a vacuous negative over probes that never ran.
+            # Live round 3 (run 41584520525) proved the refusal CAUSE
+            # matters: the loopback normalization had fixed scope, the
+            # probes were refused by the REQUEST BUDGET instead (the
+            # spec-ingested surface tripled the endpoint map and the legacy
+            # battery consumed the cap before the zombie checks) — a note
+            # blaming the servers entry would have sent the operator
+            # hunting the wrong cause. The refusal response's error prefix
+            # (budget: / scope:) carries the truth; name it.
+            causes = []
+            if any(e.startswith("budget:") for e in zomb_errs):
+                causes.append("the request budget was reached (BUDGET_"
+                              "REACHED) — the spec-ingested surface needs a "
+                              "larger --max-requests")
+            if any(e.startswith("scope:") for e in zomb_errs):
+                causes.append("the scope policy refused the spec's host — "
+                              "check that the spec's servers entry matches "
+                              "the scan target (loopback equivalences are "
+                              "normalized at ingestion)")
+            if not causes:
+                causes.append("transport-level refusal (HTTP 0)")
             st.boundary(fam, "UNTESTABLE",
-                        "every declared-path probe was refused (HTTP 0 — "
-                        "scope policy or transport): no liveness claim is "
-                        "possible. Check that the spec's servers entry "
-                        "matches the scan target (loopback equivalences "
-                        "are normalized at ingestion)")
+                        "every declared-path probe was refused: no liveness "
+                        "claim is possible. Cause"
+                        + ("s" if len(causes) > 1 else "")
+                        + " observed: " + "; ".join(causes))
         else:
             st.boundary(fam, "TESTED_NEGATIVE",
                         "the supplied spec and the live surface agree: every "
