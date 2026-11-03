@@ -320,9 +320,14 @@ def test_harvest_prefers_login_shaped_surfaces():
         def find(self, *a, **k):
             raise AssertionError("no finding may fire from this stub")
 
+        # ROUND 7 / FM-02: the differential reads per-family sent counts
+        # (family-cap checks) — mirror _St.counts' shape on the stub.
+        counts = {"jwt_algorithm_confusion": {"sent": 0},
+                  "jwt_none_acceptance": {"sent": 0}}
+
         def __getattr__(self, name):
-            # the differential tail (probe/counts/...) is not under test
-            # here — the HARVEST TARGET is; route anything else to a no-op
+            # the differential tail (probe/...) is not under test here —
+            # the HARVEST TARGET is; route anything else to a no-op
             if name.startswith("_"):
                 raise AttributeError(name)
             return lambda *a, **k: SimpleNamespace(status=401, error=None,
@@ -376,6 +381,8 @@ def test_differential_targets_strong_named_surfaces_first():
     class _St:
         def __init__(self):
             self.probes, self.boundaries = [], []
+            self.counts = {"jwt_algorithm_confusion": {"sent": 0},
+                           "jwt_none_acceptance": {"sent": 0}}
 
         def send(self, ep, note="", **kw):
             if "login" in ep.url and note == "modern-jwt-harvest":
@@ -386,6 +393,7 @@ def test_differential_targets_strong_named_surfaces_first():
 
         def probe(self, fam, ep, note="", **kw):
             self.probes.append((fam, ep.url))
+            self.counts[fam]["sent"] += 1
             return SimpleNamespace(status=401, error=None, body="",
                                    headers={}, request_id="r-prot-test")
 
@@ -405,11 +413,20 @@ def test_differential_targets_strong_named_surfaces_first():
     st = _St()
     _jwt_families(st, eps)
     assert st.probes, "fam2 must run (a signed HS256 harvest token)"
-    assert all(url.endswith("/identity/api/v2/user/dashboard")
+    # ROUND 7 / FM-02: the differential iterates ALL strong-named protected
+    # surfaces — the dashboard (the strong-named surface) is probed FIRST
+    # (never skipped in favor of the weak 'api'-only community endpoint
+    # that merely sorts first in the map), and the remaining protected
+    # surfaces follow until the family cap or an honest verdict.
+    assert st.probes[0][1].endswith("/identity/api/v2/user/dashboard"), st.probes
+    assert any(url.endswith("/community/api/v2/community/posts/recent")
                for _, url in st.probes), st.probes
+    # every probed surface yields its honest TESTED_NEGATIVE boundary
+    assert any(kind == "TESTED_NEGATIVE" and "dashboard" in detail
+               for _, kind, detail in st.boundaries), st.boundaries
 
-    # fallback shape: no strong-named surface -> the first weak candidate
-    # is used exactly as before
+    # fallback shape: no strong-named surface -> the weak candidate is
+    # still covered (iterated, honest negative per surface)
     st2 = _St()
     _jwt_families(st2, [eps[0], eps[1]])
     assert st2.probes and all(

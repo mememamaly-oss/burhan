@@ -579,6 +579,15 @@ class GraphqlEngine:
                    if not STATE_SHAPED_QUERY_RE.search(q["name"] or "")]
         if not queries:
             return findings
+        if len(queries) > 6:
+            # FM-05 (first-match audit): the [:6] cap was silent — read-shaped
+            # queries beyond the sixth left the battery without a recorded
+            # trace (the ZOMBIE_PROBE_CAP leftover-boundary pattern, applied).
+            self._record_boundary(
+                "graphql/sqli", url, "NOT_SUPPORTED",
+                f"{len(queries) - 6} read-shaped queries left unprobed "
+                f"(battery cap 6, documented)",
+                provenance="graphql:sqli-cap")
         for q in queries[:6]:
             str_args = [a for a in q["args"]
                         if "string" in (a.get("type") or "").lower()
@@ -746,7 +755,15 @@ class GraphqlEngine:
                                   "(fragments require an object type)",
                                   provenance="graphql:features")
             return
-        q = queries[0]
+        # FM-06 (first-match audit): the probe used the FIRST object-returning
+        # query in schema order — an accident when a later query carries the
+        # string/ID argument that exercises the variables feature. Prefer the
+        # first arg-carrying query (deterministic shape preference, still ONE
+        # request); an arg-less schema still gets the no-arg variant.
+        q = next((c for c in queries
+                  if any("string" in (a.get("type") or "").lower()
+                         or (a.get("type") or "") in ("ID",)
+                         for a in (c.get("args") or []))), queries[0])
         arg = next((a for a in q["args"]
                     if "string" in (a.get("type") or "").lower()
                     or (a.get("type") or "") in ("ID",)), None)

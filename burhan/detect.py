@@ -1926,13 +1926,20 @@ class XxeDetector(Detector):
         targets = [p.name for p in ep.parameters]
         body = (recon_resp.body or "") if recon_resp else ""
         # Error-driven element discovery: "Store ID could not be parsed" -> storeId
+        err_found = []
         for m in re.finditer(r"([A-Za-z][a-z]{1,20}) ID could not be parsed", body):
             word = m.group(1)
             cand = word[0].lower() + word[1:] + "Id"
             if cand and cand not in targets:
                 targets.append(cand)
+                err_found.append(cand)
+        # FM-17 (first-match audit): error-discovered names carry
+        # response-proven priority over the endpoint's own param order —
+        # the app itself named the element it failed to parse; a surface
+        # with 4+ params used to crowd them out of the [:4] budget.
         probes = []
-        for t in targets[:4]:
+        for t in ([t for t in err_found]
+                  + [t for t in targets if t not in err_found])[:4]:
             # control TWICE: response-determinism gate (blind-XXE targets answer with
             # per-request random values — an unstable control proves the response carries
             # no entity-content information, so the differential is meaningless noise).
@@ -2684,12 +2691,19 @@ class JwtDetector(Detector):
     severity = Severity.MEDIUM
     AUTHISH = ("login", "signin", "sign-in", "auth", "token", "jwt", "session",
                "apikey", "api-key", "credential", "oauth")
+    # FM-16 (first-match audit, 2026-11-03): the same starvation class the
+    # modernsec round-5 fix closed — an auth-word-but-not-login surface
+    # (forget-password) consumed the budget before the login ever arrived.
+    # Login-shaped surfaces carry their own bounded budget and never starve.
+    LOGINISH = ("login", "signin", "sign-in")
     TOKEN_RE = re.compile(r"eyJ[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{4,}\.([A-Za-z0-9_-]*)")
     MAX_ENDPOINTS = 6                  # deterministic budget
 
     def __init__(self, engine, bus, strategy_store=None):
         super().__init__(engine, bus, strategy_store)
         self._done = 0
+        self._done_preferred = 0
+        self._skipped_noted = False
 
     def candidates(self, ep: Endpoint):          # not used — see run(ep)
         return []
@@ -2707,9 +2721,23 @@ class JwtDetector(Detector):
         blob = ep.url.lower()
         if not any(w in blob for w in self.AUTHISH):
             return None
-        if self._done >= self.MAX_ENDPOINTS:
-            return None
-        self._done += 1
+        if any(w in blob for w in self.LOGINISH):
+            if self._done_preferred >= self.MAX_ENDPOINTS:
+                return None
+            self._done_preferred += 1
+        else:
+            if self._done >= self.MAX_ENDPOINTS:
+                # FM-16: the leftover budget line is recorded ONCE, never
+                # silently — the ZOMBIE_PROBE_CAP leftover-boundary pattern.
+                if not self._skipped_noted:
+                    self._skipped_noted = True
+                    self.bus.emit(
+                        "JwtBudgetReached",
+                        note=f"{self._done} auth-shaped surfaces probed; further "
+                             f"non-login auth-shaped surfaces are skipped "
+                             f"(MAX_ENDPOINTS={self.MAX_ENDPOINTS}, documented)")
+                return None
+            self._done += 1
         r = self.engine.send(RequestMutation(endpoint=ep, note="jwt-capture"))
         if r is None or r.error or not r.status:
             return None

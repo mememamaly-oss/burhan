@@ -376,9 +376,21 @@ class HashCryptoChainPhase:
         # first write. With a write sink: truncate + write + read each
         # candidate directly (the fresh window is deterministic). Without:
         # the original before/after diff.
+        # FM-29 (full-repo first-match sweep, 2026-11-03): the writer used
+        # to be ONE gate endpoint (the first hash gate) — if that surface
+        # was down/readonly the whole 10-name wordlist burned on the dead
+        # writer and the family returned [] SILENTLY while other gate
+        # writers sat untried. Every gate writer is now swept (bounded,
+        # deterministic order; one artifact is all the chain needs).
+        writers = hash_eps + crypto_eps
+        if len(writers) > 3:
+            self.bus.emit(
+                "ChainPhaseLeftovers",
+                note=f"{len(writers) - 3} gate endpoints left unswept as "
+                     f"writers (writer sweep cap 3, documented)")
+            writers = writers[:3]
         artifact_name = None
-        writer = (hash_eps or crypto_eps or [None])[0]
-        if writer is not None:
+        for writer in writers:
             if write_ep is not None:
                 for name in ARTIFACT_WORDLIST:
                     v = self._probe(writer, K1, read_ep, read_param, name,
@@ -397,7 +409,17 @@ class HashCryptoChainPhase:
                     if any("hash_value=" in ln or "secret_value=" in ln for ln in new_lines):
                         artifact_name = name
                         break
+            if artifact_name is not None:
+                break
         if artifact_name is None:
+            if writers:
+                self.bus.emit(
+                    "ChainPhaseBoundary",
+                    note=f"no artifact line appeared after sweeping "
+                         f"{len(writers)} gate writers x {len(ARTIFACT_WORDLIST)} "
+                         f"names — the write side of the chain is not observable "
+                         f"on these surfaces (family honestly untested)")
+            return []
             return []
 
         # ---- hash: exact-digest oracle --------------------------------
