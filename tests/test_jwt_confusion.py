@@ -351,3 +351,67 @@ def test_harvest_prefers_login_shaped_surfaces():
                             "modern-jwt-harvest"), st2.sends[:3]
     assert any("harvest clean" in d and "forget-password" in d
                for _, _, d in st2.boundaries), st2.boundaries
+
+
+def test_differential_targets_strong_named_surfaces_first():
+    """BFLA-2b round 6 (crAPI live run 41591566412): the round-5 fix restored
+    the harvest (fam1/fam2 back to 2/2 probes) but the differential still
+    missed — the PROTECTED-side selection takes the first protected-shaped
+    endpoint, and 'api' (PROTECTED_WORDS' weak catch-all) hits EVERY
+    /community/api/... and /identity/api/... surface: after the loopback
+    normalization a spec-declared community endpoint preceded crAPI's
+    known-vulnerable dashboard, the differential ran against a properly
+    verifying surface, and recorded an honest-but-wrong-target negative.
+    A surface that NAMES its protectedness (dashboard/account/admin/...)
+    must sort first — selection by surface SHAPE, never by map order
+    (the same discipline as the round-5 harvest fix). 'api'-only surfaces
+    remain the fallback when no strong-named surface exists."""
+    from types import SimpleNamespace
+
+    from burhan.modernsec import _jwt_families
+
+    TOKEN = ("eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9."
+             "eyJzdWIiOiAidUB4IiwgImV4cCI6IDk5OTk5OTk5OTl9.sig")
+
+    class _St:
+        def __init__(self):
+            self.probes, self.boundaries = [], []
+
+        def send(self, ep, note="", **kw):
+            if "login" in ep.url and note == "modern-jwt-harvest":
+                return SimpleNamespace(status=200, error=None,
+                                       body='{"token": "' + TOKEN + '"}',
+                                       headers={})
+            return SimpleNamespace(status=401, error=None, body="", headers={})
+
+        def probe(self, fam, ep, note="", **kw):
+            self.probes.append((fam, ep.url))
+            return SimpleNamespace(status=401, error=None, body="",
+                                   headers={}, request_id="r-prot-test")
+
+        def boundary(self, fam, kind, detail):
+            self.boundaries.append((fam, kind, detail))
+
+        def find(self, *a, **k):
+            raise AssertionError("no finding may fire from this stub")
+
+    base = "http://127.0.0.1:59996"
+    # the WEAK ('api'-only) community endpoint comes FIRST in eps order —
+    # the pre-round-6 rule sent the differential there
+    eps = [Endpoint(url=f"{base}/identity/api/auth/login", method="POST"),
+           Endpoint(url=f"{base}/community/api/v2/community/posts/recent"),
+           Endpoint(url=f"{base}/identity/api/v2/user/dashboard")]
+
+    st = _St()
+    _jwt_families(st, eps)
+    assert st.probes, "fam2 must run (a signed HS256 harvest token)"
+    assert all(url.endswith("/identity/api/v2/user/dashboard")
+               for _, url in st.probes), st.probes
+
+    # fallback shape: no strong-named surface -> the first weak candidate
+    # is used exactly as before
+    st2 = _St()
+    _jwt_families(st2, [eps[0], eps[1]])
+    assert st2.probes and all(
+        url.endswith("/community/api/v2/community/posts/recent")
+        for _, url in st2.probes), st2.probes
