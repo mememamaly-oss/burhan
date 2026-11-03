@@ -76,6 +76,16 @@ PROTECTED_WORDS = ("protected", "private", "secured", "admin", "api",
                    "account", "session", "dashboard", "member")
 AUTHISH = ("login", "signin", "sign-in", "auth", "token", "jwt", "session",
            "apikey", "api-key", "credential", "oauth")
+# BFLA-2b round 5 (crAPI live run 41589420101): LOGIN-shaped surfaces are the
+# only auth-ish ones that ANSWER a token to a replay (the credentialed
+# json_login endpoint AUTH-06 contributes); an auth-word-but-not-login
+# surface (crAPI's spec-declared /identity/api/auth/forget-password) answers
+# 4xx and starves both differentials. Before the loopback normalization the
+# spec's localhost URLs sorted after every 127.0.0.1 URL, so the login won
+# the first-AUTHISH pick BY ACCIDENT; normalized, everything is 127.0.0.1
+# and forget-password sorts first — the harvest replayed the wrong surface
+# and the diagnostic boundary (round 4) named it.
+LOGINISH = ("login", "signin", "sign-in")
 
 POST_BUDGET = 8          # max POST endpoints probed by the smuggling family
 SMUG_K = 16              # the clipped leftover (bytes) in the desync shape
@@ -298,7 +308,12 @@ def _none_variant(hdr: dict, claims: dict) -> str:
 
 def _jwt_families(st: _St, eps):
     fam1, fam2 = "jwt_algorithm_confusion", "jwt_none_acceptance"
-    auth_ep = next((ep for ep in eps if _word_hit(ep.url, AUTHISH)), None)
+    # round 5: prefer LOGIN-shaped surfaces for the harvest (stable sort —
+    # the first login-shaped candidate in eps order wins; auth-word-only
+    # surfaces stay fallbacks, as before, for targets without a login path)
+    _auth_cands = [ep for ep in eps if _word_hit(ep.url, AUTHISH)]
+    _auth_cands.sort(key=lambda ep: 0 if _word_hit(ep.url, LOGINISH) else 1)
+    auth_ep = _auth_cands[0] if _auth_cands else None
     # AUTH-06: the harvest source itself often matches PROTECTED_WORDS
     # ("/auth/api/login" contains "api") — but the differential needs a
     # DIFFERENT protected surface; probing the login endpoint answers
