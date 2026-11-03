@@ -546,11 +546,13 @@ def test_fm21b_family_relation_carries_every_double_candidate(monkeypatch):
 
     # a REAL per-request chain: three constructors sharing the
     # seedUniquifier domain (u advances by UNIQ_MULT), nanoTime = t_i.
-    # (t0, G) are FIXED and pre-verified: the relation solver scans its
-    # window bottom-up, so a false-positive solution can precede the true
-    # one for some (t0, G) — these values were searched so the TRUE pair
-    # returns the TRUE solution (and the pre-fix cands[0] path provably
-    # dies on this fixture: the decoy pair yields no solution at all).
+    # (t0, G) are FIXED: the relation solver used to return its FIRST
+    # window-scan match only (FM-21c, CI live-caught 2026-11-03) — a false
+    # positive preceding the true solution killed the family on an ordering
+    # accident. The solver now returns EVERY solution (cap 8) and the
+    # forward confirmation arbitrates, so this pin is environment-stable.
+    # The pre-fix cands[0] path provably dies on this fixture: the decoy
+    # pair yields no solution at all.
     u = 0x9E3779B97F4A7C15
     t0 = 0x1000
     G = 0x1000                     # per-request clock gap « window 1<<23

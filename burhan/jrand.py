@@ -139,20 +139,28 @@ def predict_double_int(s0: int) -> int:
 
 def uniquifier_relation_solve(s1_low48: int, s2_low48: int, t1_center: int,
                               t2_center: int, window: int = 1 << 22,
-                              gap_max: int = 300_000_000):
+                              gap_max: int = 300_000_000) -> list[tuple[int, int, int]]:
     """Meet-in-the-middle solve of the seed relation in the 48-BIT domain:
         seed_low48 = (u ^ t) & MASK48,  u2_low48 = u1_low48 * UNIQ_MULT mod 2^48
     Given the recovered low-48 seeds of two requests and monotonic-clock
     centers (same clock domain as the JVM's nanoTime on a shared host), find
     (u1, t1, t2) with t1 low-48 inside the window, the gap inside [0, gap_max]
-    (mod-2^48 difference), and t2 within its own window. numpy-vectorized;
-    returns (u1_low48, t1_low48, t2_low48) or None. Expected false positives
-    per call ~ (2*window)^2 * gap / 2^96-scale — in practice < 1; the caller's
-    third-sample confirmation kills the rest."""
+    (mod-2^48 difference), and t2 within its own window. numpy-vectorized.
+
+    FM-21c (first-match audit follow-up, CI live-caught 2026-11-03): the
+    solver used to return the FIRST window-scan match only — when a false
+    positive preceded the true solution, the caller's third-sample
+    confirmation killed it and the TRUE solution (same candidate pair,
+    later in the scan) was never seen: the family died on an ordering
+    accident (passed locally, failed in CI — the scan order is
+    environment-stable but the false-positive LAYOUT is fixture-sensitive).
+    The solver now returns EVERY solution (bounded at SOL_CAP), and the
+    caller's forward confirmation arbitrates among them — the confirmation
+    is the self-verifying oracle, so "first confirmed" is exact."""
     try:
         import numpy as np
     except Exception:
-        return None
+        return []
     M48 = np.uint64(MASK48)
     C48 = np.uint64(UNIQ_MULT & MASK48)
     S1 = np.uint64(s1_low48)
@@ -168,7 +176,9 @@ def uniquifier_relation_solve(s1_low48: int, s2_low48: int, t1_center: int,
     CH = 1 << 20
     n = 2 * window
     done = 0
-    while done < n:
+    out: list[tuple[int, int, int]] = []
+    SOL_CAP = 8
+    while done < n and len(out) < SOL_CAP:
         m = min(CH, n - done)
         idx = np.arange(done, done + m, dtype=np.int64)
         delta = idx - window
@@ -178,11 +188,10 @@ def uniquifier_relation_solve(s1_low48: int, s2_low48: int, t1_center: int,
         t2 = (S2 ^ u2) & M48
         d2 = (t2 - t1) & M48
         ok = np.nonzero(_near(t2, t2c, W) & ((d2 <= np.uint64(gap_max)) | (d2 >= M48 - np.uint64(gap_max))))[0]
-        if len(ok):
-            i = int(ok[0])
-            return (int(u1[i]), int(t1[i]), int(t2[i]))
+        for i in ok[:SOL_CAP - len(out)]:
+            out.append((int(u1[i]), int(t1[i]), int(t2[i])))
         done += m
-    return None
+    return out
 
 
 def double_from_cookie(cookie: str) -> int | None:

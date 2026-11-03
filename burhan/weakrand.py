@@ -240,36 +240,35 @@ class WeakRandomPhase:
             cand_sets.append(per_sample)
         # relation solve on requests 1-2 (window covers HTTP RTT jitter),
         # confirm forward on request 3 — over the candidates cross-product
-        # (bounded: recover_state_nextdouble caps at 4 per sample)
+        # (bounded: recover_state_nextdouble caps at 4 per sample, the
+        # solver caps at 8 solutions per pair — FM-21c)
         for c1 in cand_sets[0]:
             for c2 in cand_sets[1]:
-                sol = jrand.uniquifier_relation_solve(c1[0], c2[0],
+                sols = jrand.uniquifier_relation_solve(c1[0], c2[0],
                                                       c1[1], c2[1],
                                                       window=1 << 23)
-                if sol is None:
-                    continue
-                u1, _t1, _t2 = sol
-                # forward confirmation (48-bit domain): the third request's
-                # seed must xor-decode (two uniquifier advances from
-                # request 1) to a nanoTime low-48 inside ITS measured window.
-                u3 = ((u1 * jrand.UNIQ_MULT % jrand.MOD64)
-                      * jrand.UNIQ_MULT % jrand.MOD64) & jrand.MASK48
-                for c3 in cand_sets[2]:
-                    t3 = c3[0] ^ u3
-                    d3 = (t3 - (c3[1] & jrand.MASK48)) & jrand.MASK48
-                    if not (d3 > (1 << 23) and d3 < jrand.MASK48 - (1 << 23)):
-                        return Finding(type="weak_random", severity=Severity.HIGH,
-                                       endpoint_url=ep.url, parameter=cname,
-                                       method=ep.method,
-                                       evidence=[Evidence("lcg_seed_relation",
-                                          f"cookie '{cname}' values come from per-request "
-                                          f"new java.util.Random() instances: exact 48-bit states recovered "
-                                          f"from the observed values, and the seedUniquifier multiplicative "
-                                          f"relation (u2 = u1*1181783497276652981 mod 2^64) holds across all "
-                                          f"three requests inside the measured CLOCK_MONOTONIC windows — "
-                                          "seeds are time-derived LCG seeds, not CSPRNG output", None,
-                                          " ".join(v[:20] for v, _ in samples))],
-                                       status=FindingStatus.CANDIDATE)
+                for u1, _t1, _t2 in sols:
+                    # forward confirmation (48-bit domain): the third request's
+                    # seed must xor-decode (two uniquifier advances from
+                    # request 1) to a nanoTime low-48 inside ITS measured window.
+                    u3 = ((u1 * jrand.UNIQ_MULT % jrand.MOD64)
+                          * jrand.UNIQ_MULT % jrand.MOD64) & jrand.MASK48
+                    for c3 in cand_sets[2]:
+                        t3 = c3[0] ^ u3
+                        d3 = (t3 - (c3[1] & jrand.MASK48)) & jrand.MASK48
+                        if not (d3 > (1 << 23) and d3 < jrand.MASK48 - (1 << 23)):
+                            return Finding(type="weak_random", severity=Severity.HIGH,
+                                           endpoint_url=ep.url, parameter=cname,
+                                           method=ep.method,
+                                           evidence=[Evidence("lcg_seed_relation",
+                                              f"cookie '{cname}' values come from per-request "
+                                              f"new java.util.Random() instances: exact 48-bit states recovered "
+                                              f"from the observed values, and the seedUniquifier multiplicative "
+                                              f"relation (u2 = u1*1181783497276652981 mod 2^64) holds across all "
+                                              f"three requests inside the measured CLOCK_MONOTONIC windows — "
+                                              "seeds are time-derived LCG seeds, not CSPRNG output", None,
+                                              " ".join(v[:20] for v, _ in samples))],
+                                           status=FindingStatus.CANDIDATE)
         return None
 
     # ------------------------------------------------------------------ run
