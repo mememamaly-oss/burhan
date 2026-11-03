@@ -732,6 +732,36 @@ def extract_query_params(url: str) -> list[tuple[str, str]]:
 OPENAPI_PROBE_PATHS = ("/openapi.json", "/swagger.json", "/swagger/v1/swagger.json", "/v2/api-docs")
 
 
+def _loopback_normalize(spec_root: str, base: str) -> str:
+    """BFLA-2b (crAPI live round, 2026-11-02, run 41491090217): crAPI's own
+    spec declares its server as localhost:8888 while the scan targets
+    127.0.0.1:8888 — the resulting endpoints sat OUTSIDE the scan's host
+    scope, every battery replay through a scope-checked engine was silently
+    refused (HTTP 0), the BFLA privileged oracle read "failed" on a request
+    that never left the engine, and the zombie family recorded a VACUOUS
+    TESTED_NEGATIVE ("the spec and the live surface agree") over all-refused
+    probes. Loopback<->loopback with matching scheme+port is the SAME
+    machine by definition: normalize the spec root onto the scan base.
+    Non-loopback mismatches keep DISC-13 semantics (the spec's declaration
+    stands; the scope gate decides — and 3G now reports refused probes
+    honestly instead of claiming agreement)."""
+    try:
+        a = urllib.parse.urlsplit(spec_root)
+        b = urllib.parse.urlsplit(base)
+        if not (a.scheme and a.netloc and b.scheme and b.netloc):
+            return spec_root
+        if a.scheme != b.scheme or a.port != b.port:
+            return spec_root
+        ah = (a.hostname or "").lower()
+        bh = (b.hostname or "").lower()
+        loopback = {"localhost", "127.0.0.1", "::1", "0.0.0.0"}
+        if ah in loopback and bh in loopback and ah != bh:
+            return urllib.parse.urlunsplit((b.scheme, b.netloc, a.path, "", ""))
+    except Exception:
+        pass
+    return spec_root
+
+
 def parse_openapi(spec: dict, base_url: str) -> list[Endpoint]:
     """DISC-13 (Phase 54): an OpenAPI/Swagger document is a machine-readable attack
     surface map the TARGET ITSELF publishes — endpoints invisible to any crawler
@@ -746,6 +776,7 @@ def parse_openapi(spec: dict, base_url: str) -> list[Endpoint]:
     root = base
     if servers and isinstance(servers, list) and servers[0].get("url", "").startswith("http"):
         root = servers[0]["url"].rstrip("/")
+    root = _loopback_normalize(root, base)
     paths = spec.get("paths") or {}
     for path, ops in (paths.items() if isinstance(paths, dict) else []):
         if not isinstance(ops, dict):
