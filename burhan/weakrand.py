@@ -157,18 +157,29 @@ class WeakRandomPhase:
                 cands.append(s_after)
         if not cands:
             return None           # fresh instances or CSPRNG — not a shared chain
-        s_after = cands[0]          # state after cookie1's two next() calls
-        # cookie2 consumed two more next() calls; the PREDICTED cookie3 rides
-        # the state after cookie2's calls.
-        s_before3 = jrand.next_state(jrand.next_state(s_after))
-        predicted = jrand.double_int_to_cookie(jrand.predict_double_int(s_before3))
+        # FM-21 (first-match audit): cands can hold up to 4 recovered states
+        # (recover_state_nextdouble). The old cands[0] single pick predicted
+        # cookie3 from the FIRST state only — the matching state sitting
+        # later in the list yielded a false negative. Every candidate gets
+        # its prediction; the fetched cookie3 arbitrates (self-verifying).
+        preds = []
+        for s_after in cands:
+            # cookie2 consumed two more next() calls; the PREDICTED cookie3
+            # rides the state after cookie2's calls.
+            s_before3 = jrand.next_state(jrand.next_state(s_after))
+            preds.append(jrand.double_int_to_cookie(jrand.predict_double_int(s_before3)))
+        predicted = preds[0]
         c3 = self._fetch_cookie(ep)
         if not c3:
             return None
         got = c3[1].strip()
-        # Java emits the shortest repr; tolerate leading-zero shape diffs
-        if got == predicted or (got.lstrip("0") == predicted.lstrip("0")
-                                and got and predicted):
+        # FM-21: any candidate's prediction matching the fetched cookie3
+        # proves the shared chain (the exact state is then the matching one).
+        # Java emits the shortest repr; tolerate leading-zero shape diffs.
+        def _shape_eq(a: str, b: str) -> bool:
+            return a == b or (a.lstrip("0") == b.lstrip("0") and a and b)
+        if any(_shape_eq(got, p) for p in preds):
+            predicted = next(p for p in preds if _shape_eq(got, p))
             return Finding(type="weak_random", severity=Severity.HIGH,
                            endpoint_url=ep.url, parameter=cname, method=ep.method,
                            evidence=[Evidence("lcg_chain_prediction",
@@ -194,56 +205,81 @@ class WeakRandomPhase:
             if not c:
                 return None
             samples.append((c[1].strip(), (t0 + t1) // 2))
-        seeds = []
+        # FM-21b (full-repo first-match sweep, 2026-11-03): the 'double'
+        # branch used to keep ONE recovered state (cands[0]) — a wrong pick
+        # fed a false seed into the relation solve and killed the whole
+        # 3-sample confirmation (false negative, the FM-21 twin). Every
+        # candidate is now carried per sample; the relation solve + the
+        # forward confirmation on request 3 arbitrate (self-verifying,
+        # pure arithmetic — no extra requests).
+        cand_sets: list[list[tuple[int, int]]] = []
         for val, ts in samples:
+            per_sample: list[tuple[int, int]] = []
             if kind == "long":
                 try:
                     v = jrand.parse_java_long(val)
                 except ValueError:
                     return None
-                st = jrand.recover_state_nextlong(v)
+                per_sample = [(jrand.seed_from_state(
+                    jrand.recover_state_nextlong(v)), ts)]
             elif kind == "double":
                 d = jrand.double_from_cookie(val)
                 if d is None:
                     return None
-                cands = jrand.recover_state_nextdouble(d)
-                st = cands[0] if cands else None
+                per_sample = [(jrand.seed_from_state(s), ts)
+                              for s in jrand.recover_state_nextdouble(d)]
             else:                                  # base64 nextBytes
                 try:
                     bs = base64.b64decode(val + "===")[:10]
                 except Exception:
                     return None
-                st = jrand.recover_state_nextbytes(bs)
-            if st is None:
+                per_sample = [(jrand.seed_from_state(
+                    jrand.recover_state_nextbytes(bs)), ts)]
+            if not per_sample:
                 return None
-            seeds.append((jrand.seed_from_state(st), ts))
+            cand_sets.append(per_sample)
         # relation solve on requests 1-2 (window covers HTTP RTT jitter),
-        # confirm forward on request 3
-        sol = jrand.uniquifier_relation_solve(seeds[0][0], seeds[1][0],
-                                              seeds[0][1], seeds[1][1],
-                                              window=1 << 23)
-        if sol is None:
+        # confirm forward on request 3 — over the candidates cross-product
+        # (bounded: recover_state_nextdouble caps at 4 per sample, the
+        # solver caps at 8 solutions per pair — FM-21c).
+        # FM-21d: the solve is numpy-only (no pure fallback) — absence is
+        # recorded LOUDLY as UNTESTABLE, never a silent negative.
+        if not jrand.numpy_available():
+            self.bus.emit(
+                "WeakRandRelationUnavailable", ep.url,
+                note="the per-request seed-relation family needs numpy "
+                     "(vectorized window scan, no pure fallback) and it is "
+                     "not importable — family UNTESTABLE on this surface "
+                     "(requirements.txt declares numpy)")
             return None
-        u1, t1, t2 = sol
-        # forward confirmation (48-bit domain): the third request's seed must
-        # xor-decode (two uniquifier advances from request 1) to a nanoTime
-        # low-48 inside ITS measured window.
-        u3 = ((u1 * jrand.UNIQ_MULT % jrand.MOD64) * jrand.UNIQ_MULT % jrand.MOD64) & jrand.MASK48
-        t3 = seeds[2][0] ^ u3
-        d3 = (t3 - (seeds[2][1] & jrand.MASK48)) & jrand.MASK48
-        if d3 > (1 << 23) and d3 < jrand.MASK48 - (1 << 23):
-            return None
-        return Finding(type="weak_random", severity=Severity.HIGH,
-                       endpoint_url=ep.url, parameter=cname, method=ep.method,
-                       evidence=[Evidence("lcg_seed_relation",
-                          f"cookie '{cname}' values come from per-request "
-                          f"new java.util.Random() instances: exact 48-bit states recovered "
-                          f"from the observed values, and the seedUniquifier multiplicative "
-                          f"relation (u2 = u1*1181783497276652981 mod 2^64) holds across all "
-                          f"three requests inside the measured CLOCK_MONOTONIC windows — "
-                          "seeds are time-derived LCG seeds, not CSPRNG output", None,
-                          " ".join(v[:20] for v, _ in samples))],
-                       status=FindingStatus.CANDIDATE)
+        for c1 in cand_sets[0]:
+            for c2 in cand_sets[1]:
+                sols = jrand.uniquifier_relation_solve(c1[0], c2[0],
+                                                      c1[1], c2[1],
+                                                      window=1 << 23)
+                for u1, _t1, _t2 in sols:
+                    # forward confirmation (48-bit domain): the third request's
+                    # seed must xor-decode (two uniquifier advances from
+                    # request 1) to a nanoTime low-48 inside ITS measured window.
+                    u3 = ((u1 * jrand.UNIQ_MULT % jrand.MOD64)
+                          * jrand.UNIQ_MULT % jrand.MOD64) & jrand.MASK48
+                    for c3 in cand_sets[2]:
+                        t3 = c3[0] ^ u3
+                        d3 = (t3 - (c3[1] & jrand.MASK48)) & jrand.MASK48
+                        if not (d3 > (1 << 23) and d3 < jrand.MASK48 - (1 << 23)):
+                            return Finding(type="weak_random", severity=Severity.HIGH,
+                                           endpoint_url=ep.url, parameter=cname,
+                                           method=ep.method,
+                                           evidence=[Evidence("lcg_seed_relation",
+                                              f"cookie '{cname}' values come from per-request "
+                                              f"new java.util.Random() instances: exact 48-bit states recovered "
+                                              f"from the observed values, and the seedUniquifier multiplicative "
+                                              f"relation (u2 = u1*1181783497276652981 mod 2^64) holds across all "
+                                              f"three requests inside the measured CLOCK_MONOTONIC windows — "
+                                              "seeds are time-derived LCG seeds, not CSPRNG output", None,
+                                              " ".join(v[:20] for v, _ in samples))],
+                                           status=FindingStatus.CANDIDATE)
+        return None
 
     # ------------------------------------------------------------------ run
     def run(self, endpoints: list[Endpoint], findings: list):

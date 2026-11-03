@@ -343,7 +343,6 @@ def _jwt_families(st: _St, eps):
         for f in (fam1, fam2):
             st.boundary(f, "NOT_DISCOVERED", "no protected-shaped endpoint in flight")
         return
-    prot = prot_eps[0]
     r = st.send(auth_ep, note="modern-jwt-harvest")
     token = _mine_jwt(r)
     if not token:
@@ -371,9 +370,15 @@ def _jwt_families(st: _St, eps):
     hdr = _decode_seg(token.split(".")[0])
     claims = _decode_seg(token.split(".")[1])
     alg = str(hdr.get("alg", "")).lower()
-    recipe = f"auth={auth_ep.url}; protected={prot.url}"
 
     # ---- family 1: algorithm confusion (asymmetric issuance only)
+    # ROUND 7 / FM-02 (STATE.md candidate (a), live run 41605966137): the
+    # differential now iterates ALL strong-named protected surfaces — the
+    # first-protected pick spent every probe on the signature-VERIFYING
+    # admin route (DELETE .../admin/videos/12345) while the dashboard (the
+    # signature-gap surface, run 41436129520's jwt_signature_not_enforced)
+    # sat unprobed in the same class. One verified finding per family stays
+    # the honest cap; a pure negative names its surface and yields the slot.
     if alg in ASYM_ALGS:
         key_body, jwks_used = _discover_pubkey(st, auth_ep)
         if key_body is None:
@@ -383,41 +388,58 @@ def _jwt_families(st: _St, eps):
         else:
             forged = _forge_hs256(key_body, claims)
             bad = _corrupt_sig(forged)
-            pr = st.probe(fam1, prot, extra_headers={"Authorization": f"Bearer {forged}"})
-            ct = st.probe(fam1, prot, extra_headers={"Authorization": f"Bearer {bad}"})
-            if _ok(pr) and not _ok(ct):
-                st.find(fam1, Severity.HIGH, prot, "-", [
-                    Evidence("confusion_differential",
-                             f"algorithm confusion (CWE-347): the forged HS256 token "
-                             f"signed with the PUBLIC key PEM body as the HMAC secret "
-                             f"was ACCEPTED (HTTP {pr.status}) while the corrupted-"
-                             f"signature control was REJECTED (HTTP {ct.status}) — "
-                             f"the verifier mixes asymmetric and symmetric algorithms. "
-                             f"claims: {sorted(claims)}", pr.request_id),
-                    Evidence("probe_recipe", recipe + f"; jwks={jwks_used}",
-                             pr.request_id)])
-            else:
-                if _ok(ct):
+            fam1_done = False
+            for _pi, prot in enumerate(prot_eps):
+                if st.counts[fam1]["sent"] + 2 > FAMILY_CAPS[fam1]:
+                    st.boundary(fam1, "NOT_SUPPORTED",
+                                f"family request cap reached before exhausting the "
+                                f"{len(prot_eps)} protected surfaces (documented)")
+                    break
+                recipe = f"auth={auth_ep.url}; protected={prot.url}"
+                pr = st.probe(fam1, prot, extra_headers={"Authorization": f"Bearer {forged}"})
+                ct = st.probe(fam1, prot, extra_headers={"Authorization": f"Bearer {bad}"})
+                if _ok(pr) and not _ok(ct):
+                    st.find(fam1, Severity.HIGH, prot, "-", [
+                        Evidence("confusion_differential",
+                                 f"algorithm confusion (CWE-347): the forged HS256 token "
+                                 f"signed with the PUBLIC key PEM body as the HMAC secret "
+                                 f"was ACCEPTED (HTTP {pr.status}) while the corrupted-"
+                                 f"signature control was REJECTED (HTTP {ct.status}) — "
+                                 f"the verifier mixes asymmetric and symmetric algorithms. "
+                                 f"claims: {sorted(claims)}", pr.request_id),
+                        Evidence("probe_recipe", recipe + f"; jwks={jwks_used}",
+                                 pr.request_id)])
+                    fam1_done = True
+                elif _ok(ct):
                     # run-9 class (crAPI challenge 15, live): the control itself
                     # was accepted — signatures are not enforced at all
                     _sig_not_enforced(st, prot, ct, hdr, claims,
                                       recipe + f"; jwks={jwks_used}",
                                       "the confusion differential\u2019s control")
-                if _ok(pr) and _ok(ct):
-                    st.boundary(fam1, "OBSERVED_ANOMALY",
-                                "the protected endpoint accepted the forged token AND "
-                                "the corrupted control — the confusion differential "
-                                "cannot isolate (both arms passed); the signature "
-                                "bypass is reported as jwt_signature_not_enforced")
-                elif _ok(ct):
-                    st.boundary(fam1, "OBSERVED_ANOMALY",
-                                "the corrupted control was ACCEPTED while the forged "
-                                "token was not — reported as jwt_signature_not_enforced")
+                    if _ok(pr):
+                        st.boundary(fam1, "OBSERVED_ANOMALY",
+                                    "the protected endpoint accepted the forged token AND "
+                                    "the corrupted control — the confusion differential "
+                                    "cannot isolate (both arms passed); the signature "
+                                    "bypass is reported as jwt_signature_not_enforced")
+                    else:
+                        st.boundary(fam1, "OBSERVED_ANOMALY",
+                                    "the corrupted control was ACCEPTED while the forged "
+                                    "token was not — reported as jwt_signature_not_enforced")
+                    fam1_done = True
                 else:
                     st.boundary(fam1, "TESTED_NEGATIVE",
-                                f"the differential held: forged rejected (HTTP "
+                                f"{prot.url}: the differential held: forged rejected (HTTP "
                                 f"{getattr(pr, 'status', 0)}), control rejected (HTTP "
                                 f"{getattr(ct, 'status', 0)})")
+                if fam1_done:
+                    if _pi + 1 < len(prot_eps):
+                        st.boundary(fam1, "NOT_SUPPORTED",
+                                    f"{len(prot_eps) - _pi - 1} protected surfaces left "
+                                    f"unprobed after the differential produced its "
+                                    f"verdict on {prot.url} (one finding per family "
+                                    f"is the honest cap, documented)")
+                    break
     else:
         st.boundary(fam1, "NOT_DISCOVERED",
                     f"no asymmetric issuance in flight (alg={alg!r}) — the confusion "
@@ -432,35 +454,54 @@ def _jwt_families(st: _St, eps):
         return
     nv = _none_variant(hdr, claims)
     bad_orig = _corrupt_sig(token)
-    pr2 = st.probe(fam2, prot, extra_headers={"Authorization": f"Bearer {nv}"})
-    ct2 = st.probe(fam2, prot, extra_headers={"Authorization": f"Bearer {bad_orig}"})
-    if _ok(pr2) and not _ok(ct2):
-        st.find(fam2, Severity.HIGH, prot, "-", [
-            Evidence("none_differential",
-                     f"none-acceptance (CWE-347/CWE-287): the alg=none token with an "
-                     f"EMPTY signature was ACCEPTED (HTTP {pr2.status}) while the "
-                     f"corrupted-signature ORIGINAL was REJECTED (HTTP {ct2.status}) "
-                     f"— the verifier honors the none algorithm. claims: "
-                     f"{sorted(claims)}", pr2.request_id),
-            Evidence("probe_recipe", recipe, pr2.request_id)])
-    elif _ok(pr2) and _ok(ct2):
-        _sig_not_enforced(st, prot, ct2, hdr, claims, recipe,
-                          "the none-acceptance differential\u2019s control")
-        st.boundary(fam2, "OBSERVED_ANOMALY",
-                    "the verifier accepted the none-variant AND the corrupted original "
-                    "— it does not verify signatures at all; the signature bypass is "
-                    "reported as jwt_signature_not_enforced")
-    elif _ok(ct2):
-        _sig_not_enforced(st, prot, ct2, hdr, claims, recipe,
-                          "the none-acceptance differential\u2019s control")
-        st.boundary(fam2, "OBSERVED_ANOMALY",
-                    "the corrupted ORIGINAL was ACCEPTED while the none-variant was "
-                    "not — reported as jwt_signature_not_enforced")
-    else:
-        st.boundary(fam2, "TESTED_NEGATIVE",
-                    f"the differential held: none-variant rejected (HTTP "
-                    f"{getattr(pr2, 'status', 0)}), corrupted original rejected "
-                    f"(HTTP {getattr(ct2, 'status', 0)})")
+    fam2_done = False
+    for _pi, prot in enumerate(prot_eps):
+        if st.counts[fam2]["sent"] + 2 > FAMILY_CAPS[fam2]:
+            st.boundary(fam2, "NOT_SUPPORTED",
+                        f"family request cap reached before exhausting the "
+                        f"{len(prot_eps)} protected surfaces (documented)")
+            break
+        recipe = f"auth={auth_ep.url}; protected={prot.url}"
+        pr2 = st.probe(fam2, prot, extra_headers={"Authorization": f"Bearer {nv}"})
+        ct2 = st.probe(fam2, prot, extra_headers={"Authorization": f"Bearer {bad_orig}"})
+        if _ok(pr2) and not _ok(ct2):
+            st.find(fam2, Severity.HIGH, prot, "-", [
+                Evidence("none_differential",
+                         f"none-acceptance (CWE-347/CWE-287): the alg=none token with an "
+                         f"EMPTY signature was ACCEPTED (HTTP {pr2.status}) while the "
+                         f"corrupted-signature ORIGINAL was REJECTED (HTTP {ct2.status}) "
+                         f"— the verifier honors the none algorithm. claims: "
+                         f"{sorted(claims)}", pr2.request_id),
+                Evidence("probe_recipe", recipe, pr2.request_id)])
+            fam2_done = True
+        elif _ok(pr2) and _ok(ct2):
+            _sig_not_enforced(st, prot, ct2, hdr, claims, recipe,
+                              "the none-acceptance differential\u2019s control")
+            st.boundary(fam2, "OBSERVED_ANOMALY",
+                        "the verifier accepted the none-variant AND the corrupted original "
+                        "— it does not verify signatures at all; the signature bypass is "
+                        "reported as jwt_signature_not_enforced")
+            fam2_done = True
+        elif _ok(ct2):
+            _sig_not_enforced(st, prot, ct2, hdr, claims, recipe,
+                              "the none-acceptance differential\u2019s control")
+            st.boundary(fam2, "OBSERVED_ANOMALY",
+                        "the corrupted ORIGINAL was ACCEPTED while the none-variant was "
+                        "not — reported as jwt_signature_not_enforced")
+            fam2_done = True
+        else:
+            st.boundary(fam2, "TESTED_NEGATIVE",
+                        f"{prot.url}: the differential held: none-variant rejected (HTTP "
+                        f"{getattr(pr2, 'status', 0)}), corrupted original rejected "
+                        f"(HTTP {getattr(ct2, 'status', 0)})")
+        if fam2_done:
+            if _pi + 1 < len(prot_eps):
+                st.boundary(fam2, "NOT_SUPPORTED",
+                            f"{len(prot_eps) - _pi - 1} protected surfaces left "
+                            f"unprobed after the differential produced its verdict "
+                            f"on {prot.url} (one finding per family is the honest "
+                            f"cap, documented)")
+            break
 
 
 # ------------------------------------------------------ §5 GraphQL batching
@@ -586,8 +627,16 @@ def _smug_pair(st: _St, ep: Endpoint, canary: str):
 
 def _smuggling(st: _St, eps):
     fam = "http_request_smuggling"
-    post_eps = [ep for ep in eps
-                if (ep.method or "GET").upper() == "POST"][:POST_BUDGET]
+    post_all = [ep for ep in eps
+                if (ep.method or "GET").upper() == "POST"]
+    post_eps = post_all[:POST_BUDGET]
+    if len(post_all) > POST_BUDGET:
+        # FM-04 (first-match audit): the POST_BUDGET slice was silent —
+        # POST endpoints beyond the eighth left the family without a
+        # recorded trace (the ZOMBIE_PROBE_CAP leftover pattern, applied).
+        st.boundary(fam, "NOT_SUPPORTED",
+                    f"{len(post_all) - POST_BUDGET} POST endpoints left "
+                    f"unprobed (POST_BUDGET={POST_BUDGET}, documented)")
     if not post_eps:
         st.boundary(fam, "NOT_DISCOVERED", "no POST endpoint in flight")
         return

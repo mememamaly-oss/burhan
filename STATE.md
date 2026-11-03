@@ -1110,6 +1110,94 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   BFLA confirmation; run 41591566412 = the round-5 full verdict set;
   run 41605966137 = the round-6 close on merged main 8f4536ef).
 
+## 2026-11-03 (II) — ROUND 7: the first-match audit, repo-wide sweep, the class closed engine-wide
+
+- THE AUDIT (branch fix/first-match-audit-batch, commits 9033b21 +
+  84df026): a systematic sweep for EVERY positional-selection site in
+  the engine — `x[0]` over a dynamic list, `next(...)` without default,
+  silent `[:N]` truncation, sort-then-first, pop(0) — classified by
+  VERDICT RELEVANCE. 28 sites in burhan/; 12 verdict-relevant ones
+  closed in one batch. The repo-wide companion sweep
+  (scripts/audit_first_match_fullrepo.py, 167 py + 146 ts tracked
+  files, inventory JSON in download/first-match-audit/) found two MORE
+  verdict-relevant sites outside the original map and one honesty gap:
+  FM-21b (weakrand._family_relation kept ONE recovered state per
+  double-cookie sample), FM-29 (chainphase artifact discovery burned
+  the whole wordlist on the FIRST gate writer — a dead first gate
+  starved healthy writers), FM-30 (the identity statement's [:3] cookie
+  cap dropped leftovers silently).
+- THE FIX PATTERN (uniform, three shapes): (1) iterate EVERY candidate
+  until a verdict or a documented cap (FM-02 differential over all
+  strong-named protected surfaces — the ROUND 6 candidate (a), live
+  run 41730556960 PROVED it: fam1 recorded TESTED_NEGATIVE on the
+  signature-VERIFYING admin route, then OBSERVED_ANOMALY on the
+  DASHBOARD — jwt_signature_not_enforced verified, the exact surface
+  rounds 1-6 could not reach; FM-08 every id-ish param; FM-29 every
+  gate writer; FM-21b the full candidate cross-product);
+  (2) shape-based ordering over accident (FM-01 LOGINISH ported to the
+  second harvest copy, FM-06 first arg-carrying query, FM-10 richest
+  GET twin, FM-16 login-shaped surfaces carry their own budget,
+  FM-17 error-discovered XXE elements first); (3) never a silent
+  leftover — every cap now names what it left behind (FM-01/03/04/05
+  cap notes, FM-16 JwtBudgetReached, FM-29 ChainPhaseLeftovers/
+  Boundary, FM-30 leftover count in the claim itself).
+- FM-09 (the audit's most dangerous finding, closed): the VR-17
+  fresh-victim verification hung the whole VERIFIED/REJECTED verdict on
+  the alphabetically-first other account — a per-victim ACL there
+  flipped a true positive to REJECTED. Now EXISTENTIAL: the break
+  stands if ANY other account's object reads back
+  (IDOR_FRESH_VICTIM_CAP=3, both the param path and the path-swap
+  path; every checked victim named in the notes).
+- FM-21c (found BY CI, not by us): CI run 41730552234 caught on the
+  branch what local runs could not — the uniquifier relation solver
+  returned its FIRST window-scan match only; when a false positive
+  preceded the true solution for the same candidate pair, the
+  third-sample confirmation killed it and the TRUE solution (later in
+  the same scan) was never seen. The solver now returns EVERY solution
+  (SOL_CAP=8) and the confirmation arbitrates. The pin passes on BOTH
+  the searched fixture (t0=0x1000) and the CI-killing one
+  (t0=0xAB12CD34). This is the audit's own class, live-caught inside
+  the audit's own fix — the strongest possible confirmation that the
+  class was real.
+- FM-21d (the deep root under the CI failure, 87cc814): neither
+  requirements.txt nor requirements-dev.txt declared numpy, and the
+  seed-relation solve is numpy-vectorized with NO pure-Python fallback
+  (a 16.7M-value window scan per call) — the per-request
+  java.util.Random relation family was SILENTLY DEAD in every
+  deployment that followed the documented requirements. Invisible all
+  campaign because crAPI/DVGA/vulnapp expose no digit-fraction cookie
+  surfaces (verified; the fixture benchmark TP=38/FN=0 is unaffected).
+  numpy>=1.24 is now declared with this history inline;
+  jrand.numpy_available() is the honest probe; a missing numpy records
+  a LOUD WeakRandRelationUnavailable UNTESTABLE bus note, never a
+  silent negative (the audit's never-silent discipline, applied to a
+  dependency gap).
+- PINS: tests/test_first_match_pins.py — 14 deterministic tests
+  (fixture params pre-verified; the FM-21b decoy-first shape provably
+  kills the pre-fix cands[0] code and passes the new code). Suite grew
+  267 -> 281 green; every fix carries its pin.
+- LIVE VALIDATION on the fix branch (run 41730556960 on 9033b21, then
+  the FINAL rerun 41733682178 on merged-fix 87cc814: SUCCESS — crAPI
+  v1.1.5 + DVGA, ground-truth SHAs pinned pre-scan): crAPI 85.2 s,
+  4851 requests, 99 findings: jwt_signature_not_enforced VERIFIED on
+  the dashboard (probe_recipe cites login harvest -> dashboard ->
+  jwks), BFLA VERIFIED with a REAL per-session object id
+  (video_id=4, not the spec EXAMPLE), jwt_weak_secret boundary now
+  names its leftovers ("6 auth-shaped surfaces left unharvested,
+  family cap 2, documented"), fam1/fam2 record per-surface
+  TESTED_NEGATIVE + the leftover-as-verdict shape. DVGA 6.0 s, 834
+  requests, 26 findings, all families loud. Artifacts:
+  download/live-validation-fixbranch/ (live-validation.json,
+  crapi-scan.json, dvga-scan.json, ground-truth-sha.json).
+- THE WALL on the final fix head 87cc814 (run 41733677098 + the push
+  run 41733662992): ALL GREEN — engine/doctor+suite, fixture scan with
+  report formats, Juice Shop real-target, reproducibility attestation,
+  transparency log, secret scan, compliance drift, SaaS app, both
+  Action dogfoods. The two red CI runs (41730552234, 41732292967) are
+  part of the record: they are what caught FM-21c and then FM-21d —
+  the wall doing exactly what it exists for.
+
+
 ## Where to find things
 
 - Round-by-round history: `git log`, worklog.md (current + history).

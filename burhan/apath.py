@@ -233,7 +233,11 @@ def _link_identity(f, ctx, rids):
                     # excerpt is always a literal slice of the CITED entry —
                     # citation and excerpt must never come from different entries.
                     cookie_vals[n] = (r, v)
-    cookies = sorted(set(cookies))[:3]
+    # FM-30 (full-repo first-match sweep, 2026-11-03): the [:3] cookie cap
+    # is a STATEMENT-READABILITY bound over an identity claim — the leftover
+    # cookies are now NAMED in the claim itself, never silently dropped.
+    cookies_all = sorted(set(cookies))
+    cookies = cookies_all[:3]
     if cookies and rids:
         prov = ctx.cookie_provenance(cookies)
         crid, cval = cookie_vals.get(cookies[0], (rids[0], "; ".join(cookies)))
@@ -241,12 +245,16 @@ def _link_identity(f, ctx, rids):
         if cookies[0] in prov:
             prid, setc = prov[cookies[0]]
             ev.append(_ev("journal", prid, setc))
+        leftover = (f"; {len(cookies_all) - len(cookies)} further cookie(s) "
+                    f"observed (statement cap 3, documented)"
+                    if len(cookies_all) > len(cookies) else "")
         return {"slot": "identity", "status": "verified",
                 "statement": ("anonymous web session — cookie " + ", ".join(cookies) +
                               " carried by the raw proving requests; " +
                               (f"issued by the target on response {prov[cookies[0]][0]} (an unauthenticated fetch of a public surface)"
                                if cookies[0] in prov else "provenance not retained in the journal") +
-                              "; no Authorization/credential material in any proving request"),
+                              "; no Authorization/credential material in any proving request"
+                              + leftover),
                 "evidence": ev + [_finding_ev(f)]}
     if rids:
         e = ctx.entry(rids[0])

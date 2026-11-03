@@ -79,6 +79,11 @@ LOGOUT_PATH_RE = re.compile(r"(log-?out|log-?off|sign-?out|sign-?off)", re.I)
 ID_PARAM_NAMES = {"id", "user_id", "userid", "uid", "account", "account_id", "acct",
                   "customer_id", "profile_id", "doc_id", "order_id", "object_id",
                   "record_id", "employee_id", "member_id"}
+# FM-09 (first-match audit, 2026-11-03): the VR-17 fresh-victim verification
+# sweeps up to this many OTHER accounts (existence semantics — one readable
+# object stands) instead of betting the whole VERIFIED/REJECTED verdict on
+# the alphabetically-first other account.
+IDOR_FRESH_VICTIM_CAP = 3
 # ^ MAX-05b (maximum internal test, live-caught on Juice Shop 20.2.0): plain
 #   "id" — THE canonical REST object-param name — was missing from the set,
 #   so every /resource/{id} surface was skipped by the IDOR engine even with
@@ -428,9 +433,18 @@ class AuthzEngine:
     def _vertical(self, endpoints: list[Endpoint]) -> list[Finding]:
         findings = []
         by_path: dict[str, Endpoint] = {}
+        # FM-10 (first-match audit): the first-crawled GET twin used to win
+        # the path's representation — the Mutillidae class (core.py's id
+        # material documents it: 1,131 probes in the WRONG param context).
+        # The RICHEST twin (most parameters) now represents the path;
+        # count ties break on the earlier crawl order (deterministic).
         for ep in endpoints:
-            if (ep.method or "GET").upper() == "GET" and ep.url.split("?")[0] not in by_path:
-                by_path[ep.url.split("?")[0]] = ep
+            if (ep.method or "GET").upper() != "GET":
+                continue
+            k = ep.url.split("?")[0]
+            cur = by_path.get(k)
+            if cur is None or len(ep.parameters or ()) > len(cur.parameters or ()):
+                by_path[k] = ep
         # differential role-view surfaces: privileged-only links from BOTH the
         # landing page AND the bounded role-view replay of the crawl set
         links_by_name = {n: self._landing_links(s) | self._role_view_links(s, endpoints)
@@ -553,65 +567,85 @@ class AuthzEngine:
                 continue
             if ep.url.split("?")[0] in found_paths:
                 continue
-            p = next((p for p in ep.parameters
-                      if ((p.name or "").lower() in ID_PARAM_NAMES
-                          or (p.name or "").lower().endswith(("_id", "_num")))
-                      and p.kind.value != "token"), None)
-            if p is None:
+            # FM-08 (first-match audit): the first id-ish param used to be the
+            # only one probed — a BOLA riding the endpoint's SECOND object
+            # param was structurally invisible. Every id-ish param is swept
+            # now (bounded per endpoint, one finding per endpoint as before).
+            id_params = [p for p in ep.parameters
+                         if ((p.name or "").lower() in ID_PARAM_NAMES
+                             or (p.name or "").lower().endswith(("_id", "_num")))
+                         and p.kind.value != "token"][:4]
+            if not id_params:
                 continue
             done += 1
             hit = False
-            for acc in sorted(attackers, key=lambda a: a.name):
+            for p in id_params:
                 if hit:
                     break
-                sess = self.sessions.get(acc.name)
-                if sess is None:
-                    continue
-                for victim in sorted(accounts, key=lambda a: a.name):
-                    if victim.name == acc.name or not victim.marker or not victim.object_id:
+                for acc in sorted(attackers, key=lambda a: a.name):
+                    if hit:
+                        break
+                    sess = self.sessions.get(acc.name)
+                    if sess is None:
                         continue
-                    probe = self._fetch(sess["engine"], ep, "authz-idor",
-                                        param_name=p.name, param_value=victim.object_id)
-                    self._mx(ep.url, f"role:{acc.role}", probe.status, resp=probe)
-                    if probe.error or not probe.ok or victim.marker not in (probe.body or ""):
-                        continue
+                    for victim in sorted(accounts, key=lambda a: a.name):
+                        if victim.name == acc.name or not victim.marker or not victim.object_id:
+                            continue
+                        probe = self._fetch(sess["engine"], ep, "authz-idor",
+                                            param_name=p.name, param_value=victim.object_id)
+                        self._mx(ep.url, f"role:{acc.role}", probe.status, resp=probe)
+                        if probe.error or not probe.ok or victim.marker not in (probe.body or ""):
+                            continue
                     # listing guard: multiple distinct account markers = directory
-                    # surface, not object-level access
-                    markers_seen = sum(1 for m in all_markers if m in (probe.body or ""))
-                    if markers_seen > 1:
-                        continue
-                    horizontal = " (horizontal, same-role)" if _rank(acc.role) == _rank(victim.role) \
-                        else " (cross-role)"
-                    cand = Finding(
-                        "idor_bola", Severity.HIGH, ep.url, p.name, ep.method or "GET",
-                        [Evidence("object_access_broken",
-                                  f"account {acc.name} (role={acc.role}) retrieved "
-                                  f"account {victim.name}'s private object via "
-                                  f"{p.name}={victim.object_id}: victim marker "
-                                  f"present in response{horizontal} — no object-level "
-                                  "authorization", probe.request_id)],
-                        status=FindingStatus.CANDIDATE)
-                    cand.authz_context = (f"attacker={acc.name}(role={acc.role}) "
-                                          f"victim={victim.name}(role={victim.role})")
-                    # VR-17: FRESH victim (different account) with the same attacker
-                    others = [v for v in sorted(accounts, key=lambda a: a.name)
-                              if v.name not in (acc.name, victim.name)
-                              and v.marker and v.object_id]
-                    fresh = others[0] if others else victim
-                    vr = self._fetch(sess["engine"], ep, "authz-verify",
-                                     param_name=p.name, param_value=fresh.object_id)
-                    ok = (not vr.error and vr.ok and fresh.marker in (vr.body or ""))
-                    cand.verification = Verification(
-                        method="re-test:fresh-victim-object", passed=ok,
-                        confidence=0.9 if ok else 0.15, rounds=1,
-                        notes=f"fresh victim object ({p.name}={fresh.object_id}, "
-                              f"account={fresh.name}) also readable by {acc.name}: {ok}")
-                    cand.confidence = cand.verification.confidence
-                    cand.status = FindingStatus.VERIFIED if ok else FindingStatus.REJECTED
-                    findings.append(cand)
-                    found_paths.add(ep.url.split("?")[0])
-                    hit = True
-                    break            # one finding per endpoint; next endpoint continues
+                        # surface, not object-level access
+                        markers_seen = sum(1 for m in all_markers if m in (probe.body or ""))
+                        if markers_seen > 1:
+                            continue
+                        horizontal = " (horizontal, same-role)" if _rank(acc.role) == _rank(victim.role) \
+                            else " (cross-role)"
+                        cand = Finding(
+                            "idor_bola", Severity.HIGH, ep.url, p.name, ep.method or "GET",
+                            [Evidence("object_access_broken",
+                                      f"account {acc.name} (role={acc.role}) retrieved "
+                                      f"account {victim.name}'s private object via "
+                                      f"{p.name}={victim.object_id}: victim marker "
+                                      f"present in response{horizontal} — no object-level "
+                                      "authorization", probe.request_id)],
+                            status=FindingStatus.CANDIDATE)
+                        cand.authz_context = (f"attacker={acc.name}(role={acc.role}) "
+                                              f"victim={victim.name}(role={victim.role})")
+                        # VR-17 + FM-09 (first-match audit): the fresh-victim
+                        # verification used to ride the alphabetically-first other
+                        # account — a per-victim ACL on that one account flipped a
+                        # true positive to REJECTED. Existential semantics: the
+                        # break stands if ANY other account's object reads back;
+                        # every checked victim is named in the notes. Bounded at
+                        # IDOR_FRESH_VICTIM_CAP victims per candidate.
+                        others = [v for v in sorted(accounts, key=lambda a: a.name)
+                                  if v.name not in (acc.name, victim.name)
+                                  and v.marker and v.object_id][:IDOR_FRESH_VICTIM_CAP]
+                        ok, checked = False, []
+                        for v in others:
+                            vr = self._fetch(sess["engine"], ep, "authz-verify",
+                                             param_name=p.name, param_value=v.object_id)
+                            v_ok = (not vr.error and vr.ok and v.marker in (vr.body or ""))
+                            checked.append(f"{v.name}:{'readable' if v_ok else 'denied'}")
+                            if v_ok:
+                                ok = True
+                                break        # existence proven — further probes add nothing
+                        if not checked:
+                            checked = [f"{victim.name}:original-hit-only"]
+                        cand.verification = Verification(
+                            method="re-test:fresh-victim-object", passed=ok,
+                            confidence=0.9 if ok else 0.15, rounds=1,
+                            notes=f"fresh victim objects ({p.name}) re-tested for "
+                                  f"account {acc.name}: {'; '.join(checked)} -> {ok}")
+                        cand.confidence = cand.verification.confidence
+                        cand.status = FindingStatus.VERIFIED if ok else FindingStatus.REJECTED
+                        findings.append(cand)
+                        found_paths.add(ep.url.split("?")[0])
+                        hit = True
+                        break            # one finding per endpoint; next endpoint continues
 
         # OWSP-33 (NodeGoat round, live-caught on /allocations/:userId): object
         # ids riding as the FINAL PATH SEGMENT have no Parameter at all — the
@@ -677,20 +711,31 @@ class AuthzEngine:
                         status=FindingStatus.CANDIDATE)
                     cand.authz_context = (f"attacker={acc.name}(role={acc.role}) "
                                           f"victim={victim.name}(role={victim.role})")
-                    # VR-17: FRESH victim (different account), same attacker
+                    # VR-17 + FM-09 (first-match audit): existential
+                    # fresh-victim sweep — the break stands if ANY other
+                    # account's path-object reads back (same semantics as the
+                    # parameter path above; the old others[0] single pick
+                    # could flip a true positive to REJECTED).
                     others = [v for v in sorted(accounts, key=lambda a: a.name)
                               if v.name not in (acc.name, victim.name)
-                              and v.marker and v.object_id]
-                    fresh = others[0] if others else victim
-                    uf = _swap_url(fresh.object_id)
-                    vr = self._fetch(sess["engine"], Endpoint(url=uf, method="GET"),
-                                     "authz-verify")
-                    ok = (not vr.error and vr.ok and fresh.marker in (vr.body or ""))
+                              and v.marker and v.object_id][:IDOR_FRESH_VICTIM_CAP]
+                    ok, checked = False, []
+                    for v in others:
+                        uf = _swap_url(v.object_id)
+                        vr = self._fetch(sess["engine"], Endpoint(url=uf, method="GET"),
+                                         "authz-verify")
+                        v_ok = (not vr.error and vr.ok and v.marker in (vr.body or ""))
+                        checked.append(f"{v.name}:{'readable' if v_ok else 'denied'}")
+                        if v_ok:
+                            ok = True
+                            break
+                    if not checked:
+                        checked = [f"{victim.name}:original-hit-only"]
                     cand.verification = Verification(
                         method="re-test:fresh-victim-object", passed=ok,
                         confidence=0.9 if ok else 0.15, rounds=1,
-                        notes=f"fresh victim object ({uf.split('?')[0]}, account={fresh.name}) "
-                              f"also readable by {acc.name}: {ok}")
+                        notes=f"fresh victim objects (path swap) re-tested for "
+                              f"account {acc.name}: {'; '.join(checked)} -> {ok}")
                     cand.confidence = cand.verification.confidence
                     cand.status = FindingStatus.VERIFIED if ok else FindingStatus.REJECTED
                     findings.append(cand)

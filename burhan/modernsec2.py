@@ -130,6 +130,11 @@ _SECRET_FIELD_RE2 = re.compile(
 
 _GQL_PATH_RE = re.compile(r"graphql|gql", re.I)
 _AUTHISH = ("login", "signin", "sign-in", "auth", "token", "jwt", "session")
+# FM-01 (first-match audit, 2026-11-03): the round-5 LOGINISH preference
+# (modernsec.py, PR #29) was never ported to this second harvest copy — an
+# auth-word-but-not-login surface (crAPI's forget-password) sorted before
+# the login and starved the family at NO_TOKEN. Same stable sort here.
+_LOGINISH = ("login", "signin", "sign-in")
 
 
 def _b64u(b: bytes) -> str:
@@ -246,6 +251,12 @@ def jwt_weak_secret_offline(token: str):
 
 def _jwt_weak_secret(st: _St2, eps):
     authish = [e for e in eps if any(w in e.url.lower() for w in _AUTHISH)]
+    authish.sort(key=lambda ep: 0 if any(w in ep.url.lower() for w in _LOGINISH) else 1)
+    if len(authish) > FAMILY2_CAPS["jwt_weak_secret"]:
+        st.boundary("jwt_weak_secret", "NOT_SUPPORTED",
+                    f"{len(authish) - FAMILY2_CAPS['jwt_weak_secret']} "
+                    f"auth-shaped surfaces left unharvested (family cap "
+                    f"{FAMILY2_CAPS['jwt_weak_secret']}, documented)")
     for ep in authish[:FAMILY2_CAPS["jwt_weak_secret"]]:
         r = st.probe("jwt_weak_secret", ep, note="m2-jwt-harvest")
         token = _mine_jwt(r)
@@ -633,9 +644,18 @@ def _bfla(st: "_St2", eps, authz_sessions):
                    key=lambda x: x["account"].name)
     lows = sorted((s for s in authz_sessions.values() if s["rank"] > top_rank),
                   key=lambda x: (x["rank"], x["account"].name))
-    cands = [ep for ep in eps
-             if (ep.method or "GET").upper() in ("POST", "PUT", "PATCH", "DELETE")
-             and ADMIN_PATH_RE.search(urlsplit(ep.url).path)][:BFLA_EP_CAP]
+    admin_all = [ep for ep in eps
+                 if (ep.method or "GET").upper() in ("POST", "PUT", "PATCH", "DELETE")
+                 and ADMIN_PATH_RE.search(urlsplit(ep.url).path)]
+    cands = admin_all[:BFLA_EP_CAP]
+    if len(admin_all) > BFLA_EP_CAP:
+        # FM-03: the candidate cap used to be silent — admin-shaped surfaces
+        # beyond the cap left the battery without a recorded trace (the
+        # ZOMBIE_PROBE_CAP leftover-boundary pattern, applied).
+        st.boundary(fam, "NOT_SUPPORTED",
+                    f"{len(admin_all) - BFLA_EP_CAP} admin-shaped non-GET "
+                    f"endpoints left unexamined (BFLA_EP_CAP={BFLA_EP_CAP}, "
+                    f"documented)")
     if not cands:
         st.boundary(fam, "NOT_DISCOVERED",
                     "no admin-shaped non-GET endpoints in flight")
