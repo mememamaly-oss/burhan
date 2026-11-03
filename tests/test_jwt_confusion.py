@@ -227,3 +227,57 @@ def test_signoff_twin_fires_signature_not_enforced(signoff_base):
     # the acceptance must reproduce
     ok, notes = replay_sig347(engine, sig[0])
     assert ok, notes
+
+
+def test_harvest_clean_boundary_names_its_cause():
+    """BFLA-2b round 4 (crAPI live runs 41584520525 + 41586612972): the
+    credentialed json_login replay that fed fam1/fam2 in run 41436129520
+    (confirmed-positive jwt_signature_not_enforced) started answering
+    WITHOUT a token once the loopback normalization put the spec's 42
+    endpoints in scope — the active detect phase spends ~4700 requests
+    on the target BEFORE the axis-13 harvest runs. The old one-line
+    'harvest clean' note hid the harvest response itself; four rounds
+    of live archaeology had to guess the cause. The boundary must carry
+    the observed facts (surface, HTTP status, engine error) so the NEXT
+    artifact names its own cause. Stubbed at the _St boundary — no
+    fixture server needed for a message contract."""
+    from types import SimpleNamespace
+
+    from burhan.modernsec import _jwt_families
+
+    class _St:
+        def __init__(self, response):
+            self.response, self.boundaries = response, []
+
+        def send(self, ep, note="", **kw):
+            self.sent = (ep, note)
+            return self.response
+
+        def boundary(self, fam, kind, detail):
+            self.boundaries.append((fam, kind, detail))
+
+        def find(self, *a, **k):
+            raise AssertionError("no finding may fire on a clean harvest")
+
+    base = "http://127.0.0.1:59998"
+    eps = [Endpoint(url=f"{base}/auth/api/login", method="POST"),
+           Endpoint(url=f"{base}/api/account/dashboard", method="GET")]
+
+    st = _St(SimpleNamespace(status=401, error=None, body="", headers={}))
+    _jwt_families(st, eps)
+    assert st.sent[1] == "modern-jwt-harvest"
+    assert [(f, k) for f, k, _ in st.boundaries] == [
+        ("jwt_algorithm_confusion", "UNTESTABLE"),
+        ("jwt_none_acceptance", "UNTESTABLE")]
+    for _, _, detail in st.boundaries:
+        assert "harvest clean" in detail and "/auth/api/login" in detail, detail
+        assert "HTTP 401" in detail, detail
+        assert "engine error" not in detail, detail
+
+    st2 = _St(SimpleNamespace(
+        status=0, error="budget:BUDGET_REACHED: stopped at 4000 requests",
+        body="", headers={}))
+    _jwt_families(st2, eps)
+    for _, _, detail in st2.boundaries:
+        assert "HTTP 0" in detail, detail
+        assert "engine error: budget:BUDGET_REACHED" in detail, detail

@@ -317,8 +317,26 @@ def _jwt_families(st: _St, eps):
     r = st.send(auth_ep, note="modern-jwt-harvest")
     token = _mine_jwt(r)
     if not token:
+        # BFLA-2b round 4 (crAPI live runs 41584520525 + 41586612972): the
+        # credentialed json_login replay that fed fam1/fam2 in earlier runs
+        # (confirmed-positive jwt_signature_not_enforced, run 41436129520)
+        # started answering WITHOUT a token once the loopback normalization
+        # put the spec's 42 endpoints in scope — the active detect phase now
+        # spends ~4700 requests on the target BEFORE this harvest runs. The
+        # old one-line note hid the harvest response itself, so the four
+        # rounds of live archaeology had to guess. The boundary now carries
+        # the observed facts (surface, HTTP status, engine error) so the
+        # NEXT artifact names its own cause.
+        _st = getattr(r, "status", 0)
+        _err = getattr(r, "error", None)
         for f in (fam1, fam2):
-            st.boundary(f, "UNTESTABLE", "no JWT observed in flight (harvest clean)")
+            st.boundary(
+                f, "UNTESTABLE",
+                "no JWT observed in flight (harvest clean): the auth surface "
+                f"{auth_ep.url} answered HTTP {_st or 0}"
+                + (f" (engine error: {_err})" if _err else "")
+                + " — no token to forge with; the replay may be state- or "
+                  "rate-dependent after the scan's active phase")
         return
     hdr = _decode_seg(token.split(".")[0])
     claims = _decode_seg(token.split(".")[1])
