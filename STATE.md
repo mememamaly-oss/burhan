@@ -1048,15 +1048,54 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   same login: control token ACCEPTED, HTTP 200).
 
 - ROUND 6 (branch differential-targets-strong-named-surfaces, PR #30,
-  commit 26e4d4a, suite 267/267 local, CI pending at record time) —
+  commit 26e4d4a, suite 267/267 local; CI green 2026-11-03 — 27 checks:
+  23 success + 4 documented environment skips; merged 8f4536ef) —
   STRONG_PROTECTED (protected/private/secured/admin/dashboard/account/
   member/session) surfaces sort FIRST in the protected candidate list
   (stable); 'api'-only surfaces remain the fallback. Selection by
   surface SHAPE, never by map order — the order-sensitivity class now
-  closed on BOTH sides of the differential. NEXT STEP (documented for
-  the follow-up): merge PR #30 when green, dispatch live validation,
+  closed on BOTH sides of the differential. NEXT STEP as documented at
+  record time: merge PR #30 when green, dispatch live validation,
   expect the confirmed-positive jwt_signature_not_enforced to return
   on the dashboard alongside the standing BFLA confirmation.
+
+- RUN 41605966137 (the round-6 close: live validation dispatched on
+  merged main 8f4536ef; 4842 requests, 67.1s, 98 findings, 11 recorded
+  boundaries, zero unjudged) — BFLA confirmed a THIRD consecutive time
+  (identical finding sha256, DELETE /identity/api/v2/admin/videos/4
+  executed for the user session, verified, HIGH). The documented
+  expectation did NOT materialize: fam1/fam2 both TESTED_NEGATIVE.
+  OBSERVED CAUSE (from the request journal, not speculation): the
+  STRONG_PROTECTED sort worked as designed — but only prot_eps[0] is
+  ever probed, and the spec-declared ADMIN route (/identity/api/v2/
+  admin/videos/{video_id}; 'admin' is a strong word) sorts BEFORE the
+  dashboard (/identity/api/v2/user/dashboard) in eps order. All four
+  differential probes hit DELETE /identity/api/v2/admin/videos/12345 —
+  the spec EXAMPLE object id, not a real one. The admin route VERIFIES
+  signatures (forged HS256 401, corrupted control 401 — an honest
+  negative FOR THAT SURFACE): its documented flaw is the ROLE gap (the
+  standing BFLA), not a signature gap; the known signature gap (run
+  41436129520, control token ACCEPTED HTTP 200) lives on the DASHBOARD,
+  which the differential never visited. crAPI carries TWO
+  protected-surface classes and a one-surface differential can only
+  see the first. BONUS asymmetry, recorded verbatim by the fam2
+  boundary: none-variant HTTP 404 vs corrupted-original HTTP 401 on
+  the same surface+method — a 404-after-401 is the controller's
+  object-lookup answer (the EXAMPLE id 12345 matches nothing), i.e.
+  the unsigned token appears to have passed the same auth filter that
+  rejected the corrupted one (consistent with the BFLA: no role check,
+  findById empty -> 404); the verdict logic (_ok = 2xx only) counts
+  the 404 as "rejected" and records TESTED_NEGATIVE — a possible
+  none-acceptance positive MASKED by the nonexistent EXAMPLE object,
+  the round-1 class (spec EXAMPLE ids) resurfacing on the
+  DIFFERENTIAL side: the authz oracle materializes per-session real
+  object ids, the differential still replays prot.url verbatim.
+  ROUND 7 CANDIDATES (both grounded in this run's observations, none
+  speculative): (a) iterate ALL strong-named prot_eps instead of
+  prot_eps[0] only — the dashboard is in the class; (b) a
+  404-asymmetry verdict class (probe reaches the controller while the
+  control is auth-rejected) + per-session object-id materialization
+  for the differential's protected replays.
 
 - THE PATTERN OF THE WHOLE CHAIN (worth naming): the pre-normalization
   live successes rode on an accident of URL sorting (localhost URLs
@@ -1068,7 +1107,8 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   list position now sorts by SURFACE SHAPE, and every refused/empty
   stage records its observed cause. Live artifacts under
   download/bfla-rounds/live-validation/ (run 41584520525 = the first
-  BFLA confirmation; run 41591566412 = the latest full verdict set).
+  BFLA confirmation; run 41591566412 = the round-5 full verdict set;
+  run 41605966137 = the round-6 close on merged main 8f4536ef).
 
 ## Where to find things
 
