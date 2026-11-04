@@ -109,7 +109,11 @@ def main() -> int:
         }
         assert has_pair and "attack_chains" not in rep
         json.dump(out, open(os.path.join(EV, "RED.json"), "w"), indent=1)
-        print(json.dumps(out, indent=1))
+        # no scan-derived data on stdout (CodeQL
+        # py/clear-text-logging-sensitive-data): the artifact on disk IS
+        # the record; the console line is a fixed-shape summary only.
+        print(f"RED evidence written: {len(types)} types, pair={has_pair}, "
+              f"attack_chains_key={'attack_chains' in rep}")
         return 0
 
     # ---- BLUE: both twins, one run each
@@ -185,10 +189,11 @@ def main() -> int:
     }
     json.dump(out, open(os.path.join(EV, "BLUE.json"), "w"), indent=1,
               ensure_ascii=False)
-    print("BLUE evidence written:")
-    print(json.dumps({"red_twin_chains": out["red_twin"]["chains_reported"],
-                      "blue_twin_chains": out["blue_twin"]["chains_reported"],
-                      "oracle": out["red_twin"]["elevation_oracle"]}, indent=1))
+    # counts only on stdout — the full record (incl. the elevation oracle)
+    # lives in the committed artifact, not the console.
+    print(f"BLUE evidence written: red_twin_chains="
+          f"{out['red_twin']['chains_reported']} blue_twin_chains="
+          f"{out['blue_twin']['chains_reported']}")
 
     # SHA256SUMS (the established pattern)
     import hashlib
