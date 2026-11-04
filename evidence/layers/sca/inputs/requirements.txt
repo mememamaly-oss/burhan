@@ -1,0 +1,2 @@
+# deliberately pinned OLD versions — the SCA live-evidence input
+requests==2.19.1

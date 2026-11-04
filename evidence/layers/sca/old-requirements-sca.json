@@ -1,0 +1,481 @@
+{
+ "kind": "sca",
+ "manifest": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt",
+ "ecosystem": "PyPI",
+ "packages_queried": 1,
+ "unresolved_pins": [],
+ "deferred_forms_note": "explicitly deferred (stated, never silent): bun.lock, poetry.lock, Pipfile.lock, go.mod, go.sum, Cargo.toml, Cargo.lock, pom.xml, Gemfile.lock, composer.lock; package.json is deferred to its lockfile (ranges, not resolved versions)",
+ "advisory_ids": [
+  "GHSA-9hjg-9r4m-mvj7",
+  "GHSA-9wx4-h78v-vm56",
+  "GHSA-gc5v-m9x4-r6x2",
+  "GHSA-j8r2-6x86-q33q",
+  "GHSA-x84v-xcm2-53pg",
+  "PYSEC-2018-28",
+  "PYSEC-2023-74",
+  "PYSEC-2026-1872",
+  "PYSEC-2026-1873",
+  "PYSEC-2026-2275"
+ ],
+ "findings": [
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "GHSA-9hjg-9r4m-mvj7",
+   "cve_aliases": [
+    "CVE-2024-47081"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+    "base_score": 5.2
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-9hjg-9r4m-mvj7: Requests vulnerable to .netrc credentials leak via malicious URLs"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 5.2, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "GHSA-9wx4-h78v-vm56",
+   "cve_aliases": [
+    "CVE-2024-35195"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N",
+    "base_score": 5.3
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-9wx4-h78v-vm56: Requests `Session` object does not verify requests after making first request with verify=False"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 5.3, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "GHSA-gc5v-m9x4-r6x2",
+   "cve_aliases": [
+    "CVE-2026-25645"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:N/I:H/A:N",
+    "base_score": 3.9
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-gc5v-m9x4-r6x2: Requests has Insecure Temp File Reuse in its extract_zipped_paths() utility function"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 3.9, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:N/I:H/A:N\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "GHSA-j8r2-6x86-q33q",
+   "cve_aliases": [
+    "CVE-2023-32681"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:N/A:N",
+    "base_score": 6.1
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-j8r2-6x86-q33q: Unintended leak of Proxy-Authorization header in requests"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 6.1, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:N/A:N\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "GHSA-x84v-xcm2-53pg",
+   "cve_aliases": [
+    "CVE-2018-18074"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+    "base_score": 7.5
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-x84v-xcm2-53pg: Insufficiently Protected Credentials in Requests"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 7.5, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "PYSEC-2018-28",
+   "cve_aliases": [
+    "CVE-2018-18074"
+   ],
+   "severity_data": {
+    "base_score": null,
+    "note": "severity not provided by advisory"
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "PYSEC-2018-28: The Requests package before 2.20.0 for Python sends an HTTP Authorization header to an http URI upon receiving a same-hostname https-to-http redirect, which makes it easier for remote attackers to discover credentials by sniffing the network."
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": null, \"note\": \"severity not provided by advisory\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "PYSEC-2023-74",
+   "cve_aliases": [
+    "CVE-2023-32681"
+   ],
+   "severity_data": {
+    "base_score": null,
+    "note": "severity not provided by advisory"
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "PYSEC-2023-74: Requests is a HTTP library. Since Requests 2.3.0, Requests has been leaking Proxy-Authorization headers to destination servers when redirected to an HTTPS endpoint. This is a product of how we use `rebuild_proxies` to reattach the `Proxy-Authorization` header to requests. For HTTP connections sent t"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": null, \"note\": \"severity not provided by advisory\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "PYSEC-2026-1872",
+   "cve_aliases": [
+    "CVE-2024-47081"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+    "base_score": 5.2
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "PYSEC-2026-1872: Requests vulnerable to .netrc credentials leak via malicious URLs"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 5.2, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "PYSEC-2026-1873",
+   "cve_aliases": [
+    "CVE-2024-35195"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N",
+    "base_score": 5.3
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "PYSEC-2026-1873: Requests `Session` object does not verify requests after making first request with verify=False"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 5.3, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "advisory_id": "PYSEC-2026-2275",
+   "cve_aliases": [
+    "CVE-2026-25645"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+    "base_score": 4.3
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests",
+   "parameter": "requests",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "PYSEC-2026-2275: Requests is a HTTP library. Prior to version 2.33.0, the `requests.utils.extract_zipped_paths()` utility function uses a predictable filename when extracting files from zip archives into the system temporary directory. If the target file already exists, it is reused without validation. A local attac"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 4.3, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "PyPI/requests==2.19.1 from /home/z/my-project/evidence/layers/sca/inputs/requirements.txt"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  }
+ ],
+ "note": "every severity shown is the advisory's own CVSS data; absences are stated, never filled"
+}

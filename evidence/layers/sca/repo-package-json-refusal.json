@@ -1,0 +1,4 @@
+{
+ "refused": "package.json",
+ "reason": "package.json carries RANGE constraints, not resolved versions \u2014 OSV queries need the resolved version. Ingest package-lock.json instead (documented deferral, burhan/sca.py docstring)."
+}

@@ -923,6 +923,19 @@
       "owasp_2025_src": "scope",
       "pci_dss": "6.4.2"
     },
+    "sca_vulnerable_dependency": {
+      "type": "sca_vulnerable_dependency",
+      "mapped": true,
+      "cwe": "CWE-1104",
+      "cwe_label": "Use of Unmaintained Third-Party Components",
+      "owasp_2021": "A06:2021",
+      "owasp_2021_title": "Vulnerable and Outdated Components",
+      "owasp_2021_src": "scope",
+      "owasp_2025": "A03:2025",
+      "owasp_2025_title": "Software Supply Chain Failures",
+      "owasp_2025_src": "official",
+      "pci_dss": "6.4.2"
+    },
     "secure_cookie": {
       "type": "secure_cookie",
       "mapped": true,

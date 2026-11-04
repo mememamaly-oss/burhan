@@ -1,0 +1,248 @@
+{
+ "kind": "sca",
+ "manifest": "/home/z/my-project/evidence/layers/sca/inputs/package-lock.json",
+ "ecosystem": "npm",
+ "packages_queried": 2,
+ "unresolved_pins": [],
+ "deferred_forms_note": "explicitly deferred (stated, never silent): bun.lock, poetry.lock, Pipfile.lock, go.mod, go.sum, Cargo.toml, Cargo.lock, pom.xml, Gemfile.lock, composer.lock; package.json is deferred to its lockfile (ranges, not resolved versions)",
+ "advisory_ids": [
+  "GHSA-29mw-wpgm-hmr9",
+  "GHSA-35jh-r3h4-6jhm",
+  "GHSA-p6mc-m468-83gw",
+  "GHSA-r5fr-rjxr-66jc",
+  "GHSA-xxjr-mmjv-4gpg"
+ ],
+ "findings": [
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "lodash",
+   "ecosystem": "npm",
+   "version": "4.17.15",
+   "advisory_id": "GHSA-29mw-wpgm-hmr9",
+   "cve_aliases": [
+    "CVE-2020-28500"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+    "base_score": 5.3
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/package-lock.json#lodash",
+   "parameter": "lodash",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-29mw-wpgm-hmr9: Regular Expression Denial of Service (ReDoS) in lodash"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 5.3, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "npm/lodash==4.17.15 from /home/z/my-project/evidence/layers/sca/inputs/package-lock.json"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "lodash",
+   "ecosystem": "npm",
+   "version": "4.17.15",
+   "advisory_id": "GHSA-35jh-r3h4-6jhm",
+   "cve_aliases": [
+    "CVE-2021-23337"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+    "base_score": 7.1
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/package-lock.json#lodash",
+   "parameter": "lodash",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-35jh-r3h4-6jhm: Command Injection in lodash"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 7.1, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "npm/lodash==4.17.15 from /home/z/my-project/evidence/layers/sca/inputs/package-lock.json"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "lodash",
+   "ecosystem": "npm",
+   "version": "4.17.15",
+   "advisory_id": "GHSA-p6mc-m468-83gw",
+   "cve_aliases": [
+    "CVE-2020-8203"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H",
+    "base_score": 7.4
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/package-lock.json#lodash",
+   "parameter": "lodash",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-p6mc-m468-83gw: Prototype Pollution in lodash"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 7.4, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "npm/lodash==4.17.15 from /home/z/my-project/evidence/layers/sca/inputs/package-lock.json"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "lodash",
+   "ecosystem": "npm",
+   "version": "4.17.15",
+   "advisory_id": "GHSA-r5fr-rjxr-66jc",
+   "cve_aliases": [
+    "CVE-2026-4800"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "base_score": 8.1
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/package-lock.json#lodash",
+   "parameter": "lodash",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-r5fr-rjxr-66jc: lodash vulnerable to Code Injection via `_.template` imports key names"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 8.1, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "npm/lodash==4.17.15 from /home/z/my-project/evidence/layers/sca/inputs/package-lock.json"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  },
+  {
+   "type": "sca_vulnerable_dependency",
+   "status": "confirmed_by_advisory",
+   "package": "lodash",
+   "ecosystem": "npm",
+   "version": "4.17.15",
+   "advisory_id": "GHSA-xxjr-mmjv-4gpg",
+   "cve_aliases": [
+    "CVE-2025-13465"
+   ],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L",
+    "base_score": 6.4
+   },
+   "known_exploited": [],
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/package-lock.json#lodash",
+   "parameter": "lodash",
+   "evidence": [
+    {
+     "kind": "osv_advisory",
+     "detail": "GHSA-xxjr-mmjv-4gpg: Lodash has Prototype Pollution Vulnerability in `_.unset`, `_.omit`, and `_.pullAt` functions"
+    },
+    {
+     "kind": "severity_source",
+     "detail": "{\"base_score\": 6.4, \"source\": \"CVSS_V3\", \"vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L\"}"
+    },
+    {
+     "kind": "manifest_pin",
+     "detail": "npm/lodash==4.17.15 from /home/z/my-project/evidence/layers/sca/inputs/package-lock.json"
+    }
+   ],
+   "compliance": {
+    "type": "sca_vulnerable_dependency",
+    "mapped": true,
+    "cwe": "CWE-1104",
+    "cwe_label": "Use of Unmaintained Third-Party Components",
+    "owasp_2021": "A06:2021",
+    "owasp_2021_title": "Vulnerable and Outdated Components",
+    "owasp_2021_src": "scope",
+    "owasp_2025": "A03:2025",
+    "owasp_2025_title": "Software Supply Chain Failures",
+    "owasp_2025_src": "official",
+    "pci_dss": "6.4.2"
+   }
+  }
+ ],
+ "note": "every severity shown is the advisory's own CVSS data; absences are stated, never filled"
+}
