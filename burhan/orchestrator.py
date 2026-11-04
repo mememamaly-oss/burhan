@@ -65,6 +65,7 @@ class ScanConfig:
                  vault=None, vault_key_file=None, workflow=False, logic_active=False,
                  graphql=True, websocket=True, modern=True, modern_v2=False,
                  exclude_urls=None,
+                 prioritize_store=None,
                  max_requests: int = 500,
                  race: bool = False, race_parallel: int = 10,
                  race_candidates: list | None = None,
@@ -101,6 +102,13 @@ class ScanConfig:
         # wordlist, RFC 8725), graphql aliasing cost-DoS, excessive data
         # exposure, rebind TOCTOU. Zero overlap with the v1 family set.
         self.exclude_urls = list(exclude_urls or [])
+        # Round 10, PART 1: optional path to the shared Store where prior
+        # runs of this target live. When set, report() resolves finding
+        # lifecycle (NEW/RECURRING/FIXED/REGRESSED) + risk scores against
+        # it BEFORE the audit signature; when unset the report carries the
+        # same block with lifecycle=NEW for every finding (first-seen) —
+        # additive either way, zero scan behavior changed.
+        self.prioritize_store = prioritize_store
         # V411-EXC: operator-declared URL exclusions (substring match) — the
         # surface is neither page-fetched, kept in the endpoint map, nor
         # actively probed. For authorized scans of stateful targets whose
@@ -2051,6 +2059,22 @@ class BurhanScanner:
         # key rides the report so every scan (bench included) carries its paths.
         from .apath import build_attack_paths
         rep["attack_paths"] = build_attack_paths(rep)
+        # Round 10, PART 1 — risk prioritization: attach the stable finding
+        # identity, resolve the cross-run lifecycle against the shared store
+        # (when wired), and score + rank every verified finding. Runs BEFORE
+        # the audit signature so the identities + lifecycle + ranked view ride
+        # the SIGNED payload — additive key, no existing key touched.
+        try:
+            from .prioritize import apply_prioritization
+            apply_prioritization(rep, store_path=self.cfg.prioritize_store or "")
+        except Exception as e:
+            fid = self.failures.record("prioritize", f"{type(e).__name__}: {e}", {})
+            self.bus.emit("ScannerFailed", scanner="prioritize", failure=fid,
+                          error=str(e)[:200])
+            self.boundary.tool_failure("prioritize", self.target.url,
+                                       f"{type(e).__name__}: {e}",
+                                       evidence=f"failure {fid}",
+                                       provenance="orchestrator:prioritize")
         # Phase 57: defense in depth — when a vault is armed, scrub the WHOLE
         # report of every known raw value. Findings carry masks by
         # construction; this catches any future accidental leakage path.

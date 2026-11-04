@@ -629,6 +629,50 @@ def build_bilingual(report: dict) -> dict:
                                 "finding_specific": g["specific"]},
             },
         })
+    # Round 10, PART 1: the risk-ranked view, bilingual. When the source
+    # findings carry the prioritization block (identity + lifecycle +
+    # risk_score — every post-round-10 scan does), the reader sees the
+    # ranked order AND why each finding ranked where it did. Legacy runs
+    # without the block get an honest absence note, never a fabricated
+    # ranking.
+    scored = [f for f in findings if f.get("risk_score") is not None]
+    risk_ranked = None
+    if scored:
+        rows = sorted(scored,
+                      key=lambda f: (-int(f.get("risk_score") or 0),
+                                     f.get("identity") or "", f.get("id") or ""))
+        risk_ranked = {
+            "ar": {
+                "title": "الترتيب حسب الخطر (صيغة الجولة 10 المعلنة)",
+                "formula": "الدرجة = round(100 × ج × (0.40·ت + 0.35·ف + 0.25·د)) — "
+                           "ج نتيجة إعادة التنفيذ، ت التعرض، ف الوزن الفني للفئة، "
+                           "د دورة الحياة (المنتكِس فوق الجديد). كل مكوّن يظهر بجانب "
+                           "درجة كل نتيجة.",
+                "rows": [
+                    {"score": f.get("risk_score"),
+                     "lifecycle": f.get("lifecycle") or "NEW",
+                     "type": f.get("type", ""),
+                     "url": f.get("url", ""),
+                     "parameter": f.get("parameter") or "",
+                     "components": f.get("risk_components") or {}}
+                    for f in rows],
+            },
+            "en": {
+                "title": "Risk ranking (the round-10 stated formula)",
+                "formula": "score = round(100 × V × (0.40·E + 0.35·T + 0.25·L)) — "
+                           "V re-execution verdict, E exposure, T technical class "
+                           "weight, L lifecycle (REGRESSED above NEW). Every "
+                           "component is shown beside each finding's score.",
+                "rows": [
+                    {"score": f.get("risk_score"),
+                     "lifecycle": f.get("lifecycle") or "NEW",
+                     "type": f.get("type", ""),
+                     "url": f.get("url", ""),
+                     "parameter": f.get("parameter") or "",
+                     "components": f.get("risk_components") or {}}
+                    for f in rows],
+            },
+        }
     return {
         "format": "bilingual-1",
         "language_pair": ["ar", "en"],
@@ -638,6 +682,12 @@ def build_bilingual(report: dict) -> dict:
         "findings_count": len(findings),
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "findings": out_findings,
+        "risk_ranked": risk_ranked,
+        "risk_ranked_note": ("" if risk_ranked else
+                             "النتائج المصدر لا تحمل كتلة الترتيب (تشغيلة قبل الجولة "
+                             "10) — لا ترتيب مفبرك. / Source findings carry no "
+                             "prioritization block (pre-round-10 run) — no "
+                             "fabricated ranking."),
         "audit": audit_block(report, seed=report.get("seed")),
     }
 
@@ -705,6 +755,40 @@ def build_bilingual_docx(bilingual: dict, path: str) -> str:
                f"{a.get('merkle_root', '')} — the signature proves no "
                f"finding was dropped or altered between the scan and this "
                f"report.", size=9, color=(0x66, 0x66, 0x66))
+
+    # Round 10, PART 1: the risk-ranked table (both languages) — shown when
+    # the source carries the prioritization block; the honest absence note
+    # otherwise. Same additive contract as the whole round.
+    rr = bilingual.get("risk_ranked")
+    if rr:
+        for lang, rtl in (("ar", True), ("en", False)):
+            sec = rr[lang]
+            _para(doc, sec["title"], rtl=rtl, bold=True, size=13,
+                  color=(0x1F, 0x3A, 0x5F))
+            _para(doc, sec["formula"], rtl=rtl, size=9,
+                  color=(0x66, 0x66, 0x66))
+            table = doc.add_table(rows=1 + len(sec["rows"]), cols=4)
+            table.style = "Table Grid"
+            hdr = table.rows[0].cells
+            for cell, txt in zip(
+                    hdr,
+                    ("الدرجة | score", "دورة الحياة | lifecycle",
+                     "النوع | type", "المعامل | parameter") if rtl else
+                    ("score", "lifecycle", "type", "parameter")):
+                para = cell.paragraphs[0]
+                run = para.add_run(txt)
+                run.bold = True
+                run.font.size = Pt(8.5)
+            for i, r in enumerate(sec["rows"], start=1):
+                for cell, val in zip(table.rows[i].cells,
+                                     (str(r["score"]), r["lifecycle"],
+                                      r["type"], r["parameter"])):
+                    para = cell.paragraphs[0]
+                    run = para.add_run(str(val))
+                    run.font.size = Pt(8.5)
+    elif bilingual.get("risk_ranked_note"):
+        _para(doc, bilingual["risk_ranked_note"], rtl=True, size=9,
+              color=(0x66, 0x66, 0x66))
 
     for f in bilingual.get("findings", []):
         c = f.get("compliance") or {}

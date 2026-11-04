@@ -378,7 +378,21 @@ def _build_json(store: Store, run_id: str) -> dict:
         # per-run in the store, so it can evolve without replaying scans).
         for f in run.get("findings", []):
             f.setdefault("compliance", compliance_for(f.get("type", "")))
+        # Round 10, PART 1: the risk-ranked view — findings sorted by the
+        # stated prioritize.py score, each with its components (WHY it
+        # ranked where it did). Runs saved before round 10 carry no
+        # risk_score columns; their ranked view is computed fresh here from
+        # the same stated formula (lifecycle=NEW — the store has no memory
+        # for them), so old runs gain the view without ever being rewritten.
+        from .prioritize import risk_ranked, risk_score, NEW as _NEW
+        ranked_src = []
+        for f in run.get("findings", []):
+            if f.get("risk_score") is None:
+                f.update(risk_score(f, f.get("lifecycle") or _NEW,
+                                    bool((run.get("stats") or {}).get("authenticated"))))
+            ranked_src.append(f)
         return {"kind": "single-run", "scanner": run["scanner"], "run": run,
+                "risk_ranked": risk_ranked(ranked_src),
                 "compliance": compliance_summary(run.get("findings", []))}
     runs = store.list_runs(limit=100)
     latest = store.list_findings(limit=500)
@@ -435,6 +449,45 @@ def _build_html(store: Store, run_id: str) -> str:
             f"<td class='ev'>{evs}</td>"
             f"<td class='ev'>{e(ver.get('method', ''))}</td>"
             f"<td class='ev'>{e(_comp)}</td></tr>")
+    # Round 10, PART 1: the risk-ranked view — the report reader sees WHY
+    # each finding ranked where it did (the score's own components), not
+    # just a number. Computed from the same stated formula as the JSON view.
+    from .prioritize import risk_ranked, risk_score, NEW as _NEW
+    ranked_rows = []
+    for f in findings:
+        if f.get("risk_score") is None:
+            f.update(risk_score(f, f.get("lifecycle") or _NEW,
+                                bool((intel_stats or {}).get("authenticated"))))
+    for r in risk_ranked(findings):
+        c = r.get("risk_components") or {}
+        v = (c.get("verification") or {})
+        ex = (c.get("exposure") or {})
+        tc = (c.get("technical") or {})
+        lc = (c.get("lifecycle") or {})
+        comps = (f"verification {v.get('weight', '?')} ({e(str(v.get('value', '')))}) · "
+                 f"exposure {v and ''}{ex.get('weight', '?')}"
+                 f"{' (auth-gated)' if ex.get('auth_gated') else ' (anonymous)'} · "
+                 f"technical {tc.get('weight', '?')} ({e(str(tc.get('class', '')))}) · "
+                 f"lifecycle {lc.get('weight', '?')} ({e(str(lc.get('state', '')))})")
+        ranked_rows.append(
+            f"<tr><td><b>{r['risk_score']}</b></td>"
+            f"<td>{e(r.get('lifecycle') or _NEW)}</td>"
+            f"<td><code>{e(r['type'])}</code></td>"
+            f"<td class='u'>{e(r.get('url', ''))}</td>"
+            f"<td><code>{e(r.get('parameter') or '')}</code></td>"
+            f"<td class='ev'>{comps}</td></tr>")
+    ranked_html = ""
+    if ranked_rows:
+        ranked_html = (
+            "<h2>Risk-ranked findings (round 10 formula — stated, reproducible)</h2>"
+            "<p>score = round(100 × V × (0.40·E + 0.35·T + 0.25·L)) — "
+            "V re-execution verdict, E exposure, T technical class weight, "
+            "L lifecycle (REGRESSED above NEW). "
+            "<a href='https://github.com/mememamaly-oss/burhan/blob/main/burhan/prioritize.py'>"
+            "The full formula statement</a>.</p>"
+            "<table><tr><th>score</th><th>lifecycle</th><th>type</th>"
+            "<th>endpoint</th><th>param</th><th>why (components)</th></tr>"
+            + "".join(ranked_rows) + "</table>")
     # P2-C: the compliance rollup section — one glance for the compliance
     # buyer: which OWASP categories (2021 + 2025 final) this run hit, which
     # CWEs, and the PCI DSS 6.4.2 evidence tally.
@@ -718,6 +771,7 @@ def _build_html(store: Store, run_id: str) -> str:
 </style></head><body>
 <header><h1>{e(title)}</h1><div class="sub">{e(str(subtitle))}</div></header>
 <section><h2>Statistics</h2><div class="stats">{stat_items}</div></section>
+{ranked_html}
 {intel_html}
 {v41_html}
 {sym_html}

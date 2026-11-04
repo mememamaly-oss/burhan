@@ -1,0 +1,90 @@
+{
+ "mode": "BLUE (post-change: identity + lifecycle + stated score)",
+ "sequence": "vulnerable -> patched -> re-broken, same target, identity matching across scans",
+ "identity": "ddd0c54fbb238252",
+ "identity_basis": {
+  "detector": "xss_reflected",
+  "endpoint": "http://127.0.0.1:55961/vuln/xss.php",
+  "parameter": "q"
+ },
+ "scan1_vulnerable": {
+  "xss_found": true,
+  "lifecycle": "NEW",
+  "risk_score": 87,
+  "risk_components": {
+   "verification": {
+    "weight": 1.0,
+    "value": "verified"
+   },
+   "exposure": {
+    "weight": 1.0,
+    "auth_gated": false
+   },
+   "technical": {
+    "weight": 0.7778,
+    "class": "xss_reflected"
+   },
+   "lifecycle": {
+    "weight": 0.8,
+    "state": "NEW"
+   }
+  }
+ },
+ "scan2_patched": {
+  "xss_found": false,
+  "fixed_identities": 1,
+  "xss_resolved_FIXED": true,
+  "untested_absences": 0,
+  "coverage_gate": "the endpoint WAS re-tested this run (request journal) -> the absence is FIXED"
+ },
+ "scan3_rebroken": {
+  "xss_found": true,
+  "lifecycle": "REGRESSED",
+  "same_identity_as_scan1": true,
+  "risk_score": 92,
+  "risk_components": {
+   "verification": {
+    "weight": 1.0,
+    "value": "verified"
+   },
+   "exposure": {
+    "weight": 1.0,
+    "auth_gated": false
+   },
+   "technical": {
+    "weight": 0.7778,
+    "class": "xss_reflected"
+   },
+   "lifecycle": {
+    "weight": 1.0,
+    "state": "REGRESSED"
+   }
+  }
+ },
+ "lifecycle_trail_in_store": [
+  "NEW",
+  "FIXED",
+  "REGRESSED"
+ ],
+ "regressed_outranks_new": true,
+ "formula": "score = round(100 * V * (0.40*E + 0.35*T + 0.25*L)); V re-execution verdict (verified 1.0 / observed_anomaly 0.6 / unverified 0.3), E exposure (anonymous 1.0 / auth-gated 0.70), T technical class weight (intel.RISK_WEIGHTS/9, default 3/9), L lifecycle (REGRESSED 1.0 > NEW 0.8 > RECURRING 0.6). Full statement: burhan/prioritize.py module docstring.",
+ "runs": [
+  {
+   "kind": "vulnerable",
+   "run_id": "run-10273a276e",
+   "xss_count": 1
+  },
+  {
+   "kind": "patched",
+   "run_id": "run-f1ef0343b5",
+   "xss_count": 0
+  },
+  {
+   "kind": "rebroken",
+   "run_id": "run-2c10825d6c",
+   "xss_count": 1
+  }
+ ],
+ "scanner": "burhan-core/5.0.0",
+ "target": "http://127.0.0.1:55961"
+}
