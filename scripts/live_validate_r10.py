@@ -46,6 +46,31 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SEED = "r10live!" * 8
 
 
+def _crapi_race_candidate(base: str) -> dict:
+    """The ONE declared race candidate — VERBATIM the battery's shape
+    (live_validate_modern2.py), which the battery job proved against this
+    exact stack in the same run: quota/concurrent/win_statuses and the
+    v1.1.5 param names. The first dispatch failed with exit 3 inside
+    five minutes (run 41913951604) — a hand-rolled variant of this dict
+    is the prime suspect; the proven schema is mirrored, not reinvented."""
+    email = f"burhan-race-{int(time.time())}@integration.test"
+    return {
+        "url": base + "/workshop/api/mechanic/signup",
+        "method": "POST",
+        "params": {
+            "name": "Burhan Race Probe",
+            "email": email,
+            "number": "5550001111",
+            "password": "Burhan-Race-123!",
+            "mechanic_code": f"BRH{int(time.time()) % 1000000}",
+        },
+        "quota": 1,
+        "concurrent": 6,
+        "win_statuses": [200, 201],
+        "verify_params": None,  # filled in main() with a second email
+    }
+
+
 def _crapi_login(base: str):
     from burhan.auth import AuthProfile
     return AuthProfile(
@@ -235,16 +260,11 @@ def main() -> int:
             print(f"crAPI spec load failed (shadow layer records the "
                   f"boundary): {e}")
 
-    # the ONE declared race candidate (same as the battery)
-    import urllib.request
-    race_email = f"burhan-r10-v{int(time.time())}@integration.test"
-    race = {
-        "url": args.crapi + "/workshop/api/mechanic/signup",
-        "method": "POST",
-        "params": {"email": race_email, "password": "Burhan-Live-123!",
-                   "name": "Burhan Race", "phoneNumber": "1234567890"},
-    }
-    race["verify_params"] = dict(race["params"], email=race_email)
+    # the ONE declared race candidate — the battery's VERBATIM shape
+    race = _crapi_race_candidate(args.crapi)
+    race["verify_params"] = dict(
+        race["params"],
+        email=f"burhan-r10-v{int(time.time())}@integration.test")
 
     store_path = str(out / "r10-lifecycle-store.db")
     if os.path.exists(store_path):
@@ -259,6 +279,14 @@ def main() -> int:
     except Exception as e:  # noqa: BLE001
         print(f"GATE FAIL: a crAPI scan died mid-run "
               f"({type(e).__name__}: {e}) — recorded, never retried blind")
+        # the verdict is STILL written: the artifact must tell the next
+        # reader exactly why this run failed (upload runs if: always())
+        (out / "r10-live-validation.json").write_text(json.dumps({
+            "when": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "part": "r10-part5-live-validation",
+            "failed": {"error": f"{type(e).__name__}: {e}",
+                       "stage": "crAPI scan (pass1 or pass2)"},
+        }, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
         return 3
 
     from burhan.prioritize import NEW, RECURRING, REGRESSED

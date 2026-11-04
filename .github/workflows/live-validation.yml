@@ -340,7 +340,12 @@ jobs:
                   print(f"::error::{name} did not come up in 180s")
                   sys.exit(1)
           PY
-          docker exec scanbox python3 /ws/scripts/live_validate_r10.py             --crapi http://127.0.0.1:8888             --dvga http://127.0.0.1:5013             --crapi-spec /ws/.live-spec/crapi-openapi-spec.json             --max-requests 12000             --out-dir /out/r10
+          docker exec scanbox python3 /ws/scripts/live_validate_r10.py \
+            --crapi http://127.0.0.1:8888 \
+            --dvga http://127.0.0.1:5013 \
+            --crapi-spec /ws/.live-spec/crapi-openapi-spec.json \
+            --max-requests 12000 \
+            --out-dir /out/r10
           mkdir -p "$RUNNER_TEMP/r10"
           docker cp scanbox:/out/r10/. "$RUNNER_TEMP/r10/"
           docker rm -f scanbox >/dev/null
@@ -360,6 +365,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
+          # the verdict JSON is written on EVERY path (success, gate
+          # failure, mid-scan death); the scan reports and store db
+          # exist only as far as the run got — warn, never error: a
+          # failed run must still hand back its verdict artifact.
           name: r10-live-validation-crapi-dvga
           path: |
             ${{ runner.temp }}/r10/r10-live-validation.json
@@ -367,4 +376,4 @@ jobs:
             ${{ runner.temp }}/r10/r10-pass2-scan.json
             ${{ runner.temp }}/r10/r10-dvga-scan.json
             ${{ runner.temp }}/r10/r10-lifecycle-store.db
-          if-no-files-found: error
+          if-no-files-found: warn
