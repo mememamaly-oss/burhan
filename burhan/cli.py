@@ -324,6 +324,10 @@ def main():
                         "graphql aliasing, excessive data exposure, rebind TOCTOU) — off by default")
     s.add_argument("--out", default="results/scan.json"); s.add_argument("--strategy-path")
     s.add_argument("--db", default="", help="persist run+findings to this SQLite store")
+    s.add_argument("--prioritize-store", default="",
+                   help="round 10 part 1: path to the shared SQLite store whose "
+                        "prior runs of this target drive the finding lifecycle "
+                        "(NEW/RECURRING/FIXED/REGRESSED) and risk ranking")
     s.add_argument("--no-oast", action="store_true",
                    help="disable the OAST engine entirely (OOB blind-vuln confirmation)")
     s.add_argument("--oast", choices=["auto", "local", "public"], default="auto",
@@ -611,7 +615,8 @@ def main():
                          exclude_urls=a.exclude_url,
                          race=a.race, race_parallel=a.race_parallel,
                          race_variance=a.race_variance, symbolic=a.symbolic,
-                         modern_v2=a.modern_v2)
+                         modern_v2=a.modern_v2,
+                         prioritize_store=a.prioritize_store or None)
         # AXIS-18: computed payloads are SENT to validation endpoints — a
         # loud, explicit notice before the first symbolic request leaves.
         if a.symbolic:

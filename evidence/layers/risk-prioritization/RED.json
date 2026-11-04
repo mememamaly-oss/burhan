@@ -1,0 +1,51 @@
+{
+ "mode": "RED (pre-change 3a1e52b: flat list, no lifecycle)",
+ "sequence": "identical vulnerable -> patched -> re-broken",
+ "finding_keys": [
+  "compliance",
+  "confidence",
+  "evidence",
+  "id",
+  "impact",
+  "method",
+  "parameter",
+  "risk",
+  "run_id",
+  "scanner",
+  "severity",
+  "status",
+  "type",
+  "url",
+  "verification"
+ ],
+ "has_identity": false,
+ "has_lifecycle": false,
+ "has_risk_score": false,
+ "xss_fingerprint": "f8ea45618a866ce6",
+ "delta_run2_vs_run3": {
+  "new": 1,
+  "fixed": 0,
+  "recurring": 87
+ },
+ "delta_says_rebroken_is_new": true,
+ "delta_cannot_tell_regression_from_fresh": "Store.delta() is a set difference over fingerprints: the REGRESSED finding appears in 'new' (run2->run3) exactly as a brand-new vulnerability would — no FIXED memory, no REGRESSED state exists anywhere in the pre-change tree",
+ "runs": [
+  {
+   "kind": "vulnerable",
+   "run_id": "run-10273a276e",
+   "xss_count": 1
+  },
+  {
+   "kind": "patched",
+   "run_id": "run-f1ef0343b5",
+   "xss_count": 0
+  },
+  {
+   "kind": "rebroken",
+   "run_id": "run-2c10825d6c",
+   "xss_count": 1
+  }
+ ],
+ "scanner": "burhan-core/5.0.0",
+ "target": "http://127.0.0.1:32971"
+}
