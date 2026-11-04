@@ -1,0 +1,20 @@
+{
+ "status": "refused-report-only",
+ "fallback": {
+  "mode": "report-only-fallback",
+  "reason": "3.4: no isolated clone/staging instance provided — the remediation stage is REFUSED ENTIRELY (the live target is never a substitute); the output falls back to the Part-1 report-only guidance",
+  "type": "xss_reflected",
+  "remediation_ar": [
+   "هرب كل قيمة من مدخلات المستخدم قبل عرضها في الصفحة (ترميز HTML للمحارف < > & \" ').",
+   "القائمة البيضاء للسياق: ما يُدرج داخل JavaScript أو URL يحتاج ترميزاً مختلفاً عن سياق HTML.",
+   "أضف رأس Content-Security-Policy ليمنع تنفيذ السكربتات المحقونة حتى لو نجح الإدراج."
+  ],
+  "remediation_en": [
+   "HTML-encode every user-supplied value before rendering it (the < > & \" ' characters).",
+   "Encode for the exact context: values placed inside JavaScript or URLs need different encoding than HTML body.",
+   "Add a Content-Security-Policy header so injected scripts are blocked even if injection slips through."
+  ],
+  "guidance_source": "CWE-79 · OWASP A03:2021 / A05:2025 (compliance.py mapping)",
+  "note": "no isolated clone/staging was provided for this target; the fix stage was refused ENTIRELY (order 3.4) — the live scanned target is never a substitute"
+ }
+}

@@ -1,0 +1,11 @@
+--- a/vulnapp.py
++++ b/vulnapp.py
+@@ -1036,7 +1036,7 @@
+             return self._send(200, HEADER_TMPL.format(body=f"<p>forum thread list ... lots of content here ... " * 8 + f" item {vid}</p>"))
+ 
+         if path == "/vuln/xss.php":
+-            qv = q.get("q", "")
++            qv = q.get("q", "").replace("<", "&lt;").replace(">", "&gt;")
+             return self._send(200, HEADER_TMPL.format(body=f"<div>You searched for '{qv}'</div>"))
+ 
+         if path == "/vuln/traversal.php":

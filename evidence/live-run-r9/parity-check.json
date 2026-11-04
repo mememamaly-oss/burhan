@@ -1,0 +1,18 @@
+{
+ "crapi": {
+  "source_findings": 99,
+  "bilingual_findings": 99,
+  "source_ids_eq_output_ids": true,
+  "both_languages_complete": true,
+  "audit_root_matches_source": true,
+  "run_id": "run-11a12f971b"
+ },
+ "dvga": {
+  "source_findings": 26,
+  "bilingual_findings": 26,
+  "source_ids_eq_output_ids": true,
+  "both_languages_complete": true,
+  "audit_root_matches_source": true,
+  "run_id": "run-c9e952f909"
+ }
+}
