@@ -80,7 +80,28 @@ DISMISSALS = {
     # credential exists anywhere in this flow — every password literal is
     # minted by the script itself for a container that dies with the job.
     256: ("used in tests", "Script's own seeded throwaway accounts for disposable CI containers (built and torn down in the same job) plus scanner canary markers — evidence output, plaintext by design; no real credential exists in the flow (verified vs run 41730556960 artifact). Round-7 triage 2026-11-03."),
+    # py/clear-text-storage x3 + clear-text-logging x1 (alerts #262-265) —
+    # the r10 live-validation script's OWN seeded throwaway accounts
+    # (Burhan-Race-123! / Test!123 / Admin!123) for DISPOSABLE crAPI/DVGA
+    # containers that the R10 CI job builds from scratch and tears down in
+    # the same run. The scan reports / verdict / stdout it emits are the
+    # evidence product — plaintext by design; no real credential exists
+    # anywhere in the flow. Same triage class as #256 above. Round-10
+    # triage 2026-11-04, STATE.md.
+    262: ("used in tests", "r10 live-validation script writes the crAPI scan report (evidence product) with only its OWN seeded throwaway accounts (Burhan-Race-123!/Test!123/Admin!123) for disposable CI containers. Plaintext by design; no real credential. Class of #256. Triage 2026-11-04, STATE.md."),
+    263: ("used in tests", "Same evidence-product class as #262 — the DVGA scan report, same script-minted throwaway credentials for the disposable container. Same class as #256. Round-10 triage 2026-11-04, STATE.md."),
+    264: ("used in tests", "Same evidence-product class as #262 — the r10 live-validation verdict file (lifecycle + honest chain record). Same class as #256. Round-10 triage 2026-11-04, STATE.md."),
+    265: ("used in tests", "stdout print of the same verdict's lifecycle summary — the CI log evidence channel; same seeded-throwaway-credential class as #262/#256. Round-10 triage 2026-11-04, STATE.md."),
 }
+
+
+def _only_filter(argv):
+    """--only N,N,... limits the run to specific alert numbers so fresh
+    entries can be applied without re-PATCHing already-dismissed ones."""
+    if "--only" in argv:
+        i = argv.index("--only")
+        return {int(x) for x in argv[i + 1].split(",") if x.strip()}
+    return None
 
 
 def main() -> int:
@@ -88,8 +109,13 @@ def main() -> int:
     if not token:
         print("FATAL: GITHUB_TOKEN env not provided")
         return 1
+    only = _only_filter(sys.argv)
     failures = []
+    applied = 0
     for num, (reason, comment) in sorted(DISMISSALS.items()):
+        if only is not None and num not in only:
+            continue
+        applied += 1
         body = json.dumps({"state": "dismissed", "dismissed_reason": reason,
                            "dismissed_comment": comment}).encode()
         req = urllib.request.Request(f"{API}/{num}", data=body, method="PATCH",
@@ -111,7 +137,7 @@ def main() -> int:
     if failures:
         print("FAILURES:", failures)
         return 2
-    print(f"all {len(DISMISSALS)} dismissals applied")
+    print(f"all {applied} dismissals applied")
     return 0
 
 

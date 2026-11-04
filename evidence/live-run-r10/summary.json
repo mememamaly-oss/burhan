@@ -1,0 +1,51 @@
+{
+ "run": "GitHub Actions run 41922403748 (live-validation.yml, R10 job) — the SUCCESS dispatch",
+ "dispatches_before_success": 3,
+ "forensics": [
+  "41913951604: hand-rolled race-candidate dict missing quota/concurrent/win_statuses — exit 3 (schema now mirrors the battery VERBATIM)",
+  "41918334837: full scans ran but set -e killed the step BEFORE docker cp — verdict trapped in the dead scanbox (unconditional copy-out since ccfaa98)",
+  "41920279230: THE GATE CAUGHT A REAL WIRING FLAW — one shared seed gave both passes the SAME run_id (run_id derives from the seed), so the store's exclude_run filter blinded pass 2: 98 re-appearing identities read NEW. Fixed: distinct per-pass seeds (identity is detector+endpoint+parameter, seed-independent)"
+ ],
+ "scans": {
+  "pass1": {
+   "run_id": "run-e5e96d95e3",
+   "seed": "r10liveAr10liveAr10liveAr10liveAr10liveAr10liveAr10liveAr10liveA",
+   "target": "http://127.0.0.1:8888",
+   "findings": 100,
+   "requests": 4854,
+   "identities_sha256": "6c8bc88a5ac646c1"
+  },
+  "pass2": {
+   "run_id": "run-740db872dc",
+   "seed": "r10liveBr10liveBr10liveBr10liveBr10liveBr10liveBr10liveBr10liveB",
+   "target": "http://127.0.0.1:8888",
+   "findings": 98,
+   "requests": 4841,
+   "identities_sha256": "d7a7a25bb4d97192"
+  },
+  "dvga": {
+   "run_id": "run-d2b84e4c65",
+   "seed": "r10liveDr10liveDr10liveDr10liveDr10liveDr10liveDr10liveDr10liveD",
+   "target": "http://127.0.0.1:5013",
+   "findings": 26,
+   "requests": 834
+  }
+ },
+ "lifecycle": {
+  "identity_overlap": 98,
+  "overlap_states_scan2": [
+   "RECURRING"
+  ],
+  "scan1_only": 2,
+  "scan2_only": 0,
+  "law": "a re-appearing identity MUST read RECURRING in scan 2 (NEW would break the lifecycle law); identity matching, never count comparison"
+ },
+ "chains_honest": {
+  "crapi_pass1_CR01_pair_present": true,
+  "crapi_pass1_CR01_proven": false,
+  "why_not": "step2 admin function: HTTP 405 — not executed (live refusal probe, 3 bounded requests, recorded)",
+  "crapi_CR02_pair_present": false,
+  "dvga_pairs_present": false
+ },
+ "note": "full CI artifacts (both crAPI scan reports, the DVGA report, the lifecycle store.db) are delivered in download/r10-evidence/live-run-r10/ — 34MB, kept out of git like the round-8/r9 large artifacts."
+}
