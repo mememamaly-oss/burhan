@@ -1,0 +1,18 @@
+{
+ "mode": "RED (pre-change tree: the chain capability does not exist)",
+ "red_twin_scan": {
+  "finding_types": [
+   "bfla",
+   "csrf",
+   "jwt_signature_not_enforced",
+   "missing_security_headers",
+   "server_banner_disclosure"
+  ],
+  "bfla_present": true,
+  "jwt_signature_not_enforced_present": true,
+  "attack_chains_key_in_report": false,
+  "attack_chains_value": "(key absent)",
+  "chainrules_module_exists": false
+ },
+ "verdict": "the SAME two findings fire in the same scan with NO way to express that one feeds the other \u2014 the pre-change report is a flat list; the escalation relationship exists in reality and is invisible in the artifact"
+}
