@@ -1379,7 +1379,114 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   full client artifacts (bilingual docx/pdf/json) in download/r9-live/.
   Operator-facing run artifacts only — no scan behavior changed.
 
-## Where to find things
+## 2026-11-04 — ROUND 10: risk prioritization formula + attack-path chaining + OSV.dev SCA + unified cross-category report + live lifecycle validation
+
+- PART 1 (risk prioritization — one stated formula, lifecycle-aware): RED
+  (pre-change 3a1e52b): Store.delta() is a set difference over fingerprints —
+  in the vulnerable -> patched -> re-broken sequence the REGRESSED XSS
+  appears in "new" (run2->run3) exactly like a brand-new vulnerability
+  (delta new=1, recurring=87); no identity, no lifecycle, no score exists
+  anywhere in the pre-change tree. BLUE: identity = detector + endpoint +
+  parameter (seed-independent), lifecycle NEW -> (absent while patched) ->
+  REGRESSED with the Store's lifecycle_history as the memory, and the
+  stated formula score = round(100 * V * (0.40*E + 0.35*T + 0.25*L)) with
+  V the re-execution verdict, E exposure, T technical class weight, L
+  lifecycle where REGRESSED(1.0) > NEW(0.8) > RECURRING(0.6) — the
+  regressed finding now outranks a fresh one and the report SAYS the score.
+  burhan/prioritize.py + --prioritize-store. PR #37 -> main d600167.
+  Evidence: evidence/layers/risk-prioritization/ (RED/BLUE/SHA256SUMS).
+- PART 2 (attack-path chaining — proof, never adjacent-finding theater):
+  chainrules evaluated over verified findings ONLY. CR-01-credential-feeding
+  (bfla + jwt_signature_not_enforced, live combined proof, 3 bounded
+  requests, elevation oracle over HTTP) and CR-02-shared-surface-entry
+  (shadow|zombie + any exploitable class on the same normalized endpoint,
+  pure data join). RED twin vs BLUE twin: CR-01 PROVEN on the RED twin
+  (1 chain, proof steps recorded) and silent on the BLUE twin. OFF by
+  default: detect_chains is inert unless a rule's specific pair fires;
+  ordinary scans send ZERO extra requests. PR #39 -> 232e4bb.
+  Evidence: evidence/layers/attack-path-chaining/ (RED/BLUE/SHA256SUMS).
+- PART 3 (SCA — OSV.dev, advisory-own severity, honest absence): RED: no
+  sca command, zero engine files mentioning OSV, no compliance row, no
+  SARIF rule. BLUE: `burhan sca --manifest` — OSV.dev batch API, findings
+  carry status=confirmed_by_advisory, the ADVISORY'S OWN CVSS as
+  severity_data (never the scanner's guess; honest absence when the
+  advisory states none), cve_aliases, and known_exploited via OFFLINE KEV
+  matching against an operator-supplied --kev-catalog — the live cisa.gov
+  fetch was REFUSED from the build environment (WAF 403 Access Denied,
+  verbatim body committed, evidence/layers/sca/KEV-and-summary.json); the
+  engine NEVER fakes the cross-reference. REAL data: the committed old
+  requirements.txt -> 10 findings / 10 advisories, old package-lock.json ->
+  5/5, the repo's OWN requirements.txt -> 0 findings (clean), a package.json
+  WITHOUT a lockfile -> refused with the reason recorded (no pinning, no
+  silent best-effort). Fixtures committed at evidence/layers/sca/inputs/.
+  PR #38 -> 23ec690. Evidence: evidence/layers/sca/ (raw OSV responses,
+  refusal records, SHA256SUMS).
+- PART 4 (unified cross-category report — ONE ranked list): DAST + SCA +
+  proven chains on the ONE Part-1 formula, `burhan report --format
+  unified`. The cross-category translation is stated in EVERY output as
+  the three judgment calls: J1 V(confirmed_by_advisory) = 0.85 (below
+  re-execution VERIFIED, above observed_anomaly — advisory confirmation is
+  strong but not our own execution), J2 T = the advisory's own CVSS
+  base_score/10 when present, J3 a proven chain takes V=1.00 with the entry
+  finding's exposure and the max member technical weight. Second pass over
+  a shared store resolves SCA/chain rows RECURRING by identity like DAST.
+  Tested with all three categories on the committed fixtures
+  (evidence/layers/unified-report/BLUE.json: 11 dast + 10 sca + 1 chain
+  both passes). PR #41 -> 6d62e58.
+- PART 5 (live validation — the gate that earned its keep): the R10 CI
+  job (live-validation.yml) took FOUR dispatches, each failure recorded:
+  (1) hand-rolled race-candidate dict rejected — schema now mirrors the
+  battery VERBATIM; (2) set -e killed the step BEFORE docker cp — verdict
+  trapped in the dead scanbox, unconditional copy-out since; (3) THE GATE
+  CAUGHT A REAL WIRING FLAW: one shared seed gave both passes the SAME
+  run_id (run_id derives from the seed) and the store's exclude_run filter
+  blinded pass 2 — 98 re-appearing identities read NEW; fixed with distinct
+  per-pass seeds (identity is seed-independent, the same discipline as
+  Part 1's own three-scan test). (4) SUCCESS (run 41922403748): scan 1 =
+  100 findings ALL NEW; scan 2 = 98 findings, identity_overlap=98,
+  overlap_states_scan2=[RECURRING] — the lifecycle law held LIVE; scan1_only
+  2 (race-candidate uniqueness + boundary), scan2_only 0. CHAINS, honest
+  record: crAPI pass 1 has the CR-01 pair present (8 verified types incl.
+  bfla + jwt_signature_not_enforced) but NO chain claimed — the live
+  combined proof was attempted directly and the specific link is broken:
+  "step2 admin function: HTTP 405 — not executed" (recorded, not silently
+  skipped); CR-02 pair absent; DVGA: no chain pairs (missing_security_
+  headers/secure_cookie/weak_random only) — a true negative is a result.
+  PR #42 -> aad0e018. Compact record committed at evidence/live-run-r10/;
+  full CI artifacts (both crAPI scans, DVGA scan, the lifecycle store.db)
+  delivered in download/r10-evidence/live-run-r10/ (34MB, out of git).
+- Round-10 CLOSE regression on merged main aad0e018 (this session, local
+  equivalents of the CI wall): doctor PASS (19 checks), anti-pattern
+  --ci-gate PASS, python suite 361/361 green, canonical fixture scan 199
+  verified / 30 distinct types all compliance-mapped, benchmark gate F1 =
+  1.0 with the deterministic confusion intact (TP=38 FP=0 FN=0 TN=37),
+  all five report formats exported from the store, and the two-run
+  reproducibility attestation: identical Merkle root 5c451f22f0e15345…
+  across independent executions (findings_sha256 + findings_count MATCH).
+  Suite: 319 -> 361 green across the round (+42: identity/lifecycle,
+  chain rules, SCA, unified report).
+- CodeQL triage on main (the documented exception, codified): the 4
+  live_validate_r10.py alerts (#262 py/clear-text-storage line 134,
+  #263 line 154, #264 line 344, #265 py/clear-text-logging line 346) are
+  the script's OWN seeded throwaway accounts (Burhan-Race-123!/Test!123/
+  Admin!123) for disposable crAPI/DVGA containers the R10 job builds and
+  tears down in the same run — plaintext evidence by design, no real
+  credential anywhere in the flow; dismissed on main with the round-7
+  #256-class comment and added to scripts/dismiss_codeql_fps.py (now with
+  --only so fresh entries apply without re-PATCHing old ones).
+- Dependency-review advisory DECISION (accept + document): the
+  non-required advisory check "Dependency review" is red on main from
+  23ec690 onward because GitHub's dependency graph parses EVERY tracked
+  manifest, and evidence/layers/sca/inputs/* are deliberately old,
+  vulnerable manifests — they ARE the SCA layer's ground truth (the same
+  doctrine as fixtures/vulnapp.py for the 38/38 benchmark). Deleting or
+  weakening them would corrupt the scanner's own test data. Workflow
+  scoping was considered and rejected as unnecessary: the check is
+  advisory, not a required context; the red is the honest reading of the
+  fixtures' existence. Related: the Dependabot PR against the FIXTURE
+  (evidence/layers/sca/inputs/requests 2.33.0) was CLOSED UNMERGED —
+  bumping a test fixture would invalidate the committed OSV evidence.
+
 
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,

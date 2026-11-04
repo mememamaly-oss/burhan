@@ -1,0 +1,153 @@
+{
+ "when": "2026-11-04T22:12:20Z",
+ "part": "r10-part5-live-validation",
+ "lifecycle": {
+  "store": "r10-lifecycle-store.db",
+  "seeds": {
+   "pass1": "r10liveAr10liveAr10liveAr10liveAr10liveAr10liveAr10liveAr10liveA",
+   "pass2": "r10liveBr10liveBr10liveBr10liveBr10liveBr10liveBr10liveBr10liveB",
+   "why": "run_id derives from the seed; one shared seed gave both passes the same run_id and the store's exclude_run filter blinded pass 2 — run 41920279230 proved it live"
+  },
+  "scan1": {
+   "findings": 100,
+   "requests": 4854,
+   "wall": 82.2,
+   "all_new": true
+  },
+  "scan2": {
+   "findings": 98,
+   "requests": 4841,
+   "wall": 65.7
+  },
+  "identity_overlap": 98,
+  "overlap_states_scan2": [
+   "RECURRING"
+  ],
+  "scan2_only_identities": 0,
+  "scan1_only_identities": 2,
+  "law": "a re-appearing identity MUST read RECURRING in scan 2 (NEW would break the lifecycle law); identity matching, never count comparison"
+ },
+ "chains": {
+  "crapi_pass1": {
+   "target": "crapi-pass1",
+   "verified_types_present": [
+    "bfla",
+    "csrf",
+    "jwt_signature_not_enforced",
+    "missing_security_headers",
+    "path_traversal",
+    "server_banner_disclosure",
+    "vertical_privilege_escalation",
+    "weak_random"
+   ],
+   "rules": {
+    "CR-01-credential-feeding": {
+     "pair_present": true,
+     "chains_proven": [],
+     "live_refusal_probe": {
+      "combined_proof": null,
+      "why_not": "step2 admin function: HTTP 405 — not executed",
+      "note": "the pair is present and the live combined proof was attempted directly (3 bounded requests): no chain was claimed because the specific link is broken — recorded, not silently skipped"
+     }
+    },
+    "CR-02-shared-surface-entry": {
+     "pair_present": false,
+     "chains_proven": []
+    }
+   },
+   "rule_catalog": [
+    {
+     "rule": "CR-01-credential-feeding",
+     "pair": [
+      "bfla",
+      "jwt_signature_not_enforced"
+     ],
+     "precondition": "the BFLA function's response, executed with the low-privilege session, returns credential material whose claims the CWE-347 endpoint accepts"
+    },
+    {
+     "rule": "CR-02-shared-surface-entry",
+     "pair": [
+      "shadow_api_endpoint|zombie_api_endpoint",
+      "<any exploitable class>"
+     ],
+     "precondition": "the undocumented surface IS the same normalized endpoint another family proved exploitable (pure data join)"
+    }
+   ]
+  },
+  "crapi_pass2": {
+   "target": "crapi-pass2",
+   "verified_types_present": [
+    "csrf",
+    "jwt_signature_not_enforced",
+    "missing_security_headers",
+    "server_banner_disclosure",
+    "vertical_privilege_escalation",
+    "weak_random"
+   ],
+   "rules": {
+    "CR-01-credential-feeding": {
+     "pair_present": false,
+     "chains_proven": []
+    },
+    "CR-02-shared-surface-entry": {
+     "pair_present": false,
+     "chains_proven": []
+    }
+   },
+   "rule_catalog": [
+    {
+     "rule": "CR-01-credential-feeding",
+     "pair": [
+      "bfla",
+      "jwt_signature_not_enforced"
+     ],
+     "precondition": "the BFLA function's response, executed with the low-privilege session, returns credential material whose claims the CWE-347 endpoint accepts"
+    },
+    {
+     "rule": "CR-02-shared-surface-entry",
+     "pair": [
+      "shadow_api_endpoint|zombie_api_endpoint",
+      "<any exploitable class>"
+     ],
+     "precondition": "the undocumented surface IS the same normalized endpoint another family proved exploitable (pure data join)"
+    }
+   ]
+  },
+  "dvga": {
+   "target": "dvga",
+   "verified_types_present": [
+    "missing_security_headers",
+    "secure_cookie",
+    "weak_random"
+   ],
+   "rules": {
+    "CR-01-credential-feeding": {
+     "pair_present": false,
+     "chains_proven": []
+    },
+    "CR-02-shared-surface-entry": {
+     "pair_present": false,
+     "chains_proven": []
+    }
+   },
+   "rule_catalog": [
+    {
+     "rule": "CR-01-credential-feeding",
+     "pair": [
+      "bfla",
+      "jwt_signature_not_enforced"
+     ],
+     "precondition": "the BFLA function's response, executed with the low-privilege session, returns credential material whose claims the CWE-347 endpoint accepts"
+    },
+    {
+     "rule": "CR-02-shared-surface-entry",
+     "pair": [
+      "shadow_api_endpoint|zombie_api_endpoint",
+      "<any exploitable class>"
+     ],
+     "precondition": "the undocumented surface IS the same normalized endpoint another family proved exploitable (pure data join)"
+    }
+   ]
+  }
+ }
+}
