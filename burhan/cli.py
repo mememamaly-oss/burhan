@@ -499,9 +499,24 @@ def main():
                     help="save the raw OSV responses verbatim here (the "
                          "evidence contract)")
     sca.add_argument("--kev-catalog", default="",
-                    help="path to the official CISA KEV catalog JSON for the "
-                         "known-exploited cross-reference (offline matching; "
-                         "no scan-time fetch of cisa.gov)")
+                     help="path to the official CISA KEV catalog JSON for the "
+                          "known-exploited cross-reference (offline matching; "
+                          "no scan-time fetch of cisa.gov)")
+    uni = sub.add_parser("unified", help="round 10 part 4: the unified "
+                         "cross-category report — the scan's DAST findings, "
+                         "SCA findings and proven attack chains ranked "
+                         "together on the one stated formula")
+    uni.add_argument("--scan", required=True,
+                     help="path to a saved scan result JSON (the DAST side)")
+    uni.add_argument("--sca", action="append", default=[], metavar="RESULT",
+                     help="path to a `burhan sca` result JSON (repeatable — "
+                          "one per manifest)")
+    uni.add_argument("--prioritize-store", default="",
+                     help="the shared lifecycle store: resolve "
+                          "NEW/RECURRING/REGRESSED/FIXED across runs and "
+                          "record this invocation's resolutions")
+    uni.add_argument("--out", default="",
+                     help="write the unified report JSON here (default: stdout)")
     imp = sub.add_parser("impact", help="v4.4.0 (L3): Proven Real Impact — "
                         "plan SAFE minimal-benign impact probes over a saved "
                         "scan result; optionally execute them live and assess "
@@ -960,6 +975,44 @@ def main():
                               "packages_queried": sca_out["packages_queried"],
                               "advisory_ids": len(sca_out["advisory_ids"]),
                               "findings": len(sca_out["findings"])}))
+        else:
+            print(payload)
+    elif a.cmd == "unified":
+        # Round 10, PART 4: the unified cross-category view. PURE
+        # post-processing over its inputs (zero requests): the scan's
+        # DAST findings keep their scan-time scores, SCA findings are
+        # scored on the advisory-confirmed judgment (V=0.85, advisory-own
+        # CVSS for T), chains take their members' components (J3).
+        # Lifecycle resolves against the shared store when given and is
+        # recorded under this invocation's own run id — never as findings
+        # rows, so scan prev-run semantics stay untouched.
+        from burhan.unified import build_unified
+        from burhan.store import Store
+        try:
+            with open(a.scan, encoding="utf-8") as fh:
+                scan_rep = json.load(fh)
+        except Exception as e:
+            print(json.dumps({"error": f"cannot read scan result: {e}"}),
+                  file=sys.stderr)
+            sys.exit(2)
+        sca_reps = []
+        for path in a.sca:
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    sca_reps.append(json.load(fh))
+            except Exception as e:
+                print(json.dumps(
+                    {"error": f"cannot read SCA result {path}: {e}"}),
+                    file=sys.stderr)
+                sys.exit(2)
+        store = Store(a.prioritize_store) if a.prioritize_store else None
+        out = build_unified(scan_rep, sca_reps, store=store)
+        payload = json.dumps(out, indent=1, ensure_ascii=False)
+        if a.out:
+            with open(a.out, "w", encoding="utf-8") as fh:
+                fh.write(payload + "\n")
+            print(json.dumps({"written": a.out,
+                              "counts_by_category": out["counts_by_category"]}))
         else:
             print(payload)
     elif a.cmd == "apaths":

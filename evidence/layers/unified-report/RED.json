@@ -1,0 +1,8 @@
+{
+ "unified_command_exists": false,
+ "unified_command_stderr": ": error: argument cmd: invalid choice: 'unified' (choose from scan, benchmark, doctor, repair-demo, compliance, findings, report, twin, reproduce, capability-matrix, apaths, sca, impact, serve, vault)",
+ "unified_module_exists": false,
+ "prioritize_knows_advisory_verdict": false,
+ "judgment_calls_documented": false,
+ "verdict": "three separate outputs, no unified command, no stated cross-category verdict weight \u2014 the categories cannot be ranked together and the advisory-confirmed judgment is undocumented"
+}

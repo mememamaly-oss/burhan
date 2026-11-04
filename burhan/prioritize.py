@@ -63,6 +63,16 @@ DESIGN (owner order 2026-11-04, part 1):
       ranked — they are listed as fixed in the report view.
   Every component is stored per finding and SHOWN in the report view:
   a reader sees WHY something ranked where it did, not just a number.
+
+  CROSS-CATEGORY JUDGMENT CALLS (round 10 part 4 — the unified report
+  ranks DAST, SCA and chain findings on THIS ONE formula; both calls are
+  stated here and echoed in the unified output's judgment_calls block):
+    * V(confirmed_by_advisory) = 0.85 — an advisory-confirmed dependency
+      finding sits between an observed anomaly and a re-execution-verified
+      one (see VERIFICATION_WEIGHTS).
+    * T — a finding with the advisory's own numeric CVSS base score uses
+      base_score/10 (the advisory's own measurement) instead of the class
+      default weight (see technical_component).
 """
 from __future__ import annotations
 
@@ -84,6 +94,14 @@ VERIFICATION_WEIGHTS = {
     "candidate": 0.30,
     "unverified": 0.30,
     "rejected": 0.00,
+    # Round 10 part 4 — cross-category judgment call (stated, not hidden):
+    # an SCA finding is CONFIRMED BY THE ADVISORY, not by re-execution on
+    # a live target. It sits BETWEEN observed_anomaly (0.60) and verified
+    # (1.00): stronger than a mere observation (a public advisory + the
+    # exact pinned version is an established fact), weaker than the
+    # scanner's own re-execution proof. 0.85 — a judgment call, documented
+    # here and surfaced in the unified report's judgment_calls block.
+    "confirmed_by_advisory": 0.85,
 }
 
 # exposure weight (E)
@@ -254,7 +272,17 @@ def exposure_component(f: dict, scan_authenticated: bool) -> float:
 
 
 def technical_component(f: dict) -> float:
-    """T: the class's technical weight from intel.RISK_WEIGHTS / 9."""
+    """T: the class's technical weight from intel.RISK_WEIGHTS / 9.
+
+    Cross-category rule (round 10 part 4): a finding carrying the
+    ADVISORY'S OWN numeric CVSS base score (severity_data.base_score,
+    e.g. an SCA finding) uses that score / 10 as its technical
+    component — the advisory's own measurement over the class
+    default. Absent or non-numeric -> the class weight, never a guess."""
+    sd = f.get("severity_data") or {}
+    base = sd.get("base_score")
+    if isinstance(base, (int, float)):
+        return min(1.0, max(0.0, float(base) / 10))
     w = _risk_weights().get(f.get("type", ""), 3) / 9
     return min(1.0, max(0.0, w))
 
