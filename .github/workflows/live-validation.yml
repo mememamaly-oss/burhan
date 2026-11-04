@@ -305,7 +305,8 @@ jobs:
       - name: Fetch the operator spec (crAPI main-branch openapi)
         run: |
           mkdir -p .live-spec
-          curl -sL -o .live-spec/crapi-openapi-spec.json             https://raw.githubusercontent.com/OWASP/crAPI/main/openapi-spec/crapi-openapi-spec.json
+          curl -sL -o .live-spec/crapi-openapi-spec.json \
+            https://raw.githubusercontent.com/OWASP/crAPI/main/openapi-spec/crapi-openapi-spec.json
           sha256sum .live-spec/crapi-openapi-spec.json
 
       - name: Run r10 live validation (two crAPI scans sharing a lifecycle store + chain evaluation)
@@ -317,9 +318,11 @@ jobs:
           set -e
           export DOCKER_HOST=unix:///var/run/docker.sock
           docker volume create scanout >/dev/null
-          docker run -d --name scanbox --network host             -v scanout:/out python:3.12-slim sleep 2400 >/dev/null
+          docker run -d --name scanbox --network host \
+            -v scanout:/out python:3.12-slim sleep 2400 >/dev/null
           docker exec scanbox mkdir -p /ws
-          tar --exclude=.git --exclude=node_modules --exclude=.next             -cf - . | docker exec -i scanbox tar -xf - -C /ws
+          tar --exclude=.git --exclude=node_modules --exclude=.next \
+            -cf - . | docker exec -i scanbox tar -xf - -C /ws
           docker exec scanbox python3 - <<'PY'
           import sys, time, urllib.request
           targets = [
@@ -340,16 +343,25 @@ jobs:
                   print(f"::error::{name} did not come up in 180s")
                   sys.exit(1)
           PY
+          # the verdict JSON is written inside scanbox on EVERY path
+          # (success, gate failure, mid-scan death) — the copy-out below
+          # is UNCONDITIONAL (run 41918334837 lost its verdict to set -e
+          # killing the step before docker cp); the step then fails with
+          # the script's own exit code.
+          set +e
           docker exec scanbox python3 /ws/scripts/live_validate_r10.py \
             --crapi http://127.0.0.1:8888 \
             --dvga http://127.0.0.1:5013 \
             --crapi-spec /ws/.live-spec/crapi-openapi-spec.json \
             --max-requests 12000 \
             --out-dir /out/r10
+          EXEC_RC=$?
+          set -e
           mkdir -p "$RUNNER_TEMP/r10"
-          docker cp scanbox:/out/r10/. "$RUNNER_TEMP/r10/"
+          docker cp scanbox:/out/r10/. "$RUNNER_TEMP/r10/" || true
           docker rm -f scanbox >/dev/null
           docker volume rm scanout >/dev/null
+          exit $EXEC_RC
 
       - name: Dump diagnostics (targets failed)
         if: failure()
