@@ -99,11 +99,10 @@ class StepUpGate:
     @classmethod
     def setup(cls, store_path: str, secret: str, **kw) -> "StepUpGate":
         """Create the store from a fresh secret. REFUSES to overwrite an
-        existing store (no silent reset of the audit trail)."""
-        if os.path.exists(store_path):
-            raise FileExistsError(
-                f"step-up store already exists at {store_path} — refusing "
-                f"to overwrite its audit trail; rotate by explicit deletion")
+        existing store (no silent reset of the audit trail): the create is
+        ATOMIC and EXCLUSIVE (O_CREAT|O_EXCL) — there is no exists()-
+        then-open window between the check and the create, so two racing
+        setups cannot both win (CI-live-caught TOCTOU, 2026-11-04)."""
         salt = secrets.token_bytes(16)
         data = {
             "salt_b64": base64.b64encode(salt).decode("ascii"),
@@ -114,7 +113,15 @@ class StepUpGate:
         }
         os.makedirs(os.path.dirname(os.path.abspath(store_path)) or ".",
                     exist_ok=True)
-        with open(store_path, "w", encoding="utf-8") as fh:
+        try:
+            fd = os.open(store_path, os.O_CREAT | os.O_EXCL |
+                         os.O_WRONLY, 0o600)
+        except FileExistsError:
+            raise FileExistsError(
+                f"step-up store already exists at {store_path} — refusing "
+                f"to overwrite its audit trail; rotate by explicit "
+                f"deletion") from None
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
             json.dump(data, fh, indent=1)
         return cls(store_path, **kw)
 

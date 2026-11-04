@@ -1348,10 +1348,17 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   throughout and kept serving its unpatched surface (pinned). 13
   tests green including the isolation-rule pins, the no-clone
   report-only fallback, and the unsupported-class refusal.
-- Anti-pattern gate on the round's own new code: bilingual.py,
-  stepup.py, remediation.py produced ZERO scanner hits (no silent
-  excepts — refusals are loud exceptions by design); --ci-gate PASS
-  with no new ledger entries needed.
+- Anti-pattern gate on the round's own new code — HONEST RECORD: the
+  CI wall caught 2 TOCTOU hits in the new modules themselves
+  (remediation.py build_patch exists-then-open; stepup.py setup
+  exists-then-create). The author's earlier local "zero hits" claim
+  was WRONG: the local scan ran before the files were git-tracked, so
+  the scanner never saw them. Both fixed race-free, not ledgered: the
+  build_patch open IS the check (EAFP; FileNotFoundError -> the loud
+  refusal) and setup creates the store atomically and exclusively
+  (O_CREAT|O_EXCL, mode 0600 — two racing setups cannot both win);
+  r9 tests re-green 23/23 and --ci-gate PASS with the files tracked.
+  The wall, not the author, caught these.
 - Suite: 296 -> 319 green (10 bilingual + 13 stepup/remediation).
   python-docx>=1.1.0 declared in requirements.txt the day the format
   shipped (the FM-21d numpy doctrine).

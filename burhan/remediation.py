@@ -129,11 +129,15 @@ def build_patch(finding: dict, clone_dir: str) -> dict:
             f"stage refuses rather than guessing; the Part-1 report-only "
             f"guidance is the output for this finding")
     src = os.path.join(clone_dir, st["file"])
-    if not os.path.exists(src):
+    try:
+        # EAFP (CI-live-caught TOCTOU, 2026-11-04): the open IS the check —
+        # no exists() window between looking and reading; a missing file is
+        # the loud refusal below.
+        lines = open(src, encoding="utf-8").read().splitlines(keepends=True)
+    except FileNotFoundError:
         raise RemediationRefused(
             f"the clone does not contain {st['file']!r} — the strategy's "
             f"anchor file is absent; refusing")
-    lines = open(src, encoding="utf-8").read().splitlines(keepends=True)
     anchor_i = next((i for i, ln in enumerate(lines)
                      if ln.strip() == st["anchor"].strip()), None)
     if anchor_i is None:
