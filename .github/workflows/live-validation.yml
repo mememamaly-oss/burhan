@@ -258,3 +258,113 @@ jobs:
             ${{ runner.temp }}/live/dvga-scan.json
             ${{ runner.temp }}/ground-truth-sha.json
           if-no-files-found: error
+  r10-lifecycle-chains:
+    name: R10 (crAPI lifecycle NEW->RECURRING + chain rules on live results)
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    services:
+      docker:
+        image: docker:27-dind
+        options: >-
+          --privileged
+          --name docker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Start crAPI (official compose v1.1.5 + latest images, bridge vars)
+        run: |
+          set +e
+          # same pinned compose + bridge variables as the battery job — the
+          # full rationale (chatbot/mailhog upstreams, LISTEN_IP, dind port
+          # publishing) is documented there and verified by its prior runs.
+          curl -sL -o /tmp/crapi.zip https://github.com/OWASP/crAPI/archive/refs/tags/v1.1.5.zip
+          unzip -q /tmp/crapi.zip -d /tmp
+          cd /tmp/crAPI-1.1.5/deploy/docker
+          cat > docker-compose.override.yml <<'YAML'
+          services:
+            crapi-web:
+              environment:
+                - CHATBOT_SERVICE=crapi-workshop:8000
+                - MAILHOG_WEB_SERVICE=mailhog:8025
+          YAML
+          sed -i 's|^LISTEN_IP=.*|LISTEN_IP=0.0.0.0|' .env
+          export DOCKER_HOST=unix:///var/run/docker.sock
+          docker compose -f docker-compose.yml -f docker-compose.override.yml pull
+          docker compose -f docker-compose.yml -f docker-compose.override.yml --compatibility up -d
+          echo "compose up exit: $?"
+
+      - name: Start DVGA (official Docker Hub image)
+        run: |
+          export DOCKER_HOST=unix:///var/run/docker.sock
+          docker run -d --name dvga -p 5013:5013 -e WEB_HOST=0.0.0.0 dolevf/dvga
+
+      - name: Fetch the operator spec (crAPI main-branch openapi)
+        run: |
+          mkdir -p .live-spec
+          curl -sL -o .live-spec/crapi-openapi-spec.json             https://raw.githubusercontent.com/OWASP/crAPI/main/openapi-spec/crapi-openapi-spec.json
+          sha256sum .live-spec/crapi-openapi-spec.json
+
+      - name: Run r10 live validation (two crAPI scans sharing a lifecycle store + chain evaluation)
+        # same scan-inside-the-dind pattern as the battery job (run
+        # 41286864928 lesson). scanbox sleeps 2400s: THIS job runs TWO
+        # full crAPI scans back-to-back plus a DVGA scan — the battery's
+        # 900s box would die mid-scan-2.
+        run: |
+          set -e
+          export DOCKER_HOST=unix:///var/run/docker.sock
+          docker volume create scanout >/dev/null
+          docker run -d --name scanbox --network host             -v scanout:/out python:3.12-slim sleep 2400 >/dev/null
+          docker exec scanbox mkdir -p /ws
+          tar --exclude=.git --exclude=node_modules --exclude=.next             -cf - . | docker exec -i scanbox tar -xf - -C /ws
+          docker exec scanbox python3 - <<'PY'
+          import sys, time, urllib.request
+          targets = [
+              ("crAPI", "http://127.0.0.1:8888/web/health"),
+              ("DVGA",  "http://127.0.0.1:5013/"),
+          ]
+          for name, url in targets:
+              for attempt in range(90):
+                  try:
+                      with urllib.request.urlopen(url, timeout=3) as r:
+                          if r.status < 500:
+                              print(f"{name} up (attempt {attempt + 1})")
+                              break
+                  except Exception:
+                      pass
+                  time.sleep(2)
+              else:
+                  print(f"::error::{name} did not come up in 180s")
+                  sys.exit(1)
+          PY
+          docker exec scanbox python3 /ws/scripts/live_validate_r10.py             --crapi http://127.0.0.1:8888             --dvga http://127.0.0.1:5013             --crapi-spec /ws/.live-spec/crapi-openapi-spec.json             --max-requests 12000             --out-dir /out/r10
+          mkdir -p "$RUNNER_TEMP/r10"
+          docker cp scanbox:/out/r10/. "$RUNNER_TEMP/r10/"
+          docker rm -f scanbox >/dev/null
+          docker volume rm scanout >/dev/null
+
+      - name: Dump diagnostics (targets failed)
+        if: failure()
+        run: |
+          export DOCKER_HOST=unix:///var/run/docker.sock
+          cd /tmp/crAPI-1.1.5/deploy/docker 2>/dev/null || true
+          echo "--- compose ps ---"
+          docker compose -f docker-compose.yml -f docker-compose.override.yml ps -a 2>/dev/null || true
+          echo "--- web logs ---"
+          docker compose -f docker-compose.yml -f docker-compose.override.yml logs --tail 40 crapi-web 2>/dev/null || true
+
+      - name: Upload r10 live-validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r10-live-validation-crapi-dvga
+          path: |
+            ${{ runner.temp }}/r10/r10-live-validation.json
+            ${{ runner.temp }}/r10/r10-pass1-scan.json
+            ${{ runner.temp }}/r10/r10-pass2-scan.json
+            ${{ runner.temp }}/r10/r10-dvga-scan.json
+            ${{ runner.temp }}/r10/r10-lifecycle-store.db
+          if-no-files-found: error
