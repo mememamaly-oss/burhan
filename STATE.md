@@ -1291,6 +1291,78 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
 - Tests: 281 -> 296 green (3 antipattern pins + 12 registry-gate
   tests, all in the wall suite).
 
+## 2026-11-04 — ROUND 9: bilingual client report + step-up authentication + propose-and-prove remediation (feature-flagged, additive only)
+
+- PART 1 (bilingual AR/EN report, a SIXTH format): burhan/bilingual.py
+  + `burhan report --format bilingual [--pdf]`. Per finding, in both
+  languages: a plain-language description (curated for 20 types, honest
+  registry-sourced fallback for the rest), the exploitation proof
+  restated for a non-technical reader with the engine's evidence detail
+  QUOTED VERBATIM plus the verification verdict, and remediation steps
+  whose every entry cites its source (the compliance.py CWE/OWASP
+  mapping; header-class steps name the exact headers the finding's own
+  evidence lists). Exports: structured JSON + .docx (python-docx, RTL
+  Arabic sections) + PDF (soffice headless; LOUD refusal when absent,
+  never a silent skip). Content-loss proof: the document embeds the
+  audit.py Merkle root + Ed25519 signature over the SOURCE findings —
+  a dropped/altered finding is detectable by the standard recipe
+  (pinned by test). REAL test (P1.3): generated from the actual
+  round-8 live evidence (crapi 99 findings + DVGA 26, committed at
+  evidence/live-validation-r8/): source finding IDs == AR output IDs
+  == EN output IDs, exact two-way diff, ZERO loss — 10 tests green.
+- PART 2 (master-password step-up): burhan/stepup.py — a DISTINCT
+  256-bit os.urandom secret (generate_master_secret; never the owner's
+  normal password), stored only as a scrypt verifier + per-store salt;
+  a sliding-window rate limit (5 credential failures / 300 s; the
+  lock's own refusals do not extend the window); and EVERY use — pass
+  or fail — appended to a tamper-evident hash chain
+  (head_i = sha256(head_{i-1} || canonical(event_i)), the audit.py
+  canonicalization discipline), with verify_chain() recomputing it
+  end-to-end: edit/delete/reorder raises StepUpChainTampered and the
+  gate fails closed. Gated purposes (order 2.1): closure_reexploit +
+  patch_generation — both wired in burhan/remediation.py BEFORE the
+  action. PAIRED proof (2.2): without the credential the action
+  refuses AND the refusal is in the chain; with it the action runs AND
+  the grant is in the chain — plus wrong-secret, rate-limit
+  slide-open, tamper-fail-closed, no-overwrite-setup and entropy pins
+  (6 tests).
+- PART 3 (propose-and-prove, NEVER on the live target): the hard rule
+  (3.1) is ENFORCED IN CODE at assert_isolated() — the single choke
+  point run_remediation passes FIRST: IsolationViolation when the work
+  surface's host:port EQUALS the scanned target's, when it shares the
+  target's host without the explicit allow_same_host_staging flag, or
+  when NO isolated surface exists (3.4: the stage refuses ENTIRELY and
+  returns the Part-1 report-only fallback payload — the live target is
+  never a substitute). apply_patch takes only a local clone directory
+  (no URL parameter exists); there is NO merge/push/deploy function in
+  the module (asserted by test at module level) — the output is a
+  diff/PR bundle for the CLIENT's own review system. REAL RED->BLUE
+  (3.2): a live clone of fixtures/vulnapp.py (own process, own port,
+  copied source) — the original xss_reflected exploit reproduced on
+  the UNPATCHED clone (raw reflection observed over HTTP), the patch
+  applied to the clone source only (HTML-escaping — the exact pattern
+  the fixture's own /safe/search.php already uses), the clone
+  restarted by the client-provided hook, the SAME exploit re-run on
+  the PATCHED clone and observed to FAIL (escaped, no raw
+  reflection); the original fixture source stayed byte-identical
+  throughout and kept serving its unpatched surface (pinned). 13
+  tests green including the isolation-rule pins, the no-clone
+  report-only fallback, and the unsupported-class refusal.
+- Anti-pattern gate on the round's own new code — HONEST RECORD: the
+  CI wall caught 2 TOCTOU hits in the new modules themselves
+  (remediation.py build_patch exists-then-open; stepup.py setup
+  exists-then-create). The author's earlier local "zero hits" claim
+  was WRONG: the local scan ran before the files were git-tracked, so
+  the scanner never saw them. Both fixed race-free, not ledgered: the
+  build_patch open IS the check (EAFP; FileNotFoundError -> the loud
+  refusal) and setup creates the store atomically and exclusively
+  (O_CREAT|O_EXCL, mode 0600 — two racing setups cannot both win);
+  r9 tests re-green 23/23 and --ci-gate PASS with the files tracked.
+  The wall, not the author, caught these.
+- Suite: 296 -> 319 green (10 bilingual + 13 stepup/remediation).
+  python-docx>=1.1.0 declared in requirements.txt the day the format
+  shipped (the FM-21d numpy doctrine).
+
 ## Where to find things
 
 - Round-by-round history: `git log`, worklog.md (current + history).

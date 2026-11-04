@@ -447,7 +447,10 @@ def main():
     fnd.add_argument("--delta", action="store_true", help="diff the two most recent runs")
     rep = sub.add_parser("report", help="export an HTML/JSON/SARIF report from the store")
     rep.add_argument("--db", default="results/burhan.db"); rep.add_argument("--run-id", default="")
-    rep.add_argument("--out", default="results/report.html"); rep.add_argument("--format", choices=["html", "json", "sarif", "executive", "glass"], default="html")
+    rep.add_argument("--out", default="results/report.html"); rep.add_argument("--format", choices=["html", "json", "sarif", "executive", "glass", "bilingual"], default="html")
+    rep.add_argument("--pdf", action="store_true",
+                     help="bilingual format: also convert the .docx to PDF "
+                          "(requires soffice on PATH; refuses loudly if absent)")
     rep.add_argument("--ci", action="store_true",
                      help="CI/CD gate: exit 1 when the report carries verified "
                           "critical/high findings (works with every format)")
@@ -774,6 +777,30 @@ def main():
             # Phase 64: the iOS-style frosted-glass dashboard of the Digital Twin
             open(a.out, "w").write(build_glass_html(st, a.run_id))
             print(json.dumps({"report": a.out, "format": "glass", "run_id": a.run_id or "newest"}))
+        elif a.format == "bilingual":
+            # Round 9, part 1: the AR/EN client report — a NEW additive format;
+            # no existing format's behavior changes. The structured JSON and the
+            # .docx land next to --out; the source findings' Merkle root +
+            # Ed25519 signature (audit.py) ride along as content-loss evidence.
+            from burhan.bilingual import (build_bilingual as _bb,
+                                          build_bilingual_docx as _bd,
+                                          export_pdf as _ep)
+            run_id = a.run_id or (st.list_runs(limit=1) or [{}])[0].get("run_id", "")
+            run = st.get_run(run_id)
+            if run is None:
+                raise SystemExit(f"bilingual: run {run_id!r} not found in the store")
+            bi = _bb(run)
+            base_out = a.out[:-5] if a.out.endswith(".json") else a.out
+            json.dump(bi, open(base_out + ".json", "w"), indent=1, ensure_ascii=False)
+            _bd(bi, base_out + ".docx")
+            pdf = ""
+            if getattr(a, "pdf", False):
+                pdf = _ep(base_out + ".docx", base_out + ".pdf")
+            print(json.dumps({"report": base_out + ".json", "format": "bilingual",
+                              "run_id": run_id, "findings": bi["findings_count"],
+                              "docx": base_out + ".docx", "pdf": pdf,
+                              "merkle_root": bi["audit"]["merkle_root"][:16] + "…"}))
+            return
         else:
             open(a.out, "w").write(build_html(st, a.run_id))
             print(json.dumps({"report": a.out, "format": a.format, "run_id": a.run_id or "overview"}))
