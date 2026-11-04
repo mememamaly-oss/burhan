@@ -43,7 +43,17 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-SEED = "r10live!" * 8
+# DIFFERENT seeds per pass: run_id is DERIVED from the seed (deterministic
+# reproducibility), so one shared seed gave BOTH passes the same run_id —
+# run 41920279230's store proved it: ONE runs row, and lifecycle_history's
+# exclude_run filter blinded pass 2 to pass 1's history (all 98
+# re-appearing identities read NEW). Identity is detector+endpoint+
+# parameter — seed-INDEPENDENT for the same vulnerability — so distinct
+# seeds keep the comparison honest while giving each pass its own run
+# row, exactly like part 1's three-scan test.
+SEED_A = "r10liveA" * 8   # crAPI pass 1
+SEED_B = "r10liveB" * 8   # crAPI pass 2
+SEED_DVGA = "r10liveD" * 8   # the DVGA scan's own run row
 
 
 def _crapi_race_candidate(base: str) -> dict:
@@ -97,7 +107,7 @@ def _crapi_authz(base: str) -> dict:
 
 
 def scan_crapi(base: str, spec, race, max_requests: int, store_path: str,
-               out: Path, label: str) -> dict:
+               out: Path, label: str, seed: str) -> dict:
     """One full crAPI scan with the battery's own setup + the lifecycle
     store wired. The scan itself resolves lifecycle (orchestrator ->
     apply_prioritization) and save_run records it in the SAME store."""
@@ -109,7 +119,7 @@ def scan_crapi(base: str, spec, race, max_requests: int, store_path: str,
     t0 = time.time()
     try:
         cfg = ScanConfig(allow_private=True, max_pages=50, timeout=15.0,
-                         seed=SEED, oast=oast, workflow=False,
+                         seed=seed, oast=oast, workflow=False,
                          logic_active=False, modern_v2=True,
                          auth=_crapi_login(base), authz=_crapi_authz(base),
                          openapi_spec=spec, race_candidates=[race],
@@ -133,7 +143,7 @@ def scan_dvga(base: str, max_requests: int, out: Path) -> dict:
     t0 = time.time()
     try:
         cfg = ScanConfig(allow_private=True, max_pages=50, timeout=15.0,
-                         seed=SEED, oast=oast, workflow=False,
+                         seed=SEED_DVGA, oast=oast, workflow=False,
                          logic_active=False, modern_v2=True,
                          max_requests=max_requests)
         rep = BurhanScanner(base, cfg).run()
@@ -273,9 +283,9 @@ def main() -> int:
     # ---- LIFECYCLE: two back-to-back scans, one shared store ----------
     try:
         rep1 = scan_crapi(args.crapi, spec, race, args.max_requests,
-                          store_path, out, "pass1")
+                          store_path, out, "pass1", SEED_A)
         rep2 = scan_crapi(args.crapi, spec, race, args.max_requests,
-                          store_path, out, "pass2")
+                          store_path, out, "pass2", SEED_B)
     except Exception as e:  # noqa: BLE001
         print(f"GATE FAIL: a crAPI scan died mid-run "
               f"({type(e).__name__}: {e}) — recorded, never retried blind")
@@ -295,7 +305,11 @@ def main() -> int:
     overlap = sorted(set(id1) & set(id2))
     lifecycle = {
         "store": "r10-lifecycle-store.db",
-        "seed": SEED,
+        "seeds": {"pass1": SEED_A, "pass2": SEED_B,
+                  "why": ("run_id derives from the seed; one shared seed "
+                          "gave both passes the same run_id and the "
+                          "store's exclude_run filter blinded pass 2 — "
+                          "run 41920279230 proved it live")},
         "scan1": {"findings": len(id1), "requests": rep1["stats"].get("requests"),
                   "wall": rep1["wall_seconds"],
                   "all_new": all(f.get("lifecycle") == NEW
