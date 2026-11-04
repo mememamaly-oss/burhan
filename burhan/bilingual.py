@@ -673,6 +673,38 @@ def build_bilingual(report: dict) -> dict:
                     for f in rows],
             },
         }
+    # Round 10, PART 2: the proven chains, bilingual narrative — each
+    # step links back to its underlying finding id. Absent -> [].
+    chains = list(report.get("attack_chains") or [])
+    by_id = {f.get("id", ""): f for f in findings}
+    def _chain_rows(lang):
+        rows = []
+        for c in chains:
+            steps = []
+            for st in c.get("narrative", []):
+                fid = str(st.get("finding_id", ""))
+                if lang == "ar":
+                    txt = f"الخطوة {st['step']}: " + st.get("text", "") + (
+                        f" [النتيجة {fid}]" if fid else "")
+                else:
+                    txt = f"Step {st['step']}: " + st.get("text", "") + (
+                        f" [finding {fid}]" if fid else "")
+                steps.append(txt)
+            imp = c.get("impact") or {}
+            rows.append({
+                "rule": c.get("rule", ""),
+                "title": c.get("title", ""),
+                "findings": c.get("findings", {}),
+                "steps": steps,
+                "impact": (imp.get("narrative") or imp.get("verdict") or ""),
+            })
+        return rows
+    chains_bilingual = {
+        "ar": {"title": "سلاسل الهجوم المثبتة",
+               "rows": _chain_rows("ar")},
+        "en": {"title": "Proven attack chains",
+               "rows": _chain_rows("en")},
+    } if chains else None
     return {
         "format": "bilingual-1",
         "language_pair": ["ar", "en"],
@@ -680,6 +712,7 @@ def build_bilingual(report: dict) -> dict:
         "target": report.get("target", ""),
         "scanner": report.get("scanner", ""),
         "findings_count": len(findings),
+        "attack_chains": chains_bilingual,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "findings": out_findings,
         "risk_ranked": risk_ranked,
@@ -789,6 +822,20 @@ def build_bilingual_docx(bilingual: dict, path: str) -> str:
     elif bilingual.get("risk_ranked_note"):
         _para(doc, bilingual["risk_ranked_note"], rtl=True, size=9,
               color=(0x66, 0x66, 0x66))
+
+    # Round 10, PART 2: the chains narrative (both languages)
+    ac = bilingual.get("attack_chains")
+    if ac:
+        for lang, rtl in (("ar", True), ("en", False)):
+            sec = ac[lang]
+            _para(doc, sec["title"], rtl=rtl, bold=True, size=13,
+                  color=(0xB0, 0x30, 0x30))
+            for row in sec["rows"]:
+                for st in row["steps"]:
+                    _para(doc, st, rtl=rtl, size=9.5)
+                _para(doc, ("الأثر: " if lang == "ar" else "Impact: ")
+                      + row["impact"], rtl=rtl, size=9,
+                      color=(0x66, 0x66, 0x66))
 
     for f in bilingual.get("findings", []):
         c = f.get("compliance") or {}

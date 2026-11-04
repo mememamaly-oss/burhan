@@ -393,6 +393,7 @@ def _build_json(store: Store, run_id: str) -> dict:
             ranked_src.append(f)
         return {"kind": "single-run", "scanner": run["scanner"], "run": run,
                 "risk_ranked": risk_ranked(ranked_src),
+                "attack_chains": run.get("attack_chains", []),
                 "compliance": compliance_summary(run.get("findings", []))}
     runs = store.list_runs(limit=100)
     latest = store.list_findings(limit=500)
@@ -476,6 +477,32 @@ def _build_html(store: Store, run_id: str) -> str:
             f"<td class='u'>{e(r.get('url', ''))}</td>"
             f"<td><code>{e(r.get('parameter') or '')}</code></td>"
             f"<td class='ev'>{comps}</td></tr>")
+    chains = ((run.get("attack_chains") if run_id else []) or [])
+    chains_html = ""
+    if chains:
+        chain_blocks = []
+        for c in chains:
+            steps = "".join(
+                f"<li><b>step {st['step']}.</b> {e(st['text'])} "
+                f"<span class='ev'>[finding {e(str(st.get('finding_id', '')))}"
+                f"{(' — ' + e(str(st.get('evidence_excerpt', ''))[:160])) if st.get('evidence_excerpt') else ''}]</span></li>"
+                for st in c.get("narrative", []))
+            imp = c.get("impact") or {}
+            chain_blocks.append(
+                f"<div class='box'><h3>{e(c.get('title', ''))}</h3>"
+                f"<p class='ev'>rule {e(c.get('rule', ''))} · pair "
+                f"{e(' + '.join(c.get('pair', ())) if isinstance(c.get('pair'), tuple) else e(str(c.get('pair', ''))))}"
+                f" · findings {e(str((c.get('findings') or {}).get('finding_a', '')))}"
+                f" -> {e(str((c.get('findings') or {}).get('finding_b', '')))}</p>"
+                f"<ol>{steps}</ol>"
+                f"<p><b>Impact:</b> {e(str(imp.get('narrative') or imp.get('verdict') or ''))}</p></div>")
+        chains_html = (
+            "<h2>Proven attack chains (round 10 part 2)</h2>"
+            "<p>Each chain is a narrative sequence whose every step links back "
+            "to its underlying verified finding. CR-01 chains carry a combined "
+            "proof re-executed live; CR-02 chains are a data join between two "
+            "findings' own evidence. This section supplements — never "
+            "replaces — the flat finding list.</p>" + "".join(chain_blocks))
     ranked_html = ""
     if ranked_rows:
         ranked_html = (
@@ -771,6 +798,7 @@ def _build_html(store: Store, run_id: str) -> str:
 </style></head><body>
 <header><h1>{e(title)}</h1><div class="sub">{e(str(subtitle))}</div></header>
 <section><h2>Statistics</h2><div class="stats">{stat_items}</div></section>
+{chains_html}
 {ranked_html}
 {intel_html}
 {v41_html}

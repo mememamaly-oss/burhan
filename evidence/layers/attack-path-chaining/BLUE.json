@@ -1,0 +1,91 @@
+{
+ "mode": "BLUE (post-change: CR-01 proven on RED twin, silent on BLUE)",
+ "red_twin": {
+  "finding_types": [
+   "bfla",
+   "csrf",
+   "jwt_signature_not_enforced",
+   "missing_security_headers",
+   "server_banner_disclosure"
+  ],
+  "chains_reported": 1,
+  "cr01_proof_steps": [
+   {
+    "step": 1,
+    "action": "fresh login harvest through the scan's own credentialed endpoint (low-privilege identity)",
+    "request_id": "harvest",
+    "note": "the low-privilege session the scan itself used"
+   },
+   {
+    "step": 2,
+    "action": "executed the admin-only function http://127.0.0.1:55537/api/admin/rotate-keys with the low-privilege session (finding A's surface)",
+    "request_id": "req-9ab0b356",
+    "response_sha256_note": "the function's own response is the escalation: it returned the rotated admin credential"
+   },
+   {
+    "step": 3,
+    "action": "corrupted that credential's signature (finding B's own CWE-347 mechanism: one mid-signature character flipped) and presented it to http://127.0.0.1:55537/api/account/dashboard",
+    "request_id": "req-0244deb0",
+    "oracle": "accepted with role=admin — {\"account\": \"root-admin@chainapp.test\", \"admin_data\": true, \"role\": \"admin\"}"
+   }
+  ],
+  "elevation_oracle": {
+   "account": "root-admin@chainapp.test",
+   "role": "admin",
+   "admin_data": true
+  },
+  "verdict": "CHAIN PROVEN end-to-end: finding A's own output is the credential that unlocks finding B's protected surface, accepted AS ADMIN with a corrupted signature",
+  "narrative_finding_links": [
+   {
+    "step": 1,
+    "finding_id": "F-e64cf7c4c6"
+   },
+   {
+    "step": 2,
+    "finding_id": "F-e64cf7c4c6"
+   },
+   {
+    "step": 3,
+    "finding_id": "F-979b4146bf"
+   }
+  ]
+ },
+ "blue_twin": {
+  "finding_types": [
+   "bfla",
+   "csrf",
+   "jwt_signature_not_enforced",
+   "missing_security_headers",
+   "server_banner_disclosure"
+  ],
+  "both_classes_fire_independently": true,
+  "chains_reported": 0,
+  "cr01_reported": false,
+  "verdict": "same two vulnerability CLASSES, escalation link BROKEN (the admin function returns no credential material) — NO chain reported. Two highs are not a chain; the precondition, not the severities, decides"
+ },
+ "rule_catalog": [
+  {
+   "id": "CR-01-credential-feeding",
+   "pair": [
+    "bfla",
+    "jwt_signature_not_enforced"
+   ],
+   "precondition": "the BFLA function's response, executed with the low-privilege session, returns credential material the CWE-347 endpoint accepts",
+   "proof_kind": "live combined proof (3 bounded requests, elevation oracle over HTTP)"
+  },
+  {
+   "id": "CR-02-shared-surface-entry",
+   "pair": [
+    "shadow_api_endpoint|zombie_api_endpoint",
+    "<any exploitable class>"
+   ],
+   "precondition": "the undocumented surface IS the same normalized endpoint another family proved exploitable (pure data join)",
+   "proof_kind": "data join between the two findings' own evidence"
+  }
+ ],
+ "deferred": {
+  "rule": "authenticated-flow XSS via a separate authz bypass (the order's archetype (b))",
+  "reason": "in this engine the xss detector's own reachability IS the unlock — the pair adds nothing separately provable; deferred until a fixture exists where the XSS surface is reachable only with a credential the scan itself does not hold"
+ },
+ "off_by_default": "detect_chains is inert unless a rule's specific pair fires; ordinary scans send ZERO extra requests and get no chains"
+}

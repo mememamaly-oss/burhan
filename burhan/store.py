@@ -90,6 +90,12 @@ V10_COLUMNS = {
     "risk_components": "TEXT", # the score's components, JSON (transparency)
 }
 
+# Round 10, PART 2: the proven attack chains ride the RUN row (a list,
+# not per-finding data). Same idempotent ALTER TABLE discipline.
+V10_RUN_COLUMNS = {
+    "attack_chains_json": "TEXT",
+}
+
 
 def finding_fingerprint(type_: str, method: str, url: str, parameter: str) -> str:
     """Stable cross-run identity of ONE vulnerability at ONE injection point
@@ -119,6 +125,10 @@ class Store:
         for col, decl in V10_COLUMNS.items():
             if col not in have:
                 c.execute(f"ALTER TABLE findings ADD COLUMN {col} {decl}")
+        have_runs = {r["name"] for r in c.execute("PRAGMA table_info(runs)")}
+        for col, decl in V10_RUN_COLUMNS.items():
+            if col not in have_runs:
+                c.execute(f"ALTER TABLE runs ADD COLUMN {col} {decl}")
 
     def _conn(self) -> sqlite3.Connection:
         c = sqlite3.connect(self.path, timeout=10)
@@ -143,10 +153,15 @@ class Store:
                 "first_seen, identity, endpoint, lifecycle, risk_score, "
                 "risk_components")
         n_ph = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?"   # 19 placeholders = 19 cols
+        chains = report.get("attack_chains") or []
         with self._conn() as c:
-            c.execute("INSERT OR REPLACE INTO runs VALUES (?,?,?,?,?,?,?)",
-                      (report["run_id"], report.get("seed", ""), report.get("scanner", ""),
-                       report.get("target", ""), now, now, json.dumps(stats)))
+            c.execute(
+                "INSERT OR REPLACE INTO runs "
+                "(run_id, seed, scanner, target, started, finished, stats_json, "
+                " attack_chains_json) VALUES (?,?,?,?,?,?,?,?)",
+                (report["run_id"], report.get("seed", ""), report.get("scanner", ""),
+                 report.get("target", ""), now, now, json.dumps(stats),
+                 json.dumps(chains) if chains else None))
             for f in report.get("findings", []):
                 fp = finding_fingerprint(f["type"], f.get("method", "GET"),
                                          f.get("url", ""), f.get("parameter", ""))
@@ -213,6 +228,7 @@ class Store:
         return {"run_id": r["run_id"], "seed": r["seed"], "scanner": r["scanner"],
                 "target": r["target"], "started": r["started"],
                 "stats": json.loads(r["stats_json"] or "{}"),
+                "attack_chains": json.loads(r["attack_chains_json"] or "[]"),
                 "findings": [self._finding_row(f) for f in fs],
                 "rejected_candidates": [self._finding_row(f) for f in rec]}
 

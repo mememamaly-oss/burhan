@@ -2022,6 +2022,26 @@ class BurhanScanner:
                                    "policy": ("raw values encrypted at rest; "
                                               "reveal requires an authorized key "
                                               "and is audit-logged")}
+        # ---- Round 10, PART 2: attack-path chaining. INERT unless a rule's
+        # specific finding-type pair both fired in THIS scan's verified
+        # findings (bfla+jwt_signature_not_enforced -> the live combined
+        # proof; shadow/zombie + an exploitable on the same endpoint -> a
+        # pure data join). An ordinary scan sends ZERO extra requests here
+        # and gets no chains — the layer cannot perturb any existing run,
+        # benchmark, or reproducibility gate.
+        try:
+            from .chainrules import detect_chains, chains_summary
+            self._chains = detect_chains(self.findings, engine=self.engine)
+            if self._chains:
+                self.stats["attack_chains"] = chains_summary(self._chains)
+        except Exception as e:
+            fid = self.failures.record("chainrules", f"{type(e).__name__}: {e}", {})
+            self.bus.emit("ScannerFailed", scanner="chainrules", failure=fid,
+                          error=str(e)[:200])
+            self.boundary.tool_failure("chainrules", self.target.url,
+                                       f"{type(e).__name__}: {e}",
+                                       evidence=f"failure {fid}",
+                                       provenance="orchestrator:chainrules")
         self.bus.emit("ScanCompleted", **self.stats)
         return self.report()
 
@@ -2059,6 +2079,9 @@ class BurhanScanner:
         # key rides the report so every scan (bench included) carries its paths.
         from .apath import build_attack_paths
         rep["attack_paths"] = build_attack_paths(rep)
+        # Round 10, PART 2: the proven chains ride the payload top-level —
+        # each step links back to its underlying finding id and evidence.
+        rep["attack_chains"] = getattr(self, "_chains", [])
         # Round 10, PART 1 — risk prioritization: attach the stable finding
         # identity, resolve the cross-run lifecycle against the shared store
         # (when wired), and score + rank every verified finding. Runs BEFORE
