@@ -314,9 +314,14 @@ def test_three_scans_lifecycle_real(tmp_path):
             rep = _scan(base, seed, db)
             v.stop()
             Store(db).save_run(rep)
+            # exact path equality via urllib.parse, NOT an endswith
+            # substring check — CodeQL's incomplete-url-substring-
+            # sanitization rule fires on substring URL matching; exact
+            # comparison is stronger and honest.
+            from urllib.parse import urlsplit
             xss = [f for f in rep["findings"]
                    if f["type"] == "xss_reflected"
-                   and f["url"].split("?")[0].endswith("/vuln/xss.php")]
+                   and urlsplit(f["url"]).path == "/vuln/xss.php"]
             results.append({"variant": variant, "run_id": rep["run_id"],
                              "xss": xss, "rep": rep})
 

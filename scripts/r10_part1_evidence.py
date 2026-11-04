@@ -87,9 +87,13 @@ def scan(base: str, seed: str, db: str, mode: str) -> dict:
 
 
 def xss_of(rep: dict) -> list[dict]:
+    # exact path equality via urllib.parse, NOT an endswith substring
+    # check — CodeQL's incomplete-url-substring-sanitization rule fires on
+    # substring URL matching; exact comparison is stronger and honest.
+    from urllib.parse import urlsplit
     return [f for f in rep.get("findings", [])
             if f["type"] == "xss_reflected"
-            and f["url"].split("?")[0].endswith("/vuln/xss.php")]
+            and urlsplit(f["url"]).path == "/vuln/xss.php"]
 
 
 def main() -> int:
