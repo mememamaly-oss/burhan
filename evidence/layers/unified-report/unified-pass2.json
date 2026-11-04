@@ -1,0 +1,775 @@
+{
+ "kind": "unified-report",
+ "formula": "score = round(100 * V * (0.40*E + 0.35*T + 0.25*L)); V re-execution verdict (verified 1.0 / observed_anomaly 0.6 / unverified 0.3), E exposure (anonymous 1.0 / auth-gated 0.70), T technical class weight (intel.RISK_WEIGHTS/9, default 3/9), L lifecycle (REGRESSED 1.0 > NEW 0.8 > RECURRING 0.6). Full statement: burhan/prioritize.py module docstring.",
+ "judgment_calls": [
+  {
+   "id": "J1",
+   "call": "V(confirmed_by_advisory) = 0.85",
+   "why": "an advisory-confirmed dependency is stronger than an observed anomaly (0.60) but was not re-executed on a live target like a verified finding (1.00)"
+  },
+  {
+   "id": "J2",
+   "call": "T = advisory's own CVSS base_score/10 when present",
+   "why": "the advisory's own measurement beats the class-default weight; absent/non-numeric falls back to the class weight"
+  },
+  {
+   "id": "J3",
+   "call": "chain: V=1.00 (proven chain), E=entry finding's exposure, T=max member technical",
+   "why": "the chain claim carries its own live combined proof or is a join of two VERIFIED findings; the chain is entered through finding_a, and is as strong as its strongest link"
+  }
+ ],
+ "counts_by_category": {
+  "dast": 11,
+  "sca": 10,
+  "chain": 1
+ },
+ "scan_target": "http://127.0.0.1:37921",
+ "rows": [
+  {
+   "category": "dast",
+   "id": "F-7913824719",
+   "identity": "c24c9f3ca02381b8",
+   "type": "csrf",
+   "severity": "medium",
+   "lifecycle": "NEW",
+   "risk_score": 79,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.5556,
+     "class": "csrf"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921/auth/api/login",
+   "parameter": "email, password"
+  },
+  {
+   "category": "dast",
+   "id": "F-94091fc884",
+   "identity": "d656c446698540a5",
+   "type": "jwt_signature_not_enforced",
+   "severity": "high",
+   "lifecycle": "NEW",
+   "risk_score": 72,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.3333,
+     "class": "jwt_signature_not_enforced"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921/api/account/dashboard",
+   "parameter": "-"
+  },
+  {
+   "category": "sca",
+   "id": "GHSA-x84v-xcm2-53pg",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2018-18074"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+    "base_score": 7.5
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 69,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.75,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "dast",
+   "id": "F-25b0926134",
+   "identity": "3d8dc945ed059ed8",
+   "type": "missing_security_headers",
+   "severity": "low",
+   "lifecycle": "NEW",
+   "risk_score": 68,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.2222,
+     "class": "missing_security_headers"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921",
+   "parameter": ""
+  },
+  {
+   "category": "dast",
+   "id": "F-1b6c1b1811",
+   "identity": "9ed82469f1e10690",
+   "type": "missing_security_headers",
+   "severity": "low",
+   "lifecycle": "NEW",
+   "risk_score": 68,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.2222,
+     "class": "missing_security_headers"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921/auth/api/login",
+   "parameter": ""
+  },
+  {
+   "category": "dast",
+   "id": "F-6019e5aa92",
+   "identity": "b4415c4c81bbc6c8",
+   "type": "missing_security_headers",
+   "severity": "low",
+   "lifecycle": "NEW",
+   "risk_score": 68,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.2222,
+     "class": "missing_security_headers"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921/api/account/dashboard",
+   "parameter": ""
+  },
+  {
+   "category": "dast",
+   "id": "F-32135e8f8c",
+   "identity": "ca4bbb02d5bf2d93",
+   "type": "missing_security_headers",
+   "severity": "low",
+   "lifecycle": "NEW",
+   "risk_score": 68,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.2222,
+     "class": "missing_security_headers"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921/api/admin/rotate-keys",
+   "parameter": ""
+  },
+  {
+   "category": "sca",
+   "id": "GHSA-j8r2-6x86-q33q",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2023-32681"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:N/A:N",
+    "base_score": 6.1
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 65,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.61,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "dast",
+   "id": "F-90e9ed412a",
+   "identity": "65046df892d53aa3",
+   "type": "server_banner_disclosure",
+   "severity": "low",
+   "lifecycle": "NEW",
+   "risk_score": 64,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.1111,
+     "class": "server_banner_disclosure"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921/auth/api/login",
+   "parameter": ""
+  },
+  {
+   "category": "dast",
+   "id": "F-9f8aefde04",
+   "identity": "a152aa2d254ae124",
+   "type": "server_banner_disclosure",
+   "severity": "low",
+   "lifecycle": "NEW",
+   "risk_score": 64,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.1111,
+     "class": "server_banner_disclosure"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921/api/account/dashboard",
+   "parameter": ""
+  },
+  {
+   "category": "dast",
+   "id": "F-395fcebf88",
+   "identity": "c4a4851279c00485",
+   "type": "server_banner_disclosure",
+   "severity": "low",
+   "lifecycle": "NEW",
+   "risk_score": 64,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.1111,
+     "class": "server_banner_disclosure"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921",
+   "parameter": ""
+  },
+  {
+   "category": "dast",
+   "id": "F-432476e394",
+   "identity": "f1f6c9a0fbf2c80f",
+   "type": "server_banner_disclosure",
+   "severity": "low",
+   "lifecycle": "NEW",
+   "risk_score": 64,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.1111,
+     "class": "server_banner_disclosure"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921/api/admin/rotate-keys",
+   "parameter": ""
+  },
+  {
+   "category": "sca",
+   "id": "GHSA-9wx4-h78v-vm56",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2024-35195"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N",
+    "base_score": 5.3
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 63,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.53,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "sca",
+   "id": "PYSEC-2026-1873",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2024-35195"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N",
+    "base_score": 5.3
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 63,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.53,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "sca",
+   "id": "GHSA-9hjg-9r4m-mvj7",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2024-47081"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+    "base_score": 5.2
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 62,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.52,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "sca",
+   "id": "PYSEC-2026-1872",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2024-47081"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+    "base_score": 5.2
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 62,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.52,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "dast",
+   "id": "F-16e13db624",
+   "identity": "137cbd9f4950fb7e",
+   "type": "bfla",
+   "severity": "high",
+   "lifecycle": "NEW",
+   "risk_score": 60,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified"
+    },
+    "exposure": {
+     "weight": 0.7,
+     "auth_gated": true
+    },
+    "technical": {
+     "weight": 0.3333,
+     "class": "bfla"
+    },
+    "lifecycle": {
+     "weight": 0.8,
+     "state": "NEW"
+    }
+   },
+   "url": "http://127.0.0.1:37921/api/admin/rotate-keys",
+   "parameter": "-"
+  },
+  {
+   "category": "sca",
+   "id": "PYSEC-2026-2275",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2026-25645"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+    "base_score": 4.3
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 60,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.43,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "sca",
+   "id": "GHSA-gc5v-m9x4-r6x2",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2026-25645"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "source": "CVSS_V3",
+    "vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:N/I:H/A:N",
+    "base_score": 3.9
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 58,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.39,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "sca",
+   "id": "PYSEC-2018-28",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2018-18074"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "base_score": null,
+    "note": "severity not provided by advisory"
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 57,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.3333,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "sca",
+   "id": "PYSEC-2023-74",
+   "identity": "7d612ba224f87afe",
+   "type": "sca_vulnerable_dependency",
+   "package": "requests",
+   "ecosystem": "PyPI",
+   "version": "2.19.1",
+   "cve_aliases": [
+    "CVE-2023-32681"
+   ],
+   "known_exploited": [],
+   "severity_data": {
+    "base_score": null,
+    "note": "severity not provided by advisory"
+   },
+   "lifecycle": "RECURRING",
+   "risk_score": 57,
+   "risk_components": {
+    "verification": {
+     "weight": 0.85,
+     "value": "confirmed_by_advisory"
+    },
+    "exposure": {
+     "weight": 1.0,
+     "auth_gated": false
+    },
+    "technical": {
+     "weight": 0.3333,
+     "class": "sca_vulnerable_dependency"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   },
+   "url": "/home/z/my-project/evidence/layers/sca/inputs/requirements.txt#requests"
+  },
+  {
+   "category": "chain",
+   "id": "CR-01-credential-feeding",
+   "identity": "8f354a0bd6b5a0fe",
+   "rule": "CR-01-credential-feeding",
+   "title": "admin function hands out the credential that unlocks the signature-not-enforced surface",
+   "pair": [
+    "bfla",
+    "jwt_signature_not_enforced"
+   ],
+   "member_findings": {
+    "finding_a": "F-16e13db624",
+    "finding_b": "F-94091fc884"
+   },
+   "narrative_steps": 3,
+   "lifecycle": "RECURRING",
+   "risk_score": 55,
+   "risk_components": {
+    "verification": {
+     "weight": 1.0,
+     "value": "verified-chain"
+    },
+    "exposure": {
+     "weight": 0.7,
+     "auth_gated": true,
+     "basis": "entry finding (finding_a)"
+    },
+    "technical": {
+     "weight": 0.3333,
+     "basis": "max of member findings"
+    },
+    "lifecycle": {
+     "weight": 0.6,
+     "state": "RECURRING"
+    }
+   }
+  }
+ ],
+ "note": "one formula, three categories, every judgment call stated; rejected candidates and unverified findings are NOT ranked here — the scan report carries them under their honest names",
+ "lifecycle_recorded_run_id": "unified-b9b8c42f1eb7"
+}
