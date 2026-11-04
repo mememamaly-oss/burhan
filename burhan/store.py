@@ -355,6 +355,30 @@ class Store:
                 [(run_id, target, ident, "UNTESTED_ABSENCE", "", now)
                  for ident in resolved.get("untested_absences", [])])
 
+    def lifecycle_prev_present(self, target: str, exclude_run: str = "") -> dict[str, str]:
+        """The previous invocation's PRESENT identities for this target,
+        straight from the lifecycle log (the log — not the findings rows —
+        is the lifecycle source of truth; store.py's own contract). Used
+        by the unified report's SCA/chain resolution, which records
+        lifecycle rows but never findings rows: for scan targets the
+        findings-gate in previous_run_id stays authoritative inside
+        lifecycle_history, while HERE the log itself decides. Empty for
+        a target's first recorded invocation."""
+        with self._conn() as c:
+            r = c.execute(
+                "SELECT run_id FROM lifecycle_log WHERE target=? AND run_id<>? "
+                "AND state IN ('NEW','RECURRING','REGRESSED') "
+                "GROUP BY run_id ORDER BY MAX(resolved_at) DESC LIMIT 1",
+                (target, exclude_run)).fetchone()
+            if not r:
+                return {}
+            return {row["identity"]: row["endpoint"] or ""
+                    for row in c.execute(
+                        "SELECT identity, endpoint FROM lifecycle_log "
+                        "WHERE run_id=? AND target=? AND state IN "
+                        "('NEW','RECURRING','REGRESSED')",
+                        (r["run_id"], target)).fetchall()}
+
     def lifecycle_history(self, target: str, exclude_run: str = "") -> dict:
         """The lifecycle memory for one target (all runs recorded so far,
         excluding the given run):

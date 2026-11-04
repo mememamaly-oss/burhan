@@ -1,0 +1,65 @@
+{
+ "mode": "blue",
+ "scan_types": [
+  "bfla",
+  "csrf",
+  "jwt_signature_not_enforced",
+  "missing_security_headers",
+  "server_banner_disclosure"
+ ],
+ "chain_rule_present": "CR-01-credential-feeding",
+ "sca_input": "evidence/layers/sca/old-requirements-sca.json (the committed REAL OSV result for requests==2.19.1)",
+ "counts_pass1": {
+  "dast": 11,
+  "sca": 10,
+  "chain": 1
+ },
+ "counts_pass2": {
+  "dast": 11,
+  "sca": 10,
+  "chain": 1
+ },
+ "top_rows_pass1": [
+  {
+   "category": "dast",
+   "id": "F-7913824719",
+   "risk_score": 79,
+   "lifecycle": "NEW"
+  },
+  {
+   "category": "sca",
+   "id": "GHSA-x84v-xcm2-53pg",
+   "risk_score": 73,
+   "lifecycle": "NEW"
+  },
+  {
+   "category": "dast",
+   "id": "F-94091fc884",
+   "risk_score": 72,
+   "lifecycle": "NEW"
+  },
+  {
+   "category": "sca",
+   "id": "GHSA-j8r2-6x86-q33q",
+   "risk_score": 69,
+   "lifecycle": "NEW"
+  },
+  {
+   "category": "dast",
+   "id": "F-25b0926134",
+   "risk_score": 68,
+   "lifecycle": "NEW"
+  }
+ ],
+ "judgment_calls": [
+  "J1: V(confirmed_by_advisory) = 0.85",
+  "J2: T = advisory's own CVSS base_score/10 when present",
+  "J3: chain: V=1.00 (proven chain), E=entry finding's exposure, T=max member technical"
+ ],
+ "lifecycle_trail_rows": 4,
+ "recurring_seen_pass2": [
+  "7d612ba2",
+  "8f354a0b"
+ ],
+ "verdict": "ONE ranked list over DAST + SCA + the proven chain, the three judgment calls stated in every output, and the second pass resolving SCA/chain rows RECURRING against the shared store"
+}
