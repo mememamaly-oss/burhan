@@ -1,0 +1,34 @@
+{
+ "purpose": "closure_reexploit",
+ "without_credential": {
+  "refused": true,
+  "message": "the action 'closure_reexploit' requires the master-password step-up credential (refusal recorded in the chain, event #1)"
+ },
+ "with_credential": {
+  "purpose": "closure_reexploit",
+  "ok": true,
+  "detail": "step-up granted",
+  "ts": 1793784887.594
+ },
+ "chain_events": [
+  {
+   "purpose": "closure_reexploit",
+   "ok": false,
+   "detail": "credential not supplied",
+   "ts": 1793784887.565
+  },
+  {
+   "purpose": "closure_reexploit",
+   "ok": true,
+   "detail": "step-up granted",
+   "ts": 1793784887.594
+  },
+  {
+   "purpose": "patch_generation",
+   "ok": true,
+   "detail": "step-up granted",
+   "ts": 1793784888.137
+  }
+ ],
+ "chain_verified_count": 3
+}

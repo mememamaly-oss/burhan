@@ -1,0 +1,30 @@
+{
+ "status": "proposed-and-proved",
+ "finding_type": "xss_reflected",
+ "target_url": "http://127.0.0.1:48793",
+ "work_url": "http://127.0.0.1:49971",
+ "red": {
+  "url": "http://127.0.0.1:49971/vuln/xss.php?q=%3Cburhan-r9-xss%3E",
+  "raw_reflection": true,
+  "escaped": false,
+  "exploitable": true
+ },
+ "blue": {
+  "url": "http://127.0.0.1:49971/vuln/xss.php?q=%3Cburhan-r9-xss%3E",
+  "raw_reflection": false,
+  "escaped": true,
+  "exploitable": false
+ },
+ "patch": {
+  "file": "vulnapp.py",
+  "line": 1039,
+  "diff": "--- a/vulnapp.py\n+++ b/vulnapp.py\n@@ -1036,7 +1036,7 @@\n             return self._send(200, HEADER_TMPL.format(body=f\"<p>forum thread list ... lots of content here ... \" * 8 + f\" item {vid}</p>\"))\n \n         if path == \"/vuln/xss.php\":\n-            qv = q.get(\"q\", \"\")\n+            qv = q.get(\"q\", \"\").replace(\"<\", \"&lt;\").replace(\">\", \"&gt;\")\n             return self._send(200, HEADER_TMPL.format(body=f\"<div>You searched for '{qv}'</div>\"))\n \n         if path == \"/vuln/traversal.php\":\n",
+  "strategy": "xss_reflected",
+  "explanation": "HTML-escape the reflected parameter before rendering — the exact escaping the application already applies on its own /safe/search.php surface (defense the codebase itself proves correct)."
+ },
+ "delivery": {
+  "form": "pull-request-bundle",
+  "diff": "--- a/vulnapp.py\n+++ b/vulnapp.py\n@@ -1036,7 +1036,7 @@\n             return self._send(200, HEADER_TMPL.format(body=f\"<p>forum thread list ... lots of content here ... \" * 8 + f\" item {vid}</p>\"))\n \n         if path == \"/vuln/xss.php\":\n-            qv = q.get(\"q\", \"\")\n+            qv = q.get(\"q\", \"\").replace(\"<\", \"&lt;\").replace(\">\", \"&gt;\")\n             return self._send(200, HEADER_TMPL.format(body=f\"<div>You searched for '{qv}'</div>\"))\n \n         if path == \"/vuln/traversal.php\":\n",
+  "instructions": "open a PR in the CLIENT's own repository / review system with this diff; the client's team reviews and merges it — this tool never merges or deploys to client systems (no such code path exists)"
+ }
+}

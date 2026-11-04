@@ -1,0 +1,9 @@
+crapi_docx: /home/z/my-project/download/r9-live/crapi-bilingual.docx
+crapi_pdf: /home/z/my-project/download/r9-live/crapi-bilingual.pdf
+dvga_docx: /home/z/my-project/download/r9-live/dvga-bilingual.docx
+dvga_pdf: /home/z/my-project/download/r9-live/dvga-bilingual.pdf
+parity: PASS — zero content loss, both datasets
+stepup_paired: PASS — refusal logged (event 1), grant logged (event 2), chain verified
+remediation: PASS — RED reproduced on the unpatched clone, BLUE observed on the patched clone, original byte-identical, target still serving its unpatched surface
+fallback_3_4: PASS — stage refused, report-only payload
+ALL LIVE RUNS PASS

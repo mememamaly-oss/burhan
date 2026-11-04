@@ -1362,6 +1362,22 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
 - Suite: 296 -> 319 green (10 bilingual + 13 stepup/remediation).
   python-docx>=1.1.0 declared in requirements.txt the day the format
   shipped (the FM-21d numpy doctrine).
+- LIVE RUN on merged main (scripts/run_r9_live.py, cac58e8, ALL PASS):
+  the bilingual report generated from the real signed r8 evidence —
+  crapi 99/99 and DVGA 26/26, source IDs == output IDs, both languages
+  complete, audit roots match the source findings (parity-check.json);
+  the step-up paired proof on a fresh gate — refusal logged (event 1),
+  closure grant logged (event 2), patch_generation grant logged, chain
+  verified end-to-end (stepup-paired-proof.json); the real RED->BLUE on
+  a live clone — raw reflection reproduced on the unpatched clone
+  (HTTP probe), the patch applied to the clone source only, the same
+  exploit observed to FAIL (escaped) on the patched clone, the original
+  fixture byte-identical and still serving its unpatched surface
+  (remediation-bundle.json + remediation.patch); the 3.4 live refusal —
+  no clone -> the stage refused entirely, report-only payload
+  (fallback-3-4.json). Small proofs committed at evidence/live-run-r9/;
+  full client artifacts (bilingual docx/pdf/json) in download/r9-live/.
+  Operator-facing run artifacts only — no scan behavior changed.
 
 ## Where to find things
 
