@@ -9,3 +9,8 @@ blake3==1.0.11
 # caught the pin failing on exactly that. It is a runtime engine dependency;
 # the weakrand battery now records UNTESTABLE loudly if it is ever absent.
 numpy>=1.24
+
+# Round 9, part 1: the bilingual (AR/EN) client report renders .docx via
+# python-docx at runtime (build_bilingual_docx) — a declared engine dependency
+# since the day the format shipped, per the FM-21d numpy doctrine.
+python-docx>=1.1.0
