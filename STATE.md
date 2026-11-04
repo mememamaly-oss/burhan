@@ -1264,10 +1264,23 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   TP=38 FP=0 FN=0 TN=37) and byte-identical repro. The
   numpy-missing class is what this schedule exists to catch.
 - PART 4 (live re-validation on crAPI + DVGA with the fixed engine):
-  see the round-8 run record below — dispatch on merged main,
-  previously-confirmed findings must reproduce with identical
-  SHA-256s; any new finding/regression is reported with its
-  RED->BLUE evidence.
+  run 41750687823 on merged main 8e2effb (2026-11-04T01:01Z), SUCCESS.
+  The authorization gate admitted the self-hosted containers (registry
+  entry 'self-hosted-fixtures'). REPRODUCTION VERDICT: crAPI 63.6 s /
+  4,837 requests / 99 findings — bfla @ /identity/api/v2/admin/videos/4
+  and jwt_signature_not_enforced @ /identity/api/v2/user/dashboard BOTH
+  REPRODUCED with SHA-256 IDENTICAL to the round-7 baseline (runs
+  41730556960/41733682178 artifact 13277428057); DVGA 5.0 s / 834
+  requests / 26 findings (baseline: 834/26). ZERO new findings, ZERO
+  regressions, by these methods, on these two targets, on this date.
+  The scheduled-hardening dispatch on the same merged head (run
+  41750691170) finished ALL GREEN: antipattern-gate, doctor, pytest,
+  benchmark-gate, reproducibility — the happy path proven in the real
+  GitHub environment (report artifact: scheduled-hardening-report,
+  commit 8e2effb, 5/5 true, zero failures). Evidence:
+  download/r8-live/ (live-validation.json, crapi-scan.json,
+  dvga-scan.json, ground-truth-sha.json) + download/r8-hardening/
+  (hardening-report.json).
 - CLEANUP (owner-authorized): 87 tracked __pycache__/*.pyc files
   untracked + .gitignore; two stale auto-checkout-recovery stashes
   (pyc-only, verified) dropped; three duplicate untracked round-7
