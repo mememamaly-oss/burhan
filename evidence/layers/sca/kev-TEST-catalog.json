@@ -1,0 +1,11 @@
+{
+ "_label": "TEST FIXTURE \u2014 NOT the official CISA catalog. For the offline-matching demo only; the operator passes the real catalog file via --kev-catalog",
+ "vulnerabilities": [
+  {
+   "cveID": "CVE-2023-32681"
+  },
+  {
+   "cveID": "CVE-2020-8203"
+  }
+ ]
+}

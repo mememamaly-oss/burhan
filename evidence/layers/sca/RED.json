@@ -1,0 +1,8 @@
+{
+ "sca_command_exists": false,
+ "sca_command_stderr": "usage: burhan [-h]\n              {scan,benchmark,doctor,repair-demo,compliance,findings,report,twin,reproduce,capability-matrix,apaths,impact,serve,vault}\n              ...\nburhan: error: argument cmd",
+ "engine_files_mentioning_osv": "(none)",
+ "compliance_has_sca_row": false,
+ "sarif_has_sca_rule": false,
+ "verdict": "no manifest ingestion, no OSV query, no SCA finding type \u2014 the capability does not exist anywhere in the pre-change tree"
+}

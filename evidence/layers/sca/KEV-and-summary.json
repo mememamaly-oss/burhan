@@ -1,0 +1,42 @@
+{
+ "live_fetch": {
+  "http_status": 403,
+  "verbatim": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;cisa&#46;gov&#47;sites&#47;default&#47;files&#47;feeds&#47;known&#95;exploite",
+  "note": "the cisa.gov catalog fetch was REFUSED from this environment (WAF 403 Access Denied). The KEV cross-reference therefore ships as OFFLINE matching against the operator's own copy of the official catalog (--kev-catalog); no live fetch is attempted at scan time by design"
+ },
+ "offline_match_demo": {
+  "requests_2_19_1": [
+   "CVE-2023-32681"
+  ],
+  "lodash_4_17_15": [
+   "CVE-2020-8203"
+  ],
+  "negative_control": []
+ },
+ "repo_requirements_plain_result": {
+  "packages_queried": 1,
+  "advisory_ids": [],
+  "unresolved_pins": [
+   "cryptography: 'cryptography>=41.0.0' — not an exact pin; the resolved version is unknown from this file",
+   "numpy: 'numpy>=1.24' — not an exact pin; the resolved version is unknown from this file",
+   "python-docx: 'python-docx>=1.1.0' — not an exact pin; the resolved version is unknown from this file"
+  ],
+  "note": "this repo's own manifest: ONE exact pin queryable (blake3==1.0.11); the range pins are recorded as unresolved (the resolved version is unknown from a range — never guessed). The result is whatever OSV returned for the exact pin: reported plainly, not manufactured"
+ },
+ "old_manifests_named_public_cves": {
+  "requests==2.19.1": [
+   "CVE-2018-18074",
+   "CVE-2023-32681",
+   "CVE-2024-35195",
+   "CVE-2024-47081",
+   "CVE-2026-25645"
+  ],
+  "lodash==4.17.15": [
+   "CVE-2020-28500",
+   "CVE-2020-8203",
+   "CVE-2021-23337",
+   "CVE-2025-13465",
+   "CVE-2026-4800"
+  ]
+ }
+}

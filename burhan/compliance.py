@@ -338,6 +338,18 @@ COMPLIANCE: dict[str, dict[str, str]] = {
         "owasp_2021": "A06:2021", "owasp_2021_src": "scope",
         "owasp_2025": "A03:2025", "owasp_2025_src": "official",
     },
+    # Round 10, PART 3 (SCA): a manifest-pinned dependency with a real
+    # OSV/CVE/GHSA advisory. Same category pages, same scope-tagging
+    # discipline as vulnerable_js_dependency above (the served-asset
+    # sibling): A06:2021 Vulnerable and Outdated Components (CWE-1104 in
+    # the page's scope text, not the List of Mapped CWEs), A03:2025
+    # Software Supply Chain Failures (CWE-1104 IS in that page's official
+    # mapped list).
+    "sca_vulnerable_dependency": {
+        "cwe": "CWE-1104",
+        "owasp_2021": "A06:2021", "owasp_2021_src": "scope",
+        "owasp_2025": "A03:2025", "owasp_2025_src": "official",
+    },
     # ---- authentication family
     "jwt_security": {
         "cwe": "CWE-347",

@@ -209,6 +209,9 @@ SARIF_RULES = {
     "http_response_header_injection":   "Burhan-HDR-001",
     "missing_security_headers":         "Burhan-HDR-002",
     "vulnerable_js_dependency":         "Burhan-DEP-001",
+    # Round 10, PART 3 (SCA): manifest-pinned dependency with a real
+    # OSV/CVE/GHSA advisory — the SARIF rule id for sca findings.
+    "sca_vulnerable_dependency":        "Burhan-SCA-001",
     "idor":                             "Burhan-IDOR-001",
     # Phase 56 (v2.8.0): the Intelligence Layer classes
     "idor_bola":                        "Burhan-IDOR-001",

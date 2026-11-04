@@ -483,6 +483,21 @@ def main():
     apa.add_argument("--result", required=True, help="path to a scan result JSON")
     apa.add_argument("--out", default="", help="write the paths JSON here (default: stdout)")
     apa.add_argument("--paths-only", action="store_true", help="omit the summary block")
+    sca = sub.add_parser("sca", help="round 10 part 3: SCA — match a client "
+                         "application's dependency manifest against the OSV.dev "
+                         "public batch API (no key required)")
+    sca.add_argument("--manifest", required=True,
+                    help="requirements.txt or package-lock.json of the "
+                         "scanned client application (package.json is "
+                         "deferred to its lockfile — see burhan/sca.py)")
+    sca.add_argument("--out", default="", help="write the SCA result JSON here (default: stdout)")
+    sca.add_argument("--raw-dir", default="",
+                    help="save the raw OSV responses verbatim here (the "
+                         "evidence contract)")
+    sca.add_argument("--kev-catalog", default="",
+                    help="path to the official CISA KEV catalog JSON for the "
+                         "known-exploited cross-reference (offline matching; "
+                         "no scan-time fetch of cisa.gov)")
     imp = sub.add_parser("impact", help="v4.4.0 (L3): Proven Real Impact — "
                         "plan SAFE minimal-benign impact probes over a saved "
                         "scan result; optionally execute them live and assess "
@@ -918,6 +933,30 @@ def main():
             sys.exit(0 if result.get("replay") == "REPRODUCTION_VERIFIED" else 1)
         print(json.dumps(proof, indent=1, ensure_ascii=False))
         print("\n" + reproduce_command(proof))
+    elif a.cmd == "sca":
+        # Round 10, PART 3: SCA over a client dependency manifest. The
+        # OSV.dev PUBLIC batch API is called (no key); every severity shown
+        # is the advisory's own CVSS data; the raw responses land in
+        # --raw-dir for the evidence contract. Deferred manifests refuse
+        # LOUDLY (ManifestRejected -> exit 2), never a silent skip.
+        from burhan.sca import build_sca_findings, ManifestRejected
+        try:
+            sca_out = build_sca_findings(a.manifest,
+                                         kev_catalog=a.kev_catalog or "",
+                                         raw_dir=a.raw_dir or "")
+        except ManifestRejected as e:
+            print(json.dumps({"error": f"manifest refused: {e}"}), file=sys.stderr)
+            sys.exit(2)
+        payload = json.dumps(sca_out, indent=1, ensure_ascii=False)
+        if a.out:
+            with open(a.out, "w", encoding="utf-8") as fh:
+                fh.write(payload + "\n")
+            print(json.dumps({"written": a.out,
+                              "packages_queried": sca_out["packages_queried"],
+                              "advisory_ids": len(sca_out["advisory_ids"]),
+                              "findings": len(sca_out["findings"])}))
+        else:
+            print(payload)
     elif a.cmd == "apaths":
         # v4.3.0 (L2): Attack Path Intelligence over a saved scan result.
         # Pure post-processing — reads the JSON, builds the paths, zero requests.
