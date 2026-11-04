@@ -1,0 +1,70 @@
+# Continuous hardening — round 8, part 3 (owner order 2026-11-03).
+#
+# WHY A SCHEDULE: the wall only runs on push/dispatch. Dependency updates
+# and environment drift surface BETWEEN pushes — round 7's numpy incident
+# (an entire detection family silently dead in every documented
+# deployment, caught only because a pin happened to exercise it in CI) is
+# the exact class this job exists to catch. Weekly, the SAME gates the
+# wall runs, plus the anti-pattern scanner gate (part 1 of this round):
+#
+#   antipattern-gate — the first-match/anti-pattern AST scanner with the
+#                      manual-review ledger: new engine code adding an
+#                      unledgered positional-selection/silent-except/
+#                      TOCTOU/counter-ordering pattern FAILS the run
+#   doctor           — the 19-check engine self-test
+#   pytest           — the full Python suite (fixture benchmark incl.)
+#   benchmark-gate   — the committed confusion floor (F1=1.0, TP=38, FP=0)
+#   reproducibility  — two independent executions, byte-identical outputs
+#
+# A failure NEVER dies silently: scripts/scheduled_hardening.py opens a
+# tracked issue per failing check (or comments the existing open one —
+# dedup by title prefix among open issues labeled 'scheduled-hardening')
+# using this run's GITHUB_TOKEN, and the run itself marks red.
+name: Continuous hardening (weekly)
+
+on:
+  schedule:
+    - cron: "23 4 * * 1"   # weekly, Monday 04:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write            # the auto-issue mechanism needs exactly this
+
+concurrency:
+  group: continuous-hardening
+  cancel-in-progress: false
+
+jobs:
+  hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install engine + test deps (the declared set — drift caught here)
+        run: |
+          pip install -r requirements-dev.txt
+          pip install -r requirements.txt playwright
+          python3 -m playwright install --with-deps chromium
+
+      - name: Run all hardening gates (scanner, doctor, suite, benchmark, repro)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python3 scripts/scheduled_hardening.py --work-dir "$RUNNER_TEMP/hardening"
+
+      - name: Upload the hardening report (always — green or red)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scheduled-hardening-report
+          path: ${{ runner.temp }}/hardening/hardening-report.json
+          if-no-files-found: warn

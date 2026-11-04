@@ -358,6 +358,15 @@ def main() -> int:
     out = Path(args.out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)
 
+    # ---- authorization gate (round 8, part 2): BEFORE the first request.
+    # The registry (authorized-targets.json, repo root) is the ONLY source
+    # of truth; an unlisted/unverified target is refused loudly with exit 2
+    # — the validation dies here, zero scan requests sent.
+    from burhan.authorized_targets import require_authorized
+    for _t in (args.crapi, args.dvga):
+        if _t:
+            require_authorized(_t)
+
     ok = True
     results, scores = {}, {}
 

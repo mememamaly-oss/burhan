@@ -1,0 +1,2282 @@
+{
+ "generated": "2026-11-03",
+ "entries": [
+  {
+   "id": "AP-001",
+   "file": "burhan/apath.py",
+   "code": "crid,\\ cval\\ =\\ cookie_vals\\.get\\(cookies\\[0\\],\\ \\(rids\\[0\\],\\ \";\\ \"\\.join\\(cookies\\)\\)\\)",
+   "class": "citation-pick",
+   "reason": "cookies[0] of the SORTED, all-named cookie list: the identity statement cites the first by name and names the rest (FM-30 names any leftovers) — citation, not selection",
+   "scanner_class": "FIRST[0]",
+   "line": 243
+  },
+  {
+   "id": "AP-002",
+   "file": "burhan/apath.py",
+   "code": "if\\ cookies\\[0\\]\\ in\\ prov:",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick: citation/deterministic choice with the alternatives named or bounded — no verdict rides on list order",
+   "scanner_class": "FIRST[0]",
+   "line": 245
+  },
+  {
+   "id": "AP-003",
+   "file": "burhan/apath.py",
+   "code": "prid,\\ setc\\ =\\ prov\\[cookies\\[0\\]\\]",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick: citation/deterministic choice with the alternatives named or bounded — no verdict rides on list order",
+   "scanner_class": "FIRST[0]",
+   "line": 246
+  },
+  {
+   "id": "AP-004",
+   "file": "burhan/apath.py",
+   "code": "if\\ cookies\\[0\\]\\ in\\ prov\\ else\\ \"provenance\\ not\\ retained\\ in\\ the\\ journal\"\\)\\ \\+",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick: citation/deterministic choice with the alternatives named or bounded — no verdict rides on list order",
+   "scanner_class": "FIRST[0]",
+   "line": 255
+  },
+  {
+   "id": "AP-005",
+   "file": "burhan/apath.py",
+   "code": "\\(f\"issued\\ by\\ the\\ target\\ on\\ response\\ \\{prov\\[cookies\\[0\\]\\]\\[0\\]\\}\\ \\(an\\ unauthenticated\\ fetch\\ of\\ a\\ public\\ surface\\)\"",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick: citation/deterministic choice with the alternatives named or bounded — no verdict rides on list order",
+   "scanner_class": "FIRST[0]",
+   "line": 254
+  },
+  {
+   "id": "AP-006",
+   "file": "burhan/apath.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 359
+  },
+  {
+   "id": "AP-007",
+   "file": "burhan/apath.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 593
+  },
+  {
+   "id": "AP-008",
+   "file": "burhan/api.py",
+   "code": "except\\ Exception:",
+   "class": "error-response",
+   "reason": "API handler: invalid JSON is answered with HTTP 400 to the client — the failure is observable to the caller, not swallowed",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 284
+  },
+  {
+   "id": "AP-009",
+   "file": "burhan/auth.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 104
+  },
+  {
+   "id": "AP-010",
+   "file": "burhan/auth.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 154
+  },
+  {
+   "id": "AP-011",
+   "file": "burhan/auth.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 169
+  },
+  {
+   "id": "AP-012",
+   "file": "burhan/auth.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 240
+  },
+  {
+   "id": "AP-013",
+   "file": "burhan/authorized_targets.py",
+   "code": "reg\\ =\\ json\\.load\\(open\\(path,\\ encoding=\"utf\\-8\"\\)\\)",
+   "class": "state-load-race",
+   "reason": "registry exists-then-open: a torn read collapses into the adjacent corrupt-load handler -> the loud SystemExit(2) banner — the gate fails LOUD on a raced registry, never scans",
+   "scanner_class": "TOCTOU",
+   "line": 54
+  },
+  {
+   "id": "AP-014",
+   "file": "burhan/authorized_targets.py",
+   "code": "except\\ Exception:",
+   "class": "fail-closed-default",
+   "reason": "_is_loopback_or_private: a getaddrinfo failure returns False = 'not provably the operator's own host' -> the target falls to the public-target path where an unlisted host is REFUSED — the default is the safe verdict on purpose",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 102
+  },
+  {
+   "id": "AP-015",
+   "file": "burhan/authz.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 316
+  },
+  {
+   "id": "AP-016",
+   "file": "burhan/authz.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 323
+  },
+  {
+   "id": "AP-017",
+   "file": "burhan/authz.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 371
+  },
+  {
+   "id": "AP-018",
+   "file": "burhan/authz.py",
+   "code": "first\\ =\\ sorted\\(self\\.sessions\\.items\\(\\)\\)\\[0\\]\\[1\\]",
+   "class": "deterministic-pick",
+   "reason": "sorted(self.sessions.items())[0]: a deterministic pick for origin extraction — any authenticated session's landing carries the scheme/host; not a verdict selection",
+   "scanner_class": "FIRST[0-call]",
+   "line": 475
+  },
+  {
+   "id": "AP-019",
+   "file": "burhan/authz.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 500
+  },
+  {
+   "id": "AP-020",
+   "file": "burhan/authz.py",
+   "code": "break\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ one\\ finding\\ per\\ surface",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 550
+  },
+  {
+   "id": "AP-021",
+   "file": "burhan/authz.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 565
+  },
+  {
+   "id": "AP-022",
+   "file": "burhan/authz.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 584
+  },
+  {
+   "id": "AP-023",
+   "file": "burhan/authz.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 587
+  },
+  {
+   "id": "AP-024",
+   "file": "burhan/authz.py",
+   "code": "break\\ \\ \\ \\ \\ \\ \\ \\ \\#\\ existence\\ proven\\ —\\ further\\ probes\\ add\\ nothing",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 635
+  },
+  {
+   "id": "AP-025",
+   "file": "burhan/authz.py",
+   "code": "break\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ one\\ finding\\ per\\ endpoint;\\ next\\ endpoint\\ continues",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 648
+  },
+  {
+   "id": "AP-026",
+   "file": "burhan/authz.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 661
+  },
+  {
+   "id": "AP-027",
+   "file": "burhan/authz.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 686
+  },
+  {
+   "id": "AP-028",
+   "file": "burhan/authz.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 731
+  },
+  {
+   "id": "AP-029",
+   "file": "burhan/authz.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 744
+  },
+  {
+   "id": "AP-030",
+   "file": "burhan/browser.py",
+   "code": "break\\ \\ \\ \\ \\ \\ \\ \\ \\#\\ one\\ sink\\ per\\ source\\ pattern\\ is\\ enough\\ for\\ planning",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 94
+  },
+  {
+   "id": "AP-031",
+   "file": "burhan/browser.py",
+   "code": "except\\ Exception:\\ pass",
+   "class": "best-effort-teardown",
+   "reason": "close(): best-effort cleanup — a failed close must not mask the scan result; nothing is decided on the swallowed error",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 230
+  },
+  {
+   "id": "AP-032",
+   "file": "burhan/browser.py",
+   "code": "except\\ Exception:\\ pass",
+   "class": "best-effort-teardown",
+   "reason": "close(): best-effort cleanup of the loop server",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 233
+  },
+  {
+   "id": "AP-033",
+   "file": "burhan/browser.py",
+   "code": "except\\ Exception:\\ pass",
+   "class": "best-effort-teardown",
+   "reason": "close(): best-effort cleanup of the socket",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 236
+  },
+  {
+   "id": "AP-034",
+   "file": "burhan/chainphase.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 95
+  },
+  {
+   "id": "AP-035",
+   "file": "burhan/chainphase.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 400
+  },
+  {
+   "id": "AP-036",
+   "file": "burhan/chainphase.py",
+   "code": "wr\\ =\\ self\\._submit\\(writer,\\ K1\\)\\[0\\]\\ if\\ hash_eps\\ else\\ self\\._submit\\(writer,\\ P16\\)\\[0\\]",
+   "class": "tuple-shape",
+   "reason": "_submit(...)[0]: tuple unpack of the (resp,) return shape inside the FM-29 writer sweep — not a list selection",
+   "scanner_class": "FIRST[0-call]",
+   "line": 404
+  },
+  {
+   "id": "AP-037",
+   "file": "burhan/chainphase.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 411
+  },
+  {
+   "id": "AP-038",
+   "file": "burhan/chainphase.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 413
+  },
+  {
+   "id": "AP-039",
+   "file": "burhan/chainphase.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 513
+  },
+  {
+   "id": "AP-040",
+   "file": "burhan/chainphase.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 517
+  },
+  {
+   "id": "AP-041",
+   "file": "burhan/chainphase.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 520
+  },
+  {
+   "id": "AP-042",
+   "file": "burhan/chainphase.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 604
+  },
+  {
+   "id": "AP-043",
+   "file": "burhan/chainphase.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 732
+  },
+  {
+   "id": "AP-044",
+   "file": "burhan/cli.py",
+   "code": "authz_cfg\\ =\\ json\\.load\\(open\\(_azp\\)\\)",
+   "class": "state-load-race",
+   "reason": "authz fixture load: exists-then-open on a repo-local file; the race collapses into a parse error handled right below — no security decision on the window",
+   "scanner_class": "TOCTOU",
+   "line": 145
+  },
+  {
+   "id": "AP-045",
+   "file": "burhan/cli.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 249
+  },
+  {
+   "id": "AP-046",
+   "file": "burhan/cli.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 281
+  },
+  {
+   "id": "AP-047",
+   "file": "burhan/cli.py",
+   "code": "n\\ =\\ len\\(sarif\\.get\\(\"runs\",\\ \\[\\{\\}\\]\\)\\[0\\]\\.get\\(\"results\",\\ \\[\\]\\)\\)\\ if\\ \"runs\"\\ in\\ sarif\\ else\\ 0",
+   "class": "guarded-read",
+   "reason": "sarif.get('runs', [{}])[0]: guarded default; the doctor reports the count it finds — diagnostics read",
+   "scanner_class": "FIRST[0-call]",
+   "line": 761
+  },
+  {
+   "id": "AP-048",
+   "file": "burhan/cli.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 848
+  },
+  {
+   "id": "AP-049",
+   "file": "burhan/cli.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 850
+  },
+  {
+   "id": "AP-050",
+   "file": "burhan/core.py",
+   "code": "except\\ Exception:",
+   "class": "fail-closed-default",
+   "reason": "is_private_ip: any ambiguity returns True = REJECT (SSRF gate) — the default is the safe verdict on purpose",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 103
+  },
+  {
+   "id": "AP-051",
+   "file": "burhan/core.py",
+   "code": "except\\ Exception\\ as\\ exc:",
+   "class": "reason-returned",
+   "reason": "pin_transport_address: the exception text is RETURNED as the dns-unresolvable reason — observable to the caller, not swallowed",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 139
+  },
+  {
+   "id": "AP-052",
+   "file": "burhan/core.py",
+   "code": "return\\ sorted\\(set\\(addrs\\),\\ key=_order\\)\\[0\\],\\ None",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 158
+  },
+  {
+   "id": "AP-053",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 202
+  },
+  {
+   "id": "AP-054",
+   "file": "burhan/detect.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 498
+  },
+  {
+   "id": "AP-055",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1228
+  },
+  {
+   "id": "AP-056",
+   "file": "burhan/detect.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1339
+  },
+  {
+   "id": "AP-057",
+   "file": "burhan/detect.py",
+   "code": "if\\ budget\\ <=\\ 0:",
+   "class": "check-then-spend",
+   "reason": "budget check BEFORE the spend in the same iteration — verified ordering; the cap is never exceeded",
+   "scanner_class": "COUNTER_CHECK",
+   "line": 1501
+  },
+  {
+   "id": "AP-058",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1502
+  },
+  {
+   "id": "AP-059",
+   "file": "burhan/detect.py",
+   "code": "s_url,\\ r1,\\ r2\\ =\\ hits\\[0\\]",
+   "class": "citation-pick",
+   "reason": "hits[0]: the finding cites the first storage surface while all_surfaces lists EVERY surface in the evidence — citation, not a dropped candidate",
+   "scanner_class": "FIRST[0]",
+   "line": 1514
+  },
+  {
+   "id": "AP-060",
+   "file": "burhan/detect.py",
+   "code": "budget\\ \\-=\\ 1",
+   "class": "check-then-spend",
+   "reason": "budget -= 1 after the checked gate — exact accounting, no overshoot possible",
+   "scanner_class": "COUNTER_DEC",
+   "line": 1529
+  },
+  {
+   "id": "AP-061",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1757
+  },
+  {
+   "id": "AP-062",
+   "file": "burhan/detect.py",
+   "code": "break\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ depth\\ ladder\\ stops\\ at\\ the\\ first\\ hit\\ per\\ base",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1759
+  },
+  {
+   "id": "AP-063",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 2105
+  },
+  {
+   "id": "AP-064",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 2258
+  },
+  {
+   "id": "AP-065",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 2336
+  },
+  {
+   "id": "AP-066",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 2338
+  },
+  {
+   "id": "AP-067",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 2427
+  },
+  {
+   "id": "AP-068",
+   "file": "burhan/detect.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 2717
+  },
+  {
+   "id": "AP-069",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 2852
+  },
+  {
+   "id": "AP-070",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 2915
+  },
+  {
+   "id": "AP-071",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 3053
+  },
+  {
+   "id": "AP-072",
+   "file": "burhan/detect.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 3128
+  },
+  {
+   "id": "AP-073",
+   "file": "burhan/discovery.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 54
+  },
+  {
+   "id": "AP-074",
+   "file": "burhan/discovery.py",
+   "code": "url\\ =\\ queue\\.pop\\(0\\)",
+   "class": "worklist-pop",
+   "reason": "queue.pop(0): BFS crawl frontier — traversal order, not selection",
+   "scanner_class": "POP0",
+   "line": 370
+  },
+  {
+   "id": "AP-075",
+   "file": "burhan/discovery.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 760
+  },
+  {
+   "id": "AP-076",
+   "file": "burhan/evidence.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 704
+  },
+  {
+   "id": "AP-077",
+   "file": "burhan/graphql.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 313
+  },
+  {
+   "id": "AP-078",
+   "file": "burhan/graphql.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 332
+  },
+  {
+   "id": "AP-079",
+   "file": "burhan/graphql.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 553
+  },
+  {
+   "id": "AP-080",
+   "file": "burhan/graphql.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 676
+  },
+  {
+   "id": "AP-081",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 730
+  },
+  {
+   "id": "AP-082",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 732
+  },
+  {
+   "id": "AP-083",
+   "file": "burhan/graphql.py",
+   "code": "for\\ a\\ in\\ \\(c\\.get\\(\"args\"\\)\\ or\\ \\[\\]\\)\\)\\),\\ queries\\[0\\]\\)",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick: citation/deterministic choice with the alternatives named or bounded — no verdict rides on list order",
+   "scanner_class": "FIRST[0]",
+   "line": 766
+  },
+  {
+   "id": "AP-084",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 928
+  },
+  {
+   "id": "AP-085",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 970
+  },
+  {
+   "id": "AP-086",
+   "file": "burhan/graphql.py",
+   "code": "break\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ one\\ verified\\ finding\\ is\\ the\\ honest\\ cap",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 989
+  },
+  {
+   "id": "AP-087",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1013
+  },
+  {
+   "id": "AP-088",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1136
+  },
+  {
+   "id": "AP-089",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1230
+  },
+  {
+   "id": "AP-090",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1310
+  },
+  {
+   "id": "AP-091",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1361
+  },
+  {
+   "id": "AP-092",
+   "file": "burhan/graphql.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1370
+  },
+  {
+   "id": "AP-093",
+   "file": "burhan/http_engine.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 203
+  },
+  {
+   "id": "AP-094",
+   "file": "burhan/http_engine.py",
+   "code": "except\\ Exception\\ as\\ exc:",
+   "class": "reason-returned",
+   "reason": "_pin_target: the exception text is returned as the pin failure reason — observable to the caller",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 415
+  },
+  {
+   "id": "AP-095",
+   "file": "burhan/http_engine.py",
+   "code": "pinned\\ =\\ sorted\\(set\\(addrs\\),\\ key=_order\\)\\[0\\]",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 438
+  },
+  {
+   "id": "AP-096",
+   "file": "burhan/http_engine.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 474
+  },
+  {
+   "id": "AP-097",
+   "file": "burhan/http_engine.py",
+   "code": "victim\\ =\\ order\\.pop\\(0\\)",
+   "class": "fifo-eviction",
+   "reason": "order.pop(0): documented FIFO cookie-jar eviction at JAR_CAP with jar_evictions counter — capacity policy, not selection",
+   "scanner_class": "POP0",
+   "line": 487
+  },
+  {
+   "id": "AP-098",
+   "file": "burhan/http_engine.py",
+   "code": "break",
+   "class": "loud-break",
+   "reason": "redirect loop: RedirectBlockedByScope is emitted on the bus BEFORE the break — the stop is announced, never silent",
+   "scanner_class": "BREAK",
+   "line": 617
+  },
+  {
+   "id": "AP-099",
+   "file": "burhan/http_engine.py",
+   "code": "break",
+   "class": "loud-break",
+   "reason": "cross-host redirect: scope policy stop, the reason is emitted via RedirectBlockedByScope by the caller of _scope_ok",
+   "scanner_class": "BREAK",
+   "line": 620
+  },
+  {
+   "id": "AP-100",
+   "file": "burhan/http_engine.py",
+   "code": "break",
+   "class": "loud-break",
+   "reason": "redirect pin failure: RedirectBlockedByScope emitted with the pin reason before the break",
+   "scanner_class": "BREAK",
+   "line": 627
+  },
+  {
+   "id": "AP-101",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 199
+  },
+  {
+   "id": "AP-102",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 225
+  },
+  {
+   "id": "AP-103",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 288
+  },
+  {
+   "id": "AP-104",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 295
+  },
+  {
+   "id": "AP-105",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 377
+  },
+  {
+   "id": "AP-106",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 577
+  },
+  {
+   "id": "AP-107",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 586
+  },
+  {
+   "id": "AP-108",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 630
+  },
+  {
+   "id": "AP-109",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 667
+  },
+  {
+   "id": "AP-110",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 683
+  },
+  {
+   "id": "AP-111",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 688
+  },
+  {
+   "id": "AP-112",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 713
+  },
+  {
+   "id": "AP-113",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 731
+  },
+  {
+   "id": "AP-114",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 743
+  },
+  {
+   "id": "AP-115",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 830
+  },
+  {
+   "id": "AP-116",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 936
+  },
+  {
+   "id": "AP-117",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 971
+  },
+  {
+   "id": "AP-118",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1123
+  },
+  {
+   "id": "AP-119",
+   "file": "burhan/impact.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1140
+  },
+  {
+   "id": "AP-120",
+   "file": "burhan/impact.py",
+   "code": "return\\ _body\\(ctx\\.entry\\(cands\\[0\\]\\[0\\]\\)\\)",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick: citation/deterministic choice with the alternatives named or bounded — no verdict rides on list order",
+   "scanner_class": "FIRST[0]",
+   "line": 1229
+  },
+  {
+   "id": "AP-121",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1230
+  },
+  {
+   "id": "AP-122",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1343
+  },
+  {
+   "id": "AP-123",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1413
+  },
+  {
+   "id": "AP-124",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1428
+  },
+  {
+   "id": "AP-125",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception\\ as\\ e:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1443
+  },
+  {
+   "id": "AP-126",
+   "file": "burhan/infra.py",
+   "code": "break\\ \\ \\#\\ المهلة\\ انتهت\\ —\\ النقص\\ يُبلَّغ\\ كما\\ هو،\\ بلا\\ تجميل",
+   "class": "deadline-break",
+   "reason": "load harness: deadline break — the message shortfall is reported as-is (per the inline comment), never dressed up",
+   "scanner_class": "BREAK",
+   "line": 218
+  },
+  {
+   "id": "AP-127",
+   "file": "burhan/infra.py",
+   "code": "break\\ \\ \\#\\ النقص\\ يُبلَّغ\\ كما\\ هو",
+   "class": "deadline-break",
+   "reason": "load harness: deadline break — the row shortfall is reported as-is, never dressed up",
+   "scanner_class": "BREAK",
+   "line": 255
+  },
+  {
+   "id": "AP-128",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 47
+  },
+  {
+   "id": "AP-129",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:\\ return\\ False",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 277
+  },
+  {
+   "id": "AP-130",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 380
+  },
+  {
+   "id": "AP-131",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 382
+  },
+  {
+   "id": "AP-132",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 472
+  },
+  {
+   "id": "AP-133",
+   "file": "burhan/intel.py",
+   "code": "f\"\\{hits\\[0\\]\\[0\\]\\}\"\\ if\\ hit\\ else\\ \"fresh\\ canary\\ did\\ not\\ persist\\ on\\ any\\ render\\ surface\"\\)\\)",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick: citation/deterministic choice with the alternatives named or bounded — no verdict rides on list order",
+   "scanner_class": "FIRST[0]",
+   "line": 577
+  },
+  {
+   "id": "AP-134",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 713
+  },
+  {
+   "id": "AP-135",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 740
+  },
+  {
+   "id": "AP-136",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 764
+  },
+  {
+   "id": "AP-137",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 802
+  },
+  {
+   "id": "AP-138",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 828
+  },
+  {
+   "id": "AP-139",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1297
+  },
+  {
+   "id": "AP-140",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1299
+  },
+  {
+   "id": "AP-141",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1407
+  },
+  {
+   "id": "AP-142",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1572
+  },
+  {
+   "id": "AP-143",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1776
+  },
+  {
+   "id": "AP-144",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1780
+  },
+  {
+   "id": "AP-145",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1810
+  },
+  {
+   "id": "AP-146",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1813
+  },
+  {
+   "id": "AP-147",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1822
+  },
+  {
+   "id": "AP-148",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1831
+  },
+  {
+   "id": "AP-149",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1833
+  },
+  {
+   "id": "AP-150",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1870
+  },
+  {
+   "id": "AP-151",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1886
+  },
+  {
+   "id": "AP-152",
+   "file": "burhan/intel.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1918
+  },
+  {
+   "id": "AP-153",
+   "file": "burhan/intel.py",
+   "code": "self\\.stats\\ =\\ json\\.load\\(open\\(path\\)\\)",
+   "class": "state-load-race",
+   "reason": "strategy-stats load: exists-then-open; a race collapses into the adjacent except -> fresh stats — no security decision",
+   "scanner_class": "TOCTOU",
+   "line": 2244
+  },
+  {
+   "id": "AP-154",
+   "file": "burhan/intel.py",
+   "code": "return\\ sorted\\(strategies,\\ key=lambda\\ st:\\ \\(\\-lb\\(st\\)\\[0\\],\\ st\\)\\)",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 2261
+  },
+  {
+   "id": "AP-155",
+   "file": "burhan/intel.py",
+   "code": "self\\.records\\ =\\ json\\.load\\(open\\(path\\)\\)",
+   "class": "state-load-race",
+   "reason": "boundary journal load: exists-then-open; a race collapses into the adjacent except -> fresh journal",
+   "scanner_class": "TOCTOU",
+   "line": 2274
+  },
+  {
+   "id": "AP-156",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 2313
+  },
+  {
+   "id": "AP-157",
+   "file": "burhan/jrand.py",
+   "code": "ok\\ =\\ np\\.nonzero\\(\\(s2\\ >>\\ np\\.uint64\\(21\\)\\)\\ ==\\ np\\.uint64\\(b\\)\\)\\[0\\]",
+   "class": "vectorized-collect",
+   "reason": "np.nonzero(...)[0]: vectorized collect — the result list is capped ok[:4] downstream; not a first-only pick",
+   "scanner_class": "FIRST[0-call]",
+   "line": 119
+  },
+  {
+   "id": "AP-158",
+   "file": "burhan/jrand.py",
+   "code": "break",
+   "class": "capped-collect",
+   "reason": "pure-Python fallback mirrors the numpy path's ok[:4] cap — a bounded COLLECT (stop after 4), not a first-only selection",
+   "scanner_class": "BREAK",
+   "line": 128
+  },
+  {
+   "id": "AP-159",
+   "file": "burhan/jrand.py",
+   "code": "except\\ Exception:",
+   "class": "by-design-probe",
+   "reason": "numpy_available() IS the loud gate's probe (FM-21d): returning False on import failure is its contract, the caller records WeakRandRelationUnavailable",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 148
+  },
+  {
+   "id": "AP-160",
+   "file": "burhan/jrand.py",
+   "code": "ok\\ =\\ np\\.nonzero\\(_near\\(t2,\\ t2c,\\ W\\)\\ \\&\\ \\(\\(d2\\ <=\\ np\\.uint64\\(gap_max\\)\\)\\ \\|\\ \\(d2\\ >=\\ M48\\ \\-\\ np\\.uint64\\(gap_max\\)\\)\\)\\)\\[0\\]",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 210
+  },
+  {
+   "id": "AP-161",
+   "file": "burhan/memory.py",
+   "code": "with\\ open\\(path,\\ encoding=\"utf\\-8\"\\)\\ as\\ fh:",
+   "class": "state-load-race",
+   "reason": "memory store load: exists-then-open inside its own try; a race or corrupt read collapses to a fresh store (inline comment: a memory failure must never fail a scan)",
+   "scanner_class": "TOCTOU",
+   "line": 43
+  },
+  {
+   "id": "AP-162",
+   "file": "burhan/metrics.py",
+   "code": "break",
+   "class": "fixed-point",
+   "reason": "power-iteration: fixed-point convergence break (delta < 1e-15)",
+   "scanner_class": "BREAK",
+   "line": 221
+  },
+  {
+   "id": "AP-163",
+   "file": "burhan/metrics.py",
+   "code": "break",
+   "class": "fixed-point",
+   "reason": "Gauss iteration: convergence break (|de-1| < eps)",
+   "scanner_class": "BREAK",
+   "line": 341
+  },
+  {
+   "id": "AP-164",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 138
+  },
+  {
+   "id": "AP-165",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 264
+  },
+  {
+   "id": "AP-166",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 273
+  },
+  {
+   "id": "AP-167",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 282
+  },
+  {
+   "id": "AP-168",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 291
+  },
+  {
+   "id": "AP-169",
+   "file": "burhan/modernsec.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 397
+  },
+  {
+   "id": "AP-170",
+   "file": "burhan/modernsec.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 442
+  },
+  {
+   "id": "AP-171",
+   "file": "burhan/modernsec.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 463
+  },
+  {
+   "id": "AP-172",
+   "file": "burhan/modernsec.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 504
+  },
+  {
+   "id": "AP-173",
+   "file": "burhan/modernsec.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 572
+  },
+  {
+   "id": "AP-174",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 683
+  },
+  {
+   "id": "AP-175",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 153
+  },
+  {
+   "id": "AP-176",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 240
+  },
+  {
+   "id": "AP-177",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 355
+  },
+  {
+   "id": "AP-178",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 400
+  },
+  {
+   "id": "AP-179",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 405
+  },
+  {
+   "id": "AP-180",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 461
+  },
+  {
+   "id": "AP-181",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception\\ as\\ e:\\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001\\ —\\ probe\\ errors\\ are\\ outcomes",
+   "class": "probe-outcome",
+   "reason": "rebind_toctou_probe: probe errors ARE outcomes (inline comment); the boundary records the observed cause",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 487
+  },
+  {
+   "id": "AP-182",
+   "file": "burhan/modernsec2.py",
+   "code": "o\\ =\\ stack\\.pop\\(0\\)",
+   "class": "worklist-pop",
+   "reason": "stack.pop(0): BFS worklist order-pop — traversal order, not a candidate selection",
+   "scanner_class": "POP0",
+   "line": 547
+  },
+  {
+   "id": "AP-183",
+   "file": "burhan/modernsec2.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 692
+  },
+  {
+   "id": "AP-184",
+   "file": "burhan/modernsec2.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 706
+  },
+  {
+   "id": "AP-185",
+   "file": "burhan/modernsec2.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 715
+  },
+  {
+   "id": "AP-186",
+   "file": "burhan/modernsec2.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 774
+  },
+  {
+   "id": "AP-187",
+   "file": "burhan/modernsec2.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 833
+  },
+  {
+   "id": "AP-188",
+   "file": "burhan/modernsec2.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 991
+  },
+  {
+   "id": "AP-189",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "best-effort-teardown",
+   "reason": "stop(): uniform provider protocol — nothing to stop is a success",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 135
+  },
+  {
+   "id": "AP-190",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "transient-poll",
+   "reason": "poll(): transient network errors keep the polling loop alive to the deadline; the deadline outcome (None) is the honest answer",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 221
+  },
+  {
+   "id": "AP-191",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "clock-parse-fallback",
+   "reason": "_hit(): unparsable timestamps fall back to time.time() — the interaction is still recorded, only its clock precision degrades",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 234
+  },
+  {
+   "id": "AP-192",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "transient-poll",
+   "reason": "hits(): audit view best-effort — an empty view on transport failure; the verdict paths use poll() with its deadline",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 250
+  },
+  {
+   "id": "AP-193",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ Exception:",
+   "class": "gated-by-design",
+   "reason": "planner gate pass-through by design — the gate's decision, not a swallowed failure",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 307
+  },
+  {
+   "id": "AP-194",
+   "file": "burhan/orchestrator.py",
+   "code": "endpoints\\.extend\\(e\\ for\\ e\\ in\\ found\\ if\\ e\\.id\\ !=\\ endpoints\\[0\\]\\.id\\)",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick: citation/deterministic choice with the alternatives named or bounded — no verdict rides on list order",
+   "scanner_class": "FIRST[0]",
+   "line": 582
+  },
+  {
+   "id": "AP-195",
+   "file": "burhan/orchestrator.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 774
+  },
+  {
+   "id": "AP-196",
+   "file": "burhan/orchestrator.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1032
+  },
+  {
+   "id": "AP-197",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ Exception:",
+   "class": "best-effort-teardown",
+   "reason": "browser.close() after the DOM phase — teardown, the phase's own failures are recorded above via failures.record",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1245
+  },
+  {
+   "id": "AP-198",
+   "file": "burhan/orchestrator.py",
+   "code": "break",
+   "class": "bounded-unwrap",
+   "reason": "4-deep __cause__ unwrap loop — bounded exception-inspection, stops at the innermost frame",
+   "scanner_class": "BREAK",
+   "line": 2026
+  },
+  {
+   "id": "AP-199",
+   "file": "burhan/orchestrator.py",
+   "code": "assert\\ len\\(hits\\)\\ ==\\ 1\\ and\\ \"…\"\\ in\\ hits\\[0\\]\\.evidence\\[0\\]\\.detail\\ and\\ \"BBBB\"\\ not\\ in\\ hits\\[0\\]\\.evidence\\[0\\]\\.detail",
+   "class": "self-test",
+   "reason": "doctor self-test asserts on a controlled in-memory fixture — diagnostics, not engine verdict logic",
+   "scanner_class": "FIRST[0]",
+   "line": 2252
+  },
+  {
+   "id": "AP-200",
+   "file": "burhan/paramintel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 74
+  },
+  {
+   "id": "AP-201",
+   "file": "burhan/pcs.py",
+   "code": "return\\ struct\\.unpack\\(\">f\",\\ buf\\[pos\\ \\+\\ 1:pos\\ \\+\\ 5\\]\\)\\[0\\],\\ pos\\ \\+\\ 5",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 218
+  },
+  {
+   "id": "AP-202",
+   "file": "burhan/pcs.py",
+   "code": "return\\ struct\\.unpack\\(\">d\",\\ buf\\[pos\\ \\+\\ 1:pos\\ \\+\\ 9\\]\\)\\[0\\],\\ pos\\ \\+\\ 9",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 220
+  },
+  {
+   "id": "AP-203",
+   "file": "burhan/race/__init__.py",
+   "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 65
+  },
+  {
+   "id": "AP-204",
+   "file": "burhan/race/__init__.py",
+   "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 74
+  },
+  {
+   "id": "AP-205",
+   "file": "burhan/race/engine.py",
+   "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 143
+  },
+  {
+   "id": "AP-206",
+   "file": "burhan/race/engine.py",
+   "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 180
+  },
+  {
+   "id": "AP-207",
+   "file": "burhan/race/gates.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 196
+  },
+  {
+   "id": "AP-208",
+   "file": "burhan/race/gates.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 199
+  },
+  {
+   "id": "AP-209",
+   "file": "burhan/race/integration.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 48
+  },
+  {
+   "id": "AP-210",
+   "file": "burhan/repro.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 297
+  },
+  {
+   "id": "AP-211",
+   "file": "burhan/repro.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 321
+  },
+  {
+   "id": "AP-212",
+   "file": "burhan/secrets.py",
+   "code": "break\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ one\\ finding\\ per\\ class\\ per\\ endpoint",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 141
+  },
+  {
+   "id": "AP-213",
+   "file": "burhan/statemachine.py",
+   "code": "break",
+   "class": "first-invalid-break",
+   "reason": "twin validation: reports the FIRST broken step then stops — one reported defect at a time, the validator continues on the next entry",
+   "scanner_class": "BREAK",
+   "line": 345
+  },
+  {
+   "id": "AP-214",
+   "file": "burhan/statemachine.py",
+   "code": "break",
+   "class": "first-invalid-break",
+   "reason": "boundary-journal validation: same one-defect-at-a-time shape",
+   "scanner_class": "BREAK",
+   "line": 369
+  },
+  {
+   "id": "AP-215",
+   "file": "burhan/symbolic/models.py",
+   "code": "except\\ Exception:",
+   "class": "verdict-correct",
+   "reason": "verify_result_signature: an exception during signature verification means INVALID — returning False is the correct security verdict, not a swallowed error",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 244
+  },
+  {
+   "id": "AP-216",
+   "file": "burhan/symbolic/solver.py",
+   "code": "cap\\ =\\ b\\ \\-\\ 1",
+   "class": "bound-derivation",
+   "reason": "cap = b - 1: computing a bound from input b — a derivation, not a budget decrement; no check-spend ordering to violate",
+   "scanner_class": "COUNTER_DEC",
+   "line": 151
+  },
+  {
+   "id": "AP-217",
+   "file": "burhan/symbolic/solver.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 265
+  },
+  {
+   "id": "AP-218",
+   "file": "burhan/transparency.py",
+   "code": "break",
+   "class": "first-invalid-break",
+   "reason": "consistency checker: reports the first contradicting pair then breaks — one defect per pass, the report lists it",
+   "scanner_class": "BREAK",
+   "line": 421
+  },
+  {
+   "id": "AP-219",
+   "file": "burhan/twin.py",
+   "code": "role=\"user\"\\ if\\ roles_seen\\ ==\\ \\{\"user\"\\}\\ else\\ sorted\\(roles_seen\\)\\[0\\]\\)",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 345
+  },
+  {
+   "id": "AP-220",
+   "file": "burhan/weakrand.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 234
+  },
+  {
+   "id": "AP-221",
+   "file": "burhan/weakrand.py",
+   "code": "if\\ budget\\ <=\\ 0:",
+   "class": "check-then-spend",
+   "reason": "budget check BEFORE the multi-request families spend — verified ordering; disclosure oracle stays free by design",
+   "scanner_class": "COUNTER_CHECK",
+   "line": 302
+  },
+  {
+   "id": "AP-222",
+   "file": "burhan/weakrand.py",
+   "code": "budget\\ \\-=\\ 1",
+   "class": "check-then-spend",
+   "reason": "budget -= 1 after the checked gate — exact accounting",
+   "scanner_class": "COUNTER_DEC",
+   "line": 308
+  },
+  {
+   "id": "AP-223",
+   "file": "burhan/websocket.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 151
+  },
+  {
+   "id": "AP-224",
+   "file": "burhan/websocket.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 330
+  },
+  {
+   "id": "AP-225",
+   "file": "burhan/websocket.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 421
+  },
+  {
+   "id": "AP-226",
+   "file": "burhan/websocket.py",
+   "code": "length\\ =\\ struct\\.unpack\\(\">H\",\\ self\\._read_exact\\(2\\)\\)\\[0\\]",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 471
+  },
+  {
+   "id": "AP-227",
+   "file": "burhan/websocket.py",
+   "code": "length\\ =\\ struct\\.unpack\\(\">Q\",\\ self\\._read_exact\\(8\\)\\)\\[0\\]",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 473
+  },
+  {
+   "id": "AP-228",
+   "file": "burhan/websocket.py",
+   "code": "self\\.close_code\\ =\\ struct\\.unpack\\(\">H\",\\ payload\\[:2\\]\\)\\[0\\]\\ \\\\",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 484
+  },
+  {
+   "id": "AP-229",
+   "file": "burhan/websocket.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 523
+  },
+  {
+   "id": "AP-230",
+   "file": "burhan/websocket.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 528
+  },
+  {
+   "id": "AP-231",
+   "file": "burhan/websocket.py",
+   "code": "except\\ Exception:",
+   "class": "best-effort-teardown",
+   "reason": "close(): teardown — the handshake outcome is already recorded",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 559
+  },
+  {
+   "id": "AP-232",
+   "file": "burhan/websocket.py",
+   "code": "except\\ Exception:",
+   "class": "best-effort-teardown",
+   "reason": "_hard_close(): teardown of a broken socket",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 568
+  },
+  {
+   "id": "AP-233",
+   "file": "burhan/websocket.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 585
+  },
+  {
+   "id": "AP-234",
+   "file": "burhan/websocket.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 824
+  },
+  {
+   "id": "AP-235",
+   "file": "burhan/workflow.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 157
+  },
+  {
+   "id": "AP-236",
+   "file": "burhan/workflow.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 350
+  },
+  {
+   "id": "AP-237",
+   "file": "burhan/workflow.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 571
+  },
+  {
+   "id": "AP-238",
+   "file": "burhan/workflow.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 598
+  },
+  {
+   "id": "AP-239",
+   "file": "burhan/workflow.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 645
+  },
+  {
+   "id": "AP-240",
+   "file": "burhan/workflow.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 770
+  },
+  {
+   "id": "AP-241",
+   "file": "burhan/workflow.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1162
+  },
+  {
+   "id": "AP-242",
+   "file": "burhan/workflow.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1164
+  },
+  {
+   "id": "AP-243",
+   "file": "burhan/workflow.py",
+   "code": "key=lambda\\ t:\\ \\(\\-self\\._score\\(t\\[0\\],\\ t\\[1\\]\\)\\[0\\],",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 1545
+  },
+  {
+   "id": "AP-244",
+   "file": "burhan/workflow.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 1640
+  },
+  {
+   "id": "AP-245",
+   "file": "burhan/wsattack.py",
+   "code": "client,\\ _render_json_message\\(shapes\\[0\\],\\ list\\(shapes\\[0\\]\\[\"keys\"\\]\\)\\[0\\],",
+   "class": "citation-pick",
+   "reason": "round-7-reviewed positional pick over a call result: citation/deterministic choice, no verdict risk",
+   "scanner_class": "FIRST[0-call]",
+   "line": 270
+  },
+  {
+   "id": "AP-246",
+   "file": "burhan/wsattack.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 279
+  },
+  {
+   "id": "AP-247",
+   "file": "burhan/wsattack.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 297
+  },
+  {
+   "id": "AP-248",
+   "file": "burhan/wsattack.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 315
+  },
+  {
+   "id": "AP-249",
+   "file": "burhan/wsattack.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 323
+  },
+  {
+   "id": "AP-250",
+   "file": "burhan/wsattack.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 616
+  },
+  {
+   "id": "AP-251",
+   "file": "burhan/xgraph.py",
+   "code": "x\\ =\\ q\\.popleft\\(\\)",
+   "class": "worklist-pop",
+   "reason": "q.popleft(): BFS frontier — traversal order, not selection",
+   "scanner_class": "POP0",
+   "line": 414
+  },
+  {
+   "id": "AP-252",
+   "file": "burhan/xgraph.py",
+   "code": "x\\ =\\ q\\.popleft\\(\\)",
+   "class": "worklist-pop",
+   "reason": "q.popleft(): BFS frontier — traversal order, not selection",
+   "scanner_class": "POP0",
+   "line": 468
+  },
+  {
+   "id": "AP-253",
+   "file": "burhan/xgraph.py",
+   "code": "break",
+   "class": "probe-until-verdict",
+   "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
+   "scanner_class": "BREAK",
+   "line": 634
+  }
+ ]
+}
