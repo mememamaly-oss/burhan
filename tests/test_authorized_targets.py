@@ -145,6 +145,7 @@ def test_live_validate_script_refuses_unlisted_target_e2e():
     and no verdict file written — zero scan requests ran."""
     import subprocess
     import sys
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     out = "/tmp/render/e2e-refusal-out"
     os.makedirs(out, exist_ok=True)
     r = subprocess.run(
@@ -152,7 +153,7 @@ def test_live_validate_script_refuses_unlisted_target_e2e():
          "--crapi", "https://unlisted-evil.example.com",
          "--out-dir", out],
         capture_output=True, text=True, timeout=60,
-        cwd="/home/z/my-project")
+        cwd=root)
     assert r.returncode == 2, (r.returncode, r.stdout[:300])
     assert "REFUSED — LIVE SCAN AUTHORIZATION GATE" in r.stdout
     assert "unlisted-evil.example.com" in r.stdout
