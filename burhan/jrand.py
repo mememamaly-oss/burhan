@@ -168,11 +168,19 @@ def uniquifier_relation_solve(s1_low48: int, s2_low48: int, t1_center: int,
     environment-stable but the false-positive LAYOUT is fixture-sensitive).
     The solver now returns EVERY solution (bounded at SOL_CAP), and the
     caller's forward confirmation arbitrates among them — the confirmation
-    is the self-verifying oracle, so "first confirmed" is exact."""
-    try:
-        import numpy as np
-    except Exception:
-        return []
+    is the self-verifying oracle, so "first confirmed" is exact.
+
+    R8-AP-01 (anti-pattern sweep, 2026-11-03): the import used to be
+    wrapped in `except Exception: return []` — a numpy that raises AT
+    IMPORT (corrupted install, ABI mismatch — a real deployment class)
+    silently read as "no relation" for any direct API caller, the exact
+    silent-negative shape this project forbids. Use-time numpy failures
+    were never swallowed (they sat outside the try) and still propagate.
+    numpy ABSENCE stays a loud WeakRandRelationUnavailable via the
+    FM-21d gate upstream; every failure here is a real defect and now
+    PROPAGATES to the phase-level handler (failures ledger +
+    ScannerFailed) instead of being flattened into a clean negative."""
+    import numpy as np
     M48 = np.uint64(MASK48)
     C48 = np.uint64(UNIQ_MULT & MASK48)
     S1 = np.uint64(s1_low48)

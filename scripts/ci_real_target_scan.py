@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -47,6 +48,13 @@ def main() -> int:
 
     out = Path(args.out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)
+
+    # ---- authorization gate (round 8, part 2): BEFORE the liveness probe —
+    # the probe is itself a request, so the gate goes first. The registry
+    # (authorized-targets.json, repo root) is the ONLY source of truth; an
+    # unlisted/unverified target is refused loudly with exit 2.
+    from burhan.authorized_targets import require_authorized
+    require_authorized(args.base)
 
     # 0. target must answer before we scan
     import urllib.request

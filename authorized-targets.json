@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "updated": "2026-11-03",
+  "policy": "The ONLY source of truth for live scan authorization. Every live-scan entry point (scripts/live_validate_modern2.py, scripts/ci_real_target_scan.py, and any future runner) MUST read this registry and REFUSE LOUDLY (exit code 2, refusal banner, zero scan requests) for any target not present with valid, current proof. New entries require one of exactly three proof types, verified AT SCAN TIME (not once): (a) dns_txt — a DNS TXT record the owner controls, looked up live; (b) signed_letter — an authorization file stored in this repo whose sha256 is recorded here and re-hashed at scan time; (c) scope_page — the target's own published permission page, fetched live before each scan and matched against the pinned verbatim quote. Entries are added by the owner only, with real proof.",
+  "targets": [
+    {
+      "id": "self-hosted-fixtures",
+      "kind": "self-hosted",
+      "match": { "loopback_or_private": true },
+      "covers": [
+        "crAPI v1.1.5 (official deploy compose, 127.0.0.1:8888)",
+        "DVGA (official image)",
+        "OWASP Juice Shop v20.3.0 (official container)",
+        "WebGoat",
+        "DVWA"
+      ],
+      "proof": {
+        "type": "ownership",
+        "statement": "These fixtures are built from the projects' official images by this repo's own CI workflows, run on the runner's own loopback interface, and torn down inside the same job. The scanned network is the operator's own host — authorization is ownership."
+      },
+      "added": "2026-11-03"
+    },
+    {
+      "id": "ginandjuice.shop",
+      "kind": "permissioned-public-demo",
+      "match": { "host_suffix": "ginandjuice.shop" },
+      "proof": {
+        "type": "scope_page",
+        "page_url": "https://ginandjuice.shop/",
+        "required_quote": "This is a deliberately vulnerable web application designed for testing web vulnerability scanners",
+        "verified_live": "2026-11-03 (fetched and quoted from the live page)",
+        "published_by": "PortSwigger Ltd."
+      },
+      "added": "2026-11-03"
+    },
+    {
+      "id": "vulnweb.com",
+      "kind": "permissioned-public-demo",
+      "match": { "host_suffix": ".vulnweb.com" },
+      "proof": {
+        "type": "scope_page",
+        "page_url": "https://www.vulnweb.com/",
+        "required_quote": null,
+        "status": "pending-quote-pin",
+        "documented_basis": "worklog.md:23 ('authorized Acunetix site'); scripts/reverify/build_predictions.py:68 ('permission statement lives on acunetix.com pages'). The verbatim on-page permission line could NOT be fetched from the 2026-11-03 sandbox (network egress blocked) and MUST NOT be invented: the gate refuses every vulnweb scan until the owner pins the exact quote observed by a live fetch (the gate prints the candidate sentence it observed, for pinning)."
+      },
+      "added": "2026-11-03"
+    }
+  ]
+}

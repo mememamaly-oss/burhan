@@ -169,6 +169,13 @@ jobs:
       - name: Engine doctor (19 checks)
         run: python3 -m burhan.cli doctor
 
+      # Round 8, part 1: the anti-pattern scanner gate on EVERY push — a new
+      # engine site matching the anti-pattern classes (first-match selection,
+      # silent except, off-by-one, counter ordering, TOCTOU) without a
+      # review-ledger entry fails here. The ledger IS the manual review.
+      - name: Anti-pattern scanner gate (first-match carry-over + part-1 classes)
+        run: python3 scripts/audit_antipatterns.py --ci-gate
+
       - name: Python security tests (incl. compliance mapping parity)
         run: python3 -m pytest tests/ -q
 
