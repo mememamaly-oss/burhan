@@ -2257,13 +2257,37 @@ def doctor(allow_private=False) -> dict:
             assert _o.poll("doctor-none", timeout=0.2) is None
         local_ok = True
         try:
+            from .oast import InteractshProvider
+            with InteractshProvider() as _i:
+                assert _i.url("doctor-none").endswith(_i._host)
+                assert _i.poll("doctor-none", timeout=1.0) is None
+            interactsh_detail = "interact.sh (default public channel) OK"
+            interactsh_ok = True
+        except Exception as _ie:
+            interactsh_detail = (f"warn: interact.sh unreachable "
+                                f"({str(_ie)[:60]}) — trying webhook.site")
+            interactsh_ok = None                               # WARN path
+        try:
             with PublicWebhookProvider() as _p:
                 assert _p.public_base.startswith("https://")
                 assert _p.poll("doctor-none", timeout=1.0) is None
-            public_detail = "local listener + public webhook channel both OK"
-            public_ok = True
+            webhook_detail = "webhook.site channel OK"
+            webhook_ok = True
         except Exception as _pe:
-            public_detail = f"warn: public channel unreachable ({str(_pe)[:60]}) — local OOB only"
+            webhook_detail = (f"warn: webhook.site unreachable "
+                              f"({str(_pe)[:60]})")
+            webhook_ok = None                                  # WARN path
+        if interactsh_ok:
+            public_detail = ("local listener + interact.sh + webhook.site "
+                             "channels all OK")
+            public_ok = True
+        elif webhook_ok:
+            public_detail = ("local listener + webhook.site OK; "
+                             + interactsh_detail)
+            public_ok = None                                   # WARN (fallback)
+        else:
+            public_detail = ("warn: both public channels unreachable — "
+                             "local OOB only")
             public_ok = None                                   # WARN path
         add("oast_providers", public_ok if public_ok is not None else False, public_detail)
     except Exception as e:

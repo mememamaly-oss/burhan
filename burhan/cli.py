@@ -330,10 +330,11 @@ def main():
                         "(NEW/RECURRING/FIXED/REGRESSED) and risk ranking")
     s.add_argument("--no-oast", action="store_true",
                    help="disable the OAST engine entirely (OOB blind-vuln confirmation)")
-    s.add_argument("--oast", choices=["auto", "local", "public"], default="auto",
-                   help="Phase 52 OAST channel: auto = local listener for lab targets, "
-                        "public webhook channel for remote targets (default); "
-                        "public = force the public channel (fails loud if unreachable)")
+    s.add_argument("--oast", choices=["auto", "local", "public", "webhook"], default="auto",
+                   help="OAST channel: auto = local listener for lab targets, "
+                        "interact.sh for remote targets (default); public = force "
+                        "interact.sh; webhook = the Phase-52 webhook.site channel "
+                        "(both public channels fail loud if unreachable)")
     s.add_argument("--no-browser", action="store_true",
                    help="disable the browser/DOM engine (Phase 50: JS-built forms + DOM XSS)")
     s.add_argument("--auth-user", default="", help="Phase 51: enable authenticated scanning — username")

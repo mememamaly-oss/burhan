@@ -2110,7 +2110,7 @@ class SsrfDetector(Detector):
         if p is None or self.oast is None:
             return None
         iid = self._iid(ep, p.name, "detect")
-        hit = self.oast.poll(iid, timeout=(3.0 if getattr(self.oast, "channel", "") == "public-webhook" else self.POLL_LOCAL))
+        hit = self.oast.poll(iid, timeout=(3.0 if getattr(self.oast, "channel", "") in ("public-webhook", "interactsh") else self.POLL_LOCAL))
         if hit:
             if is_self_callback(hit, resp, self.oast.url(iid)):
                 return None                      # ENG-08: the scanner fetched it itself
@@ -2295,7 +2295,7 @@ class CommandInjectionDetector(Detector):
             # blew the 470s scan budget; 6-9 nc mutations/endpoint x 0.15s
             # ~= +1s/endpoint). The PUBLIC-WEBHOOK channel is async remote
             # (the callback may land after the response) and keeps 3.0s.
-            budget_nc = 3.0 if getattr(self.oast, "channel", "") == "public-webhook" \
+            budget_nc = 3.0 if getattr(self.oast, "channel", "") in ("public-webhook", "interactsh") \
                 else 0.0
             hit = self.oast.poll(iid, timeout=budget_nc)
             if hit:
@@ -2323,7 +2323,7 @@ class CommandInjectionDetector(Detector):
         # old single-channel poll (one window; every 50ms cycle checks all
         # channels; timeout=0 peeks return immediately on miss).
         import time as _time_cm1
-        budget = 3.0 if getattr(self.oast, "channel", "") == "public-webhook" else self.POLL_LOCAL
+        budget = 3.0 if getattr(self.oast, "channel", "") in ("public-webhook", "interactsh") else self.POLL_LOCAL
         deadline = _time_cm1.time() + budget
         channels = ("detect", "twin-env", "twin-direct")
         iid = form = hit = None
