@@ -331,12 +331,15 @@ def parse_cef(message: str) -> dict:
         v_end = positions[idx + 1][0] if idx + 1 < len(positions) \
             else len(ext_raw)                # next match starts at its space
         ext[key] = _cef_unescape(ext_raw[v_begin:v_end])
-    return {
-        "version": fields[0],                # CEF:Version (0 or 1)
-        "device_vendor": fields[1], "device_product": fields[2],
-        "device_version": fields[3], "device_event_class_id": fields[4],
-        "name": fields[5], "agent_severity": severity, "extension": ext,
-    }
+    # fields[] (from the pipe-split loop) = [Version, Device Vendor, Device
+    # Product, Device Version, Device Event Class ID, Name]; mapped by zip
+    # with the spec's own header names — no first-pick subscripts
+    header_names = ("version", "device_vendor", "device_product",
+                    "device_version", "device_event_class_id", "name")
+    out = dict(zip(header_names, fields))
+    out["agent_severity"] = severity
+    out["extension"] = ext
+    return out
 
 
 def _cef_unescape(value: str) -> str:

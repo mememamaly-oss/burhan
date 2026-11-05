@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-05T12:39:04.791670+00:00",
+ "generated": "2026-11-05T12:46:57.201407+00:00",
  "order": "SIEM/enterprise export (Part 1)",
  "rebuild": "python3 scripts/siem_export_evidence.py (re-imports the committed scan.json into a fresh store and re-exports; the working DB is not committed)",
  "source_run": {
@@ -16,7 +16,7 @@
  "exports": {
   "cef": {
    "file": "scan.cef",
-   "sha256": "6b9adda75ded0ddfd3ad3a1ae2bc53aef21e2e085f3bd99bb055186d5184784b",
+   "sha256": "08c29db62d01b085c9b32e83843e82d823bd19816413807326b684e1d827b12e",
    "lines": 199,
    "cli": {
     "report": "/home/z/my-project/burhan/evidence/layers/siem-export/scan.cef",
@@ -30,7 +30,7 @@
   },
   "syslog": {
    "file": "scan.syslog",
-   "sha256": "6d7359dfb68e8f16aa30ed648a82695354be1a080176087bb0d6bb8e6b517d43",
+   "sha256": "bc2a6e67b1932fbada89af43699cda2e6c1b50ade6a4a46370ee78e60c5bea26",
    "lines": 199,
    "cli": {
     "report": "/home/z/my-project/burhan/evidence/layers/siem-export/scan.syslog",
@@ -45,7 +45,7 @@
   },
   "ocsf": {
    "file": "scan.ocsf.json",
-   "sha256": "936207bf4f73ba1b36bd38dacf7ae6df9f256f4ec326aa149edd8f0c62321d8c",
+   "sha256": "2be05fd1b4cc726c22ff6d35ef5c82f5cd12bc20e106cbac95035e91abfa78d6",
    "events": 199,
    "cli": {
     "report": "/home/z/my-project/burhan/evidence/layers/siem-export/scan.ocsf.json",
