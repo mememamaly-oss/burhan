@@ -233,7 +233,9 @@ jobs:
                         f"({url}, probed from inside the dind)")
                   sys.exit(1)
           PY
-          docker exec -e BURHAN_LIVE_OAST=${{ inputs.oast || 'local' }} scanbox \
+          docker exec -e BURHAN_LIVE_OAST=${{ inputs.oast || 'local' }} \
+            -e BURHAN_OAST_POLL_FLOOR=${{ inputs.oast == 'interactsh' && '1.0' || '5.0' }} \
+            scanbox \
             python3 /ws/scripts/live_validate_modern2.py \
             --crapi http://127.0.0.1:8888 \
             --dvga http://127.0.0.1:5013 \
@@ -332,16 +334,25 @@ jobs:
 
       - name: Run r10 live validation (two crAPI scans sharing a lifecycle store + chain evaluation)
         # same scan-inside-the-dind pattern as the battery job (run
-        # 41286864928 lesson). scanbox sleeps 2400s: THIS job runs TWO
+        # 41286864928 lesson). scanbox sleeps 3600s: THIS job runs TWO
         # full crAPI scans back-to-back plus a DVGA scan — the battery's
-        # 900s box would die mid-scan-2.
+        # 900s box would die mid-scan-2 (and the interact.sh public OAST
+        # channel needs the same widened ceiling the battery got after
+        # run 42067722877's live-caught 40-min timeout).
         run: |
           set -e
           export DOCKER_HOST=unix:///var/run/docker.sock
           docker volume create scanout >/dev/null
           docker run -d --name scanbox --network host \
-            -v scanout:/out python:3.12-slim sleep 2400 >/dev/null
+            -v scanout:/out python:3.12-slim sleep 3600 >/dev/null
           docker exec scanbox mkdir -p /ws
+          # interact.sh channel (Part 5.1): the r10 job's box ALSO needs the
+          # provider's cryptography wheel (live-caught run 42067722877: this
+          # job died 2 minutes in with ModuleNotFoundError while the battery
+          # job — which got the conditional install first — ran on).
+          if [ "${{ inputs.oast || 'local' }}" = "interactsh" ]; then
+            docker exec scanbox pip install --quiet cryptography
+          fi
           tar --exclude=.git --exclude=node_modules --exclude=.next \
             -cf - . | docker exec -i scanbox tar -xf - -C /ws
           docker exec scanbox python3 - <<'PY'
@@ -370,7 +381,9 @@ jobs:
           # killing the step before docker cp); the step then fails with
           # the script's own exit code.
           set +e
-          docker exec -e BURHAN_LIVE_OAST=${{ inputs.oast || 'local' }} scanbox \
+          docker exec -e BURHAN_LIVE_OAST=${{ inputs.oast || 'local' }} \
+            -e BURHAN_OAST_POLL_FLOOR=${{ inputs.oast == 'interactsh' && '1.0' || '5.0' }} \
+            scanbox \
             python3 /ws/scripts/live_validate_r10.py \
             --crapi http://127.0.0.1:8888 \
             --dvga http://127.0.0.1:5013 \

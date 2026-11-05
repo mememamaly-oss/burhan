@@ -342,7 +342,14 @@ class InteractshProvider:
     # oast.live / oast.site / oast.online / oast.pro / oast.me — the first
     # is the default here; others can be passed via service=
     DEFAULT_SERVER = "https://oast.fun"
-    POLL_FLOOR = 5.0          # public-channel latency budget (same as webhook)
+    # public-channel latency budget (same as webhook). Overridable via
+    # BURHAN_OAST_POLL_FLOOR for the LIVE VALIDATION battery only (live-caught
+    # run 42067722877: ~114 OOB probe sites x the 5s floor left ONE crAPI pass
+    # unfinished after 37 minutes — the public channel's true callback latency
+    # for a NON-vulnerable loopback target is one poll round (~0.6s inner loop);
+    # the floor exists for real internet targets whose egress is slow, and the
+    # battery's fixtures answer fast). Default stays 5.0 for operator runs.
+    POLL_FLOOR = float(__import__("os").environ.get("BURHAN_OAST_POLL_FLOOR", "5.0"))
     # pkg/server/util.go (fetched, verbatim): "Correlation ids are produced
     # from xid (cidl prefix) and zbase32 (cidn suffix), so detection is
     # restricted to those alphabets" — xid = 0-9a-v, zbase32 =
