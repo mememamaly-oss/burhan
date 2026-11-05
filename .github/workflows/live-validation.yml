@@ -49,6 +49,12 @@ name: Live validation (crAPI + DVGA — modern battery v2)
 
 on:
   workflow_dispatch:
+    inputs:
+      oast:
+        description: "OAST channel for the live scans (Part 5.1): local listener (default) or interact.sh"
+        type: choice
+        default: local
+        options: [local, interactsh]
   schedule:
     - cron: "17 3 * * 1" # weekly, Monday — same cadence as CodeQL
 
@@ -213,7 +219,8 @@ jobs:
                         f"({url}, probed from inside the dind)")
                   sys.exit(1)
           PY
-          docker exec scanbox python3 /ws/scripts/live_validate_modern2.py \
+          docker exec -e BURHAN_LIVE_OAST=${{ inputs.oast || 'local' }} scanbox \
+            python3 /ws/scripts/live_validate_modern2.py \
             --crapi http://127.0.0.1:8888 \
             --dvga http://127.0.0.1:5013 \
             --crapi-spec /ws/.live-spec/crapi-openapi-spec.json \
@@ -349,7 +356,8 @@ jobs:
           # killing the step before docker cp); the step then fails with
           # the script's own exit code.
           set +e
-          docker exec scanbox python3 /ws/scripts/live_validate_r10.py \
+          docker exec -e BURHAN_LIVE_OAST=${{ inputs.oast || 'local' }} scanbox \
+            python3 /ws/scripts/live_validate_r10.py \
             --crapi http://127.0.0.1:8888 \
             --dvga http://127.0.0.1:5013 \
             --crapi-spec /ws/.live-spec/crapi-openapi-spec.json \
