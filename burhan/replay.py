@@ -47,10 +47,25 @@ class ReplayRateLimited(Exception):
 
 
 def _load_rate_state() -> dict:
-    try:
-        return json.loads(_RATE_FILE.read_text())
-    except Exception:
+    """Rate-limit state. A MISSING file is a fresh state (fine — first
+    ever replay). A file that exists but fails to read/parse is a LOUD
+    failure: silently resetting the rate limit would defeat the anti-DoS
+    cap, which is exactly the defect the SILENT_EXCEPT gate exists to
+    catch. Deleting the file is a deliberate operator act, not a default."""
+    if not _RATE_FILE.exists():
         return {}
+    try:
+        state = json.loads(_RATE_FILE.read_text())
+    except (json.JSONDecodeError, OSError, ValueError) as e:
+        raise RuntimeError(
+            f"replay rate-limit state corrupt at {_RATE_FILE} "
+            f"({type(e).__name__}: {e}) — refusing to silently reset the "
+            f"anti-DoS limit; delete the file deliberately to reset") from e
+    if not isinstance(state, dict):
+        raise RuntimeError(
+            f"replay rate-limit state corrupt at {_RATE_FILE} "
+            f"(expected an object) — delete the file deliberately to reset")
+    return state
 
 
 def _save_rate_state(state: dict) -> None:
