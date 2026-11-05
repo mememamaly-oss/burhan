@@ -483,6 +483,11 @@ def main():
                      help="v4.1.0: LIVE re-execution of the proof from a clean "
                           "engine (records REPRODUCTION_VERIFIED / "
                           "REPRODUCTION_FAILED with reason)")
+    rpr.add_argument("--gated", action="store_true",
+                     help="r11 Part 2: replay under the live authorized-targets "
+                          "gate + per-finding rate limit; implies --replay "
+                          "(REFUSED exits 2 with zero live requests, "
+                          "RATE_LIMITED exits 3)")
     rpr.add_argument("--timeout", type=float, default=12.0)
     cm = sub.add_parser("capability-matrix", help="v4.1.0: generate "
                         "CAPABILITY_MATRIX.md from ACTUAL run data (never "
@@ -980,7 +985,8 @@ def main():
                                       f"runs' proof files (or its run predates v4.0.0)"}),
                   file=sys.stderr)
             sys.exit(2)
-        if getattr(a, "gated", False) and a.replay:
+        if getattr(a, "gated", False):
+            # --gated implies --replay (there is no gated non-replay mode)
             # Part 2: gated replay — same engine plus the live authorization
             # check + per-finding rate limit + identity-linked lifecycle
             # event. Refusals exit 2 (zero live requests); rate limit exit 3.
