@@ -181,10 +181,13 @@ jobs:
         # python container on the dind's host network, where the
         # published ports are reachable as 127.0.0.1 — and the readiness
         # probes use the exact same path the scan will use.
-        # No pip install needed: the scanner's import chain is pure
-        # stdlib (verified — orchestrator and everything it pulls avoid
-        # the cryptography/blake3 requirements, those are for vault/
-        # proof/signing, which the live battery does not exercise).
+        # The scanner's import chain is pure stdlib (verified — orchestrator
+        # and everything it pulls avoid the cryptography/blake3 requirements,
+        # which live-battery runs without vault/proof/signing never touch)
+        # — EXCEPT the interact.sh OAST channel (Part 4/5), whose provider
+        # needs `cryptography` for the official protocol's RSA-OAEP + AES-CTR
+        # payloads. Install it only when that channel is actually requested
+        # (a ~2s wheel install; the default local channel stays stdlib-only).
         run: |
           set -e
           export DOCKER_HOST=unix:///var/run/docker.sock
@@ -192,6 +195,9 @@ jobs:
           docker run -d --name scanbox --network host \
             -v scanout:/out python:3.12-slim sleep 900 >/dev/null
           docker exec scanbox mkdir -p /ws
+          if [ "${{ inputs.oast || 'local' }}" = "interactsh" ]; then
+            docker exec scanbox pip install --quiet cryptography
+          fi
           # stage the engine (tar-pipe through the API; skip .git etc.)
           # .live-spec/ rides along — the checksums step fetched crAPI's
           # main-branch openapi spec there before this step
