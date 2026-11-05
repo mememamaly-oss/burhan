@@ -193,7 +193,15 @@ jobs:
           export DOCKER_HOST=unix:///var/run/docker.sock
           docker volume create scanout >/dev/null
           docker run -d --name scanbox --network host \
-            -v scanout:/out python:3.12-slim sleep 900 >/dev/null
+            -v scanout:/out python:3.12-slim sleep 3600 >/dev/null
+          # 3600 (was 900, live-caught run 42064194583): the interact.sh
+          # OAST channel (Part 5.1) polls a public service per OOB probe
+          # site with a 5s floor — the crAPI battery has ~114 such sites,
+          # so the same scans that take ~90s locally need ~10+ minutes per
+          # pass over the public channel, and the 900s box died mid-scan
+          # (exit 137, recorded). The container is still torn down in the
+          # same job; this only widens its lifetime to the job's own.
+          # timeout-minutes.
           docker exec scanbox mkdir -p /ws
           if [ "${{ inputs.oast || 'local' }}" = "interactsh" ]; then
             docker exec scanbox pip install --quiet cryptography
