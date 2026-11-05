@@ -1583,9 +1583,17 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   live, session-bound VPE class returned NOT_REPLAYABLE with reason,
   live_requests_sent=0); the candidate now prefers a request-level
   REPLAYABLE_TYPES class (crAPI's csrf proof) and the confirmation run on
-  6dcb757 records the full re-execution verdict. 5.3 is the r10 two-pass
-  design itself (green both channels).
-- Round-11 CLOSE regression on merged main 45d5b2d: python suite 390/390
+  6dcb757 (42081344487, SUCCESS) recorded the full re-execution verdict:
+  csrf finding F-482b7fbd21 REPRODUCTION_VERIFIED on a clean engine, the
+  gate passed against registry entry self-hosted-fixtures BEFORE the single
+  live request (live_requests_sent=1), evidence "state-changing POST
+  accepted from hostile origin (https://csrf-probe.example): baseline ->
+  HTTP 200 (540B), cross-origin replay -> HTTP 200 (540B) — no CSRF token
+  in the form and no Origin/Referer validation", verdict stored as a
+  REPRODUCTION_VERIFIED lifecycle event linked to the identity. 5.3 is the
+  r10 two-pass design itself (green both channels).
+- Round-11 CLOSE regression on merged main (45d5b2d and, after PR #48
+  merged, 2deb894 — both re-run: suite, doctor, gate identical): python suite 390/390
   green (7 live deselected), doctor 19/19 PASS, antipattern --ci-gate PASS,
   canonical fixture scan 199 verified / 30 distinct types all
   compliance-mapped, benchmark gate F1 = 1.0 with the deterministic
