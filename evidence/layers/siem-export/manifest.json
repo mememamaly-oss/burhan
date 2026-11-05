@@ -1,0 +1,66 @@
+{
+ "generated": "2026-11-05T12:39:04.791670+00:00",
+ "order": "SIEM/enterprise export (Part 1)",
+ "rebuild": "python3 scripts/siem_export_evidence.py (re-imports the committed scan.json into a fresh store and re-exports; the working DB is not committed)",
+ "source_run": {
+  "artifact": "evidence/full-reverify/fixtures-vulnapp/scan.json",
+  "sha256": "3158620cda361093a822e6ec1ed5b9c2d53b834800194d71bf708adbcfccde4d",
+  "run_id": "run-d6b26b92d0",
+  "findings": 199,
+  "audit": {
+   "merkle_root": "fb8312541bab0dd4afc4538ac5ad4d43ee1f3257fd57b8b2befbe41960ad7783",
+   "findings_count": 199,
+   "signature_scheme": "Ed25519-RFC8032-pure-stdlib"
+  }
+ },
+ "exports": {
+  "cef": {
+   "file": "scan.cef",
+   "sha256": "6b9adda75ded0ddfd3ad3a1ae2bc53aef21e2e085f3bd99bb055186d5184784b",
+   "lines": 199,
+   "cli": {
+    "report": "/home/z/my-project/burhan/evidence/layers/siem-export/scan.cef",
+    "format": "cef",
+    "run_id": "run-d6b26b92d0",
+    "events": 199,
+    "sent": 0,
+    "merkle_root": "591484c222532e9a…"
+   },
+   "validated_by": "burhan.siem.parse_cef round-trip (official header structure + extension dictionary keys)"
+  },
+  "syslog": {
+   "file": "scan.syslog",
+   "sha256": "6d7359dfb68e8f16aa30ed648a82695354be1a080176087bb0d6bb8e6b517d43",
+   "lines": 199,
+   "cli": {
+    "report": "/home/z/my-project/burhan/evidence/layers/siem-export/scan.syslog",
+    "format": "syslog",
+    "run_id": "run-d6b26b92d0",
+    "events": 199,
+    "sent": 199,
+    "merkle_root": "591484c222532e9a…"
+   },
+   "datagrams_received_by_loopback_collector": 199,
+   "validated_by": "syslog-rfc5424-parser 0.3.2 (Lark implementation of RFC 5424 ABNF) — every line parses"
+  },
+  "ocsf": {
+   "file": "scan.ocsf.json",
+   "sha256": "936207bf4f73ba1b36bd38dacf7ae6df9f256f4ec326aa149edd8f0c62321d8c",
+   "events": 199,
+   "cli": {
+    "report": "/home/z/my-project/burhan/evidence/layers/siem-export/scan.ocsf.json",
+    "format": "ocsf",
+    "run_id": "run-d6b26b92d0",
+    "events": 199,
+    "sent": 0,
+    "merkle_root": "591484c222532e9a…"
+   },
+   "validated_by": "jsonschema against the v1.9.0 required-attribute contract fetched from github.com/ocsf/ocsf-schema"
+  }
+ },
+ "specs": {
+  "cef": "OpenText/ArcSight 'Implementing ArcSight Common Event Format (CEF)' Version 26 (SmartConnectors 8.4.3, Oct 2023) — official PDF fetched; excerpts in specs/",
+  "rfc5424": "RFC 5424 (IETF, March 2009) — full text fetched from rfc-editor.org; sections 6+6.2 in specs/",
+  "ocsf": "OCSF v1.9.0 official schema repository (github.com/ocsf/ocsf-schema, tag v1.9.0) — class + object JSON schemas fetched verbatim into specs/"
+ }
+}

@@ -1,0 +1,399 @@
+SOURCE: https://www.rfc-editor.org/rfc/rfc5424.txt (fetched 2026-11-05, RFC 5424 'The Syslog Protocol', IETF March 2009)
+==== VERBATIM sections 6 + 6.2 ====
+6.  Syslog Message Format
+
+   The syslog message has the following ABNF [RFC5234] definition:
+
+      SYSLOG-MSG      = HEADER SP STRUCTURED-DATA [SP MSG]
+
+      HEADER          = PRI VERSION SP TIMESTAMP SP HOSTNAME
+                        SP APP-NAME SP PROCID SP MSGID
+      PRI             = "<" PRIVAL ">"
+      PRIVAL          = 1*3DIGIT ; range 0 .. 191
+      VERSION         = NONZERO-DIGIT 0*2DIGIT
+      HOSTNAME        = NILVALUE / 1*255PRINTUSASCII
+
+      APP-NAME        = NILVALUE / 1*48PRINTUSASCII
+      PROCID          = NILVALUE / 1*128PRINTUSASCII
+      MSGID           = NILVALUE / 1*32PRINTUSASCII
+
+      TIMESTAMP       = NILVALUE / FULL-DATE "T" FULL-TIME
+      FULL-DATE       = DATE-FULLYEAR "-" DATE-MONTH "-" DATE-MDAY
+      DATE-FULLYEAR   = 4DIGIT
+      DATE-MONTH      = 2DIGIT  ; 01-12
+      DATE-MDAY       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
+                                ; month/year
+      FULL-TIME       = PARTIAL-TIME TIME-OFFSET
+      PARTIAL-TIME    = TIME-HOUR ":" TIME-MINUTE ":" TIME-SECOND
+                        [TIME-SECFRAC]
+      TIME-HOUR       = 2DIGIT  ; 00-23
+      TIME-MINUTE     = 2DIGIT  ; 00-59
+      TIME-SECOND     = 2DIGIT  ; 00-59
+      TIME-SECFRAC    = "." 1*6DIGIT
+      TIME-OFFSET     = "Z" / TIME-NUMOFFSET
+      TIME-NUMOFFSET  = ("+" / "-") TIME-HOUR ":" TIME-MINUTE
+
+
+      STRUCTURED-DATA = NILVALUE / 1*SD-ELEMENT
+      SD-ELEMENT      = "[" SD-ID *(SP SD-PARAM) "]"
+      SD-PARAM        = PARAM-NAME "=" %d34 PARAM-VALUE %d34
+      SD-ID           = SD-NAME
+      PARAM-NAME      = SD-NAME
+      PARAM-VALUE     = UTF-8-STRING ; characters '"', '\' and
+                                     ; ']' MUST be escaped.
+      SD-NAME         = 1*32PRINTUSASCII
+                        ; except '=', SP, ']', %d34 (")
+
+      MSG             = MSG-ANY / MSG-UTF8
+      MSG-ANY         = *OCTET ; not starting with BOM
+      MSG-UTF8        = BOM UTF-8-STRING
+      BOM             = %xEF.BB.BF
+
+
+
+Gerhards                    Standards Track                     [Page 8]
+
+RFC 5424                  The Syslog Protocol                 March 2009
+
+
+      UTF-8-STRING    = *OCTET ; UTF-8 string as specified
+                        ; in RFC 3629
+
+      OCTET           = %d00-255
+      SP              = %d32
+      PRINTUSASCII    = %d33-126
+      NONZERO-DIGIT   = %d49-57
+      DIGIT           = %d48 / NONZERO-DIGIT
+      NILVALUE        = "-"
+
+6.1.  Message Length
+
+   Syslog message size limits are dictated by the syslog transport
+   mapping in use.  There is no upper limit per se.  Each transport
+   mapping defines the minimum maximum required message length support,
+   and the minimum maximum MUST be at least 480 octets in length.
+
+   Any transport receiver MUST be able to accept messages of up to and
+   including 480 octets in length.  All transport receiver
+   implementations SHOULD be able to accept messages of up to and
+   including 2048 octets in length.  Transport receivers MAY receive
+   messages larger than 2048 octets in length.  If a transport receiver
+   receives a message with a length larger than it supports, the
+   transport receiver SHOULD truncate the payload.  Alternatively, it
+   MAY discard the message.
+
+   If a transport receiver truncates messages, the truncation MUST occur
+   at the end of the message.  After truncation, the message MAY contain
+   invalid UTF-8 encoding or invalid STRUCTURED-DATA.  The transport
+   receiver MAY discard the message or MAY try to process as much as
+   possible in this case.
+
+6.2.  HEADER
+
+   The character set used in the HEADER MUST be seven-bit ASCII in an
+   eight-bit field as described in [RFC5234].  These are the ASCII codes
+   as defined in "USA Standard Code for Information Interchange"
+   [ANSI.X3-4.1968].
+
+   The header format is designed to provide some interoperability with
+   older BSD-based syslog.  For details on this, see Appendix A.1.
+
+6.2.1.  PRI
+
+   The PRI part MUST have three, four, or five characters and will be
+   bound with angle brackets as the first and last characters.  The PRI
+   part starts with a leading "<" ('less-than' character, %d60),
+   followed by a number, which is followed by a ">" ('greater-than'
+
+
+
+Gerhards                    Standards Track                     [Page 9]
+
+RFC 5424                  The Syslog Protocol                 March 2009
+
+
+   character, %d62).  The number contained within these angle brackets
+   is known as the Priority value (PRIVAL) and represents both the
+   Facility and Severity.  The Priority value consists of one, two, or
+   three decimal integers (ABNF DIGITS) using values of %d48 (for "0")
+   through %d57 (for "9").
+
+   Facility and Severity values are not normative but often used.  They
+   are described in the following tables for purely informational
+   purposes.  Facility values MUST be in the range of 0 to 23 inclusive.
+
+          Numerical             Facility
+             Code
+
+              0             kernel messages
+              1             user-level messages
+              2             mail system
+              3             system daemons
+              4             security/authorization messages
+              5             messages generated internally by syslogd
+              6             line printer subsystem
+              7             network news subsystem
+              8             UUCP subsystem
+              9             clock daemon
+             10             security/authorization messages
+             11             FTP daemon
+             12             NTP subsystem
+             13             log audit
+             14             log alert
+             15             clock daemon (note 2)
+             16             local use 0  (local0)
+             17             local use 1  (local1)
+             18             local use 2  (local2)
+             19             local use 3  (local3)
+             20             local use 4  (local4)
+             21             local use 5  (local5)
+             22             local use 6  (local6)
+             23             local use 7  (local7)
+
+              Table 1.  Syslog Message Facilities
+
+   Each message Priority also has a decimal Severity level indicator.
+   These are described in the following table along with their numerical
+   values.  Severity values MUST be in the range of 0 to 7 inclusive.
+
+
+
+
+
+
+
+
+Gerhards                    Standards Track                    [Page 10]
+
+RFC 5424                  The Syslog Protocol                 March 2009
+
+
+           Numerical         Severity
+             Code
+
+              0       Emergency: system is unusable
+              1       Alert: action must be taken immediately
+              2       Critical: critical conditions
+              3       Error: error conditions
+              4       Warning: warning conditions
+              5       Notice: normal but significant condition
+              6       Informational: informational messages
+              7       Debug: debug-level messages
+
+              Table 2. Syslog Message Severities
+
+   The Priority value is calculated by first multiplying the Facility
+   number by 8 and then adding the numerical value of the Severity.  For
+   example, a kernel message (Facility=0) with a Severity of Emergency
+   (Severity=0) would have a Priority value of 0.  Also, a "local use 4"
+   message (Facility=20) with a Severity of Notice (Severity=5) would
+   have a Priority value of 165.  In the PRI of a syslog message, these
+   values would be placed between the angle brackets as <0> and <165>
+   respectively.  The only time a value of "0" follows the "<" is for
+   the Priority value of "0".  Otherwise, leading "0"s MUST NOT be used.
+
+6.2.2.  VERSION
+
+   The VERSION field denotes the version of the syslog protocol
+   specification.  The version number MUST be incremented for any new
+   syslog protocol specification that changes any part of the HEADER
+   format.  Changes include the addition or removal of fields, or a
+   change of syntax or semantics of existing fields.  This document uses
+   a VERSION value of "1".  The VERSION values are IANA-assigned
+   (Section 9.1) via the Standards Action method as described in
+   [RFC5226].
+
+6.2.3.  TIMESTAMP
+
+   The TIMESTAMP field is a formalized timestamp derived from [RFC3339].
+
+   Whereas [RFC3339] makes allowances for multiple syntaxes, this
+   document imposes further restrictions.  The TIMESTAMP value MUST
+   follow these restrictions:
+
+   o  The "T" and "Z" characters in this syntax MUST be upper case.
+
+   o  Usage of the "T" character is REQUIRED.
+
+   o  Leap seconds MUST NOT be used.
+
+
+
+Gerhards                    Standards Track                    [Page 11]
+
+RFC 5424                  The Syslog Protocol                 March 2009
+
+
+   The originator SHOULD include TIME-SECFRAC if its clock accuracy and
+   performance permit.  The "timeQuality" SD-ID described in Section 7.1
+   allows the originator to specify the accuracy and trustworthiness of
+   the timestamp.
+
+   A syslog application MUST use the NILVALUE as TIMESTAMP if the syslog
+   application is incapable of obtaining system time.
+
+6.2.3.1.  Examples
+
+   Example 1
+
+        1985-04-12T23:20:50.52Z
+
+   This represents 20 minutes and 50.52 seconds after the 23rd hour of
+   12 April 1985 in UTC.
+
+   Example 2
+
+        1985-04-12T19:20:50.52-04:00
+
+   This represents the same time as in example 1, but expressed in US
+   Eastern Standard Time (observing daylight savings time).
+
+   Example 3
+
+        2003-10-11T22:14:15.003Z
+
+   This represents 11 October 2003 at 10:14:15pm, 3 milliseconds into
+   the next second.  The timestamp is in UTC.  The timestamp provides
+   millisecond resolution.  The creator may have actually had a better
+   resolution, but providing just three digits for the fractional part
+   of a second does not tell us.
+
+   Example 4
+
+         2003-08-24T05:14:15.000003-07:00
+
+   This represents 24 August 2003 at 05:14:15am, 3 microseconds into the
+   next second.  The microsecond resolution is indicated by the
+   additional digits in TIME-SECFRAC.  The timestamp indicates that its
+   local time is -7 hours from UTC.  This timestamp might be created in
+   the US Pacific time zone during daylight savings time.
+
+
+
+
+
+
+
+
+Gerhards                    Standards Track                    [Page 12]
+
+RFC 5424                  The Syslog Protocol                 March 2009
+
+
+   Example 5 - An Invalid TIMESTAMP
+
+         2003-08-24T05:14:15.000000003-07:00
+
+   This example is nearly the same as Example 4, but it is specifying
+   TIME-SECFRAC in nanoseconds.  This results in TIME-SECFRAC being
+   longer than the allowed 6 digits, which invalidates it.
+
+6.2.4.  HOSTNAME
+
+   The HOSTNAME field identifies the machine that originally sent the
+   syslog message.
+
+   The HOSTNAME field SHOULD contain the hostname and the domain name of
+   the originator in the format specified in STD 13 [RFC1034].  This
+   format is called a Fully Qualified Domain Name (FQDN) in this
+   document.
+
+   In practice, not all syslog applications are able to provide an FQDN.
+   As such, other values MAY also be present in HOSTNAME.  This document
+   makes provisions for using other values in such situations.  A syslog
+   application SHOULD provide the most specific available value first.
+   The order of preference for the contents of the HOSTNAME field is as
+   follows:
+
+   1.  FQDN
+
+   2.  Static IP address
+
+   3.  hostname
+
+   4.  Dynamic IP address
+
+   5.  the NILVALUE
+
+   If an IPv4 address is used, it MUST be in the format of the dotted
+   decimal notation as used in STD 13 [RFC1035].  If an IPv6 address is
+   used, a valid textual representation as described in [RFC4291],
+   Section 2.2, MUST be used.
+
+   Syslog applications SHOULD consistently use the same value in the
+   HOSTNAME field for as long as possible.
+
+   The NILVALUE SHOULD only be used when the syslog application has no
+   way to obtain its real hostname.  This situation is considered highly
+   unlikely.
+
+
+
+
+
+Gerhards                    Standards Track                    [Page 13]
+
+RFC 5424                  The Syslog Protocol                 March 2009
+
+
+6.2.5.  APP-NAME
+
+   The APP-NAME field SHOULD identify the device or application that
+   originated the message.  It is a string without further semantics.
+   It is intended for filtering messages on a relay or collector.
+
+   The NILVALUE MAY be used when the syslog application has no idea of
+   its APP-NAME or cannot provide that information.  It may be that a
+   device is unable to provide that information either because of a
+   local policy decision, or because the information is not available,
+   or not applicable, on the device.
+
+   This field MAY be operator-assigned.
+
+6.2.6.  PROCID
+
+   PROCID is a value that is included in the message, having no
+   interoperable meaning, except that a change in the value indicates
+   there has been a discontinuity in syslog reporting.  The field does
+   not have any specific syntax or semantics; the value is
+   implementation-dependent and/or operator-assigned.  The NILVALUE MAY
+   be used when no value is provided.
+
+   The PROCID field is often used to provide the process name or process
+   ID associated with a syslog system.  The NILVALUE might be used when
+   a process ID is not available.  On an embedded system without any
+   operating system process ID, PROCID might be a reboot ID.
+
+   PROCID can enable log analyzers to detect discontinuities in syslog
+   reporting by detecting a change in the syslog process ID.  However,
+   PROCID is not a reliable identification of a restarted process since
+   the restarted syslog process might be assigned the same process ID as
+   the previous syslog process.
+
+   PROCID can also be used to identify which messages belong to a group
+   of messages.  For example, an SMTP mail transfer agent might put its
+   SMTP transaction ID into PROCID, which would allow the collector or
+   relay to group messages based on the SMTP transaction.
+
+6.2.7.  MSGID
+
+   The MSGID SHOULD identify the type of message.  For example, a
+   firewall might use the MSGID "TCPIN" for incoming TCP traffic and the
+   MSGID "TCPOUT" for outgoing TCP traffic.  Messages with the same
+   MSGID should reflect events of the same semantics.  The MSGID itself
+   is a string without further semantics.  It is intended for filtering
+   messages on a relay or collector.
+
+
+
+
+Gerhards                    Standards Track                    [Page 14]
+
+RFC 5424                  The Syslog Protocol                 March 2009
+
+
+   The NILVALUE SHOULD be used when the syslog application does not, or
+   cannot, provide any value.
+
+   This field MAY be operator-assigned.
+

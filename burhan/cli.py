@@ -451,7 +451,15 @@ def main():
     fnd.add_argument("--delta", action="store_true", help="diff the two most recent runs")
     rep = sub.add_parser("report", help="export an HTML/JSON/SARIF report from the store")
     rep.add_argument("--db", default="results/burhan.db"); rep.add_argument("--run-id", default="")
-    rep.add_argument("--out", default="results/report.html"); rep.add_argument("--format", choices=["html", "json", "sarif", "executive", "glass", "bilingual"], default="html")
+    rep.add_argument("--out", default="results/report.html"); rep.add_argument("--format", choices=["html", "json", "sarif", "executive", "glass", "bilingual", "cef", "syslog", "ocsf"], default="html")
+    rep.add_argument("--syslog-host", default="127.0.0.1",
+                     help="syslog format only: collector host to send to "
+                          "(UDP RFC 5426 by default)")
+    rep.add_argument("--syslog-port", type=int, default=514)
+    rep.add_argument("--syslog-proto", choices=["udp", "tcp"], default="udp",
+                     help="UDP (RFC 5426) or TCP with RFC 6587 framing; "
+                          "TLS (RFC 5425) is a deployment-side PKI decision, "
+                          "documented in burhan/siem.py")
     rep.add_argument("--pdf", action="store_true",
                      help="bilingual format: also convert the .docx to PDF "
                           "(requires soffice on PATH; refuses loudly if absent)")
@@ -790,6 +798,62 @@ def main():
                                      build_executive, build_glass_html)
         st = Store(a.db)
         os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
+        if a.format in ("cef", "syslog", "ocsf"):
+            # SIEM/enterprise export (this order, Part 1): the three formats
+            # build on the SIGNED audit pipeline — the store's run row
+            # carries the audit block (merkle root + Ed25519 signature);
+            # every exported event points back to it (pointer, never a
+            # copy of the full evidence). Only VERIFIED findings export.
+            from burhan.siem import (build_cef, build_rfc5424, build_ocsf,
+                                     SyslogSender)
+            from burhan.audit import audit_block
+            # --run-id selects directly; without it the NEWEST run is used
+            # (list_runs is a summary — the full row comes from get_run)
+            if a.run_id:
+                run = st.get_run(a.run_id)
+            else:
+                newest = (st.list_runs(limit=1) or [{}])[0].get("run_id", "")
+                run = st.get_run(newest) if newest else None
+            if run is None:
+                raise SystemExit(f"siem export: run {a.run_id or '(newest)'} "
+                                 "not found in the store")
+            # the store row predates the audit enrich (save_run persists
+            # findings/stats only) — recompute the SAME audit block from the
+            # stored run (audit.py: the root depends only on the findings,
+            # the keypair only on the seed — both carried by the row), so
+            # the export carries the signed-evidence pointer without any
+            # parallel unsigned event path.
+            audit = audit_block(run, seed=run.get("seed") or None)
+            audit.setdefault("run_id", run.get("run_id", ""))
+            findings = [f for f in run.get("findings", [])
+                        if f.get("status") == "verified"]
+            sent = 0
+            if a.format == "cef":
+                with open(a.out, "w", encoding="utf-8") as fh:
+                    for f in findings:
+                        fh.write(build_cef(f, audit) + "\n")
+            elif a.format == "ocsf":
+                events = [build_ocsf(f, audit) for f in findings]
+                json.dump({"schema_version": "1.9.0",
+                           "class": "Detection Finding",
+                           "events": events}, open(a.out, "w"),
+                          indent=1, ensure_ascii=False)
+            else:  # syslog: a REAL send through SyslogSender (UDP RFC 5426 /
+                   # TCP RFC 6587), plus the message log on disk
+                with open(a.out, "w", encoding="utf-8") as fh:
+                    with SyslogSender(a.syslog_host, a.syslog_port,
+                                      proto=a.syslog_proto) as tx:
+                        for f in findings:
+                            msg = build_rfc5424(f, audit)
+                            tx.send(msg)
+                            fh.write(msg + "\n")
+                            sent += 1
+            print(json.dumps({"report": a.out, "format": a.format,
+                              "run_id": run.get("run_id", ""),
+                              "events": len(findings), "sent": sent,
+                              "merkle_root": (audit.get("merkle_root")
+                                              or "")[:16] + "…"}))
+            return
         if a.format == "sarif":
             # OP-02: SARIF 2.1.0 — the industry interchange format (GitHub code
             # scanning / VS Code / DefectDojo). Verification-gated like everything
