@@ -817,6 +817,23 @@ verification · step-by-step recipe · confidence).<br>
 Finding IDs of this view: {' '.join(f"<code>{e(f.get('id', ''))}</code>" for f in findings[:12])
 + (f" … (+{len(findings) - 12} more)" if len(findings) > 12 else "")}
 </div></section>
+<section><h2>Replay this finding (interactive control)</h2><div class='box'>
+ARCHITECTURAL REALITY, stated plainly: this HTML file is a <b>static
+document — it cannot itself make live network calls</b>. The interactive
+replay control is the CLI/API command below, which an analyst (or their
+tooling) executes from an environment that can reach the target:<br><br>
+<code>burhan reproduce --finding &lt;ID&gt; --db &lt;store.db&gt; --replay --gated</code><br><br>
+Equivalently via curl against the SaaS app's engine endpoint (the app
+shells to the same CLI):<br>
+<code>curl -X POST http://&lt;app-host&gt;/api/engine/replay -H 'Content-Type: application/json'
+-d '{{"findingId": "&lt;ID&gt;", "runId": "&lt;run&gt;", "gated": true}}'</code><br><br>
+Every replay is gated by the live authorized-targets registry (a target
+not currently authorized ⇒ REFUSED, zero live requests) and rate-limited
+to one replay per finding per 60&nbsp;seconds (anti-DoS). Exit codes /
+verdicts: <b>REPRODUCTION_VERIFIED</b> (still vulnerable — a new signed
+lifecycle event), <b>REPRODUCTION_FAILED</b> (fixed — a distinct lifecycle
+event, not an error), <b>REFUSED</b> (not authorized), <b>RATE_LIMITED</b>.
+</div></section>
 <section><h2>Recurring across runs</h2><div class="box"><ul>{rec_rows or '<li>None</li>'}</ul></div>
 <div class="box" style="margin-top:10px">Latest delta — new: <b>{len(delta.get('new', []))}</b>,
 fixed: <b>{len(delta.get('fixed', []))}</b>, recurring: <b>{len(delta.get('recurring', []))}</b></div></section>
