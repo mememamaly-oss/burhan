@@ -980,6 +980,18 @@ def main():
                                       f"runs' proof files (or its run predates v4.0.0)"}),
                   file=sys.stderr)
             sys.exit(2)
+        if getattr(a, "gated", False) and a.replay:
+            # Part 2: gated replay — same engine plus the live authorization
+            # check + per-finding rate limit + identity-linked lifecycle
+            # event. Refusals exit 2 (zero live requests); rate limit exit 3.
+            from burhan.replay import replay_finding_gated, ReplayRateLimited
+            try:
+                g = replay_finding_gated(proof)
+            except ReplayRateLimited as e:
+                print(json.dumps({"replay": "RATE_LIMITED", "reason": str(e)}))
+                raise SystemExit(3)
+            print(json.dumps(g, indent=1, ensure_ascii=False))
+            sys.exit(0 if g.get("replay") == "REPRODUCTION_VERIFIED" else 2)
         if a.replay:
             from urllib.parse import urlsplit
             from burhan.core import ScopeRule, EventBus
