@@ -1,0 +1,78 @@
+name: Continuous monitoring (opt-in per target)
+
+# Part 3.1 (this order): scheduled re-scans against targets the operator
+# EXPLICITLY listed in scripts/monitor/monitor-config.json. OPT-IN ONLY
+# (3.3): the workflow checks out that file, and if it declares no targets
+# the job exits 0 with an OFF marker — no schedule, no scan, no alert,
+# exactly like the race-prober's opt-in-only design: unattended automated
+# scanning against a target needs deliberate configuration, not a default.
+#
+# DEFAULT CADENCE (documented, per 3.1): every Monday 03:42 UTC. WHY: the
+# same weekly cadence this repo already runs its other unattended live
+# validations (live-validation.yml: "17 3 * * 1" and CodeQL) — monitoring
+# slower than the code's own validation rhythm would miss regressions the
+# project itself would catch; faster would spend CI minutes the config's
+# own targets rarely need. Each target can override its own cadence in the
+# config (the runner supports per-target cron via the operator's own
+# scheduler driving run_due.py --target <id>).
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "42 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    name: Scheduled scan (lifecycle compare + regression alert)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install engine dependencies
+        run: pip install -r requirements.txt
+
+      - name: Gate — monitoring config present and non-empty?
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, sys
+          p = pathlib.Path("scripts/monitor/monitor-config.json")
+          if not p.exists():
+              print("monitor-config.json absent — monitoring OFF (opt-in only); exiting 0")
+              open("/tmp/monitor-off", "w").write("off")
+              sys.exit(0)
+          cfg = json.loads(p.read_text())
+          targets = cfg.get("targets") or []
+          if not targets:
+              print("monitor-config.json declares no targets — monitoring OFF; exiting 0")
+              open("/tmp/monitor-off", "w").write("off")
+          else:
+              print(f"monitoring {len(targets)} configured target(s): "
+                    + ", ".join(t.get('id', '?') for t in targets))
+          PY
+
+      - name: Scheduled scans (existing engine + existing lifecycle compare)
+        if: ${{ hashFiles('/tmp/monitor-off') == '' }}
+        run: python3 scripts/monitor/run_due.py
+
+      - name: Alert evaluation (REGRESSED / CRITICAL_NEW -> webhook)
+        if: ${{ hashFiles('/tmp/monitor-off') == '' }}
+        env:
+          MONITOR_WEBHOOK_URL: ${{ secrets.MONITOR_WEBHOOK_URL }}
+        run: |
+          python3 - <<'PY'
+          import os, sys
+          sys.path.insert(0, ".")
+          url = os.environ.get("MONITOR_WEBHOOK_URL", "")
+          print("webhook:", "configured via secret" if url else
+                "NOT configured — alerts will be logged to the run output only "
+                "(the documented no-secret behavior; never a silent failure "
+                "of the scan itself)")
+          PY

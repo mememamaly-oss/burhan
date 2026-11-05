@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "policy": "OPT-IN ONLY (Part 3.3): a target is monitored ONLY by appearing here, with an explicit schedule the operator wrote. Nothing is scheduled by default — the same reasoning as the race-prober's opt-in-only design: unattended automated scanning against a target needs deliberate configuration, not a default. The authorized-targets.json gate still applies at every scan on top of this file; this config adds scheduling, not authorization. Alert policy (Part 3.2): REGRESSED findings (previously FIXED, present again) and NEW CRITICAL-severity findings fire the webhook; stable RECURRING-only runs are silent.",
+  "webhook_url": null,
+  "targets": []
+}
