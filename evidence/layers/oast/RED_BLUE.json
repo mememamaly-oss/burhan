@@ -1,0 +1,41 @@
+{
+ "generated": "2026-11-05T15:51:19.894101+00:00",
+ "provider_citation": {
+  "repo": "projectdiscovery/interactsh",
+  "fetched": "2026-11-05, main branch: pkg/client/client.go, pkg/server/http_server.go, pkg/server/util.go",
+  "protocol": "POST /register {public-key, secret-key, correlation-id}; GET /poll?id=&secret=; RSA-OAEP(SHA256)+AES-CTR payloads; xid/zbase32 correlation alphabets"
+ },
+ "third_party_transit": "interactions via this provider transit a third party (the public interact.sh infrastructure) by design — the accepted tradeoff for zero-infrastructure live testing",
+ "tests": {
+  "red": {
+   "interaction_id": "oob-red000001",
+   "issued_url": "http://5dd24c2df7ec5332aad5gcgm75rnpstcb.oast.fun/i/oob-red000001",
+   "received": true,
+   "hits": [
+    {
+     "t": 1793893881.096,
+     "method": "GET",
+     "ip": "47.57.232.232",
+     "ua": "",
+     "host": "5dd24c2df7ec5332aad5gcgm75rnpstcb",
+     "protocol": "http",
+     "raw_request": "GET /i/oob-red000001 HTTP/1.1\r\nHost: 5dd24c2df7ec5332aad5gcgm75rnpstcb.oast.fun\r\nAccept-Encoding: identity\r\nConnection: close\r\nUser-Agent: Python-urllib/3.12\r\n\r\n"
+    }
+   ]
+  },
+  "blue": {
+   "interaction_id": "oob-blue00001",
+   "received": false,
+   "pin": "TESTED_NEGATIVE — zero interaction received; the channel does not fabricate evidence"
+  },
+  "isolation": {
+   "a_received": true,
+   "b_spurious": false
+  },
+  "selfhosted_loopback": {
+   "http_red": true,
+   "http_blue_silent": true,
+   "status": "LOGIC-PROVEN-BUT-INFRASTRUCTURE-PENDING: DNS+HTTP correlation logic proven via local loopback simulation only (real DNS needs an operator NS delegation); never reported as live-network-proven"
+  }
+ }
+}
