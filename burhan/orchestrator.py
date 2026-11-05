@@ -2259,7 +2259,8 @@ def doctor(allow_private=False) -> dict:
         try:
             from .oast import InteractshProvider
             with InteractshProvider() as _i:
-                assert _i.url("doctor-none").endswith(_i._host)
+                _u = _i.url("doctor-none")
+                assert _u.endswith(_i._host + "/i/doctor-none")
                 assert _i.poll("doctor-none", timeout=1.0) is None
             interactsh_detail = "interact.sh (default public channel) OK"
             interactsh_ok = True
