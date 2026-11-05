@@ -115,7 +115,14 @@ def scan_crapi(base: str, spec, race, max_requests: int, store_path: str,
     from burhan.oast import OastServer
     from burhan.store import Store
 
-    oast = OastServer()
+    # Part 5.1 (this order): OAST channel selectable — local listener
+    # (default) or interact.sh when BURHAN_LIVE_OAST=interactsh.
+    import os as _os
+    if _os.environ.get("BURHAN_LIVE_OAST") == "interactsh":
+        from burhan.oast import InteractshProvider
+        oast = InteractshProvider()
+    else:
+        oast = OastServer()
     t0 = time.time()
     try:
         cfg = ScanConfig(allow_private=True, max_pages=50, timeout=15.0,
@@ -139,7 +146,12 @@ def scan_crapi(base: str, spec, race, max_requests: int, store_path: str,
 def scan_dvga(base: str, max_requests: int, out: Path) -> dict:
     from burhan.orchestrator import ScanConfig, BurhanScanner
     from burhan.oast import OastServer
-    oast = OastServer()
+    import os as _os
+    if _os.environ.get("BURHAN_LIVE_OAST") == "interactsh":
+        from burhan.oast import InteractshProvider
+        oast = InteractshProvider()
+    else:
+        oast = OastServer()
     t0 = time.time()
     try:
         cfg = ScanConfig(allow_private=True, max_pages=50, timeout=15.0,
