@@ -49,6 +49,12 @@ name: Live validation (crAPI + DVGA — modern battery v2)
 
 on:
   workflow_dispatch:
+    inputs:
+      oast:
+        description: "OAST channel for the live scans (Part 5.1): local listener (default) or interact.sh"
+        type: choice
+        default: local
+        options: [local, interactsh]
   schedule:
     - cron: "17 3 * * 1" # weekly, Monday — same cadence as CodeQL
 
@@ -175,17 +181,31 @@ jobs:
         # python container on the dind's host network, where the
         # published ports are reachable as 127.0.0.1 — and the readiness
         # probes use the exact same path the scan will use.
-        # No pip install needed: the scanner's import chain is pure
-        # stdlib (verified — orchestrator and everything it pulls avoid
-        # the cryptography/blake3 requirements, those are for vault/
-        # proof/signing, which the live battery does not exercise).
+        # The scanner's import chain is pure stdlib (verified — orchestrator
+        # and everything it pulls avoid the cryptography/blake3 requirements,
+        # which live-battery runs without vault/proof/signing never touch)
+        # — EXCEPT the interact.sh OAST channel (Part 4/5), whose provider
+        # needs `cryptography` for the official protocol's RSA-OAEP + AES-CTR
+        # payloads. Install it only when that channel is actually requested
+        # (a ~2s wheel install; the default local channel stays stdlib-only).
         run: |
           set -e
           export DOCKER_HOST=unix:///var/run/docker.sock
           docker volume create scanout >/dev/null
           docker run -d --name scanbox --network host \
-            -v scanout:/out python:3.12-slim sleep 900 >/dev/null
+            -v scanout:/out python:3.12-slim sleep 3600 >/dev/null
+          # 3600 (was 900, live-caught run 42064194583): the interact.sh
+          # OAST channel (Part 5.1) polls a public service per OOB probe
+          # site with a 5s floor — the crAPI battery has ~114 such sites,
+          # so the same scans that take ~90s locally need ~10+ minutes per
+          # pass over the public channel, and the 900s box died mid-scan
+          # (exit 137, recorded). The container is still torn down in the
+          # same job; this only widens its lifetime to the job's own.
+          # timeout-minutes.
           docker exec scanbox mkdir -p /ws
+          if [ "${{ inputs.oast || 'local' }}" = "interactsh" ]; then
+            docker exec scanbox pip install --quiet cryptography
+          fi
           # stage the engine (tar-pipe through the API; skip .git etc.)
           # .live-spec/ rides along — the checksums step fetched crAPI's
           # main-branch openapi spec there before this step
@@ -213,7 +233,10 @@ jobs:
                         f"({url}, probed from inside the dind)")
                   sys.exit(1)
           PY
-          docker exec scanbox python3 /ws/scripts/live_validate_modern2.py \
+          docker exec -e BURHAN_LIVE_OAST=${{ inputs.oast || 'local' }} \
+            -e BURHAN_OAST_POLL_FLOOR=${{ inputs.oast == 'interactsh' && '1.0' || '5.0' }} \
+            scanbox \
+            python3 /ws/scripts/live_validate_modern2.py \
             --crapi http://127.0.0.1:8888 \
             --dvga http://127.0.0.1:5013 \
             --crapi-spec /ws/.live-spec/crapi-openapi-spec.json \
@@ -311,16 +334,25 @@ jobs:
 
       - name: Run r10 live validation (two crAPI scans sharing a lifecycle store + chain evaluation)
         # same scan-inside-the-dind pattern as the battery job (run
-        # 41286864928 lesson). scanbox sleeps 2400s: THIS job runs TWO
+        # 41286864928 lesson). scanbox sleeps 3600s: THIS job runs TWO
         # full crAPI scans back-to-back plus a DVGA scan — the battery's
-        # 900s box would die mid-scan-2.
+        # 900s box would die mid-scan-2 (and the interact.sh public OAST
+        # channel needs the same widened ceiling the battery got after
+        # run 42067722877's live-caught 40-min timeout).
         run: |
           set -e
           export DOCKER_HOST=unix:///var/run/docker.sock
           docker volume create scanout >/dev/null
           docker run -d --name scanbox --network host \
-            -v scanout:/out python:3.12-slim sleep 2400 >/dev/null
+            -v scanout:/out python:3.12-slim sleep 3600 >/dev/null
           docker exec scanbox mkdir -p /ws
+          # interact.sh channel (Part 5.1): the r10 job's box ALSO needs the
+          # provider's cryptography wheel (live-caught run 42067722877: this
+          # job died 2 minutes in with ModuleNotFoundError while the battery
+          # job — which got the conditional install first — ran on).
+          if [ "${{ inputs.oast || 'local' }}" = "interactsh" ]; then
+            docker exec scanbox pip install --quiet cryptography
+          fi
           tar --exclude=.git --exclude=node_modules --exclude=.next \
             -cf - . | docker exec -i scanbox tar -xf - -C /ws
           docker exec scanbox python3 - <<'PY'
@@ -349,7 +381,10 @@ jobs:
           # killing the step before docker cp); the step then fails with
           # the script's own exit code.
           set +e
-          docker exec scanbox python3 /ws/scripts/live_validate_r10.py \
+          docker exec -e BURHAN_LIVE_OAST=${{ inputs.oast || 'local' }} \
+            -e BURHAN_OAST_POLL_FLOOR=${{ inputs.oast == 'interactsh' && '1.0' || '5.0' }} \
+            scanbox \
+            python3 /ws/scripts/live_validate_r10.py \
             --crapi http://127.0.0.1:8888 \
             --dvga http://127.0.0.1:5013 \
             --crapi-spec /ws/.live-spec/crapi-openapi-spec.json \

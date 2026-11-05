@@ -115,7 +115,14 @@ def scan_crapi(base: str, spec, race, max_requests: int, store_path: str,
     from burhan.oast import OastServer
     from burhan.store import Store
 
-    oast = OastServer()
+    # Part 5.1 (this order): OAST channel selectable — local listener
+    # (default) or interact.sh when BURHAN_LIVE_OAST=interactsh.
+    import os as _os
+    if _os.environ.get("BURHAN_LIVE_OAST") == "interactsh":
+        from burhan.oast import InteractshProvider
+        oast = InteractshProvider()
+    else:
+        oast = OastServer()
     t0 = time.time()
     try:
         cfg = ScanConfig(allow_private=True, max_pages=50, timeout=15.0,
@@ -139,7 +146,12 @@ def scan_crapi(base: str, spec, race, max_requests: int, store_path: str,
 def scan_dvga(base: str, max_requests: int, out: Path) -> dict:
     from burhan.orchestrator import ScanConfig, BurhanScanner
     from burhan.oast import OastServer
-    oast = OastServer()
+    import os as _os
+    if _os.environ.get("BURHAN_LIVE_OAST") == "interactsh":
+        from burhan.oast import InteractshProvider
+        oast = InteractshProvider()
+    else:
+        oast = OastServer()
     t0 = time.time()
     try:
         cfg = ScanConfig(allow_private=True, max_pages=50, timeout=15.0,
@@ -334,11 +346,53 @@ def main() -> int:
         dvga_rep = scan_dvga(args.dvga, args.max_requests, out)
         chains["dvga"] = _chain_verdict("dvga", dvga_rep, args.dvga)
 
+    # ---- R11 5.2: gated interactive replay, end-to-end, vs a REAL crAPI
+    # finding (same function the CLI's `reproduce --replay --gated` calls:
+    # live authorization gate + per-finding rate limit + the existing
+    # re-execution engine). Runs INSIDE the scanbox while crAPI is up.
+    gated_replay = {"attempted": False}
+    proofs = (rep2.get("stats") or {}).get("proofs") or []
+    crapi_proofs = [p for p in proofs
+                    if str((p.get("requests") or [{}])[0].get("url", ""))
+                    .startswith(args.crapi.rstrip("/") + "/")]
+    # Prefer a REQUEST-LEVEL replayable class (evidence.REPLAYABLE_TYPES) so
+    # the live 5.2 record shows an actual re-execution; session-bound classes
+    # (the VPE first pick of run 42077006042) reproduce NOT_REPLAYABLE — a
+    # legitimate verdict but a weaker demonstration of the replay engine.
+    from burhan.evidence import REPLAYABLE_TYPES
+    candidate = next(
+        (p for p in crapi_proofs if p.get("type") in REPLAYABLE_TYPES),
+        crapi_proofs[0] if crapi_proofs else None)
+    if candidate:
+        try:
+            from burhan.replay import (replay_finding_gated,
+                                       ReplayRateLimited)
+            gated_replay = {"attempted": True,
+                            "finding_id": candidate.get("finding_id", ""),
+                            "type": candidate.get("type", "")}
+            try:
+                g = replay_finding_gated(candidate)
+            except ReplayRateLimited as e:
+                g = {"replay": "RATE_LIMITED", "reason": str(e)}
+            gated_replay.update(g)
+            print("[5.2 gated replay] "
+                  + json.dumps({k: gated_replay.get(k) for k in
+                                ("finding_id", "type", "replay",
+                                 "live_requests_sent", "reason")}))
+        except Exception as e:  # noqa: BLE001 — recorded, never fatal to the run
+            gated_replay.update({"replay": "ERROR",
+                                 "reason": f"{type(e).__name__}: {e}"})
+            print(f"[5.2 gated replay] failed to execute: {e}")
+    else:
+        gated_replay = {"attempted": False,
+                        "reason": "no crAPI proof in pass2's stats.proofs"}
+
     verdict = {
         "when": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "part": "r10-part5-live-validation",
         "lifecycle": lifecycle,
         "chains": chains,
+        "gated_replay_5_2": gated_replay,
     }
     (out / "r10-live-validation.json").write_text(
         json.dumps(verdict, indent=1, ensure_ascii=False, default=str),

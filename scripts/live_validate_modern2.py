@@ -267,7 +267,16 @@ def run_target(name: str, base: str, modern_types: list[str], out: Path,
     from burhan.orchestrator import ScanConfig, BurhanScanner
     from burhan.oast import OastServer
 
-    oast = OastServer()
+    # Part 5.1 (this order): the OAST channel is selectable — local listener
+    # (default; loopback fixtures reach it directly) or interact.sh when
+    # BURHAN_LIVE_OAST=interactsh (the order's live-validation requirement:
+    # the public provider exercised end-to-end against real containers).
+    import os as _os
+    if _os.environ.get("BURHAN_LIVE_OAST") == "interactsh":
+        from burhan.oast import InteractshProvider
+        oast = InteractshProvider()
+    else:
+        oast = OastServer()
     t0 = time.time()
     try:
         cfg = ScanConfig(allow_private=True, max_pages=50, timeout=15.0,
