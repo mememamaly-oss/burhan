@@ -355,11 +355,13 @@ def main() -> int:
     crapi_proofs = [p for p in proofs
                     if str((p.get("requests") or [{}])[0].get("url", ""))
                     .startswith(args.crapi.rstrip("/") + "/")]
+    # Prefer a REQUEST-LEVEL replayable class (evidence.REPLAYABLE_TYPES) so
+    # the live 5.2 record shows an actual re-execution; session-bound classes
+    # (the VPE first pick of run 42077006042) reproduce NOT_REPLAYABLE — a
+    # legitimate verdict but a weaker demonstration of the replay engine.
+    from burhan.evidence import REPLAYABLE_TYPES
     candidate = next(
-        (p for p in crapi_proofs
-         if p.get("type") in ("sql_injection", "xss_reflected",
-                              "http_response_header_injection",
-                              "vertical_privilege_escalation", "csrf")),
+        (p for p in crapi_proofs if p.get("type") in REPLAYABLE_TYPES),
         crapi_proofs[0] if crapi_proofs else None)
     if candidate:
         try:
