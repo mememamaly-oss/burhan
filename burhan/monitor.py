@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -143,7 +144,11 @@ def send_alerts(webhook_url: str, target: str, run_id: str,
             return {"delivered": True, "status": r.status,
                     "elapsed_s": round(time.time() - started, 3),
                     "alerts_sent": len(alerts)}
-    except Exception as e:  # delivery failure is reported, never swallowed
+    except (urllib.error.HTTPError, urllib.error.URLError,
+            TimeoutError, OSError) as e:
+        # delivery failure is REPORTED in the return value, never swallowed
+        # (the run record carries it; the scan itself never fails for an
+        # alerting problem) — narrow exceptions, no blanket except
         return {"delivered": False, "error": f"{type(e).__name__}: {e}",
                 "elapsed_s": round(time.time() - started, 3),
                 "alerts_sent": 0}
