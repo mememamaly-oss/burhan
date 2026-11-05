@@ -1488,6 +1488,113 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   bumping a test fixture would invalidate the committed OSV evidence.
 
 
+
+## 2026-11-05 — ROUND 11: SIEM export, interactive gated replay, continuous monitoring, interact.sh OAST (PRs #44–#48)
+
+- PR #44 (c26f5b3+5a927d2, merged 3c8bde4) PART 1 SIEM/ENTERPRISE EXPORT —
+  three formats from the SIGNED audit pipeline (no parallel unsigned event
+  path; every event carries the run's audit pointer: run_id, merkle_root,
+  findings_count, Ed25519 signature+public key): CEF (official spec fetched
+  first: OpenText/ArcSight "Implementing ArcSight Common Event Format" —
+  format line, header fields, escaping rules, severity bands, cs1..cs6Label
+  pairing, rt epoch-ms; excerpts committed), RFC 5424 syslog (full text from
+  rfc-editor.org; ABNF section 6 + severity table 6.2.1; REAL sender: UDP
+  RFC 5426 / TCP RFC 6587 framing; TLS RFC 5425 deliberately not bundled —
+  a deployment PKI decision, documented), OCSF v1.9.0 Detection Finding
+  (class_uid 2004; schemas fetched verbatim from github.com/ocsf/ocsf-schema
+  tag v1.9.0). Validation REAL: CEF round-trip through the official
+  header/extension structure; every syslog line parsed by
+  syslog-rfc5424-parser 0.3.2 (the RFC's ABNF in Lark) with negative
+  controls; OCSF validated by jsonschema against the fetched contract; real
+  loopback UDP send 199/199. CLI: report --format cef|syslog|ocsf. Evidence:
+  evidence/layers/siem-export/ (spec excerpts + 199-event exports from the
+  canonical signed scan + SHA-256 manifest). CI GATE CATCH (live):
+  parse_cef's fields[0] flagged FIRST[0] — restructured, never ledgered.
+  Suite 361->380.
+- PR #45 (1495155+9c998db, merged 9f9deef) PART 4 OAST — interact.sh as the
+  DEFAULT public provider: interface fetched from projectdiscovery/interactsh
+  main (client.go/http_server.go/util.go — register/poll/deregister field
+  names, RSA-OAEP(SHA256)+AES-CTR(IV-prefixed) payloads, and the
+  xid/zbase32 correlation alphabets of util.go; the alphabet restriction was
+  load-bearing: the subdomain is the server's correlation key, our id rides
+  the path/query and is matched client-side from the decrypted raw-request).
+  LIVE RED→BLUE: a genuine blind OOB fetch received/decrypted/correlated; a
+  hardened twin zero (TESTED_NEGATIVE pinned); two ids on one registration
+  stay isolated (evidence/layers/oast/RED_BLUE.json). Third-party transit
+  stated as the accepted tradeoff. SelfHostedListener (DNS+HTTP) built as
+  the swappable upgrade — loopback-proven ONLY, reported
+  logic-proven-but-infrastructure-pending (real DNS needs an operator NS
+  delegation). webhook.site kept behind --oast webhook. +8 tests (3 live).
+- PR #46 (5d9de58+581f73d, merged a3c2740) PART 2 INTERACTIVE REPLAY —
+  burhan/replay.py: reuses evidence.replay_finding (NO second exploitation
+  mechanism); the authorized-targets registry is checked LIVE before every
+  replay (never cached) — refusal = zero live requests, exit 2, reason
+  recorded; per-finding rate limit 60s (anti-DoS: bounds one identity to
+  <=3 req/min, race <=10/min); verdicts as lifecycle events linked to the
+  prioritize.py identity model (REPRODUCTION_NOT_REPRODUCED is a distinct
+  event, not an error). HTML report 2.4: a "Replay this finding" section
+  stating the architectural reality plainly (a static HTML file cannot make
+  live network calls) and documenting the actual control: the CLI command +
+  example curl against the SaaS engine endpoint, with gate/rate-limit
+  semantics and all four verdicts. CI GATE CATCH (live):
+  _load_rate_state's blanket except flagged SILENT_EXCEPT — restructured to
+  loud failure (a silent rate-limit reset would defeat the anti-DoS cap).
+  +4 tests.
+- PR #47 (61aec7c..ddc9165, merged 45d5b2d) PART 3 CONTINUOUS MONITORING —
+  burhan/monitor.py + .github/workflows/monitor.yml (default weekly Monday
+  03:42 UTC — the same rhythm as this repo's other unattended live
+  validations, rationale documented) + scripts/monitor/run_due.py
+  (self-hosted cron equivalent) + opt-in-only scripts/monitor/
+  monitor-config.json (absent/empty = OFF, workflow exits 0 with an OFF
+  marker — the race-prober's doctrine; the authorized-targets gate still
+  applies on top). Alerting: REGRESSED (previously FIXED, present again)
+  and NEW CRITICAL fire a generic webhook with the documented payload
+  burhan-monitor-alert/1 (schema in code; evidence pointer back to the
+  signed proof); email/Slack NOT built — stated. Lifecycle logic REUSED
+  (resolve_lifecycle/record_lifecycle; monitor history via the log-driven
+  lifecycle_prev_present per store.py's own contract). 3.4 REAL test:
+  vulnerable->fixed->re-broken across runs fires the REGRESSED alert
+  exactly once with the right payload (byte-verified at a local webhook
+  collector); stable NEW/RECURRING runs silent. CI GATE CATCH (live):
+  send_alerts' blanket except flagged SILENT_EXCEPT — narrowed to
+  HTTPError/URLError/TimeoutError/OSError, failure reported not swallowed.
+  +5 tests. Evidence: evidence/layers/continuous-monitoring/
+  REGRESSION_ALERT.json.
+- PR #48 (ac4afd5..6dcb757) PART 5 LIVE VALIDATION + two real bugs fixed:
+  (a) the reproduce subparser never DEFINED --gated — Part 2's handler
+  guarded on it via getattr default False, so the gated replay path was
+  UNREACHABLE from the CLI (tests passed because they called
+  replay_finding_gated directly). The flag now exists and --gated implies
+  --replay. (b) The r10 live job never got the battery's conditional
+  cryptography install (run 42067722877: ModuleNotFoundError 2 min in) —
+  both jobs now install it for the interactsh dispatch. 5.1 GREEN, twice:
+  the battery over the PUBLIC channel (channel=interactsh in both scan
+  records) produced IDENTICAL results to the local channel — crAPI 99
+  findings (jwt_signature_not_enforced + bfla among them), DVGA 26; the r10
+  job held the lifecycle law over the public channel too (pass1 99 all NEW,
+  pass2 98, identity_overlap=98, all RECURRING). The public channel's
+  honest cost: pass wall ~700s vs ~85s local; the 5s POLL_FLOOR (sized for
+  slow real internet targets) x ~114 OOB sites had left one pass
+  unfinished after 37 minutes (run 42067722877, recorded) — the floor is
+  now env-tunable (BURHAN_OAST_POLL_FLOOR, default 5.0 unchanged for
+  operator runs; the battery dispatch sets 1.0 — the loopback fixtures'
+  true callback latency is one poll round). 5.2 gated replay end-to-end:
+  first record (run 42077006042) exercised the gate (registry consulted
+  live, session-bound VPE class returned NOT_REPLAYABLE with reason,
+  live_requests_sent=0); the candidate now prefers a request-level
+  REPLAYABLE_TYPES class (crAPI's csrf proof) and the confirmation run on
+  6dcb757 records the full re-execution verdict. 5.3 is the r10 two-pass
+  design itself (green both channels).
+- Round-11 CLOSE regression on merged main 45d5b2d: python suite 390/390
+  green (7 live deselected), doctor 19/19 PASS, antipattern --ci-gate PASS,
+  canonical fixture scan 199 verified / 30 distinct types all
+  compliance-mapped, benchmark gate F1 = 1.0 with the deterministic
+  confusion intact (TP=38 FP=0 FN=0 TN=37). CodeQL green on every PR — no
+  new alerts, no dismissals this round (the FIRST[0] and both SILENT_EXCEPT
+  catches were restructured away, never suppressed). Suite: 380 -> 390
+  green across the round (+10: SIEM 19, OAST 8, replay 4, monitoring 5
+  net of suite merges).
+
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,
   backup/release-v4.2.5, backup/release-v4.2.6, recovery/*.
