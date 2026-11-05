@@ -1,0 +1,198 @@
+SOURCE: same official CEF spec PDF (fetched 2026-11-05)
+==== VERBATIM: ArcSight Extension Dictionary key definitions (extract) ====
+ing
+0.1 end endTime Time
+Stamp
+Thetimeatwhichthe
+activityrelatedtothe
+eventended.The
+formatisMMMdd
+yyyyHH:mm:ssor
+millisecondssince
+epoch(Jan1st1970).
+Anexamplewouldbe
+reportingtheendof
+asession.
+0.1 externalId externalId String 40 TheIDusedbyan
+originatingdevice.
+Theyareusually
+increasingnumbers,
+associatedwith
+events.
+0.1 fileCreateTime fileCreateTime Time
+Stamp
+Timewhenthefile
+wascreated.
+0.1 fileHash fileHash String 255 Hashofafile.
+0.1 fileId fileId String 1023 AnIDassociatedwith
+afilecouldbethe
+inode.
+0.1 fileModificationTimefileModificationTime Time
+Stamp
+Timewhenthefile
+waslastmodified.
+0.1 filePath filePath String 1023 Fullpathtothefile,
+includingfilename
+itself.Example:
+C:\ProgramFiles
+\WindowsNT\Access
+ories\wordpad.exe
+or/usr/bin/zip
+0.1 filePermission filePermission String 1023 Permissionsofthe
+file.
+0.1 fileType fileType String 1023 Typeoffile(pipe,
+socket,etc.)
+ImplementingArcSightCommonEventFormat(CEF)-Version26
+ArcSightExtensionDictionary
+OpenTextSmartConnectors(8.4.3) Page25of41
+CEF
+Specificati
+onVersionCEFKeyName FullName
+Data
+Type
+Lengt
+h Meaning
+0.1 flexDate1 flexDate1 Time
+Stamp
+Atimestampfield
+availabletomapa
+timestampthatdoes
+notapplytoany
+otherdefined
+timestampfieldin
+thisdictionary.Use
+allflexfields
+sparinglyandseeka
+morespecific,
+dictionarysupplied
+fieldwhenpossible.
+Thesefieldsare
+typicallyreservedfor
+customeruseand
+shouldnotbesetby
+vendorsunless
+necessary.
+0.1 flexDate1Label flexDate1Label String 128 Thelabelfieldisa
+stringanddescribes
+thepurposeofthe
+flexfield.
+0.1 flexString1 flexString1 String 1023 Oneoffourfloating
+pointfieldsavailable
+tomapfieldsthatdo
+notapplytoany
+otherinthis
+dictionary.Use
+sparinglyandseeka
+morespecific,
+dictionarysupplied
+fieldwhenpossible.
+Thesefieldsare
+typicallyreservedfor
+customeruseand
+shouldnotbesetby
+vendorsunless
+necessary.
+0.1 flexString1Label flexString1Label String 128 Thelabelfieldisa
+stringanddescribes
+thepurposeofthe
+flexfield.
+ImplementingArcSightCommonEventFormat(CEF)-Version26
+ArcSightExtensionDictionary
+OpenTextSmartConnectors(8.4.3) Page26of41
+CEF
+Specificati
+onVersionCEFKeyName FullName
+Data
+Type
+Lengt
+h Meaning
+0.1 flexString2 flexString2 String 1023 Oneoffourfloating
+pointfieldsavailable
+tomapfieldsthatdo
+notapplytoany
+otherinthis
+dictionary.Use
+sparinglyandseeka
+morespecific,
+dictionarysupplied
+fieldwhenpossible.
+Thesefieldsare
+typicallyreservedfor
+customeruseand
+shouldnotbesetby
+vendorsunless
+necessary.
+0.1 flexString2Label flexString2Label String 128 Thelabelfieldisa
+stringanddescribes
+thepurposeofthe
+flexfield.
+0.1 fname fileName String 1023 Nameofthefileonly
+(withoutitspath).
+0.1 fsize fileSize Long Sizeofthefile.
+0.1 in bytesIn Long Numberofbytes
+transferredinbound,
+relativetothesource
+todestination
+relationship,meaning
+thatdatawasflowing
+fromsourceto
+destination.
+0.1 msg message String 1023 Anarbitrarymessage
+givingmoredetails
+abouttheevent.
+Multi-lineentriescan
+beproducedbyusing
+\nasthenewline
+separator.
+0.1 oldFileCreateTime oldFileCreateTime Time
+Stamp
+Timewhenoldfile
+wascreated.
+0.1 oldFileHash oldFileHash String 255 Hashoftheoldfile.
+ImplementingArcSightCommonEventFormat(CEF)-Version26
+ArcSightExtensionDictionary
+OpenTextSmartConnectors(8.4.3) Page27of41
+CEF
+Specificati
+onVersionCEFKeyName FullName
+Data
+Type
+Lengt
+h Meaning
+0.1 oldFileId oldFileId String 1023 AnIDassociatedwith
+theoldfilecouldbe
+theinode.
+0.1 oldFileModificationTimeoldFileModificationTimeTime
+Stamp
+Timewhenoldfile
+waslastmodified.
+0.1 oldFileName oldFileName String 1023 Nameoftheoldfile.
+0.1 oldFilePath oldFilePath String 1023 Fullpathtotheold
+file,includingthefile
+nameitself.
+Examples:
+c:\ProgramFiles\
+WindowsNT\Accesso
+ries\wordpad.exeor
+/usr/bin/zip
+0.1 oldFilePermission oldFilePermission String 1023 Permissionsofthe
+oldfile.
+0.1 oldFileSize oldFileSize Long Sizeoftheoldfile.
+0.1 oldFileType oldFileType String 1023 Typeoftheoldfile
+(pipe,socket,etc.)
+0.1 out bytesOut Integer Numberofbytes
+transferredoutbound
+relativetothesource
+todestination
+relationship.For
+example,thebyte
+numberofdata
+flowingfromthe
+destinationtothe
+source.
+0.1 outcome eventOutcome String 63 Displaysthe
+outcome,usuallyas
+‘success’or‘failure’.
+0.1 proto transportProtocol String 31 IdentifiestheLaye
+
+[dictionary continues: request/requestMethod/msg/cat/outcome/act/src/dst/... — see the source PDF pages 20-41]

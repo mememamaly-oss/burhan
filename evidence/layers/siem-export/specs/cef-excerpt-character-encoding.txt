@@ -1,0 +1,175 @@
+SOURCE: 'Implementing ArcSight Common Event Format (CEF)', Version 26, OpenText SmartConnectors 8.4.3, October 2023 — https://www.microfocus.com/documentation/arcsight/arcsight-smartconnectors-8.4/pdfdoc/cef-implementation-standard/cef-implementation-standard.pdf (fetched 2026-11-05)
+==== VERBATIM: format line, header field definitions, extension field, character encoding ====
+f41
+CEFImplementation
+ThisdocumentdefinestheCEFprotocolandprovidesdetailsaboutimplementingthe
+standard.Itdetailstheheaderandpredefinedextensionsusedwithinthestandard,and
+explainstheproceduretocreateuser-definedextensions.ItalsoincludesalistofCEF
+supporteddateformats.
+HeaderInformation
+CEFusesSyslogasatransportmechanism.Itusesthefollowingformatthatcontainsa
+Syslogprefix,aheader,andanextension:
+Jan18 11:07:53hostCEF:Version|DeviceVendor|DeviceProduct|Device
+Version|DeviceEventClassID|Name|Severity|[Extension]
+Inwhich,
+CEF:Version-isamandatoryheader.Therestofthemessageisformattedusingfields
+delimitedbyapipe("|")character.Allofthefollowingfieldsmustbepresentanddefined
+under"HeaderFieldDefinitions"onthenextpage.
+[Extension]-isaplaceholderforadditionalfields,butisnotmandatory.Anyadditional
+fieldsareloggedaskey-valuepairs.Foratableofdefinitions,seeArcSightExtension
+Dictionary.
+Pipe(|)usedina“value”partofaCEFheaderfieldmustbeescaped.Thepipedelimiter
+mustnotbeescaped.
+ThefollowingexamplesillustrateaCEFmessageusingSyslogtransport:
+ForCEF0.xversion
+Sep19 08:26:10hostCEF:0|Security|threatmanager|1.0|100|worm
+successfullystopped|10|src=10.0.0.1dst=2.1.2.2spt=1232
+ForCEF1.xversion
+Sep29 08:26:10hostCEF:1|Security|threatmanager|1.0|100|worm
+successfullystopped|10|src=10.0.0.1dst=2.1.2.2spt=1232
+UsingCEFWithoutSyslog
+Syslogappliesasyslogprefixtoeachmessage,nomatterwhichdeviceitarrivesfrom,
+thatcontainsthedateandhostnameinthefollowingexample:
+Jan18 11:07:53hostCEF:Version|…
+ImplementingArcSightCommonEventFormat(CEF)-Version26
+WhatisCEF?
+OpenTextSmartConnectors(8.4.3) Page5of41
+EvenifaneventproducerisunabletowriteSyslogmessages,itispossibletowritethe
+eventstoafilebyperformingthefollowingsteps:
+1. Discardthesyslogprefix(Jan18 11:07:53host).
+2. Beginthemessagewiththefollowingformat:
+CEF:Version|DeviceVendor|DeviceProduct|DeviceVersion|DeviceEvent
+ClassID|Name|Severity|[Extension]
+HeaderFieldDefinitions
+FieldName Type Size Description
+CEFVersion Numeric N/A CEFVersionisanintegerandidentifiesthe
+versionoftheCEFformat.Eventconsumers
+usethisinformationtodeterminewhatthe
+followingfieldsrepresent.
+ThecurrentCEFformatversionsare:
+l 0(CEF:0)-forCEFSpecificationversion
+0.1
+l 1(CEF:1)-forCEFSpecificationversion
+1.x
+Forexample,forCEFSpecificationversion
+1.2,thevalueoftheCEFVersionheaderfield
+willbe"1".
+agentSeverity AgentSeverityEnumerationN/A agentSeverityisastringorintegerandit
+reflectstheimportanceoftheevent.
+l Thevalidstringvaluesare:
+Unknown, Low, Medium, High, and
+Very-High.
+l Thevalidintegervaluesare:
+0-3=Low, 4-6=Medium, 7-8=High, and9-
+10=Very-High.
+ImplementingArcSightCommonEventFormat(CEF)-Version26
+WhatisCEF?
+OpenTextSmartConnectors(8.4.3) Page6of41
+deviceEventClassIdString 1023 deviceEventClassIdisauniqueidentifierfor
+eachevent-type.Thiscanbeastringoran
+integer.deviceEventClassIdidentifiesthe
+typeofeventreported.
+Intheintrusiondetectionsystem(IDS)world,
+eachsignatureorrulethatdetectscertain
+activityhasauniquedeviceEventClassId
+assigned.Thisisarequirementforother
+typesofdevicesaswell,andhelpscorrelation
+enginesprocesstheevents.Itisalsoknown
+asSignatureID.
+Note: The‘=’,‘%’ , and‘#’charactersmustbe
+escapedinthevulnerabilitystringthatare
+mappedtodeviceEventClassId, andifthey
+arepresentinthedescriptionornameofthe
+vulnerability.However,thesecharacters
+mustnotbeescapedwhenusedasa
+delimiter.
+deviceProduct String 63 deviceProduct, deviceVendor, and
+deviceVersionarestringsthatuniquely
+identifythetypeofdevicethatsentthe
+message.
+Notwoproductsmightusethesame
+deviceVendoranddeviceProductpair.There
+isnocentralauthoritymanagingthesepairs.
+Eventproducersmustensurethattheyassign
+uniquenamepairs.
+deviceVendor String 63
+deviceVersion String 31
+name String 512 nameisastringrepresentingahuman-
+readableandunderstandabledescriptionof
+theevent.
+Theeventnamemustnotcontain
+informationthatisspecificallymentionedin
+otherfields.Forexample:"Portscanfrom
+10.0.0.1targeting20.1.1.1"isnotagood
+eventname.Itmustbe:"Portscan".The
+otherinformationisredundantandcanbe
+pickedupfromtherestofthefields.
+TheExtensionField
+TheExtensionfieldcontainsacollectionofkey-valuepairs.Thekeysarepartofa
+predefinedset.ThestandardallowstoincludeadditionalkeysasdescribedintheArcSight
+ExtensionDictionarysection.Aneventcancontainanynumberofkey-valuepairsinany
+order,separatedbyspaces("").Ifafieldcontainsaspace,suchasafilename,thisisvalid
+andcanbeloggedinexactlythatmanner,asshowninthefollowingexample:
+ImplementingArcSightCommonEventFormat(CEF)-Version26
+WhatisCEF?
+OpenTextSmartConnectors(8.4.3) Page7of41
+filePath=/user/username/dir/myfilename.txt
+Note:
+l Iftherearemultiplespacesbeforeakey,allspacesbutthelastspacearetreatedas
+trailingspacesinthepriorvalueinthekey.Ifyouneedtrailingspaces,usemultiple
+spaces,otherwise,useonespacebetweentheendofavalueandthestartofthe
+followingkey.
+l Trailingspacesarenotpreservedforthefinalkey-valuepairintheextension.Itis
+highlyrecommendedtonotutilizeleadingortrailingspacesinCEFeventsunless
+absolutelynecessary.Ifthatisthecase,ensuretheorderingofkey-valuepairsinthe
+extensionissuchthatanyvaluewithtrailingspacesisnotthefinalvalue.Formore
+informationonbestpracticesforcreatingCEFevents,seetheCEFMapping
+Guidelinesdocument.
+l Extensionvaluesmustfollowtheescapecharacterguidelinesdefinedforencoding
+symbolsinCEF.See,"CharacterEncoding"below.
+CharacterEncoding
+BecauseCEFusestheUTF-8Unicodeencodingmethod,certainsymbolsmustuse
+characterencoding.Withinthiscontext,characterencodingspecifieshowtorepresent
+charactersthatcouldbemisinterpretedwithintheschema.
+EnsurethefollowingwhenencodingsymbolsinCEF:
+l TheentiremessagemustbeUTF-8encoded.
+l Spacesusedintheheaderarevalid.Donotencodeaspacecharacterbyusing
+<space>.
+l Ifapipe(|)isusedintheheader,itmustbeescapedwithabackslash(\).Butnote
+thatthepipesintheextensiondonotneedescaping.Forexample:
+Sep19 08:26:10hostCEF:0|security|threatmanager|1.0|100|detecteda
+\| in message|10|src=10.0.0.1act=blockeda | dst=1.1.1.1
+l Ifabackslash(\)isusedintheheaderortheextension,itmustbeescapedwith
+anotherbackslash(\).Forexample:
+Sep19 08:26:10hostCEF:0|security|threatmanager|1.0|100|detecteda
+\\ in packet|10|src=10.0.0.1act=blockeda \\ dst=1.1.1.1
+l Ifanequalsign(=)isusedintheextensions,ithastobeescapedwithabackslash(\).
+Equalsignsintheheaderneednoescaping.Forexample:
+Sep19 08:26:10hostCEF:0|security|threatmanager|1.0|100|detecteda =
+in message|10|src=10.0.0.1act=blockeda \= dst=1.1.1.1
+l Multi-linefieldscanbesentbyCEFbyencodingthenewlinecharacteras\nor\r.
+Notethatmultiplelinesareonlyallowedinthevaluepartoftheextensions.For
+ImplementingArcSightCommonEventFormat(CEF)-Version26
+WhatisCEF?
+OpenTextSmartConnectors(8.4.3) Page8of41
+example:
+Sep19 08:26:10hostCEF:0|security|threatmanager|1.0|100|Detecteda
+threat.No actionneeded.|10|src=10.0.0.1msg=Detecteda threat.\nNo
+actionneeded
+ImplementingArcSightCommonEventFormat(CEF)-Version26
+WhatisCEF?
+OpenTextSmartConnectors(8.4.3) Page9of41
+ArcSightExtensionDictionary
+TheCEFKeyNamesForEventProducersandCEFKeyNamesforEventConsumerstables
+listthepredefinednamesthatestablishusagesforbotheventproducersandevent
+consumers.Whilethefieldslistedinboththetablesareusefuleventconsumers,the
+fieldslistedintheCEFKeyNamesforEventConsumerstablemustnotbesetbyevent
+producers.
+Note:
+l ThebytesInandbytesOutfieldswerecontainingonlyIntegervaluesinCEF0.1.
+However,fromCEF1.0onwards,thesefieldsalsocontaintheLongvalues.
+l AllIPaddressfieldsinCEF0.1werecontainingIPv4addressesonly.However,from
+CEF1.0onwards,thesefieldsalsocontainIPv6addresses.
+CEFKeyNamesforEventProducers
+ThistabledisplaystheCEFnamesalongwiththefullnamesforeachCEFkeyname.When
+sendingevents,theCEFkeynameistheproperformtouse,be
