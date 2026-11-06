@@ -1,16 +1,16 @@
 {
- "when": "2026-11-06T10:25:02Z",
+ "when": "2026-11-06T16:19:23Z",
  "scanned": {
-  "python_files": 211,
+  "python_files": 218,
   "ts_files": 147
  },
  "raw_counts_by_class": {
-  "SILENT_EXCEPT": 290,
+  "SILENT_EXCEPT": 298,
   "TOCTOU": 13,
   "FIRST_MATCH": 5,
   "SILENT_CATCH": 1,
   "EXPORT_UNROUTED": 2,
-  "ENTRYPOINT_UNREACHABLE": 49
+  "ENTRYPOINT_UNREACHABLE": 62
  },
  "cli_wiring": {
   "read_flags": [
@@ -193,7 +193,7 @@
  },
  "entrypoint_wiring": {
   "entry_files": 11,
-  "routed_defs": 488,
+  "routed_defs": 384,
   "engine_public_functions": 1119,
   "flagged": [
    {
@@ -201,8 +201,24 @@
     "name": "FetchError"
    },
    {
+    "file": "burhan/authz.py",
+    "name": "AuthzEngine"
+   },
+   {
     "file": "burhan/blake3.py",
     "name": "blake3"
+   },
+   {
+    "file": "burhan/chainphase.py",
+    "name": "HashCryptoChainPhase"
+   },
+   {
+    "file": "burhan/chainrules.py",
+    "name": "chains_summary"
+   },
+   {
+    "file": "burhan/chainrules.py",
+    "name": "detect_chains"
    },
    {
     "file": "burhan/core.py",
@@ -231,6 +247,38 @@
    {
     "file": "burhan/detect.py",
     "name": "ParamNameTraversalDetector"
+   },
+   {
+    "file": "burhan/discovery.py",
+    "name": "parse_openapi"
+   },
+   {
+    "file": "burhan/evidence.py",
+    "name": "build_proof"
+   },
+   {
+    "file": "burhan/graphql.py",
+    "name": "GraphqlEngine"
+   },
+   {
+    "file": "burhan/modernsec.py",
+    "name": "run_modern_battery"
+   },
+   {
+    "file": "burhan/modernsec2.py",
+    "name": "FlipDNS"
+   },
+   {
+    "file": "burhan/modernsec2.py",
+    "name": "jwt_weak_secret_offline"
+   },
+   {
+    "file": "burhan/modernsec2.py",
+    "name": "rebind_toctou_probe"
+   },
+   {
+    "file": "burhan/modernsec2.py",
+    "name": "run_modern_battery_v2"
    },
    {
     "file": "burhan/oast.py",
@@ -385,6 +433,10 @@
     "name": "ValidationError"
    },
    {
+    "file": "burhan/websocket.py",
+    "name": "WsClient"
+   },
+   {
     "file": "burhan/xgraph.py",
     "name": "Event"
    },
@@ -394,7 +446,7 @@
    }
   ]
  },
- "total": 360,
+ "total": 381,
  "hits": [
   {
    "file": "burhan/api.py",
@@ -448,7 +500,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 99,
+   "line": 105,
    "class": "SILENT_EXCEPT",
    "code": "except ValueError:",
    "func": "_is_loopback_or_private",
@@ -458,7 +510,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 102,
+   "line": 108,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_is_loopback_or_private",
@@ -468,7 +520,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 167,
+   "line": 173,
    "class": "SILENT_EXCEPT",
    "code": "except FetchError as e:",
    "func": "authorize",
@@ -478,7 +530,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 194,
+   "line": 200,
    "class": "SILENT_EXCEPT",
    "code": "except (FetchError, ValueError) as e:",
    "func": "authorize",
@@ -488,7 +540,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 210,
+   "line": 216,
    "class": "SILENT_EXCEPT",
    "code": "except OSError as e:",
    "func": "authorize",
@@ -618,7 +670,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 119,
+   "line": 121,
    "class": "SILENT_EXCEPT",
    "code": "except subprocess.TimeoutExpired:",
    "func": "run_benchmark",
@@ -628,40 +680,20 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 145,
+   "line": 147,
    "class": "TOCTOU",
    "code": "authz_cfg = json.load(open(_azp))",
    "func": "_run_benchmark_inner",
-   "detail": "'_azp' checked at line 144 then used here (two calls)",
+   "detail": "'_azp' checked at line 146 then used here (two calls)",
    "ledger": "AP-044",
    "verdict": "LEDGERED(state-load-race)"
   },
   {
    "file": "burhan/cli.py",
-   "line": 249,
+   "line": 259,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "repair_demo",
-   "detail": "except swallows without re-raise/log/documented-safe comment",
-   "ledger": "AP-045",
-   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
-  },
-  {
-   "file": "burhan/cli.py",
-   "line": 281,
-   "class": "SILENT_EXCEPT",
-   "code": "except Exception:",
-   "func": "repair_demo",
-   "detail": "except swallows without re-raise/log/documented-safe comment",
-   "ledger": "AP-045",
-   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
-  },
-  {
-   "file": "burhan/cli.py",
-   "line": 281,
-   "class": "SILENT_EXCEPT",
-   "code": "except Exception:",
-   "func": "regression_suite",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "AP-045",
    "verdict": "LEDGERED(tolerant-parse-of-target-input)"
@@ -1748,7 +1780,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2267,
+   "line": 2298,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _ie:",
    "func": "doctor",
@@ -1758,7 +1790,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2277,
+   "line": 2308,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _pe:",
    "func": "doctor",
@@ -1778,42 +1810,62 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1253,
+   "line": 1262,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
-   "func": "run",
+   "func": "_run_phases",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-138",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1635,
+   "line": 1644,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
-   "func": "run",
+   "func": "_run_phases",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-138",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 625,
+   "line": 634,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
-   "func": "run",
+   "func": "_run_phases",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-138",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1020,
+   "line": 1029,
    "class": "SILENT_EXCEPT",
    "code": "except AttributeError:",
-   "func": "run",
+   "func": "_run_phases",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-142",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 2160,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — teardown must never mask",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-138",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 2166,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-138",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
@@ -3000,6 +3052,15 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/r13_axes_coverage.py",
+   "line": 77,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "read",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/repro_attest.py",
    "line": 109,
    "class": "SILENT_EXCEPT",
@@ -3104,6 +3165,33 @@
    "class": "SILENT_EXCEPT",
    "code": "except OSError:",
    "func": "vulnapp",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_axis7_negative_stability.py",
+   "line": 94,
+   "class": "SILENT_EXCEPT",
+   "code": "except socket.timeout:",
+   "func": "_loop",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_axis7_negative_stability.py",
+   "line": 96,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_loop",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_axis7_negative_stability.py",
+   "line": 103,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "stop",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "verdict": "NON_ENGINE"
   },
@@ -3265,6 +3353,42 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "tests/test_r14_cli_battery.py",
+   "line": 72,
+   "class": "SILENT_EXCEPT",
+   "code": "except subprocess.TimeoutExpired:",
+   "func": "real_scan_result",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r14_cli_battery.py",
+   "line": 52,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "real_scan_result",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r14_cli_battery.py",
+   "line": 296,
+   "class": "SILENT_EXCEPT",
+   "code": "except subprocess.TimeoutExpired:",
+   "func": "test_cli_no_secret_leakage_in_outputs",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r14_cli_battery.py",
+   "line": 275,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "test_cli_no_secret_leakage_in_outputs",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "tests/test_race_prober.py",
    "line": 64,
    "class": "SILENT_EXCEPT",
@@ -3403,6 +3527,16 @@
    "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
   },
   {
+   "file": "burhan/authz.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "AuthzEngine",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-001",
+   "verdict": "LEDGERED(detector-registry-pattern)"
+  },
+  {
    "file": "burhan/blake3.py",
    "line": 0,
    "class": "ENTRYPOINT_UNREACHABLE",
@@ -3411,6 +3545,36 @@
    "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
    "ledger": "QS-185",
    "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/chainphase.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "HashCryptoChainPhase",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-002",
+   "verdict": "LEDGERED(evidence-script-only)"
+  },
+  {
+   "file": "burhan/chainrules.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "chains_summary",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-003",
+   "verdict": "LEDGERED(detector-registry-pattern)"
+  },
+  {
+   "file": "burhan/chainrules.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "detect_chains",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-004",
+   "verdict": "LEDGERED(detector-registry-pattern)"
   },
   {
    "file": "burhan/core.py",
@@ -3481,6 +3645,86 @@
    "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
    "ledger": "QS-192",
    "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/discovery.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "parse_openapi",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-005",
+   "verdict": "LEDGERED(crypto-primitives-via-module-attr)"
+  },
+  {
+   "file": "burhan/evidence.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "build_proof",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-006",
+   "verdict": "LEDGERED(data-model-surface)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "GraphqlEngine",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-007",
+   "verdict": "LEDGERED(detector-registry-pattern)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "run_modern_battery",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-008",
+   "verdict": "LEDGERED(detector-registry-pattern)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "FlipDNS",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-009",
+   "verdict": "LEDGERED(data-model-surface)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "jwt_weak_secret_offline",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-010",
+   "verdict": "LEDGERED(crypto-primitives-via-module-attr)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "rebind_toctou_probe",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-011",
+   "verdict": "LEDGERED(detector-registry-pattern)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "run_modern_battery_v2",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-012",
+   "verdict": "LEDGERED(detector-registry-pattern)"
   },
   {
    "file": "burhan/oast.py",
@@ -3861,6 +4105,16 @@
    "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
    "ledger": "QS-230",
    "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/websocket.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "WsClient",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "R14-EP-013",
+   "verdict": "LEDGERED(data-model-surface)"
   },
   {
    "file": "burhan/xgraph.py",
