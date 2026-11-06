@@ -12,6 +12,11 @@ Checks (each = the wall's own command, none weakened):
                     (the first-match/anti-pattern scanner + the manual
                     review ledger — new code that adds an unledgered
                     engine pattern FAILS here)
+  quantum-sweep     scripts/audit_quantum_sweep.py --ci-gate
+                    (round 12: the consolidated FOUR-class scanner —
+                    first-match, SILENT_EXCEPT, TOCTOU, CLI-unreachable —
+                    over the Python engine AND the TypeScript platform;
+                    same ledger discipline, engine/src hits must match)
   doctor            python3 -m burhan.cli doctor
   pytest            python3 -m pytest tests/ -q
   benchmark-gate    python3 -m burhan.cli benchmark --race + the committed
@@ -146,6 +151,11 @@ def main() -> int:
                     [sys.executable, "scripts/audit_antipatterns.py",
                      "--ci-gate"])
     results.append(("antipattern-gate", ok, tail))
+
+    ok, tail = _run("quantum-sweep",
+                    [sys.executable, "scripts/audit_quantum_sweep.py",
+                     "--ci-gate"])
+    results.append(("quantum-sweep", ok, tail))
 
     ok, tail = _run("doctor", [sys.executable, "-m", "burhan.cli", "doctor"])
     results.append(("doctor", ok, tail))
