@@ -30,6 +30,21 @@ actually hit, across its entire history:
                      CLI handler references it or the module's own
                      __main__/console entry routes to it — else flagged.
 
+  (d+) ENTRYPOINT_UNREACHABLE (round-12 close, the run_monitor_cycle
+                     lesson): the GENERALIZED form of (d). The CLI-only
+                     check reported zero holes while dogfooding found a
+                     live instance of the same bug class in a different
+                     system — the monitoring scheduler never called the
+                     alert-cycle function, though every test passed.
+                     Entry points are NOT just the CLI: cli.py + every
+                     script the workflows invoke + package.json script
+                     chains + the production .sh runners. A PUBLIC
+                     burhan/ function referenced by tests but reachable
+                     from NO production entry point (module import is
+                     not enough — the function must be REFERENCED) is
+                     flagged. Tested-but-production-unreachable, in any
+                     wiring, not just argparse.
+
 TypeScript side (src/ + tests/, the round-12 scope extension):
   (bTS) SILENT_CATCH — catch blocks with empty/return-only bodies.
   (dTS) EXPORT_UNROUTED — exported symbols from src/lib/* that tests import
@@ -478,6 +493,228 @@ def cli_wiring_report() -> tuple[list[Hit], dict]:
 
 
 
+def entrypoint_wiring_report(py_files: list[str]) -> tuple[list[Hit], dict]:
+    """Class (d+) — ENTRYPOINT_UNREACHABLE, generalized from the CLI-only
+    check after the round-12 dogfood catch: run_monitor_cycle had ZERO
+    production callers (the scheduler imported its module for load_config
+    and dropped the report) while its test suite was green. The CLI-only
+    (d) check could not see it — it only checks argparse flag wiring.
+
+    Routing semantics (RED-tuned against the REAL historical bug, then
+    BLUE-verified on the fixed tree):
+      - Entry files: burhan/cli.py + every scripts/**.py named by a
+        workflow run: step, a package.json script (one .sh hop), or a
+        production scripts/**/*.sh. Entry = the FILE is invoked.
+      - The routing graph nodes are (file, defname) PAIRS, never bare
+        names: the word "main" in an entry's text must not route
+        `def main()` of a non-entry script (that false route hid the
+        real bug in the first two detector drafts).
+      - Edges: a routed def routes the defs it CALLS in the same file,
+        plus cross-file calls resolved through that file's actual import\n        statements at MODULE granularity (a from-import routes to the\n        module file, not the exact defining file — v1 accepted\n        over-routing; it can only under-flag across module boundaries,\n        and the ledger review is the backstop)
+        statements (from-import by name, module.attr through the module
+        alias) — imports ANYWHERE in the file, because lazy imports
+        inside bodies are this codebase's documented pattern.
+      - Flagged: a callable top-level FUNCTION in burhan/** (classes,
+        enums, and exceptions are deliberately out of scope v1: tests
+        consume them as type constructors and they are not "scheduling
+        surface") that is unrouted AND referenced by tests/.
+    """
+    import glob as _glob
+
+    # ---- 1. production entry files
+    entries: set[str] = {"burhan/cli.py"}
+    wf_text = ""
+    for wf in _glob.glob(os.path.join(ROOT, ".github/workflows/*.yml")):
+        wf_text += open(wf, encoding="utf-8").read()
+    entries.update(re.findall(r"scripts/[\w./-]+\.py", wf_text))
+    pkg_path = os.path.join(ROOT, "package.json")
+    pkg_text = open(pkg_path, encoding="utf-8").read() if os.path.exists(pkg_path) else ""
+    entries.update(re.findall(r"scripts/[\w./-]+\.py", pkg_text))
+    sh_refs = set(re.findall(r"scripts/[\w./-]+\.sh", wf_text)) | \
+              set(re.findall(r"scripts/[\w./-]+\.sh", pkg_text))
+    for sh in sorted(sh_refs):
+        p = os.path.join(ROOT, sh)
+        if os.path.exists(p):
+            entries.update(re.findall(r"scripts/[\w./-]+\.py",
+                                      open(p, encoding="utf-8").read()))
+    entries = {e for e in entries if os.path.exists(os.path.join(ROOT, e))}
+
+    non_test = [f for f in py_files
+                if not f.startswith(("tests/", "fixtures/"))]
+    fmap = {f[:-3].replace("/", "."): f for f in non_test}
+
+    def _calls_of(node) -> set[str]:
+        c = set()
+        for sub in ast.walk(node):
+            if isinstance(sub, ast.Call):
+                if isinstance(sub.func, ast.Name):
+                    c.add(sub.func.id)
+                elif isinstance(sub.func, ast.Attribute):
+                    c.add(sub.func.attr)
+        return c
+
+    # ---- 2. per-file analysis (defs + calls + imports, cached once)
+    info: dict[str, dict] = {}
+    for f in non_test:
+        try:
+            tree = ast.parse(open(os.path.join(ROOT, f), encoding="utf-8").read())
+        except Exception:  # noqa: BLE001 — other classes report parse errors
+            continue
+        defs: dict[str, set[str]] = {}
+        # PRIVATE defs are routing NODES (a routed public def calls its
+        # private helpers — they must propagate routing to what THEY call)
+        # but are never FLAGGED: flagging is the public-API question only.
+        for node in tree.body:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                defs[node.name] = _calls_of(node)
+            elif isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
+                # v1.1 (calibration lesson): classes are routing nodes —
+                # BurhanScanner.report() lazily imports and calls
+                # apply_prioritization, and v1 (top-level functions only)
+                # could not see it. A class routes the names its METHODS
+                # call (merged), and its methods become separately routable
+                # defs so the reachability is per-method, not per-file.
+                merged = set()
+                for m in node.body:
+                    if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                            and not m.name.startswith("_"):
+                        defs[f"{node.name}.{m.name}"] = _calls_of(m)
+                        merged |= _calls_of(m)
+                defs[node.name] = merged
+        from_imports: dict[str, str] = {}
+        mod_alias: dict[str, str] = {}
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                # RELATIVE imports (from .prioritize import X — the engine's
+                # documented lazy-import pattern) resolve against the
+                # importing file's package; absolute ones against the tree.
+                mod = node.module or ""
+                if node.level and f.startswith("burhan/"):
+                    pkg = f.rsplit("/", 1)[0].replace("/", ".")
+                    mod_abs = (pkg + "." + mod).lstrip(".") if mod else pkg
+                else:
+                    mod_abs = mod
+                if mod_abs and fmap.get(mod_abs):
+                    tgt = fmap[mod_abs]
+                    for a in node.names:
+                        # symbol import, ALIAS-AWARE: `from .evidence import
+                        # build_proof as build_finding_proof` — the call site
+                        # says build_finding_proof, the def says build_proof.
+                        # Map local name -> (file, original name).
+                        from_imports[a.asname or a.name] = (tgt, a.name)
+                elif node.level and not mod and f.startswith("burhan/"):
+                    # `from . import sibling` — sibling module in same package
+                    pkg_dir = f.rsplit("/", 1)[0]
+                    for a in node.names:
+                        p = os.path.join(pkg_dir, a.name + ".py")
+                        if os.path.exists(os.path.join(ROOT, p)):
+                            mod_alias[a.asname or a.name] = p
+            elif isinstance(node, ast.Import):
+                for a in node.names:
+                    p = a.name.replace(".", "/") + ".py"
+                    if os.path.exists(os.path.join(ROOT, p)):
+                        mod_alias[a.asname or a.name.split(".")[0]] = p
+        allcalls = set()
+        for c in defs.values():
+            allcalls |= c
+        attr_calls = {(n.func.value.id, n.func.attr)
+                      for n in ast.walk(tree)
+                      if isinstance(n, ast.Call)
+                      and isinstance(n.func, ast.Attribute)
+                      and isinstance(n.func.value, ast.Name)}
+        info[f] = {"defs": defs,
+                   "module_calls": _calls_of(tree) - allcalls,
+                   "from_imports": from_imports,
+                   "mod_alias": mod_alias,
+                   "attr_calls": attr_calls}
+
+    # ---- 3. reachability from entry files
+    routed: set[tuple[str, str]] = set()
+    for e in entries:
+        for d in info[e]["defs"]:
+            routed.add((e, d))
+        for c in info[e]["module_calls"]:
+            if c in info[e]["defs"]:
+                routed.add((e, c))
+            elif c in info[e]["from_imports"]:
+                tf, orig = info[e]["from_imports"][c]
+                routed.add((tf, orig))
+
+    changed = True
+    rounds = 0
+    while changed and rounds < 20:
+        changed, rounds = False, rounds + 1
+        for (f, d) in list(routed):
+            di = info.get(f)
+            if not di or d not in di["defs"]:
+                continue
+            for c in di["defs"][d]:
+                if c in di["defs"]:
+                    if (f, c) not in routed:
+                        routed.add((f, c))
+                        changed = True
+                elif c in di["from_imports"]:
+                    tgt, orig = di["from_imports"][c]
+                    if tgt in info and orig in info[tgt]["defs"] \
+                            and (tgt, orig) not in routed:
+                        routed.add((tgt, orig))
+                        changed = True
+            for (alias, attr) in di["attr_calls"]:
+                # resolve BOTH module aliases (import burhan.vault) and
+                # from-imported names (from burhan.vault import Vault) —
+                # Vault.init(...) in cli.main is a from-imported CLASS.
+                # Using a from-imported class at all (even only via
+                # classmethods) routes the CLASS, whose merged method calls
+                # then route like any def.
+                src_f = di["mod_alias"].get(alias)
+                if src_f is None and alias in di["from_imports"]:
+                    src_f = di["from_imports"][alias][0]
+                if src_f and src_f in info:
+                    if alias in info[src_f]["defs"] \
+                            and (src_f, alias) not in routed:
+                        routed.add((src_f, alias))
+                        changed = True
+                    if attr in info[src_f]["defs"] \
+                            and (src_f, attr) not in routed:
+                        routed.add((src_f, attr))
+                        changed = True
+
+    # ---- 4. flag engine FUNCTIONS referenced only by tests
+    word = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*\b")
+    test_words: set[str] = set()
+    for f in py_files:
+        if f.startswith("tests/"):
+            test_words |= set(word.findall(
+                open(os.path.join(ROOT, f), encoding="utf-8").read()))
+
+    hits: list[Hit] = []
+    flagged = []
+    for f in sorted(info):
+        if not f.startswith("burhan/"):
+            continue
+        for name in sorted(info[f]["defs"]):
+            if (f, name) in routed or name not in test_words:
+                continue
+            if name.startswith("_") or "." in name:
+                # method symbols: flagged only via their class's flat call
+                # merge is NOT meaningful — methods are not entry surface;
+                # they route (or not) through the class. Not flagged v1.1.
+                continue
+            flagged.append({"file": f, "name": name})
+            hits.append(Hit(f, 0, "ENTRYPOINT_UNREACHABLE", name, "-",
+                            "public engine function referenced by tests "
+                            "but reachable from NO production entry "
+                            "point (cli/workflows/package.json/.sh; "
+                            "import-resolution aware)"))
+    info_out = {"entry_files": sorted(entries),
+                "routed_defs": len(routed),
+                "engine_public_functions": sum(len(i["defs"]) for f, i in
+                                               info.items()
+                                               if f.startswith("burhan/")),
+                "flagged": flagged}
+    return hits, info_out
+
+
 def _qualifies_os_path(node: ast.AST) -> bool:
     """True for `os.path` (Attribute chain) or `os` (Name) — the import
     style varies across the tree (import os vs from os import path)."""
@@ -526,6 +763,8 @@ def main():
     all_hits.extend(h.as_dict() for h in scan_ts_exports_routed(ts_files))
     cli_hits, cli_info = cli_wiring_report()
     all_hits.extend(h.as_dict() for h in cli_hits)
+    ep_hits, ep_info = entrypoint_wiring_report(py_files)
+    all_hits.extend(h.as_dict() for h in ep_hits)
 
     entries = load_ledger()
     ledgered, unmatched_engine, non_engine = [], [], []
@@ -551,6 +790,10 @@ def main():
         "scanned": {"python_files": len(py_files), "ts_files": len(ts_files)},
         "raw_counts_by_class": dict(Counter(h["class"] for h in all_hits)),
         "cli_wiring": cli_info,
+        "entrypoint_wiring": {"entry_files": len(ep_info["entry_files"]),
+                              "routed_defs": ep_info["routed_defs"],
+                              "engine_public_functions": ep_info["engine_public_functions"],
+                              "flagged": ep_info["flagged"]},
         "total": len(all_hits),
         "hits": all_hits,
     }

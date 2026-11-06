@@ -1,6 +1,6 @@
 {
  "part": "round-12 quantum sweep — full-repository four-class audit",
- "when": "2026-11-05T23:55:06Z",
+ "when": "2026-11-06T05:16:57Z",
  "branch": "audit-quantum-sweep-full",
  "inventory_sha256": "7a1eee30916e84022f779d3b1aa03f200150cf2e47d828891edd4be76074fa9e",
  "scope": {
@@ -17,9 +17,23 @@
  "accounting": {
   "FIRST_MATCH": {
    "raw": 5,
+   "split_corrected": "1 ENGINE + 4 tests (the r12 final report said '5 non-engine' — imprecise, corrected in the close)",
+   "engine": {
+    "site": "burhan/detect.py:1514",
+    "ledger": "AP-059 (round-8 port, line re-verified)",
+    "classification": "citation-pick: hits[0] cites the first storage surface while all_surfaces lists EVERY surface — citation, not selection"
+   },
+   "tests": {
+    "sites": [
+     "tests/test_oast_interactsh.py:68",
+     "tests/test_openapi_ingestion.py:58",
+     "tests/test_r10_prioritize.py:329",
+     "tests/test_r10_prioritize.py:338"
+    ],
+    "classification": "individually reviewed + ledgered in the r12 close: assertion-on-observed-element / one-element-fixture / self-constructed ordered list — no selection logic under test"
+   },
    "engine_unmatched_final": 0,
-   "fixes": 0,
-   "disposition": "all sites reviewed in round 7/8 (ledger carried); zero engine hits unmatched after this pass"
+   "fixes": 0
   },
   "SILENT_EXCEPT": {
    "raw": 287,
@@ -58,6 +72,22 @@
     "CWE_LABELS (registry parity mirror for tests)",
     "resetRateLimits (integration-test state reset, docstring says test-only)"
    ]
+  },
+  "ENTRYPOINT_UNREACHABLE_d_plus": {
+   "raw_flags_current_tree": 49,
+   "classification": "exception-contract (10), data-model-surface (17), detector-registry-pattern (3), crypto-primitives-via-module-attr (9), evidence-script-only (10) — every entry individually ledgered with its reasoning",
+   "red_blue": "detector RED-verified on the REAL pre-fix tree (main@01d5b41: run_monitor_cycle flagged) and BLUE on the fixed tree (routed via run_due.py) — re-verified after every calibration change; permanent self-test tests/test_quantum_sweep_entrypoint.py (bug shape + 5 decoys, 2 passed)",
+   "calibration_fixes_during_build": [
+    "per-DEF expansion (file-level + the word 'main' falsely routed non-entry scripts' mains — hid the real bug in drafts 1-2)",
+    "entry-def seeding by FILE (name-collision routing removed)",
+    "call-based seeding (bare-word seeding removed)",
+    "relative lazy-import resolution (from .prioritize import X)",
+    "from-. import module aliases (from . import jrand)",
+    "alias-aware from-imports (import build_proof as build_finding_proof)",
+    "from-imported classes route on any usage incl. classmethods (Vault.init)",
+    "private defs as routing nodes, flagging public-only (_jwt_weak_secret chain)"
+   ],
+   "lesson_recorded": "the CLI-only class-(d) reported ZERO while the live dogfood caught the same bug class in the scheduler — static wiring checks must model EVERY production entry point, not just the CLI; this class is now permanent in the gate (ci.yml) and the weekly scheduled run"
   }
  },
  "cli_wiring": {
