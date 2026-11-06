@@ -8,7 +8,7 @@ plus scan-time arming via --vault/--vault-key-file (raw credentials captured
 during a scan land encrypted at rest, never in reports, logs or findings).
 """
 from __future__ import annotations
-import argparse, json, os, signal, socket, subprocess, sys, time, hashlib
+import argparse, json, os, re, signal, socket, subprocess, sys, time, hashlib
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from burhan.orchestrator import BurhanScanner, ScanConfig, doctor
@@ -99,7 +99,8 @@ def _benchmark_fixture(base_url: str):
 
 def run_benchmark(base_url="http://127.0.0.1:8777", out="results/benchmark.json",
                   strategy_path=None, timeout=12.0, label="",
-                  race=False, race_parallel=10, race_variance=0.005):
+                  race=False, race_parallel=10, race_variance=0.005,
+                  max_requests=0):
     """Scan the fixture and score against ground truth (spec 29/30).
     ENG-20: on the default target the benchmark spawns its OWN fresh fixture
     on an ephemeral port (determinism regardless of leftover listeners) and
@@ -110,7 +111,8 @@ def run_benchmark(base_url="http://127.0.0.1:8777", out="results/benchmark.json"
     try:
         return _run_benchmark_inner(base_url, out, strategy_path, timeout, label,
                                     spawned, race=race, race_parallel=race_parallel,
-                                    race_variance=race_variance)
+                                    race_variance=race_variance,
+                                    max_requests=max_requests)
     finally:
         if spawned is not None:
             spawned.terminate()                        # we started it -> we stop it
@@ -121,7 +123,7 @@ def run_benchmark(base_url="http://127.0.0.1:8777", out="results/benchmark.json"
 
 
 def _run_benchmark_inner(base_url, out, strategy_path, timeout, label, spawned,
-                         race=False, race_parallel=10, race_variance=0.005):
+                         race=False, race_parallel=10, race_variance=0.005, max_requests=0):
     gt = json.load(open(os.path.join(os.path.dirname(__file__), "..", "benchmarks", "ground_truth.json")))
     # Phase 49: the benchmark exercises the FULL platform — OAST armed, so the blind
     # XXE ground-truth entry (/vuln/oob-stock) is confirmable out-of-band.
@@ -162,11 +164,12 @@ def _run_benchmark_inner(base_url, out, strategy_path, timeout, label, spawned,
                          # learning AND the attack battery (fixture v8's wizard
                          # twins are the ground truth for the five logic classes).
                          workflow=True, logic_active=True,
-                         # RT-07: regression harness — budget explicitly OFF: the
-                         # benchmark's anchored request stream (~7k requests) and
-                         # verdict record (38/0/0/37) are the determinism anchor;
-                         # the operator-facing default (500) must not castrate it.
-                         max_requests=0,
+                         # RT-07: regression harness — budget defaults OFF: the
+                         # ANCHORED stream (~7k requests, verdict 38/0/0/37)
+                         # stays intact for CI and `burhan benchmark`; r14
+                         # added the parameter so repair-demo can pass a
+                         # demo-scale budget without touching the anchor.
+                         max_requests=max_requests,
                          # ORD-002-WIRE: the race battery (off = the anchored
                          # record; on = the ordered no-regression proof run)
                          race=race, race_parallel=race_parallel,
@@ -237,9 +240,16 @@ def repair_demo():
     print(" SELF-REPAIR GATE — LIVE EXECUTION (no AI, deterministic rules)")
     print("=" * 70)
 
+    # r14: the demo-scale request budget — the anchored ~7k benchmark stream
+    # belongs to CI and `burhan benchmark`; four of those on a deliberately
+    # slow fixture made the demo run for tens of minutes with no bound.
+    DEMO_BUDGET = 900
     # 0) spawn SLOW fixture (real failure substrate)
+    # r14: 60ms/req (was 150) — the demo's thresholds keep their meaning
+    # (5ms broken < 15ms rule-x3 < 60ms latency < 12s floor) while all four
+    # benchmark runs stay bounded under a 900-request demo budget.
     slow = subprocess.Popen([sys.executable, "fixtures/vulnapp.py"],
-                            env={**os.environ, "PORT": "8778", "DELAY_MS": "150"},
+                            env={**os.environ, "PORT": "8778", "DELAY_MS": "60"},
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(1.2)
     import urllib.request
@@ -248,18 +258,20 @@ def repair_demo():
         urllib.request.urlopen("http://127.0.0.1:8778/", timeout=5); slow_alive = True
     except Exception:
         pass
-    print(f"\n[0] SLOW fixture (150ms/req) spawned on :8778 -> alive={slow_alive}")
+    print(f"\n[0] SLOW fixture (60ms/req, demo budget {DEMO_BUDGET} req) spawned on :8778 -> alive={slow_alive}")
 
     try:
         # 1) healthy baseline on normal fixture
-        base = run_benchmark(out="results/benchmark_baseline.json", label="pre-repair baseline", timeout=12.0)
+        base = run_benchmark(out="results/benchmark_baseline.json", label="pre-repair baseline", timeout=12.0,
+                             max_requests=DEMO_BUDGET)
         print(f"\n[1] BASELINE benchmark (normal env): F1={base['f1']:.3f} P={base['precision']:.3f} "
               f"R={base['recall']:.3f} (TP={base['confusion']['TP']} FP={base['confusion']['FP']} FN={base['confusion']['FN']})")
 
         # 2) REAL failure: slow env + degenerate timeout -> reproducible scanner failure
         print("\n[2] INDUCING REAL FAILURE: slow env (150ms/req) + timeout=5ms ...")
         broken = run_benchmark(base_url="http://127.0.0.1:8778",
-                               out="results/benchmark_broken.json", label="broken-transport", timeout=0.005)
+                               out="results/benchmark_broken.json", label="broken-transport", timeout=0.005,
+                               max_requests=DEMO_BUDGET)
         print(f"    broken run: F1={broken['f1']:.3f} verified={broken['stats']['verified']} "
               f"requests={broken['stats']['requests']} -> {'REAL FAILURE REPRODUCED' if broken['f1'] < 0.5 else 'unstable — demo invalid'}")
         assert broken["f1"] < 0.5, "failure was not reproduced; refusing to fake results"
@@ -272,19 +284,25 @@ def repair_demo():
 
         # 4) gate: candidate A (rule-only) vs candidate B (rule + policy floor)
         def regression_suite():
-            r = subprocess.run([sys.executable, "tests/run_tests.py", "regression"],
-                               capture_output=True, text=True,
-                               cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            try:
-                j = json.loads(r.stdout)          # run_tests prints a single pretty JSON object
-                return {"passed": j["passed"], "total": j["total"], "failed": j["failed"]}
-            except Exception:
-                return {"passed": False, "raw": (r.stdout or r.stderr)[-200:]}
+            # r14 fix: the old call referenced tests/run_tests.py — a file
+            # that NEVER existed in this repository, so this step failed
+            # forever and the gate's verdict could never be ACCEPTED. The
+            # promised permanent case now lives as a real pytest module.
+            r = subprocess.run(
+                [sys.executable, "-m", "pytest", "-q",
+                 "tests/test_repair_gate_regression.py", "--no-header", "-x"],
+                capture_output=True, text=True,
+                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            passed = r.returncode == 0
+            m = re.search(r"(\d+) passed", r.stdout or "")
+            return {"passed": passed, "total": int(m.group(1)) if m else 0,
+                    "raw": (r.stdout or r.stderr)[-200:]}
 
         print("\n[4] REPAIR GATE EXECUTION (against the SAME broken environment):")
         cand_a = run_benchmark(base_url="http://127.0.0.1:8778",
                                out="results/benchmark_repair_candidateA.json",
-                               label="repair-A-rule-only", timeout=0.005 * cls[1]["action"]["multiply_timeout"])
+                               label="repair-A-rule-only", timeout=0.005 * cls[1]["action"]["multiply_timeout"],
+                               max_requests=DEMO_BUDGET)
         a_ok = cand_a["f1"] >= base["f1"] - 0.02
         print(f"    candidate A (timeout=15ms, rule-only): F1={cand_a['f1']:.3f} acceptable={a_ok} "
               f"-> {'ACCEPT' if a_ok else 'ROLLBACK + RULE QUARANTINED'}")
@@ -292,7 +310,8 @@ def repair_demo():
         print(f"    regression suite: passed={reg.get('passed')} ({reg.get('total')} cases)")
         cand_b = run_benchmark(base_url="http://127.0.0.1:8778",
                                out="results/benchmark_repair_candidateB.json",
-                               label="repair-B-with-floor", timeout=12.0)
+                               label="repair-B-with-floor", timeout=12.0,
+                               max_requests=DEMO_BUDGET)
         b_ok = cand_b["f1"] >= base["f1"] - 0.02 and cand_b["confusion"]["FP"] <= base["confusion"]["FP"]
         print(f"    candidate B (timeout=12s, rule + policy floor): F1={cand_b['f1']:.3f} "
               f"FP={cand_b['confusion']['FP']} acceptable={b_ok}")
@@ -301,7 +320,7 @@ def repair_demo():
         print(f"\n    FINAL GATE VERDICT: {verdict}")
         if verdict == "ACCEPTED":
             print("    -> repair B activated; failure class has permanent regression case "
-                  "(tests/run_tests.py::regression_timeout_repair_rule)")
+                  "(tests/test_repair_gate_regression.py)")
         else:
             print("    -> repair quarantined; failure kept in FailureMemory for rule revision")
         return {"baseline_f1": base["f1"], "broken_f1": broken["f1"],

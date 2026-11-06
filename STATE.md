@@ -1822,6 +1822,59 @@ dismissed with this analysis as the documented reason (owner action in
 the Security tab), or they may auto-close in a future analysis that
 recognizes the dot-bounded comparison.
 
+
+## 2026-11-06 — ROUND 14: the full engineering roast (owner's charter)
+
+Phases A-G executed in order. Baseline on main@9b2534d: 400 passed, both
+gates PASS, doctor 19/19. Net result: 441 passed (+41 new tests), anchor
+38/0/0/37 intact, 3 mutants killed, OSV live = zero advisories.
+
+FINDINGS & FIXES (each with a permanent regression test):
+1. repair-demo was DOUBLY broken and never could reach ACCEPTED: it called
+   tests/run_tests.py — a file that NEVER existed in this repo's history
+   (the regression step failed forever), and its four benchmarks ran the
+   ANCHORED ~7k-request stream against a deliberately slow fixture (tens
+   of minutes, unbounded). Fixed: the promised permanent case now exists
+   as tests/test_repair_gate_regression.py (4 cases incl. the
+   RepairClassifier contract, previously untested), the demo runs a
+   900-request budget, 60ms/req delay (every demo threshold keeps its
+   meaning), verdict now reaches ACCEPTED in ~3m15s.
+2. BurhanScanner.run() had NO top-level teardown: a mid-scan crash leaked
+   the playwright chromium process (browser closed only at its phase end)
+   and OAST listener threads. Fixed: run() is now a guarded wrapper
+   (_run_phases + finally: browser.close(), oast.stop()) — proven by
+   failure-injection tests (crash paths close the browser, stop OAST,
+   double-stop stays safe).
+3. NEW PERMANENT SUITES: test_r14_cli_battery.py (every CLI command as a
+   real subprocess: success paths on genuine engine data + missing/corrupt
+   inputs + unicode/space paths + vault full lifecycle incl. revoke with a
+   second key + auth-password non-leakage), test_r14_scope_adversarial.py
+   (26 cases: scheme allow-list, host allow-list, ALL liberal IPv4 forms
+   (hex/octal/decimal/short), IPv6 + mapped, cloud metadata, lookalike
+   domains, fail-closed on unresolvable, cross-host default off).
+
+AUDITED-CLEAN (verified, no fix needed — documented so it stays known):
+store.py fully parameterized SQL (the one f-string is an internal-constant
+ORDER BY); the 33 wide-except-pass handlers are all teardown/audit/parse
+fallbacks — none swallow a security decision (read line-by-line, e.g. the
+planner gate's pass only guards the audit-log append, never the verdict);
+jwt_weak_secret evidence carries a public wordlist entry + a 24-char token
+prefix (proportionate DAST proof, not a leak); HTML reports escape via
+html.escape; vault errors exit 2 with honest stderr JSON (verified by RED
+probe); IP-form canonicalization is fail-closed at BOTH the gate and the
+transport (pin_transport_address resolves once, pins, refuses ambiguity).
+
+SUPPLY CHAIN: live OSV queries on every resolved runtime + dev dependency
+(cryptography 50.0.2, blake3 1.0.11, numpy 2.1.3, python-docx 1.1.0,
+pytest 9.2.0, playwright 1.57.0, syslog-rfc5424-parser 0.3.2,
+jsonschema 4.26.0, ...) — ZERO known advisories.
+
+MUTATION PROOF (tests bite, not just pass): reverting the r13 dot-bounded
+gate fix -> 3 gate tests fail; removing the r14 teardown guarantee -> 2
+teardown tests fail; breaking the repair-demo regression path -> the
+battery's verdict test fails. All mutants reverted; the anchored benchmark
+record (38/0/0/37) verified INTACT after every lifecycle change.
+
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,
   backup/release-v4.2.5, backup/release-v4.2.6, recovery/*.

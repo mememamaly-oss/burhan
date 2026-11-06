@@ -470,7 +470,16 @@ class BurhanScanner:
                 uniq.append(b)
         return uniq
 
-    def run(self) -> dict:
+    def _run_phases(self) -> dict:
+        """The scan pipeline itself (every phase, straight-line).
+
+        r14: the public entry point is run(), a guarded wrapper that
+        guarantees resource teardown (browser engine, OAST listener) on
+        EVERY exit path — a mid-scan crash used to leak the playwright
+        chromium process and the OAST threads because the browser was
+        only closed at its own phase's end and oast.stop() was the
+        caller's responsibility alone.
+        """
         t0 = time.time()
         self.bus.emit("ScanStarted", target=self.target.url, run=self.run_id,
                       scanner=SCANNER_VERSION, seed=self.seed)
@@ -2134,6 +2143,28 @@ class BurhanScanner:
         if _sym_sec is not None:
             rep["symbolic_analysis"] = _sym_sec
         return rep
+
+    def run(self) -> dict:
+        """Public scan entry: the pipeline + GUARANTEED teardown.
+
+        Any exception from the phases propagates unchanged AFTER the
+        browser engine and the OAST listener are torn down — a crashed
+        scan must not leave a chromium process or listener threads behind.
+        """
+        try:
+            return self._run_phases()
+        finally:
+            if self.browser is not None:
+                try:
+                    self.browser.close()
+                except Exception:  # noqa: BLE001 — teardown must never mask
+                    pass            # the pipeline's own failure
+            oast = getattr(self.cfg, "oast", None)
+            if oast is not None:
+                try:
+                    oast.stop()
+                except Exception:  # noqa: BLE001
+                    pass
 
 
 # ============================================================ DOCTOR (Phase 44/45)
