@@ -1796,6 +1796,32 @@ crAPI confirmed jwt_signature_not_enforced + bfla with 0 FP and 7
 reasoned expected-misses; DVGA 0 FP; benchmark F1=1.0 (TP=38 FP=0 FN=0
 TN=37); reproducibility byte-identical Merkle across two fresh processes.
 
+
+## 2026-11-06 — ROUND 13 CLOSE: CodeQL follow-up (adversarial matrix + dot-root)
+
+The two CodeQL highs (py/incomplete-url-substring-sanitization) remained
+open after the dot-bounded fix merged — the rule tracks the taint flow
+URL-string -> suffix match and flags it regardless of dot-bounding. The
+sink was re-examined adversarially instead of dismissing blindly: 13
+attacker-crafted URL shapes thrown at the fixed gate (substring-in-path,
+query-param embedding, subdomain-of-evil, fragment tricks, ENCODED
+separators %2F/%23/%3F surviving in urlsplit().hostname, punycode
+lookalike, string-suffix lookalike) — every one refused; the only forms
+that authorize are the genuine host (userinfo/port/case variants).
+
+One REAL residual found by that pass, fixed: the RFC 1034 dot-root
+spelling (ginandjuice.shop.) is DNS-equal to the apex but was refused —
+a false refusal in the fail-closed direction. _host_of now strips the
+single trailing root dot. The adversarial matrix is now a PERMANENT test
+(test_authorized_targets.py::test_adversarial_url_forms_never_bypass_the_gate);
+16 passed.
+
+The two CodeQL alerts themselves point at TEST-file taint (attacker-like
+constants BY DESIGN flowing into the refusal-path tests) — to be
+dismissed with this analysis as the documented reason (owner action in
+the Security tab), or they may auto-close in a future analysis that
+recognizes the dot-bounded comparison.
+
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,
   backup/release-v4.2.5, backup/release-v4.2.6, recovery/*.
