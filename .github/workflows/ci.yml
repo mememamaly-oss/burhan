@@ -176,6 +176,17 @@ jobs:
       - name: Anti-pattern scanner gate (first-match carry-over + part-1 classes)
         run: python3 scripts/audit_antipatterns.py --ci-gate
 
+      # Round 12: the consolidated four-class scanner on EVERY push — the
+      # classes this project has ACTUALLY hit across its history (first-match,
+      # SILENT_EXCEPT, TOCTOU, CLI-unreachable) over the Python engine AND the
+      # TypeScript platform (src/). Same ledger discipline: engine+src hits
+      # must match scripts/quantum_sweep_ledger.json or be fixed.
+      # CLI-unreachable is the round-11 --gated lesson: a handler flag the
+      # subparser never defined, green under tests that called the function
+      # directly. This gate makes that shape fail the build, not the user.
+      - name: Quantum sweep gate (4 classes, engine + TypeScript platform)
+        run: python3 scripts/audit_quantum_sweep.py --ci-gate
+
       - name: Python security tests (incl. compliance mapping parity)
         run: python3 -m pytest tests/ -q
 
