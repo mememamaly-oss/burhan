@@ -149,69 +149,77 @@ def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
         suffix = (t.get("match") or {}).get("host_suffix")
         if not suffix:
             continue
-        if host == suffix or host.endswith(suffix):
-            proof = t.get("proof") or {}
-            ptype = proof.get("type")
-            if ptype == "scope_page":
-                required = proof.get("required_quote")
-                try:
-                    page = fetch(proof["page_url"])
-                except FetchError as e:
-                    return False, ("registry entry '%s' proof page could not "
-                                   "be fetched live: %s — proof NOT verified, "
-                                   "refusing" % (t["id"], e)), t["id"]
-                if not required:
-                    return False, ("registry entry '%s' has status "
-                                   "pending-quote-pin: the live page was "
-                                   "fetched but no verbatim quote is pinned. "
-                                   "OBSERVED on the live page (for the owner "
-                                   "to pin): %r — refusing until pinned"
-                                   % (t["id"],
-                                      _candidate_permission_sentence(page))), \
-                        t["id"]
-                if required in page:
-                    return True, ("scope page fetched live, pinned permission "
-                                  "quote verified verbatim"), t["id"]
-                return False, ("registry entry '%s': the pinned permission "
-                               "quote is NO LONGER on the live page — the "
-                               "target's published policy may have changed; "
-                               "refusing" % t["id"]), t["id"]
-            if ptype == "dns_txt":
-                try:
-                    doh = fetch("https://cloudflare-dns.com/dns-query?name=%s"
-                                "&type=TXT" % urllib.parse.quote(host, safe=""))
-                    records = " ".join(a.get("data", "")
-                                      for a in json.loads(doh).get("Answer", [])
-                                      if isinstance(a, dict))
-                except (FetchError, ValueError) as e:
-                    return False, ("registry entry '%s': live DNS TXT lookup "
-                                   "failed (%s) — proof NOT verified, refusing"
-                                   % (t["id"], e)), t["id"]
-                token = proof.get("token", "")
-                if token and token in records:
-                    return True, ("live DNS TXT lookup carries the owner's "
-                                  "authorization token"), t["id"]
-                return False, ("registry entry '%s': the live DNS TXT "
-                               "records do NOT carry the authorization token "
-                               "— refusing" % t["id"]), t["id"]
-            if ptype == "signed_letter":
-                letter = os.path.join(REPO_ROOT, proof.get("file", ""))
-                want = proof.get("sha256", "")
-                try:
-                    got = hashlib.sha256(open(letter, "rb").read()).hexdigest()
-                except OSError as e:
-                    return False, ("registry entry '%s': the authorization "
-                                   "letter could not be read (%s) — refusing"
-                                   % (t["id"], e)), t["id"]
-                if want and got == want:
-                    return True, ("signed authorization letter present, "
-                                 "sha256 re-verified at scan time"), t["id"]
-                return False, ("registry entry '%s': the letter's sha256 "
-                               "does not match the registry (%s != %s) — "
-                               "refusing" % (t["id"], got[:12], want[:12])), \
+        # Suffix matching is DOT-BOUNDED (round 13, the CodeQL high): a bare
+        # `host.endswith(suffix)` let the lookalike `evilginandjuice.shop`
+        # enter the `ginandjuice.shop` entry's proof path — an authorization
+        # bypass for attacker-registered lookalike domains. A suffix (with
+        # or without its leading dot) authorizes the apex host AND its real
+        # subdomains, never a string-suffix relative.
+        bare = suffix.lstrip(".").lower()
+        if not (host == bare or host.endswith("." + bare)):
+            continue
+        proof = t.get("proof") or {}
+        ptype = proof.get("type")
+        if ptype == "scope_page":
+            required = proof.get("required_quote")
+            try:
+                page = fetch(proof["page_url"])
+            except FetchError as e:
+                return False, ("registry entry '%s' proof page could not "
+                               "be fetched live: %s — proof NOT verified, "
+                               "refusing" % (t["id"], e)), t["id"]
+            if not required:
+                return False, ("registry entry '%s' has status "
+                               "pending-quote-pin: the live page was "
+                               "fetched but no verbatim quote is pinned. "
+                               "OBSERVED on the live page (for the owner "
+                               "to pin): %r — refusing until pinned"
+                               % (t["id"],
+                                  _candidate_permission_sentence(page))), \
                     t["id"]
-            return False, ("registry entry '%s' carries an unknown proof type "
-                           "%r — refusing" % (t["id"], ptype)), t["id"]
+            if required in page:
+                return True, ("scope page fetched live, pinned permission "
+                              "quote verified verbatim"), t["id"]
+            return False, ("registry entry '%s': the pinned permission "
+                           "quote is NO LONGER on the live page — the "
+                           "target's published policy may have changed; "
+                           "refusing" % t["id"]), t["id"]
+        if ptype == "dns_txt":
+            try:
+                doh = fetch("https://cloudflare-dns.com/dns-query?name=%s"
+                            "&type=TXT" % urllib.parse.quote(host, safe=""))
+                records = " ".join(a.get("data", "")
+                                  for a in json.loads(doh).get("Answer", [])
+                                  if isinstance(a, dict))
+            except (FetchError, ValueError) as e:
+                return False, ("registry entry '%s': live DNS TXT lookup "
+                               "failed (%s) — proof NOT verified, refusing"
+                               % (t["id"], e)), t["id"]
+            token = proof.get("token", "")
+            if token and token in records:
+                return True, ("live DNS TXT lookup carries the owner's "
+                              "authorization token"), t["id"]
+            return False, ("registry entry '%s': the live DNS TXT "
+                           "records do NOT carry the authorization token "
+                           "— refusing" % t["id"]), t["id"]
+        if ptype == "signed_letter":
+            letter = os.path.join(REPO_ROOT, proof.get("file", ""))
+            want = proof.get("sha256", "")
+            try:
+                got = hashlib.sha256(open(letter, "rb").read()).hexdigest()
+            except OSError as e:
+                return False, ("registry entry '%s': the authorization "
+                               "letter could not be read (%s) — refusing"
+                               % (t["id"], e)), t["id"]
+            if want and got == want:
+                return True, ("signed authorization letter present, "
+                             "sha256 re-verified at scan time"), t["id"]
+            return False, ("registry entry '%s': the letter's sha256 "
+                           "does not match the registry (%s != %s) — "
+                           "refusing" % (t["id"], got[:12], want[:12])), \
+                t["id"]
+        return False, ("registry entry '%s' carries an unknown proof type "
+                       "%r — refusing" % (t["id"], ptype)), t["id"]
 
     return False, ("host %r is NOT PRESENT in authorized-targets.json — "
                    "no authorization exists for this target" % host), None

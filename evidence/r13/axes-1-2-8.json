@@ -1,0 +1,258 @@
+{
+ "axis1_cli": {
+  "subcommands": 22,
+  "coverage": {
+   "apaths": {
+    "tests": false,
+    "ci_or_scripts": false
+   },
+   "authorize": {
+    "tests": false,
+    "ci_or_scripts": true
+   },
+   "benchmark": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "capability-matrix": {
+    "tests": false,
+    "ci_or_scripts": false
+   },
+   "compliance": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "doctor": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "export": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "findings": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "impact": {
+    "tests": false,
+    "ci_or_scripts": false
+   },
+   "init": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "keygen": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "purge": {
+    "tests": false,
+    "ci_or_scripts": true
+   },
+   "repair-demo": {
+    "tests": false,
+    "ci_or_scripts": false
+   },
+   "report": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "reproduce": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "revoke": {
+    "tests": false,
+    "ci_or_scripts": false
+   },
+   "sca": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "scan": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "serve": {
+    "tests": false,
+    "ci_or_scripts": true
+   },
+   "twin": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "unified": {
+    "tests": true,
+    "ci_or_scripts": true
+   },
+   "vault": {
+    "tests": true,
+    "ci_or_scripts": true
+   }
+  },
+  "commands_with_no_tests_and_no_ci": [
+   "apaths",
+   "capability-matrix",
+   "impact",
+   "repair-demo",
+   "revoke"
+  ],
+  "note": "coverage = direct reference in tests; ci_or_scripts = named in scripts or workflows. repair-demo is the seeded demo command; apaths/capability-matrix/impact/revoke are auxiliary registry/report surfaces (registry-file driven)."
+ },
+ "axis2_engine_modules": {
+  "modules": 73,
+  "with_dedicated_test": 2,
+  "imported_by_tests": 39,
+  "uncovered_modules": [
+   "burhan/api.py",
+   "burhan/apintel.py",
+   "burhan/appmap.py",
+   "burhan/boundary.py",
+   "burhan/browser.py",
+   "burhan/chain.py",
+   "burhan/coverage.py",
+   "burhan/csynth.py",
+   "burhan/fingerprint.py",
+   "burhan/impact.py",
+   "burhan/infra.py",
+   "burhan/memory.py",
+   "burhan/metrics.py",
+   "burhan/paramintel.py",
+   "burhan/planner.py",
+   "burhan/race/analysis.py",
+   "burhan/race/engine.py",
+   "burhan/race/gates.py",
+   "burhan/race/integration.py",
+   "burhan/race/models.py",
+   "burhan/reasoning.py",
+   "burhan/repro.py",
+   "burhan/secrets.py",
+   "burhan/statemachine.py",
+   "burhan/symbolic/gates.py",
+   "burhan/symbolic/integration.py",
+   "burhan/symbolic/models.py",
+   "burhan/symbolic/parser.py",
+   "burhan/symbolic/solver.py",
+   "burhan/transparency.py",
+   "burhan/twin.py",
+   "burhan/workflow.py",
+   "burhan/wsattack.py",
+   "burhan/xgraph.py"
+  ],
+  "shared_coverage_only": [
+   "burhan/apath.py",
+   "burhan/audit.py",
+   "burhan/auth.py",
+   "burhan/authz.py",
+   "burhan/bilingual.py",
+   "burhan/blake3.py",
+   "burhan/chainphase.py",
+   "burhan/chainrules.py",
+   "burhan/cli.py",
+   "burhan/compliance.py",
+   "burhan/core.py",
+   "burhan/detect.py",
+   "burhan/discovery.py",
+   "burhan/envcompat.py",
+   "burhan/evidence.py",
+   "burhan/graphql.py",
+   "burhan/http_engine.py",
+   "burhan/intel.py",
+   "burhan/jrand.py",
+   "burhan/modernsec.py",
+   "burhan/monitor.py",
+   "burhan/oast.py",
+   "burhan/orchestrator.py",
+   "burhan/pcs.py",
+   "burhan/prioritize.py",
+   "burhan/proof.py",
+   "burhan/remediation.py",
+   "burhan/replay.py",
+   "burhan/report.py",
+   "burhan/sca.py",
+   "burhan/siem.py",
+   "burhan/stepup.py",
+   "burhan/store.py",
+   "burhan/unified.py",
+   "burhan/vault.py",
+   "burhan/weakrand.py",
+   "burhan/websocket.py"
+  ],
+  "orchestrator_reachable_from_uncovered": [
+   "apintel",
+   "appmap",
+   "boundary",
+   "browser",
+   "coverage",
+   "engine",
+   "fingerprint",
+   "gates",
+   "impact",
+   "models",
+   "paramintel",
+   "parser",
+   "planner",
+   "reasoning",
+   "secrets",
+   "twin",
+   "workflow",
+   "wsattack"
+  ],
+  "note": "direct-import counting undercounts intentionally: siem is exercised via CLI-subprocess tests (test_siem_cli/test_siem_export), and browser/planner/... via the orchestrator integration path — the canonical 199-finding deterministic benchmark IS the integration test for the engine spine. The uncovered list = no direct test import, NOT no exercise.",
+  "truly_isolated": [
+   "analysis",
+   "api",
+   "chain",
+   "csynth",
+   "infra",
+   "integration",
+   "memory",
+   "metrics",
+   "repro",
+   "solver",
+   "statemachine",
+   "transparency",
+   "xgraph"
+  ],
+  "isolated_stems_actually_used": {
+   "repro": true,
+   "transparency": false,
+   "api": true,
+   "chain": false,
+   "csynth": false,
+   "infra": false,
+   "memory": true,
+   "metrics": false,
+   "statemachine": false,
+   "xgraph": false,
+   "analysis": true,
+   "integration": false,
+   "solver": true
+  },
+  "dead_surface_verdict": {
+   "no_importers_no_tests": [
+    "burhan/metrics.py",
+    "burhan/infra.py"
+   ],
+   "only_ledger_generator_consumer": [
+    "burhan/statemachine.py",
+    "burhan/xgraph.py",
+    "burhan/csynth.py"
+   ],
+   "chain": "burhan/chain.py does not exist (hits were chainphase/chainrules — both routed)",
+   "context": "spec-mandated axis modules from the v4.3 lineage whose contract tests (build-v430/tests/test_axis*) were removed with the old build tree in 1792399; the modules stayed. The r12 entrypoint ledger classified their public symbols as data-model/evidence surface. Verdict for the axes report: documented dead-code surface — candidates for removal or re-wiring in a future round, NOT silent."
+  }
+ },
+ "axis8_versions": {
+  "pyproject": null,
+  "package.json": "0.3.0",
+  "cli_banner": null,
+  "consistent": true,
+  "corrected": {
+   "engine": "burhan/core.py VERSION = 5.0.0 (single source of truth)",
+   "package_json": "0.3.0 — the SaaS frontend app, a DIFFERENT artifact from the engine (not an inconsistency)",
+   "note": "no pyproject/setup.toml: the engine ships from the repo, not PyPI"
+  }
+ }
+}

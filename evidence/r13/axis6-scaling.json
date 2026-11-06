@@ -1,0 +1,40 @@
+{
+ "axis": 6,
+ "probe": "synthetic OpenAPI scaling (parse + bounded live run)",
+ "machine": "sandbox (this run only — no general claims)",
+ "results": {
+  "N=100": {
+   "endpoints_ingested": 200,
+   "parse_seconds": 0.002,
+   "scan_wall_seconds": 10.3,
+   "requests": 200,
+   "budget": 200,
+   "budget_respected": true,
+   "findings": 4
+  },
+  "N=500": {
+   "endpoints_ingested": 1000,
+   "parse_seconds": 0.008,
+   "scan_wall_seconds": 11.9,
+   "requests": 200,
+   "budget": 200,
+   "budget_respected": true,
+   "findings": 4
+  },
+  "N=2000": {
+   "endpoints_ingested": 4000,
+   "parse_seconds": 0.032,
+   "scan_wall_seconds": 20.6,
+   "requests": 200,
+   "budget": 200,
+   "budget_respected": true,
+   "findings": 4
+  },
+  "interpretation": {
+   "ingestion": "linear, sub-100ms at every tested size (4000 endpoints = 32ms)",
+   "live_walk": "request budget enforced at every N (200/200); the budget splits between endpoint visits and per-endpoint probes — verified separately that spec paths ARE walked (19 distinct spec paths hit within the budget at N=500)",
+   "bound": "the scaling bound is max_requests by DESIGN — surface size does not inflate cost; a bigger surface means the budget spreads thinner, not that the run grows"
+  }
+ },
+ "phrasing": "numbers observed on THIS machine at THESE sizes; the request budget is the enforced scaling bound, and it held at every size tested"
+}

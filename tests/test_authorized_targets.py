@@ -160,3 +160,73 @@ def test_live_validate_script_refuses_unlisted_target_e2e():
     assert "ZERO scan requests" in r.stdout
     assert os.listdir(out) == [], "no verdict may be written on refusal"
 
+
+
+# ---- round 13: dot-bounded host-suffix matching (the CodeQL high) --------
+# RED-proven on main@85b1c8a: host.endswith(suffix) with no dot boundary let
+# the attacker-registered lookalike evilginandjuice.shop ENTER the
+# ginandjuice.shop entry's proof path (authorization bypass); symmetrically,
+# the dot-leading ".vulnweb.com" suffix never matched the apex host. Both
+# fixed: a suffix authorizes exactly the apex and dot-bounded subdomains.
+
+
+def test_lookalike_domain_never_enters_the_proof_path():
+    """evil+suffix must be refused as NOT PRESENT (no entry match at all),
+    not merely fail the proof — the proof belongs to the ORIGINAL owner."""
+    import json
+    import burhan.authorized_targets as at
+    reg = json.load(open(at.DEFAULT_REGISTRY))
+    quote = next((t["proof"].get("required_quote") for t in reg["targets"]
+                  if t["id"] == "ginandjuice.shop"
+                  and (t.get("proof") or {}).get("type") == "scope_page"), None)
+    assert quote, "the ginandjuice.shop entry must stay a pinned scope_page"
+
+    def fetch(url):
+        return "preamble. " + quote + " postamble."
+
+    for lookalike in ("evilginandjuice.shop", "not-really-ginandjuice.shop",
+                      "evilvulnweb.com", "ginandjuice.shop.evil.example"):
+        ok, reason, eid = at.authorize("https://%s/" % lookalike, fetch=fetch)
+        assert not ok and eid is None, (lookalike, eid, reason[:80])
+        assert "NOT PRESENT" in reason, (lookalike, reason[:120])
+
+
+def test_apex_and_true_subdomains_match_the_suffix():
+    """the apex host and real subdomains of a pinned entry stay authorized."""
+    import json
+    import burhan.authorized_targets as at
+    reg = json.load(open(at.DEFAULT_REGISTRY))
+    quote = next((t["proof"].get("required_quote") for t in reg["targets"]
+                  if t["id"] == "ginandjuice.shop"
+                  and (t.get("proof") or {}).get("type") == "scope_page"), None)
+
+    def fetch(url):
+        return "preamble. " + quote + " postamble."
+
+    for host, want in (("ginandjuice.shop", "ginandjuice.shop"),
+                       ("www.ginandjuice.shop", "ginandjuice.shop"),
+                       ("deep.sub.ginandjuice.shop", "ginandjuice.shop")):
+        ok, reason, eid = at.authorize("https://%s/" % host, fetch=fetch)
+        assert ok and eid == want, (host, eid, reason[:80])
+
+
+def test_dot_leading_suffix_matches_its_apex_shape():
+    """.vulnweb.com is pending-quote-pin so its PROOF refuses — but the
+    entry MATCH must now cover the apex (host == bare), where the old code
+    matched neither apex nor bounded subdomain correctly."""
+    import json
+    import burhan.authorized_targets as at
+    reg = json.load(open(at.DEFAULT_REGISTRY))
+    entry = next(t for t in reg["targets"] if t["id"] == "vulnweb.com")
+    assert entry["match"]["host_suffix"].startswith(".")
+    assert entry["proof"].get("required_quote") is None  # still pending
+
+    # entry-matching now correct: apex and subdomain REACH the proof (and are
+    # refused BY the pending proof, not by absent matching); lookalikes never
+    # reach any entry.
+    ok, reason, eid = at.authorize("https://vulnweb.com/", fetch=lambda u: "x")
+    assert not ok and eid == "vulnweb.com", (eid, reason[:100])
+    assert "pending-quote-pin" in reason
+    ok, reason, eid = at.authorize("https://www.vulnweb.com/",
+                                   fetch=lambda u: "x")
+    assert not ok and eid == "vulnweb.com", (eid, reason[:100])
