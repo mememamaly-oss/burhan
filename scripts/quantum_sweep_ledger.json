@@ -1,0 +1,1794 @@
+{
+ "entries": [
+  {
+   "id": "AP-008",
+   "file": "burhan/api.py",
+   "code": "except\\ Exception:",
+   "class": "error-response",
+   "reason": "API handler: invalid JSON is answered with HTTP 400 to the client — the failure is observable to the caller, not swallowed",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 284,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-009",
+   "file": "burhan/auth.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 104,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-012",
+   "file": "burhan/auth.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 240,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-013",
+   "file": "burhan/authorized_targets.py",
+   "code": "reg\\ =\\ json\\.load\\(open\\(path,\\ encoding=\"utf\\-8\"\\)\\)",
+   "class": "state-load-race",
+   "reason": "registry exists-then-open: a torn read collapses into the adjacent corrupt-load handler -> the loud SystemExit(2) banner — the gate fails LOUD on a raced registry, never scans",
+   "scanner_class": "TOCTOU",
+   "line": 54,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-014",
+   "file": "burhan/authorized_targets.py",
+   "code": "except\\ Exception:",
+   "class": "fail-closed-default",
+   "reason": "_is_loopback_or_private: a getaddrinfo failure returns False = 'not provably the operator's own host' -> the target falls to the public-target path where an unlisted host is REFUSED — the default is the safe verdict on purpose",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 102,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-015",
+   "file": "burhan/authz.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 316,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-016",
+   "file": "burhan/authz.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 323,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-031",
+   "file": "burhan/browser.py",
+   "code": "except\\ Exception:\\ pass",
+   "class": "best-effort-teardown",
+   "reason": "close(): best-effort cleanup — a failed close must not mask the scan result; nothing is decided on the swallowed error",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 230,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-032",
+   "file": "burhan/browser.py",
+   "code": "except\\ Exception:\\ pass",
+   "class": "best-effort-teardown",
+   "reason": "close(): best-effort cleanup of the loop server",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 233,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-033",
+   "file": "burhan/browser.py",
+   "code": "except\\ Exception:\\ pass",
+   "class": "best-effort-teardown",
+   "reason": "close(): best-effort cleanup of the socket",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 236,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-034",
+   "file": "burhan/chainphase.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 95,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-039",
+   "file": "burhan/chainphase.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 513,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-044",
+   "file": "burhan/cli.py",
+   "code": "authz_cfg\\ =\\ json\\.load\\(open\\(_azp\\)\\)",
+   "class": "state-load-race",
+   "reason": "authz fixture load: exists-then-open on a repo-local file; the race collapses into a parse error handled right below — no security decision on the window",
+   "scanner_class": "TOCTOU",
+   "line": 145,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-045",
+   "file": "burhan/cli.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 249,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-046",
+   "file": "burhan/cli.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 281,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-046",
+   "file": "burhan/cli.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 281,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-050",
+   "file": "burhan/core.py",
+   "code": "except\\ Exception:",
+   "class": "fail-closed-default",
+   "reason": "is_private_ip: any ambiguity returns True = REJECT (SSRF gate) — the default is the safe verdict on purpose",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 103,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-051",
+   "file": "burhan/core.py",
+   "code": "except\\ Exception\\ as\\ exc:",
+   "class": "reason-returned",
+   "reason": "pin_transport_address: the exception text is RETURNED as the dns-unresolvable reason — observable to the caller, not swallowed",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 139,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-054",
+   "file": "burhan/detect.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 498,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-054",
+   "file": "burhan/detect.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 498,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-056",
+   "file": "burhan/detect.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1339,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-059",
+   "file": "burhan/detect.py",
+   "code": "s_url,\\ r1,\\ r2\\ =\\ hits\\[0\\]",
+   "class": "citation-pick",
+   "reason": "hits[0]: the finding cites the first storage surface while all_surfaces lists EVERY surface in the evidence — citation, not a dropped candidate",
+   "scanner_class": "FIRST[0]",
+   "line": 1514,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-068",
+   "file": "burhan/detect.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 2717,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-073",
+   "file": "burhan/discovery.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 54,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-075",
+   "file": "burhan/discovery.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 760,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-077",
+   "file": "burhan/graphql.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 313,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-078",
+   "file": "burhan/graphql.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 332,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-079",
+   "file": "burhan/graphql.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 553,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-080",
+   "file": "burhan/graphql.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 676,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-094",
+   "file": "burhan/http_engine.py",
+   "code": "except\\ Exception\\ as\\ exc:",
+   "class": "reason-returned",
+   "reason": "_pin_target: the exception text is returned as the pin failure reason — observable to the caller",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 415,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-102",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 225,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-105",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 377,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-107",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 586,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-108",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 630,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-109",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 667,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-110",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 683,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-113",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 731,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-116",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 936,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-121",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1230,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-122",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1343,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-123",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1413,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-123",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1413,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-124",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1428,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-125",
+   "file": "burhan/impact.py",
+   "code": "except\\ Exception\\ as\\ e:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1443,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-128",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 47,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-129",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:\\ return\\ False",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 277,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-129",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:\\ return\\ False",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 277,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-143",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1776,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-150",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1870,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-150",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1870,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-151",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1886,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-151",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1886,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-153",
+   "file": "burhan/intel.py",
+   "code": "self\\.stats\\ =\\ json\\.load\\(open\\(path\\)\\)",
+   "class": "state-load-race",
+   "reason": "strategy-stats load: exists-then-open; a race collapses into the adjacent except -> fresh stats — no security decision",
+   "scanner_class": "TOCTOU",
+   "line": 2244,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-155",
+   "file": "burhan/intel.py",
+   "code": "self\\.records\\ =\\ json\\.load\\(open\\(path\\)\\)",
+   "class": "state-load-race",
+   "reason": "boundary journal load: exists-then-open; a race collapses into the adjacent except -> fresh journal",
+   "scanner_class": "TOCTOU",
+   "line": 2274,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-156",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 2313,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-159",
+   "file": "burhan/jrand.py",
+   "code": "except\\ Exception:",
+   "class": "by-design-probe",
+   "reason": "numpy_available() IS the loud gate's probe (FM-21d): returning False on import failure is its contract, the caller records WeakRandRelationUnavailable",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 148,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-161",
+   "file": "burhan/memory.py",
+   "code": "with\\ open\\(path,\\ encoding=\"utf\\-8\"\\)\\ as\\ fh:",
+   "class": "state-load-race",
+   "reason": "memory store load: exists-then-open inside its own try; a race or corrupt read collapses to a fresh store (inline comment: a memory failure must never fail a scan)",
+   "scanner_class": "TOCTOU",
+   "line": 43,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-164",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 138,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-165",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 264,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-166",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 273,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-167",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 282,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-168",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 291,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-174",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 683,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-175",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 153,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-176",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 240,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-177",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 355,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-178",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 400,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-179",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 405,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-180",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 461,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-181",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ Exception\\ as\\ e:\\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001\\ —\\ probe\\ errors\\ are\\ outcomes",
+   "class": "probe-outcome",
+   "reason": "rebind_toctou_probe: probe errors ARE outcomes (inline comment); the boundary records the observed cause",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 487,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-200",
+   "file": "burhan/paramintel.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 74,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-203",
+   "file": "burhan/race/__init__.py",
+   "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 65,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-204",
+   "file": "burhan/race/__init__.py",
+   "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 74,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-205",
+   "file": "burhan/race/engine.py",
+   "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 143,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-206",
+   "file": "burhan/race/engine.py",
+   "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 180,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-206",
+   "file": "burhan/race/engine.py",
+   "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 180,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-215",
+   "file": "burhan/symbolic/models.py",
+   "code": "except\\ Exception:",
+   "class": "verdict-correct",
+   "reason": "verify_result_signature: an exception during signature verification means INVALID — returning False is the correct security verdict, not a swallowed error",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 244,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-220",
+   "file": "burhan/weakrand.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 234,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-231",
+   "file": "burhan/websocket.py",
+   "code": "except\\ Exception:",
+   "class": "best-effort-teardown",
+   "reason": "close(): teardown — the handshake outcome is already recorded",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 559,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-232",
+   "file": "burhan/websocket.py",
+   "code": "except\\ Exception:",
+   "class": "best-effort-teardown",
+   "reason": "_hard_close(): teardown of a broken socket",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 568,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-233",
+   "file": "burhan/websocket.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 585,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-234",
+   "file": "burhan/websocket.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 824,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-235",
+   "file": "burhan/workflow.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 157,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-236",
+   "file": "burhan/workflow.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 350,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "AP-238",
+   "file": "burhan/workflow.py",
+   "code": "except\\ Exception:",
+   "class": "tolerant-parse-of-target-input",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 598,
+   "origin": "round-8-ledger (code re-verified at same line)"
+  },
+  {
+   "id": "QS-086",
+   "file": "burhan/api.py",
+   "code": "except\\ KeyboardInterrupt:",
+   "class": "SILENT_EXCEPT",
+   "reason": "KeyboardInterrupt during serve loop -> finally closes the server — clean shutdown",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 315,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-087",
+   "file": "burhan/authorized_targets.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "authorization gate refuses with the reason in the return value — fail-closed, the refusal is the observable record",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 99,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-088",
+   "file": "burhan/authorized_targets.py",
+   "code": "except\\ FetchError\\ as\\ e:",
+   "class": "SILENT_EXCEPT",
+   "reason": "authorization gate refuses with the reason in the return value — fail-closed, the refusal is the observable record",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 159,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-089",
+   "file": "burhan/authorized_targets.py",
+   "code": "except\\ \\(FetchError,\\ ValueError\\)\\ as\\ e:",
+   "class": "SILENT_EXCEPT",
+   "reason": "authorization gate refuses with the reason in the return value — fail-closed, the refusal is the observable record",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 186,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-090",
+   "file": "burhan/authorized_targets.py",
+   "code": "except\\ OSError\\ as\\ e:",
+   "class": "SILENT_EXCEPT",
+   "reason": "authorization gate refuses with the reason in the return value — fail-closed, the refusal is the observable record",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 202,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-091",
+   "file": "burhan/authz.py",
+   "code": "except\\ \\(ValueError,\\ TypeError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "non-serializable session values are skipped in the cache VIEW copy — the scan session itself is unaffected",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 210,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-092",
+   "file": "burhan/browser.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "Playwright import probe sets module _AVAIL=False — the doctor reports browser_engine WARN (degraded, not broken); documented degrade",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 132,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-093",
+   "file": "burhan/chainrules.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "chain prover returns (None, reason) — the honest no-proof verdict with its reason",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 177,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-094",
+   "file": "burhan/chainrules.py",
+   "code": "except\\ \\(ValueError,\\ IndexError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "chain prover returns (None, reason) — the honest no-proof verdict with its reason",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 186,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-095",
+   "file": "burhan/chainrules.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "chain prover returns (None, reason) — the honest no-proof verdict with its reason",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 204,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-096",
+   "file": "burhan/cli.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "port-probe OSError -> False (port closed is the answer) and benchmark child timeout -> kill+wait — both are the probe's honest verdict",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 24,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-097",
+   "file": "burhan/cli.py",
+   "code": "except\\ subprocess\\.TimeoutExpired:",
+   "class": "SILENT_EXCEPT",
+   "reason": "port-probe OSError -> False (port closed is the answer) and benchmark child timeout -> kill+wait — both are the probe's honest verdict",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 119,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-098",
+   "file": "burhan/core.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 88,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-099",
+   "file": "burhan/core.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 93,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-100",
+   "file": "burhan/core.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 134,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-101",
+   "file": "burhan/core.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 155,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-102",
+   "file": "burhan/core.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 155,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-103",
+   "file": "burhan/detect.py",
+   "code": "except\\ \\(ValueError,\\ OverflowError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "entity-normalize decoder drops unparseable entities and returns the original match — documented decode-degrade",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1202,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-104",
+   "file": "burhan/detect.py",
+   "code": "except\\ \\(ValueError,\\ OverflowError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "entity-normalize decoder drops unparseable entities and returns the original match — documented decode-degrade",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1202,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-105",
+   "file": "burhan/discovery.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "openapi candidate that is not JSON is skipped for the next candidate — documented candidate filter",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 703,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-106",
+   "file": "burhan/evidence.py",
+   "code": "except\\ Exception\\ as\\ e:",
+   "class": "SILENT_EXCEPT",
+   "reason": "replay-finding param-shape parse default (RP-1) — the replay records its own verdict; engine errors update the result dict",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 724,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-107",
+   "file": "burhan/http_engine.py",
+   "code": "except\\ \\(ValueError,\\ TypeError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 822,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-108",
+   "file": "burhan/http_engine.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 354,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-109",
+   "file": "burhan/http_engine.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 408,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-110",
+   "file": "burhan/http_engine.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 433,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-111",
+   "file": "burhan/http_engine.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 546,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-112",
+   "file": "burhan/http_engine.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 433,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-113",
+   "file": "burhan/intel.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "ParamLocation parse default to QUERY — same default the engine's own parser uses",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 56,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-114",
+   "file": "burhan/intel.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "ParamLocation parse default to QUERY — same default the engine's own parser uses",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 85,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-115",
+   "file": "burhan/intel.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "ParamLocation parse default to QUERY — same default the engine's own parser uses",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 112,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-116",
+   "file": "burhan/intel.py",
+   "code": "except\\ Exception\\ as\\ e:",
+   "class": "SILENT_EXCEPT",
+   "reason": "ParamLocation parse default to QUERY — same default the engine's own parser uses",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 2335,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-117",
+   "file": "burhan/jrand.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "parse failure returns None — caller treats None as no-signal (weakrand heuristics are opportunistic)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 230,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-118",
+   "file": "burhan/memory.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "corrupt memory is discarded with an in-code comment stating the safety rationale and the reset shape — the comment IS on the body (reviewer-verified); stats unaffected",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 47,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-119",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "raw-socket probe failure returns (None, None) — probe-absent is honest for timing side channels",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 576,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-120",
+   "file": "burhan/modernsec.py",
+   "code": "except\\ \\(ValueError,\\ IndexError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "raw-socket probe failure returns (None, None) — probe-absent is honest for timing side channels",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 583,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-121",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ \\(socket\\.timeout,\\ OSError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "DNS/HTTP self-hosted listener loops: socket-closed -> return (stop()), timeout -> continue, OSError -> return — listener teardown/liveness semantics, the channel is auxiliary",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 392,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-122",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ socket\\.timeout:",
+   "class": "SILENT_EXCEPT",
+   "reason": "DNS/HTTP self-hosted listener loops: socket-closed -> return (stop()), timeout -> continue, OSError -> return — listener teardown/liveness semantics, the channel is auxiliary",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 439,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-123",
+   "file": "burhan/modernsec2.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "DNS/HTTP self-hosted listener loops: socket-closed -> return (stop()), timeout -> continue, OSError -> return — listener teardown/liveness semantics, the channel is auxiliary",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 441,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-124",
+   "file": "burhan/monitor.py",
+   "code": "except\\ \\(urllib\\.error\\.HTTPError,\\ urllib\\.error\\.URLError,",
+   "class": "SILENT_EXCEPT",
+   "reason": "alert-delivery failure is returned in the result (round-11 CI-gate restructure) — the except types are narrowed and the failure rides the run record",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 147,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-125",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 136,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-126",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 235,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-127",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 251,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-128",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 460,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-129",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 480,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-130",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 511,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-131",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 504,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-132",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 522,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-133",
+   "file": "burhan/oast.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 594,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-134",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 670,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-135",
+   "file": "burhan/oast.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 674,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-136",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ Exception\\ as\\ _ie:",
+   "class": "SILENT_EXCEPT",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 2267,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-137",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ Exception\\ as\\ _pe:",
+   "class": "SILENT_EXCEPT",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 2277,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-138",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 315,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-139",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1253,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-140",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1635,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-141",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 625,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-142",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ AttributeError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 1020,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-143",
+   "file": "burhan/orchestrator.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 315,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-144",
+   "file": "burhan/prioritize.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "urlsplit failure returns the raw string — normalize-degrade",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 138,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-145",
+   "file": "burhan/proof.py",
+   "code": "except\\ \\(InvalidSignature,\\ ValueError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 136,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-146",
+   "file": "burhan/proof.py",
+   "code": "except\\ \\(TypeError,\\ ValueError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 190,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-147",
+   "file": "burhan/proof.py",
+   "code": "except\\ \\(KeyError,\\ TypeError,\\ ValueError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 239,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-148",
+   "file": "burhan/proof.py",
+   "code": "except\\ \\(KeyError,\\ ValueError,\\ TypeError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 269,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-149",
+   "file": "burhan/proof.py",
+   "code": "except\\ \\(KeyError,\\ ValueError,\\ TypeError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 423,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-150",
+   "file": "burhan/race/engine.py",
+   "code": "except\\ http\\.client\\.RemoteDisconnected\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ قطع\\ بلا\\ استجابة",
+   "class": "SILENT_EXCEPT",
+   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) — classification, not swallowing",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 131,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-151",
+   "file": "burhan/race/engine.py",
+   "code": "except\\ http\\.client\\.BadStatusLine\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ ليس\\ HTTP",
+   "class": "SILENT_EXCEPT",
+   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) — classification, not swallowing",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 133,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-152",
+   "file": "burhan/race/engine.py",
+   "code": "except\\ ConnectionError\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ رفض/قطع\\ وصل",
+   "class": "SILENT_EXCEPT",
+   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) — classification, not swallowing",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 135,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-153",
+   "file": "burhan/race/engine.py",
+   "code": "except\\ \\(http\\.client\\.HTTPException,\\ OSError\\)\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ ما\\ تبقى",
+   "class": "SILENT_EXCEPT",
+   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) — classification, not swallowing",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 137,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-154",
+   "file": "burhan/race/gates.py",
+   "code": "except\\ \\(TypeError,\\ ValueError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "validation gate returns False on malformed input — fail-closed",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 108,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-155",
+   "file": "burhan/race/gates.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "validation gate returns False on malformed input — fail-closed",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 143,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-156",
+   "file": "burhan/race/gates.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "validation gate returns False on malformed input — fail-closed",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 166,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-157",
+   "file": "burhan/race/integration.py",
+   "code": "except\\ engine\\.RaceEngineError\\ as\\ e:",
+   "class": "SILENT_EXCEPT",
+   "reason": "RaceEngineError becomes a RaceResult with race_detected=False — fail-closed result object",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 106,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-158",
+   "file": "burhan/remediation.py",
+   "code": "except\\ RemediationRefused\\ as\\ e:",
+   "class": "SILENT_EXCEPT",
+   "reason": "RemediationRefused returns the refused-report-only status — the refusal is the record",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 275,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-159",
+   "file": "burhan/remediation.py",
+   "code": "except\\ RemediationRefused\\ as\\ e:",
+   "class": "SILENT_EXCEPT",
+   "reason": "RemediationRefused returns the refused-report-only status — the refusal is the record",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 296,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-160",
+   "file": "burhan/sca.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "CVSS parse fallback returns an explicit note in the result — recorded",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 251,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-161",
+   "file": "burhan/secrets.py",
+   "code": "except\\ Exception:",
+   "class": "SILENT_EXCEPT",
+   "reason": "vault-encryption failure sets vault_ref=None and the finding note records 'raw value intentionally not retained' — recorded in the note",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 151,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-162",
+   "file": "burhan/siem.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "urlsplit origin failure degrades to '-' — the CEF/OCSF field contract for absent origin",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 241,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-163",
+   "file": "burhan/siem.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "urlsplit origin failure degrades to '-' — the CEF/OCSF field contract for absent origin",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 558,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-164",
+   "file": "burhan/symbolic/integration.py",
+   "code": "except\\ Exception\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ injected\\ sender\\ failure\\ =\\ honest\\ boundary",
+   "class": "SILENT_EXCEPT",
+   "reason": "injected-sender failure sets verified='transport_error' + honest_boundary + signs the result — the failure is the record",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 71,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-165",
+   "file": "burhan/symbolic/models.py",
+   "code": "except\\ \\(InvalidSignature,\\ ValueError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "ed25519 verify returns False on malformed input — fail-closed boolean verifier",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 211,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-166",
+   "file": "burhan/symbolic/parser.py",
+   "code": "except\\ SyntaxError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "SyntaxError falls through to the word-form fallback — documented two-stage parser",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 217,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-167",
+   "file": "burhan/symbolic/solver.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "parse failure returns None — no-signal for the symbolic solver",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 46,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-168",
+   "file": "burhan/vault.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "chmod best-effort on private files — the open() below enforces the real constraint (fd-level); documented",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 253,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-169",
+   "file": "burhan/vault.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "chmod best-effort on private files — the open() below enforces the real constraint (fd-level); documented",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 295,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-170",
+   "file": "burhan/weakrand.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "parse failure returns None — opportunistic heuristic, no-signal is honest",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 221,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-171",
+   "file": "burhan/websocket.py",
+   "code": "except\\ \\(socket\\.timeout,\\ TimeoutError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "recv timeout/connection failure returns None — the documented no-frame contract",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 489,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-172",
+   "file": "burhan/websocket.py",
+   "code": "except\\ \\(ConnectionError,\\ OSError\\):",
+   "class": "SILENT_EXCEPT",
+   "reason": "recv timeout/connection failure returns None — the documented no-frame contract",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 491,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-173",
+   "file": "burhan/xgraph.py",
+   "code": "except\\ Exception\\ as\\ e:\\ \\ \\#\\ noqa:\\ BLE001\\ —\\ psi=0,\\ engine\\ stays\\ alive",
+   "class": "SILENT_EXCEPT",
+   "reason": "node-run failure sets ok=False with the error note in the returned _NodeRun — recorded",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 522,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-174",
+   "file": "burhan/xgraph.py",
+   "code": "except\\ Exception:\\ \\ \\#\\ noqa:\\ BLE001",
+   "class": "SILENT_EXCEPT",
+   "reason": "node-run failure sets ok=False with the error note in the returned _NodeRun — recorded",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 622,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-175",
+   "file": "src/lib/compliance.ts",
+   "code": "CWE_LABELS",
+   "class": "EXPORT_UNROUTED",
+   "reason": "documented test-only export: CWE_LABELS is the registry mirror consumed by tests for python-engine parity; UI paths read cwe_label from COMPLIANCE_TYPES rows (already routed); re-export kept as the documented parity surface",
+   "scanner_class": "EXPORT_UNROUTED",
+   "line": 0,
+   "origin": "round-12 manual review"
+  },
+  {
+   "id": "QS-176",
+   "file": "src/lib/rate-limit.ts",
+   "code": "resetRateLimits",
+   "class": "EXPORT_UNROUTED",
+   "reason": "documented test-only export: resetRateLimits is the integration-test state reset (its own docstring says test-only, kept for type parity); never called by routes BY DESIGN",
+   "scanner_class": "EXPORT_UNROUTED",
+   "line": 0,
+   "origin": "round-12 manual review"
+  },
+  {
+   "id": "QS-177",
+   "file": "burhan/evidence.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "replay_finding RP-1 param-shape reconstruction: a stored ParamLocation string that no longer parses defaults to QUERY — the same default the engine's own classifier uses; the replay verdict (REPRODUCTION_*) records the outcome",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 653,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-178",
+   "file": "burhan/evidence.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "replay_finding RP-1 param-shape reconstruction: a stored ParamLocation string that no longer parses defaults to QUERY — the same default the engine's own classifier uses; the replay verdict (REPRODUCTION_*) records the outcome",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 658,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  },
+  {
+   "id": "QS-179",
+   "file": "burhan/evidence.py",
+   "code": "except\\ ValueError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "replay_finding RP-1 param-shape reconstruction: a stored ParamLocation string that no longer parses defaults to QUERY — the same default the engine's own classifier uses; the replay verdict (REPRODUCTION_*) records the outcome",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 664,
+   "origin": "round-12 manual review (code block read in full this pass)"
+  }
+ ]
+}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, requireOrgAccess, jsonError, ApiError, parseJsonSafe } from "@/lib/rbac";
 import { remediationFor } from "@/lib/remediation";
+import { complianceFromJson, complianceFor } from "@/lib/compliance";
 
 // GET /api/findings/:id?orgId= — full finding detail:
 //   engine evidence + verification + impact + reproduction recipe (Evidence OS)
@@ -41,8 +42,15 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     // the engine's stats.proofs (same data source as the engine's reproduce CLI).
     const reproduction = parseJsonSafe<Record<string, unknown> | null>(finding.proofJson, null);
     // P2-C: engine compliance mapping (OWASP/CWE/PCI) — imported verbatim from
-    // result.json at scan time, returned to the UI as-is. Never recomputed.
-    const compliance = parseJsonSafe<Record<string, unknown> | null>(finding.complianceJson, null);
+    // result.json at scan time. Parsed through the DEDICATED complianceFromJson
+    // (round-12 class-(d) fix): one parser per column — it normalizes partial/
+    // legacy rows through the UNMAPPED shape instead of returning raw
+    // JSON.parse output, so the UI contract is stable. Rows imported before the
+    // complianceJson column existed fall back to complianceFor(finding.type) —
+    // the same lookup-by-type the engine itself performs, unknown types get the
+    // honest unmapped shape (never a guess; identical contract both sides).
+    const compliance =
+      complianceFromJson(finding.complianceJson) ?? complianceFor(finding.type);
 
     return NextResponse.json({
       finding: {

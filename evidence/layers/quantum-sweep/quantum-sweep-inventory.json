@@ -1,0 +1,3143 @@
+{
+ "when": "2026-11-05T23:54:11Z",
+ "scanned": {
+  "python_files": 208,
+  "ts_files": 146
+ },
+ "raw_counts_by_class": {
+  "SILENT_EXCEPT": 287,
+  "TOCTOU": 11,
+  "FIRST_MATCH": 5,
+  "SILENT_CATCH": 1,
+  "EXPORT_UNROUTED": 2
+ },
+ "cli_wiring": {
+  "read_flags": [
+   "all",
+   "allow_private",
+   "assessment",
+   "auth_header",
+   "auth_pass",
+   "auth_pass_field",
+   "auth_scheme",
+   "auth_success_marker",
+   "auth_token",
+   "auth_url",
+   "auth_user",
+   "auth_user_field",
+   "auth_validate_url",
+   "authz_accounts",
+   "ci",
+   "db",
+   "delta",
+   "exclude_url",
+   "execute",
+   "finding",
+   "format",
+   "full",
+   "host",
+   "json",
+   "kev_catalog",
+   "key_file",
+   "key_id",
+   "label",
+   "logic_active",
+   "manifest",
+   "max_pages",
+   "min_risk",
+   "modern_v2",
+   "new_key",
+   "no_browser",
+   "no_crawl",
+   "no_oast",
+   "no_openapi",
+   "no_secrets",
+   "oast",
+   "openapi_spec",
+   "org",
+   "origin_probe",
+   "out",
+   "paths_only",
+   "port",
+   "prioritize_store",
+   "probe_journal",
+   "race",
+   "race_parallel",
+   "race_variance",
+   "raw_dir",
+   "record",
+   "recurring",
+   "redirect_sink",
+   "replay",
+   "report",
+   "result",
+   "run_id",
+   "sca",
+   "scan",
+   "secrets_report",
+   "seed",
+   "status",
+   "strategy_path",
+   "symbolic",
+   "syslog_host",
+   "syslog_port",
+   "syslog_proto",
+   "timeout",
+   "token",
+   "type",
+   "url",
+   "vault",
+   "vault_key_file",
+   "workflow"
+  ],
+  "defined_flags": [
+   "all",
+   "allow_private",
+   "assessment",
+   "auth_header",
+   "auth_pass",
+   "auth_pass_field",
+   "auth_scheme",
+   "auth_success_marker",
+   "auth_token",
+   "auth_url",
+   "auth_user",
+   "auth_user_field",
+   "auth_validate_url",
+   "authz_accounts",
+   "ci",
+   "db",
+   "delta",
+   "exclude_url",
+   "execute",
+   "finding",
+   "format",
+   "full",
+   "gated",
+   "host",
+   "json",
+   "kev_catalog",
+   "key_file",
+   "key_id",
+   "label",
+   "logic_active",
+   "manifest",
+   "max_pages",
+   "min_risk",
+   "modern_v2",
+   "new_key",
+   "no_browser",
+   "no_crawl",
+   "no_oast",
+   "no_openapi",
+   "no_secrets",
+   "oast",
+   "openapi_spec",
+   "org",
+   "origin_probe",
+   "out",
+   "paths_only",
+   "pdf",
+   "port",
+   "prioritize_store",
+   "probe_journal",
+   "race",
+   "race_parallel",
+   "race_variance",
+   "raw_dir",
+   "record",
+   "recurring",
+   "redirect_sink",
+   "replay",
+   "report",
+   "result",
+   "run_id",
+   "sca",
+   "scan",
+   "secrets_report",
+   "seed",
+   "status",
+   "strategy_path",
+   "symbolic",
+   "syslog_host",
+   "syslog_port",
+   "syslog_proto",
+   "timeout",
+   "token",
+   "type",
+   "url",
+   "vault",
+   "vault_key_file",
+   "workflow"
+  ],
+  "commands": [
+   "apaths",
+   "benchmark",
+   "capability-matrix",
+   "compliance",
+   "doctor",
+   "findings",
+   "impact",
+   "repair-demo",
+   "report",
+   "reproduce",
+   "sca",
+   "scan",
+   "serve",
+   "twin",
+   "unified",
+   "vault"
+  ],
+  "holes": []
+ },
+ "total": 306,
+ "hits": [
+  {
+   "file": "burhan/api.py",
+   "line": 315,
+   "class": "SILENT_EXCEPT",
+   "code": "except KeyboardInterrupt:",
+   "func": "run_server",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-086",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/api.py",
+   "line": 284,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-008",
+   "verdict": "LEDGERED(error-response)"
+  },
+  {
+   "file": "burhan/auth.py",
+   "line": 104,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_login_marker_hit",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-009",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/auth.py",
+   "line": 240,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_parse_login_form",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-009",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/authorized_targets.py",
+   "line": 54,
+   "class": "TOCTOU",
+   "code": "reg = json.load(open(path, encoding=\"utf-8\"))",
+   "func": "load_registry",
+   "detail": "'path' checked at line 48 then used here (two calls)",
+   "ledger": "AP-013",
+   "verdict": "LEDGERED(state-load-race)"
+  },
+  {
+   "file": "burhan/authorized_targets.py",
+   "line": 99,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_is_loopback_or_private",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-087",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/authorized_targets.py",
+   "line": 102,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_is_loopback_or_private",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-014",
+   "verdict": "LEDGERED(fail-closed-default)"
+  },
+  {
+   "file": "burhan/authorized_targets.py",
+   "line": 159,
+   "class": "SILENT_EXCEPT",
+   "code": "except FetchError as e:",
+   "func": "authorize",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-088",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/authorized_targets.py",
+   "line": 186,
+   "class": "SILENT_EXCEPT",
+   "code": "except (FetchError, ValueError) as e:",
+   "func": "authorize",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-089",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/authorized_targets.py",
+   "line": 202,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError as e:",
+   "func": "authorize",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-090",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/authz.py",
+   "line": 210,
+   "class": "SILENT_EXCEPT",
+   "code": "except (ValueError, TypeError):",
+   "func": "_cache_view",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-091",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/authz.py",
+   "line": 323,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_page_links",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-015",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 132,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "browser_available",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 230,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception: pass",
+   "func": "close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-031",
+   "verdict": "LEDGERED(best-effort-teardown)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 233,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception: pass",
+   "func": "close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-031",
+   "verdict": "LEDGERED(best-effort-teardown)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 236,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception: pass",
+   "func": "close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-031",
+   "verdict": "LEDGERED(best-effort-teardown)"
+  },
+  {
+   "file": "burhan/chainphase.py",
+   "line": 95,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_extract_value",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-034",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/chainphase.py",
+   "line": 513,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-034",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/chainrules.py",
+   "line": 177,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "prove_credential_feeding",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-093",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/chainrules.py",
+   "line": 186,
+   "class": "SILENT_EXCEPT",
+   "code": "except (ValueError, IndexError):",
+   "func": "prove_credential_feeding",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-094",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/chainrules.py",
+   "line": 204,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "prove_credential_feeding",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-093",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 24,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_port_open",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-096",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 119,
+   "class": "SILENT_EXCEPT",
+   "code": "except subprocess.TimeoutExpired:",
+   "func": "run_benchmark",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-097",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 145,
+   "class": "TOCTOU",
+   "code": "authz_cfg = json.load(open(_azp))",
+   "func": "_run_benchmark_inner",
+   "detail": "'_azp' checked at line 144 then used here (two calls)",
+   "ledger": "AP-044",
+   "verdict": "LEDGERED(state-load-race)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 249,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "repair_demo",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-045",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 281,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "repair_demo",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-045",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 281,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "regression_suite",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-045",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/core.py",
+   "line": 88,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "is_private_ip",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-098",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/core.py",
+   "line": 93,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "is_private_ip",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-099",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/core.py",
+   "line": 103,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "is_private_ip",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-050",
+   "verdict": "LEDGERED(fail-closed-default)"
+  },
+  {
+   "file": "burhan/core.py",
+   "line": 134,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "pin_transport_address",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-099",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/core.py",
+   "line": 139,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as exc:",
+   "func": "pin_transport_address",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-051",
+   "verdict": "LEDGERED(reason-returned)"
+  },
+  {
+   "file": "burhan/core.py",
+   "line": 155,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "pin_transport_address",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-099",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/core.py",
+   "line": 155,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_order",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-099",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 1202,
+   "class": "SILENT_EXCEPT",
+   "code": "except (ValueError, OverflowError):",
+   "func": "entity_normalize",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-103",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 1339,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "fresh_form",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-054",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 498,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "analyze",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-054",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 785,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_context_probe",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-054",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 1202,
+   "class": "SILENT_EXCEPT",
+   "code": "except (ValueError, OverflowError):",
+   "func": "_dec",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-103",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 1514,
+   "class": "FIRST_MATCH",
+   "code": "s_url, r1, r2 = hits[0]",
+   "func": "run",
+   "detail": "positional/first-match selection over a dynamic collection",
+   "ledger": "AP-059",
+   "verdict": "LEDGERED(citation-pick)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 2717,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_decode",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-054",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 498,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_echo_diff",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-054",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/discovery.py",
+   "line": 54,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "endpoint_gate_scope",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-073",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/discovery.py",
+   "line": 760,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_loopback_normalize",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-073",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/discovery.py",
+   "line": 703,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "openapi",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-105",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/evidence.py",
+   "line": 724,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:",
+   "func": "replay_finding",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-106",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/evidence.py",
+   "line": 653,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "replay_finding",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-177",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/evidence.py",
+   "line": 658,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "replay_finding",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-177",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/evidence.py",
+   "line": 664,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "replay_finding",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-177",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 313,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_looks_graphql",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-077",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 332,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "introspect",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-077",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 553,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_sensitive_fields",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-077",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 676,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_row_count",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-077",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 711,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_cmdexec_battery",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-077",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 1126,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_battery",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-077",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 1210,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_battery",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-077",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 1289,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_battery",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-077",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/graphql.py",
+   "line": 1449,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_battery",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-077",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/http_engine.py",
+   "line": 822,
+   "class": "SILENT_EXCEPT",
+   "code": "except (ValueError, TypeError):",
+   "func": "sanitize_request_body",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-107",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/http_engine.py",
+   "line": 354,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_render",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-108",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/http_engine.py",
+   "line": 408,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_pin_target",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-109",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/http_engine.py",
+   "line": 415,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as exc:",
+   "func": "_pin_target",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-094",
+   "verdict": "LEDGERED(reason-returned)"
+  },
+  {
+   "file": "burhan/http_engine.py",
+   "line": 433,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_pin_target",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-109",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/http_engine.py",
+   "line": 546,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "send",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-109",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/http_engine.py",
+   "line": 433,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_order",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-109",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 225,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "validate_read_file",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 246,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "validate_state_change",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 277,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "derive_bool_template",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 377,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_swap_query_value",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 586,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_plan_csrf",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 630,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_plan_crlf",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 667,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_set_qparam",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 683,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_plan_redirect",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 731,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_plan_stored",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 936,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_size",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 1230,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_original_traversal_body",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 1343,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "execute_impact_probes",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 1443,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:",
+   "func": "_exec_browser",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-125",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 1413,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_exec_browser",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 1428,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_exec_browser",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 1413,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_offsite",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 47,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_chain_recipe",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 56,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_chain_read",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-113",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 85,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_chain_write",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-113",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 112,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_chain_truncate",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-113",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 277,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception: return False",
+   "func": "verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 1776,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 1714,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 1729,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 1830,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 1870,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 1886,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 2244,
+   "class": "TOCTOU",
+   "code": "self.stats = json.load(open(path))",
+   "func": "__init__",
+   "detail": "'path' checked at line 2243 then used here (two calls)",
+   "ledger": "AP-153",
+   "verdict": "LEDGERED(state-load-race)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 2274,
+   "class": "TOCTOU",
+   "code": "self.records = json.load(open(path))",
+   "func": "__init__",
+   "detail": "'path' checked at line 2273 then used here (two calls)",
+   "ledger": "AP-155",
+   "verdict": "LEDGERED(state-load-race)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 2313,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "classify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 2335,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:",
+   "func": "attempt",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-116",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 277,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception: return False",
+   "func": "_echo27",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 1870,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_fresh_ct",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 1886,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_fresh_ct",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-128",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/jrand.py",
+   "line": 148,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "numpy_available",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-159",
+   "verdict": "LEDGERED(by-design-probe)"
+  },
+  {
+   "file": "burhan/jrand.py",
+   "line": 230,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "double_from_cookie",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-117",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/memory.py",
+   "line": 47,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "__init__",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-118",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/memory.py",
+   "line": 43,
+   "class": "TOCTOU",
+   "code": "with open(path, encoding=\"utf-8\") as fh:",
+   "func": "__init__",
+   "detail": "'path' checked at line 41 then used here (two calls)",
+   "ledger": "AP-161",
+   "verdict": "LEDGERED(state-load-race)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 138,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_decode_seg",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-164",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 264,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_discover_pubkey",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-164",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 282,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_discover_pubkey",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-164",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 273,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_discover_pubkey",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-164",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 291,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_discover_pubkey",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-164",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 529,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_graphql_batching",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-164",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 576,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_raw_post",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-119",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 583,
+   "class": "SILENT_EXCEPT",
+   "code": "except (ValueError, IndexError):",
+   "func": "_raw_post",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-120",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 683,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_state_doc",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-164",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec.py",
+   "line": 919,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "replay_batching",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-164",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 153,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_decode_seg",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-175",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 240,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "jwt_weak_secret_offline",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-175",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 355,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_excessive_exposure",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-175",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 487,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:      # noqa: BLE001 — probe errors are outcomes",
+   "func": "rebind_toctou_probe",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-181",
+   "verdict": "LEDGERED(probe-outcome)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 392,
+   "class": "SILENT_EXCEPT",
+   "code": "except (socket.timeout, OSError):",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-121",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 400,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-175",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 405,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-175",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 439,
+   "class": "SILENT_EXCEPT",
+   "code": "except socket.timeout:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-122",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 441,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-123",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 461,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-175",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/monitor.py",
+   "line": 147,
+   "class": "SILENT_EXCEPT",
+   "code": "except (urllib.error.HTTPError, urllib.error.URLError,",
+   "func": "send_alerts",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-124",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 136,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "stop",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 235,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_hit",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 251,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "hits",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 460,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "poll",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 480,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_hit",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 511,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "hits",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 504,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "hits",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 522,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "stop",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 594,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_dns_loop",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-133",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 670,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "stop",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 674,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "stop",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-125",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 2267,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as _ie:",
+   "func": "doctor",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-136",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 2277,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as _pe:",
+   "func": "doctor",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-137",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 315,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_run_race_battery",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-138",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 1253,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-138",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 1635,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-138",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 625,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-138",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 1020,
+   "class": "SILENT_EXCEPT",
+   "code": "except AttributeError:",
+   "func": "run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-142",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 315,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "planner_gate",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-138",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/paramintel.py",
+   "line": 74,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "infer",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-200",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/prioritize.py",
+   "line": 138,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "normalize_endpoint",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-144",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 136,
+   "class": "SILENT_EXCEPT",
+   "code": "except (InvalidSignature, ValueError):",
+   "func": "ed25519_verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-145",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 190,
+   "class": "SILENT_EXCEPT",
+   "code": "except (TypeError, ValueError):",
+   "func": "merkle_verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-146",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 239,
+   "class": "SILENT_EXCEPT",
+   "code": "except (KeyError, TypeError, ValueError):",
+   "func": "chain_verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-147",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 269,
+   "class": "SILENT_EXCEPT",
+   "code": "except (KeyError, ValueError, TypeError):",
+   "func": "timestamp_verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-148",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 423,
+   "class": "SILENT_EXCEPT",
+   "code": "except (KeyError, ValueError, TypeError):",
+   "func": "verify_claim",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-148",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/race/__init__.py",
+   "line": 65,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:                                      # noqa: BLE001",
+   "func": "wire_plan",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-203",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/race/__init__.py",
+   "line": 74,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:                                      # noqa: BLE001",
+   "func": "wire_plan",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-203",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/race/engine.py",
+   "line": 131,
+   "class": "SILENT_EXCEPT",
+   "code": "except http.client.RemoteDisconnected as e:                # قطع بلا استجابة",
+   "func": "send_one",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-150",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/race/engine.py",
+   "line": 133,
+   "class": "SILENT_EXCEPT",
+   "code": "except http.client.BadStatusLine as e:                     # ليس HTTP",
+   "func": "send_one",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-151",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/race/engine.py",
+   "line": 135,
+   "class": "SILENT_EXCEPT",
+   "code": "except ConnectionError as e:                               # رفض/قطع وصل",
+   "func": "send_one",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-152",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/race/engine.py",
+   "line": 137,
+   "class": "SILENT_EXCEPT",
+   "code": "except (http.client.HTTPException, OSError) as e:          # ما تبقى",
+   "func": "send_one",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-153",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/race/engine.py",
+   "line": 143,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:                                      # noqa: BLE001",
+   "func": "send_one",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-205",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/race/engine.py",
+   "line": 180,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:                                  # noqa: BLE001",
+   "func": "send_concurrent",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-206",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/race/engine.py",
+   "line": 180,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:                                  # noqa: BLE001",
+   "func": "_journal",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-206",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/race/gates.py",
+   "line": 108,
+   "class": "SILENT_EXCEPT",
+   "code": "except (TypeError, ValueError):",
+   "func": "validate_timing",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-154",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/race/gates.py",
+   "line": 143,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "redact_body",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-155",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/race/gates.py",
+   "line": 166,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_unquote",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-155",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/race/integration.py",
+   "line": 106,
+   "class": "SILENT_EXCEPT",
+   "code": "except engine.RaceEngineError as e:",
+   "func": "plan_race_probe",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-157",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 275,
+   "class": "SILENT_EXCEPT",
+   "code": "except RemediationRefused as e:",
+   "func": "run_remediation",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-158",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 296,
+   "class": "SILENT_EXCEPT",
+   "code": "except RemediationRefused as e:",
+   "func": "run_remediation",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-158",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/sca.py",
+   "line": 251,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "severity_from_advisory",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-160",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/secrets.py",
+   "line": 151,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "scan",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-161",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/siem.py",
+   "line": 241,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "build_cef",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-162",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/siem.py",
+   "line": 558,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "build_ocsf",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-162",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/symbolic/integration.py",
+   "line": 71,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:                       # injected sender failure = honest boundary",
+   "func": "verify_and_sign",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-164",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/symbolic/models.py",
+   "line": 211,
+   "class": "SILENT_EXCEPT",
+   "code": "except (InvalidSignature, ValueError):",
+   "func": "ed25519_verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-165",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/symbolic/models.py",
+   "line": 244,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "verify_result_signature",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-215",
+   "verdict": "LEDGERED(verdict-correct)"
+  },
+  {
+   "file": "burhan/symbolic/parser.py",
+   "line": 217,
+   "class": "SILENT_EXCEPT",
+   "code": "except SyntaxError:",
+   "func": "_parse_single",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-166",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/symbolic/solver.py",
+   "line": 46,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_num",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-167",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/vault.py",
+   "line": 253,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_write_private_json",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-168",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/vault.py",
+   "line": 295,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_open_private_json",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-168",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/weakrand.py",
+   "line": 221,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "_family_relation",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-170",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/weakrand.py",
+   "line": 234,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_family_relation",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-220",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/websocket.py",
+   "line": 585,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "classify_protocol",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-231",
+   "verdict": "LEDGERED(best-effort-teardown)"
+  },
+  {
+   "file": "burhan/websocket.py",
+   "line": 489,
+   "class": "SILENT_EXCEPT",
+   "code": "except (socket.timeout, TimeoutError):",
+   "func": "recv_frame",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-171",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/websocket.py",
+   "line": 491,
+   "class": "SILENT_EXCEPT",
+   "code": "except (ConnectionError, OSError):",
+   "func": "recv_frame",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-172",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/websocket.py",
+   "line": 559,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-231",
+   "verdict": "LEDGERED(best-effort-teardown)"
+  },
+  {
+   "file": "burhan/websocket.py",
+   "line": 568,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_hard_close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-231",
+   "verdict": "LEDGERED(best-effort-teardown)"
+  },
+  {
+   "file": "burhan/websocket.py",
+   "line": 808,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_elicit",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-231",
+   "verdict": "LEDGERED(best-effort-teardown)"
+  },
+  {
+   "file": "burhan/websocket.py",
+   "line": 824,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_reflection_probe",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-231",
+   "verdict": "LEDGERED(best-effort-teardown)"
+  },
+  {
+   "file": "burhan/workflow.py",
+   "line": 157,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "parse_forms",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-235",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/workflow.py",
+   "line": 346,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_forms_of",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-235",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/workflow.py",
+   "line": 350,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_forms_of",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-235",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/workflow.py",
+   "line": 598,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_walk",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-235",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/xgraph.py",
+   "line": 522,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:  # noqa: BLE001 — psi=0, engine stays alive",
+   "func": "_run_node",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-173",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/xgraph.py",
+   "line": 622,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "speculate",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-174",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "fixtures/chainapp.py",
+   "line": 111,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_bearer_claims",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/chainapp.py",
+   "line": 136,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/modern2_fixture.py",
+   "line": 84,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/rebind_fixture.py",
+   "line": 121,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError as e:",
+   "func": "do_GET",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/rebind_fixture.py",
+   "line": 113,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError as e:",
+   "func": "do_GET",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 491,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_dashboard_verdict",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 500,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_dashboard_verdict",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 692,
+   "class": "SILENT_EXCEPT",
+   "code": "except (TypeError, ValueError):",
+   "func": "_wf_amount",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1138,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_GET",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1157,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_GET",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1167,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_GET",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 756,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_GET",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1029,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_GET",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1218,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1235,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1264,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1295,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1328,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1348,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1362,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1581,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1590,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1602,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "fixtures/vulnapp.py",
+   "line": 1630,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/actors/mailbox.py",
+   "line": 58,
+   "class": "SILENT_EXCEPT",
+   "code": "except asyncio.QueueEmpty:",
+   "func": "drain",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/actors/mailbox.py",
+   "line": 70,
+   "class": "SILENT_EXCEPT",
+   "code": "except asyncio.QueueFull:",
+   "func": "close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/actors/pool.py",
+   "line": 94,
+   "class": "SILENT_EXCEPT",
+   "code": "except KeyError:",
+   "func": "resize",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/actors/system.py",
+   "line": 91,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_deposit",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/actors/system.py",
+   "line": 143,
+   "class": "SILENT_EXCEPT",
+   "code": "except MailboxClosed:",
+   "func": "_run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/actors/system.py",
+   "line": 165,
+   "class": "SILENT_EXCEPT",
+   "code": "except BaseException:",
+   "func": "_run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/actors/system.py",
+   "line": 91,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_chained",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/aio/pipeline.py",
+   "line": 40,
+   "class": "SILENT_EXCEPT",
+   "code": "except MailboxClosed:",
+   "func": "_stage",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/aio/pipeline.py",
+   "line": 74,
+   "class": "SILENT_EXCEPT",
+   "code": "except (MailboxClosed, asyncio.TimeoutError):",
+   "func": "collect",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/aio/writer.py",
+   "line": 92,
+   "class": "SILENT_EXCEPT",
+   "code": "except asyncio.TimeoutError:",
+   "func": "_collect",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/aio/writer.py",
+   "line": 134,
+   "class": "SILENT_EXCEPT",
+   "code": "except asyncio.QueueEmpty:",
+   "func": "_drain_nowait",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/aio/writer.py",
+   "line": 145,
+   "class": "SILENT_EXCEPT",
+   "code": "except asyncio.TimeoutError:",
+   "func": "close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "perf/aio/writer.py",
+   "line": 149,
+   "class": "SILENT_EXCEPT",
+   "code": "except (asyncio.CancelledError, Exception):",
+   "func": "close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/attack_vault_toctou.py",
+   "line": 68,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "victim",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/attack_vault_toctou.py",
+   "line": 79,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "attacker",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/attack_vault_toctou.py",
+   "line": 91,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "attacker",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/attack_vault_toctou.py",
+   "line": 96,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "attacker",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_antipatterns.py",
+   "line": 99,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:",
+   "func": "scan_py",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_antipatterns.py",
+   "line": 284,
+   "class": "TOCTOU",
+   "code": "return json.load(open(LEDGER_PATH, encoding=\"utf-8\"))[\"entries\"]",
+   "func": "load_ledger",
+   "detail": "'LEDGER_PATH' checked at line 282 then used here (two calls)",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_antipatterns.py",
+   "line": 294,
+   "class": "SILENT_EXCEPT",
+   "code": "except re.error:",
+   "func": "match_ledger",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_first_match_fullrepo.py",
+   "line": 94,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:",
+   "func": "scan_py",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/axis18_load_test.py",
+   "line": 39,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError as e:",
+   "func": "http",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/axis18_load_test.py",
+   "line": 62,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError:",
+   "func": "login",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/axis18_load_test.py",
+   "line": 99,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "server_rss_kb",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/axis19_gap_probe.py",
+   "line": 229,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError as e:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/axis19_gap_probe.py",
+   "line": 74,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError as e:",
+   "func": "req",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/bootstrap_demo_data.py",
+   "line": 49,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError as e:",
+   "func": "req",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/bootstrap_demo_data.py",
+   "line": 47,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "req",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/bootstrap_demo_data.py",
+   "line": 53,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "req",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/evidence_bfla.py",
+   "line": 42,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_spawn",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/evidence_part0.py",
+   "line": 42,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_spawn",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/evidence_race.py",
+   "line": 47,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_spawn",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/evidence_shadow.py",
+   "line": 38,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_spawn",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/final-2026-10-31/xss_iframe_browser_proof.py",
+   "line": 54,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/greengate_browser_e2e.py",
+   "line": 37,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError as e:",
+   "func": "api",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/independent-verification/wg_scan.py",
+   "line": 70,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError as e:",
+   "func": "post",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/live_validate_modern2.py",
+   "line": 419,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/live_validate_r10.py",
+   "line": 246,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:  # noqa: BLE001",
+   "func": "_chain_verdict",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/live_validate_r10.py",
+   "line": 375,
+   "class": "SILENT_EXCEPT",
+   "code": "except ReplayRateLimited as e:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/live_validate_r10.py",
+   "line": 293,
+   "class": "TOCTOU",
+   "code": "os.unlink(store_path)",
+   "func": "main",
+   "detail": "'store_path' checked at line 292 then used here (two calls)",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/p44_local_chain.py",
+   "line": 124,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_spawn",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/qa_live_battery.py",
+   "line": 86,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "jbody",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/qa_live_battery.py",
+   "line": 214,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part1_evidence.py",
+   "line": 68,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_variant",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part2_evidence.py",
+   "line": 51,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "scan_twin",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 85,
+   "class": "SILENT_EXCEPT",
+   "code": "except ManifestRejected as e:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 136,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError as e:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part4_evidence.py",
+   "line": 105,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/repro_attest.py",
+   "line": 109,
+   "class": "SILENT_EXCEPT",
+   "code": "except subprocess.TimeoutExpired:",
+   "func": "run_scan",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/run_r9_live.py",
+   "line": 155,
+   "class": "SILENT_EXCEPT",
+   "code": "except StepUpRequired as e:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/run_r9_live.py",
+   "line": 133,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:  # loud-refusal contract: report, not fail",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/run_r9_live.py",
+   "line": 147,
+   "class": "TOCTOU",
+   "code": "os.remove(store)          # fresh store for this live run only",
+   "func": "main",
+   "detail": "'store' checked at line 146 then used here (two calls)",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/run_r9_live.py",
+   "line": 76,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "start",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/scheduled_hardening.py",
+   "line": 59,
+   "class": "SILENT_EXCEPT",
+   "code": "except subprocess.TimeoutExpired:",
+   "func": "_run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/scheduled_hardening.py",
+   "line": 62,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:  # noqa: BLE001 — a check crash is a finding",
+   "func": "_run",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/scheduled_hardening.py",
+   "line": 88,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError as e:",
+   "func": "_api",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/scheduled_hardening.py",
+   "line": 171,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:  # noqa: BLE001",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/siem_export_evidence.py",
+   "line": 120,
+   "class": "SILENT_EXCEPT",
+   "code": "except socket.timeout:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/siem_export_evidence.py",
+   "line": 120,
+   "class": "SILENT_EXCEPT",
+   "code": "except socket.timeout:",
+   "func": "listen",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_authz_json_login.py",
+   "line": 65,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "vulnapp",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_bfla.py",
+   "line": 57,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_spawn",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_engine_smoke.py",
+   "line": 54,
+   "class": "SILENT_EXCEPT",
+   "code": "except subprocess.TimeoutExpired:",
+   "func": "vulnapp",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_engine_smoke.py",
+   "line": 45,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "vulnapp",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_jwt_confusion.py",
+   "line": 78,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_spawn_vulnapp",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_modernsec2.py",
+   "line": 70,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_wait_port",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_modernsec2.py",
+   "line": 359,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "test_adversarial_A6_pinned_public_fetch_never_hits_internal",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_modernsec2.py",
+   "line": 359,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_serve",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_network_policy.py",
+   "line": 222,
+   "class": "TOCTOU",
+   "code": "ast.parse(open(path).read())  # syntax-valid",
+   "func": "test_vulnapp_fixture_exists_and_parses",
+   "detail": "'path' checked at line 221 then used here (two calls)",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_network_policy.py",
+   "line": 228,
+   "class": "TOCTOU",
+   "code": "gt = json.load(open(path))",
+   "func": "test_ground_truth_json_loads_and_has_entries",
+   "detail": "'path' checked at line 227 then used here (two calls)",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_network_policy.py",
+   "line": 235,
+   "class": "TOCTOU",
+   "code": "data = json.load(open(path))",
+   "func": "test_authz_accounts_json_loads",
+   "detail": "'path' checked at line 234 then used here (two calls)",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_oast_interactsh.py",
+   "line": 68,
+   "class": "FIRST_MATCH",
+   "code": "h = hits[0]",
+   "func": "test_live_interactsh_red_blind_oob_roundtrip",
+   "detail": "positional/first-match selection over a dynamic collection",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_openapi_ingestion.py",
+   "line": 58,
+   "class": "FIRST_MATCH",
+   "code": "ep = eps[0]",
+   "func": "test_blue_integer_query_example_ingests_as_string",
+   "detail": "positional/first-match selection over a dynamic collection",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r10_chainrules.py",
+   "line": 118,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_spawn",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r10_prioritize.py",
+   "line": 329,
+   "class": "FIRST_MATCH",
+   "code": "r1 = results[0]",
+   "func": "test_three_scans_lifecycle_real",
+   "detail": "positional/first-match selection over a dynamic collection",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r10_prioritize.py",
+   "line": 338,
+   "class": "FIRST_MATCH",
+   "code": "r2 = results[1]",
+   "func": "test_three_scans_lifecycle_real",
+   "detail": "positional/first-match selection over a dynamic collection",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r10_prioritize.py",
+   "line": 275,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "start",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r10_unified.py",
+   "line": 266,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_spawn_chainapp",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_race_prober.py",
+   "line": 64,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_spawn",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_replay_fidelity.py",
+   "line": 84,
+   "class": "SILENT_EXCEPT",
+   "code": "except subprocess.TimeoutExpired:",
+   "func": "vulnapp",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_replay_fidelity.py",
+   "line": 76,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "vulnapp",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_shadow_api.py",
+   "line": 59,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "shadow_base",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_siem_cli.py",
+   "line": 81,
+   "class": "SILENT_EXCEPT",
+   "code": "except socket.timeout:",
+   "func": "test_cli_syslog_udp_real_send",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_siem_cli.py",
+   "line": 81,
+   "class": "SILENT_EXCEPT",
+   "code": "except socket.timeout:",
+   "func": "listen",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_siem_export.py",
+   "line": 184,
+   "class": "SILENT_EXCEPT",
+   "code": "except (ParseError, LarkError):",
+   "func": "test_rfc5424_negative_controls_rejected",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_stepup_remediation.py",
+   "line": 176,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "start",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_vault_key_hygiene.py",
+   "line": 147,
+   "class": "SILENT_EXCEPT",
+   "code": "except VaultError:",
+   "func": "test_open_pins_the_checked_descriptor_toctou_hardening",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tools/append_transparency.py",
+   "line": 199,
+   "class": "SILENT_EXCEPT",
+   "code": "except ValueError:",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tools/independent_verify.py",
+   "line": 152,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "ed25519_verify",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/final-2026-10-31/seed_xss.ts",
+   "line": 52,
+   "class": "SILENT_CATCH",
+   "code": "`<iframe srcdoc=\"<script>try{top.document.title='PWNED'}catch(e){}</script>\"></iframe>` +",
+   "func": "-",
+   "detail": "empty or return-only catch body",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "src/lib/compliance.ts",
+   "line": 0,
+   "class": "EXPORT_UNROUTED",
+   "code": "CWE_LABELS",
+   "func": "-",
+   "detail": "exported symbol imported by tests but not routed through any app entry",
+   "ledger": "QS-175",
+   "verdict": "LEDGERED(EXPORT_UNROUTED)"
+  },
+  {
+   "file": "src/lib/rate-limit.ts",
+   "line": 0,
+   "class": "EXPORT_UNROUTED",
+   "code": "resetRateLimits",
+   "func": "-",
+   "detail": "exported symbol imported by tests but not routed through any app entry",
+   "ledger": "QS-176",
+   "verdict": "LEDGERED(EXPORT_UNROUTED)"
+  }
+ ]
+}

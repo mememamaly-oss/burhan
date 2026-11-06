@@ -9,7 +9,7 @@
     "start": "bash -c 'set -o pipefail; NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log'",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "bun test --preload ./tests/setup.ts tests/security.test.ts tests/compliance.test.ts tests/env.test.ts",
+    "test": "bun test --preload ./tests/setup.ts tests/security.test.ts tests/compliance.test.ts tests/env.test.ts tests/quantum-sweep.classd.test.ts",
     "test:py": "python3 -m pytest tests/test_network_policy.py tests/test_engine_smoke.py -q",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
