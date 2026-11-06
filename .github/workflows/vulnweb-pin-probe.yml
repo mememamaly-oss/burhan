@@ -1,0 +1,70 @@
+name: vulnweb scope-page pin probe (round 12)
+# One job: fetch www.vulnweb.com LIVE from a GitHub runner (the dev sandbox's
+# egress cannot reach that host — DNS resolves, TCP times out; recorded in
+# authorized-targets.json's pending-pin note since 2026-11-03) and print the
+# candidate permission sentence the authorization gate's own heuristic
+# (_candidate_permission_sentence) observes. The output is FOR THE OWNER to
+# pin: nothing here authorizes a scan by itself, and the gate keeps refusing
+# vulnweb until the exact quote is pinned in authorized-targets.json.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pin-probe:
+    name: Fetch vulnweb.com permission page (for owner pinning)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Live fetch + the gate's own candidate-sentence heuristic
+        run: |
+          python3 - <<'PY'
+          import json, re, sys, urllib.request
+
+          url = "https://www.vulnweb.com/"
+          try:
+              req = urllib.request.Request(url, headers={"User-Agent": "burhan-authorization-pin-probe/1.0"})
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  page = r.read().decode("utf-8", "replace")
+              print(f"fetch OK: {url} -> {len(page)} bytes, final URL {r.url}")
+          except Exception as e:
+              print(f"::error::live fetch failed: {type(e).__name__}: {e}")
+              sys.exit(1)
+
+          # strip tags the way a reader would, then run the GATE's own
+          # heuristic verbatim (burhan/authorized_targets.py imports cleanly)
+          sys.path.insert(0, ".")
+          from burhan.authorized_targets import _candidate_permission_sentence
+          text = re.sub(r"<[^>]+>", " ", page)
+          candidate = _candidate_permission_sentence(text)
+          print("OBSERVED CANDIDATE (gate heuristic, verbatim for pinning):")
+          print("=" * 70)
+          print(repr(candidate))
+          print("=" * 70)
+
+          # machine-readable record for the artifact
+          open("vulnweb-pin-probe.json", "w").write(json.dumps({
+              "when": __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()),
+              "url": url,
+              "bytes": len(page),
+              "candidate_sentence": candidate,
+              "note": ("candidate printed BY THE GATE'S OWN heuristic for the "
+                       "owner to pin in authorized-targets.json "
+                       "(required_quote); pinning stays a manual owner action"),
+          }, indent=1, ensure_ascii=False))
+          PY
+
+      - name: Upload the probe record
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnweb-pin-probe
+          path: vulnweb-pin-probe.json
+          if-no-files-found: error

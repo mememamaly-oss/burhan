@@ -1,4 +1,9 @@
-cryptography>=41.0.0
+# r12 Part 2.1 (self-SCA, live OSV evidence 2026-11-05): the >=41
+# floor resolved to 44.0.3 in older environments — 10 advisories
+# (GHSA-537c/g6cj/jwv3/m959/r6ph + PYSEC-2026-35/-2141/-3552/-3553/
+# -3554), fixed in 46.0.5/46.0.6/48.0.1/49.0.0/50.0.0. Suite verified
+# green on 50.0.2 before this bump (390 passed).
+cryptography>=50.0.0
 blake3==1.0.11
 # FM-21d (first-match audit follow-up, CI live-caught 2026-11-03): the
 # weak_random seed-relation family (jrand.uniquifier_relation_solve — the

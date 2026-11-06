@@ -1,0 +1,11 @@
+{
+ "kind": "sca",
+ "manifest": "/tmp/requirements.txt",
+ "ecosystem": "PyPI",
+ "packages_queried": 7,
+ "unresolved_pins": [],
+ "deferred_forms_note": "explicitly deferred (stated, never silent): bun.lock, poetry.lock, Pipfile.lock, go.mod, go.sum, Cargo.toml, Cargo.lock, pom.xml, Gemfile.lock, composer.lock; package.json is deferred to its lockfile (ranges, not resolved versions)",
+ "advisory_ids": [],
+ "findings": [],
+ "note": "every severity shown is the advisory's own CVSS data; absences are stated, never filled"
+}

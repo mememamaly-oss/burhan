@@ -1,6 +1,20 @@
 {
-  "version": 1,
-  "policy": "OPT-IN ONLY (Part 3.3): a target is monitored ONLY by appearing here, with an explicit schedule the operator wrote. Nothing is scheduled by default — the same reasoning as the race-prober's opt-in-only design: unattended automated scanning against a target needs deliberate configuration, not a default. The authorized-targets.json gate still applies at every scan on top of this file; this config adds scheduling, not authorization. Alert policy (Part 3.2): REGRESSED findings (previously FIXED, present again) and NEW CRITICAL-severity findings fire the webhook; stable RECURRING-only runs are silent.",
-  "webhook_url": null,
-  "targets": []
+ "version": 1,
+ "policy": "OPT-IN ONLY (Part 3.3): a target is monitored ONLY by appearing here, with an explicit schedule the operator wrote. Nothing is scheduled by default. The authorized-targets.json gate still applies at every scan on top of this file; this config adds scheduling, not authorization. Alert policy (Part 3.2): REGRESSED findings (previously FIXED, present again) and NEW CRITICAL-severity findings fire the webhook; stable RECURRING-only runs are silent.\n\nROUND-12 PART 2.2 — this file is ALSO the project's own dogfood reference: the one configured target is the repo's OWN bundled fixture app (fixtures/vulnapp.py — self-hosted, ownership-proof per authorized-targets.json 'self-hosted-fixtures'). It is the worked example other users copy: replace target/store/schedule with their own authorized target. Real firing evidence: evidence/layers/continuous-monitoring/ (round 11: the vulnerable->fixed->re-broken REGRESSED alert, byte-verified at a local webhook collector) and evidence/layers/self-sca/ monitor-dogfood/ (round 12: the 2-run lifecycle simulation).",
+ "webhook_url": null,
+ "targets": [
+  {
+   "id": "dogfood-vulnapp",
+   "target": "http://127.0.0.1:8777",
+   "store": "results/monitor-dogfood.db",
+   "schedule": "42 3 * * 1",
+   "schedule_note": "weekly Monday 03:42 UTC — the same cadence as this repo's other unattended validations; override per target",
+   "extra_args": [
+    "--no-browser"
+   ],
+   "owner_note": "the fixture must be up before the scan — the runner starts it itself from the 'fixture' field (round-12 part 2.2); self-hosted cron users get the same behavior via scripts/monitor/run_due.py --target dogfood-vulnapp",
+   "fixture": "fixtures/vulnapp.py",
+   "fixture_port": 8777
+  }
+ ]
 }
