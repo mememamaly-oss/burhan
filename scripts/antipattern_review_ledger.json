@@ -2277,6 +2277,46 @@
    "reason": "the break is the found/verdict signal; loop exhaustion is the honest negative — context read line-by-line 2026-11-03, no cap/dedup requires a leftover note here",
    "scanner_class": "BREAK",
    "line": 634
+  },
+  {
+   "id": "R15-AP-001",
+   "file": "burhan/browser.py",
+   "line": 257,
+   "class": "SILENT_EXCEPT",
+   "reason": "R15-4 teardown watchdog: browser teardown must never raise — a failed close must not mask the pipeline's own error nor block the caller; kill-path best-effort by design",
+   "round": 15
+  },
+  {
+   "id": "R15-AP-002",
+   "file": "burhan/browser.py",
+   "line": 278,
+   "class": "SILENT_EXCEPT",
+   "reason": "R15-4 teardown watchdog: browser teardown must never raise — a failed close must not mask the pipeline's own error nor block the caller; kill-path best-effort by design",
+   "round": 15
+  },
+  {
+   "id": "R15-AP-003",
+   "file": "burhan/browser.py",
+   "line": 288,
+   "class": "SILENT_EXCEPT",
+   "reason": "R15-4 teardown watchdog: browser teardown must never raise — a failed close must not mask the pipeline's own error nor block the caller; kill-path best-effort by design",
+   "round": 15
+  },
+  {
+   "id": "R15-AP-004",
+   "file": "burhan/browser.py",
+   "line": 293,
+   "class": "SILENT_EXCEPT",
+   "reason": "R15-4 teardown watchdog: browser teardown must never raise — a failed close must not mask the pipeline's own error nor block the caller; kill-path best-effort by design",
+   "round": 15
+  },
+  {
+   "id": "R15-AP-005",
+   "file": "burhan/browser.py",
+   "line": 298,
+   "class": "SILENT_EXCEPT",
+   "reason": "R15-4 teardown watchdog: browser teardown must never raise — a failed close must not mask the pipeline's own error nor block the caller; kill-path best-effort by design",
+   "round": 15
   }
  ]
 }
