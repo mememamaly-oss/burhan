@@ -89,7 +89,13 @@ def _default_fetch(url: str) -> str:
 
 
 def _host_of(base_url: str) -> str:
-    return (urllib.parse.urlsplit(base_url).hostname or "").lower()
+    host = (urllib.parse.urlsplit(base_url).hostname or "").lower()
+    # RFC 1034 dot-root form: "example.com." is DNS-equal to "example.com".
+    # The round-13 adversarial pass showed the bare form refused the
+    # dot-root spelling (fail-closed, but a false refusal of the SAME host).
+    if host.endswith("."):
+        host = host[:-1]
+    return host
 
 
 def _is_loopback_or_private(host: str) -> bool:

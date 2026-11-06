@@ -230,3 +230,50 @@ def test_dot_leading_suffix_matches_its_apex_shape():
     ok, reason, eid = at.authorize("https://www.vulnweb.com/",
                                    fetch=lambda u: "x")
     assert not ok and eid == "vulnweb.com", (eid, reason[:100])
+
+
+# ---- round 13 close: the adversarial URL matrix (the CodeQL follow-up) ----
+# CodeQL's py/incomplete-url-substring-sanitization flagged the taint flow
+# URL-string -> suffix match. The matcher is dot-bounded and host comes from
+# urlsplit().hostname (never a path); this matrix pins the adversarial
+# behavior so the rule's concern stays answered by executable evidence.
+
+def test_adversarial_url_forms_never_bypass_the_gate():
+    """Attacker-crafted URL shapes must all be refused (or match only the
+    genuine host): userinfo/port/case are the SAME host; everything that
+    embeds the suffix as a substring is NOT-PRESENT; the dot-root spelling
+    is DNS-equal to the apex and must authorize."""
+    import json
+    import burhan.authorized_targets as at
+    reg = json.load(open(at.DEFAULT_REGISTRY))
+    quote = next((t["proof"].get("required_quote") for t in reg["targets"]
+                  if t["id"] == "ginandjuice.shop"
+                  and (t.get("proof") or {}).get("type") == "scope_page"), None)
+
+    def fetch(url):
+        return "preamble. " + quote + " postamble."
+
+    same_host = [
+        "https://user@ginandjuice.shop/",
+        "https://ginandjuice.shop:8080/",
+        "https://GINANDJUICE.SHOP/",
+        "https://ginandjuice.shop./",   # RFC 1034 dot-root
+    ]
+    for u in same_host:
+        ok, reason, eid = at.authorize(u, fetch=fetch)
+        assert ok and eid == "ginandjuice.shop", (u, eid, reason[:80])
+
+    never_bypass = [
+        "https://attacker.com/unlisted-target.example.com/",
+        "https://attacker.com?next=ginandjuice.shop/",
+        "https://ginandjuice.shop.evil.io/",
+        "https://evil.com#@ginandjuice.shop/",
+        "https://evil.io%23ginandjuice.shop/",
+        "https://ginandjuice.shop%2Fevil.io/",
+        "https://ginandjuice.shop%3Fevil.io/",
+        "https://xn--ginandjuice-8sh.shop/",
+        "https://evilginandjuice.shop/",
+    ]
+    for u in never_bypass:
+        ok, reason, eid = at.authorize(u, fetch=fetch)
+        assert not ok and eid is None, (u, eid, reason[:80])
