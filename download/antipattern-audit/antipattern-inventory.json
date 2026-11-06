@@ -308,7 +308,8 @@
    "code": "except Exception:  # noqa: BLE001",
    "func": "_browser_child_proc",
    "detail": "body=Pass, exception unused",
-   "verdict": "UNMATCHED"
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/browser.py",
@@ -317,7 +318,8 @@
    "code": "except Exception:  # noqa: BLE001",
    "func": "close._watchdog",
    "detail": "body=Pass, exception unused",
-   "verdict": "UNMATCHED"
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/browser.py",
@@ -326,7 +328,8 @@
    "code": "except Exception:  # noqa: BLE001 — teardown must never raise",
    "func": "close",
    "detail": "body=Pass, exception unused",
-   "verdict": "UNMATCHED"
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/browser.py",
@@ -335,7 +338,8 @@
    "code": "except Exception:  # noqa: BLE001",
    "func": "close",
    "detail": "body=Pass, exception unused",
-   "verdict": "UNMATCHED"
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/browser.py",
@@ -344,7 +348,8 @@
    "code": "except Exception:  # noqa: BLE001",
    "func": "close",
    "detail": "body=Pass, exception unused",
-   "verdict": "UNMATCHED"
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/chainphase.py",
