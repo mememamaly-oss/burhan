@@ -1603,6 +1603,85 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   green across the round (+10: SIEM 19, OAST 8, replay 4, monitoring 5
   net of suite merges).
 
+
+## 2026-11-05 — ROUND 12: the quantum sweep (consolidated 4-class audit) + self-SCA + monitoring dogfood (PRs #50-#51)
+
+- PR #50 (merged 6eba915): PART 0/1 — scripts/audit_quantum_sweep.py, ONE
+  tool for every recurring defect class this project has actually hit:
+  FIRST_MATCH (round-7 core), SILENT_EXCEPT (round-11's triple find,
+  comment- and recorder-aware), TOCTOU (round-8 core — FIXED the
+  os.path matcher AND the class-METHOD blind spot: round-8's scanner
+  never scanned method bodies, so memory.py/intel.py __init__ TOCTOU
+  sites were invisible to it; 11/11 site parity now), and the NEW
+  CLI_UNREACHABLE class (the round-11 --gated lesson: every flag the
+  handler reads must be DEFINED by some add_argument — dest-normalized,
+  call-aware; detector RED-verified against the exact bug shape before
+  its zero was trusted). TypeScript: SILENT_CATCH + EXPORT_UNROUTED with
+  TRANSITIVE routing credit (src/lib chains -> NextAuth entry).
+  Scope: full tree, 208 py + 146 ts tracked files; raw 306 hits (SE 287,
+  TOCTOU 11, FM 5, SC 1, EU 5, CLI holes 0). Every engine hit
+  individually reviewed this pass; 94 round-12 ledger entries; zero
+  engine-unmatched at close. REAL class-(d) FINDING (TS): findings/[id]
+  route parsed complianceJson with the GENERIC parseJsonSafe while the
+  dedicated complianceFromJson existed only in tests — the --gated shape
+  in TypeScript. FIXED: the route now routes complianceFromJson (parse)
+  + complianceFor (legacy null-column fallback, engine-identical
+  unmapped contract). RED->BLUE pinned (tests/quantum-sweep.classd.test.ts:
+  1 fail pre-fix -> 5 pass post-fix, wired into bun run test).
+  verifyPassword: detector transitive-credit fix (routed via
+  src/lib/auth.ts). CWE_LABELS + resetRateLimits: documented test-only.
+  GATE PERMANENT: ci.yml engine job (every push) + scheduled_hardening
+  (weekly). Evidence: evidence/layers/quantum-sweep/ (inventory SHA-256
+  7a1eee30..., summary with per-class accounting). Phrasing discipline
+  held: zero defects found BY THESE METHODS, ACROSS THIS SCOPE, AS OF
+  THIS DATE — no claim of permanence.
+- PR #51 (branch audit-self-sca-monitoring @ 88f899d, main merged in):
+  PART 2 — the project's own supply chain. 2.1 self-SCA on the REAL
+  manifests (requirements*.txt, as-deployed 7-package exact-pin set;
+  bun.lock = the SCA layer's documented 3.1 deferral; package-lock.json
+  not shipped — nothing manufactured): 12 REAL findings before fix (10
+  on cryptography 44.0.3 — GHSA-537c/g6cj/jwv3/m959/r6ph + PYSEC-2026-
+  35/-2141/-3552/-3553/-3554; 2 on pytest 9.0.2 — GHSA-6w46-j5rx-g56g /
+  PYSEC-2026-1845). FIX: floors bumped (cryptography>=50.0.0,
+  pytest>=9.0.3), suite verified green on the fixed set BEFORE bumping
+  (390 passed on 50.0.2 + 9.2.0); after: 0 findings (OSV batch API,
+  this set, this date). Raw OSV responses committed verbatim.
+  2.2 monitoring dogfood: monitor-config.json = the worked example
+  (dogfood-vulnapp, the repo's own bundled fixture); firing evidence
+  BOTH legs: in-process 2-cycle (NEW 197 / 10 CRITICAL_NEW alerts ->
+  RECURRING 195 / 0 alerts — the stable-run negative control) AND
+  run_due.py end-to-end (run1 2 alerts, run2 0 alerts; lifecycle_log
+  NEW->RECURRING verified in the store). TWO LIVE-CAUGHT REAL BUGS in
+  the scheduled path, both fixed: (1) run_due.py invoked the CLI with
+  --target while scan takes the target POSITIONALLY (exit 2, banner
+  lost on unsurfaced stderr); (2) run_monitor_cycle had NO production
+  caller — the scheduled runner scanned and DROPPED the report
+  (lifecycle never recorded, alerts never evaluated: the alerting layer
+  was workflow-unreachable, tested green only via direct calls — the
+  --gated shape). run_due.py now scans in-process and drives
+  run_monitor_cycle. Also: declared-fixture support (external targets
+  untouched; the authorized-targets gate still applies at scan time).
+- PART 3 on the merged state (88f899d = main + part-2): pytest 390
+  passed (7 live deselected), doctor 19/19, quantum gate PASS,
+  antipattern gate PASS, benchmark F1=1.0 confusion TP=38 FP=0 FN=0
+  TN=37 (the deterministic baseline unchanged), Merkle reproducibility:
+  two independent executions (102.4s / 102.3s) IDENTICAL root
+  5c451f22f0e15345... findings 199/199, bun 39 tests 0 fail.
+- vulnweb.com pending-pin: the sandbox cannot reach www.vulnweb.com
+  (DNS resolves, TCP times out — same as 2026-11-03). The
+  vulnweb-pin-probe workflow (committed on the PR #51 branch) fetches
+  the page LIVE on a GitHub runner and prints the OBSERVED candidate
+  sentence using the authorization gate's OWN heuristic, for the owner
+  to pin; dispatch requires the workflow on the default branch (GitHub
+  behavior) — dispatched after the PR #51 merge. Pinning stays a manual
+  owner action; the gate keeps refusing every vulnweb scan until then.
+- Round-12 numbers, total: 2 real code fixes from the class-(d)
+  discipline (complianceFromJson routing + run_monitor_cycle's missing
+  production caller), 1 detector-only false positive corrected
+  (verifyPassword), 12 real supply-chain findings fixed via floor
+  bumps, 2 scheduler bugs live-caught by the dogfood, 94 new ledger
+  entries, 0 engine-unmatched at close on all four classes.
+
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,
   backup/release-v4.2.5, backup/release-v4.2.6, recovery/*.
