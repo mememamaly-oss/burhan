@@ -1,5 +1,5 @@
 {
- "when": "2026-11-06T05:20:29Z",
+ "when": "2026-11-06T10:25:02Z",
  "scanned": {
   "python_files": 211,
   "ts_files": 147
@@ -468,7 +468,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 159,
+   "line": 167,
    "class": "SILENT_EXCEPT",
    "code": "except FetchError as e:",
    "func": "authorize",
@@ -478,7 +478,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 186,
+   "line": 194,
    "class": "SILENT_EXCEPT",
    "code": "except (FetchError, ValueError) as e:",
    "func": "authorize",
@@ -488,7 +488,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 202,
+   "line": 210,
    "class": "SILENT_EXCEPT",
    "code": "except OSError as e:",
    "func": "authorize",

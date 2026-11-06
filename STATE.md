@@ -1737,6 +1737,65 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   runner from a different network vantage (self-hosted runner), or the
   owner pinning a quote they observe themselves.
 
+
+## 2026-11-06 — ROUND 13: the eight-axis completion assessment (owner's charter)
+
+Axis 5 (Burhan's own security) — A REAL HIGH FINDING, FIXED: CodeQL's open
+py/incomplete-url-substring-sanitization pointed at the authorization
+gate's host matching. RED-proven on main@85b1c8a: `host.endswith(suffix)`
+with no dot boundary let the attacker-registered lookalike
+`evilginandjuice.shop` ENTER the `ginandjuice.shop` entry's proof path
+(an authorization bypass — the proof belongs to the original owner, so a
+lookalike passing it means scanning a target the owner never authorized).
+Symmetric flaw: the dot-leading `.vulnweb.com` suffix never matched the
+apex host. Fixed with dot-bounded matching (apex + true subdomains only,
+both suffix spellings); 3 permanent regression tests
+(test_authorized_targets.py: lookalikes never enter a proof path;
+apex/subdomains match; pending-pin entries refuse BY the proof, not by
+absent matching). 15 passed. The 2 CodeQL highs close on push; the other
+43 code-scanning alerts are the engine's own SARIF on fixtures/vulnapp.py
+(the deliberately vulnerable teaching target) — by design. The 16
+secret-scanning alerts are historical (paths deleted with the build-v430
+tree; the 2026-10-31 gitleaks sweep classified all as fixture/public-demo
+data, zero real secrets; the current tree is clean).
+
+Axis 1+2 (structure & functions) — evidence/r13/axes-1-2-8.json: 16 CLI
+subcommands (5 without direct test references — repair-demo/apaths/
+capability-matrix/impact/revoke, the latter four registry/report surfaces);
+73 engine modules — 39 with direct test imports, the rest exercised via
+CLI-subprocess tests, the orchestrator integration spine (the canonical
+199-finding deterministic benchmark), or workflow entries. Documented
+dead-code surface: burhan/metrics.py + infra.py (zero importers, zero
+tests — spec-mandated v4.3 lineage whose contract tests died with
+build-v430) and statemachine/xgraph/csynth (consumed only by the round-7
+ledger generator). Candidates for removal or rewiring, recorded here
+rather than left silent.
+
+Axis 7 (stability) — tests/test_axis7_negative_stability.py (4 passed):
+closed port -> explicit failure recorded, never a silent zero-findings
+success; a target dying mid-scan -> clean bounded termination, no hang,
+no fabricated findings; corrupt OpenAPI JSON -> loud decode error at the
+loading layer + defensive-empty in parse_openapi (documented contract);
+empty store -> honest overview page ("0 runs · 0 verified findings"),
+missing run-id -> "not found" page.
+
+Axis 6 (performance) — evidence/r13/axis6-scaling.json: OpenAPI ingestion
+linear and sub-100ms at every tested size (4000 endpoints = 32ms); the
+live walk is budget-bounded by design (max_requests 200/200 respected at
+N=100/500/2000; surface size does not inflate cost, it thins the budget);
+spec paths verified actually walked (19 distinct at N=500).
+
+Axis 8 (deployment) — engine version single-sourced (core.py 5.0.0);
+package.json 0.3.0 is the SaaS frontend (a different artifact, not an
+inconsistency); clean-install proof = every CI job installs from
+requirements.txt on a bare runner (green on main 85b1c8a).
+
+Axes 3+4 (detection truth / false positives) — from the round-12 close:
+Juice Shop 59/59 verified against the committed floor, 0 false positives;
+crAPI confirmed jwt_signature_not_enforced + bfla with 0 FP and 7
+reasoned expected-misses; DVGA 0 FP; benchmark F1=1.0 (TP=38 FP=0 FN=0
+TN=37); reproducibility byte-identical Merkle across two fresh processes.
+
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,
   backup/release-v4.2.5, backup/release-v4.2.6, recovery/*.
