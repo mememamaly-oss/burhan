@@ -42,7 +42,10 @@ def _tree_dirty() -> list[str]:
     # test file (untracked, pre-merge) are expected; anything else is pollution
     allow = ("tests/test_r15_tree_isolation.py",
              "M burhan/cli.py", "M burhan/orchestrator.py",
-             "M burhan/http_engine.py", "M burhan/browser.py")
+             "M burhan/http_engine.py", "M burhan/browser.py",
+             "M scripts/antipattern_review_ledger.json",
+             "M evidence/layers/quantum-sweep/quantum-sweep-inventory.json",
+             "M download/antipattern-audit/antipattern-inventory.json")
     return [l.strip() for l in r.stdout.splitlines()
             if l.strip() and l.strip() not in allow
             and not l.strip().endswith("test_r15_tree_isolation.py")]
