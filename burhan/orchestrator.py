@@ -4,6 +4,7 @@ Plus: burhan doctor (Phase 45) and benchmark runner hooks (Phase 16/29).
 from __future__ import annotations
 import json, os, time
 import urllib.parse
+import weakref
 from .core import (Endpoint, EventBus, Evidence, Finding, FindingStatus, ScopeRule, ParamKind,
                    Severity, Target, DiscoverySource, new_run_id, SCANNER_VERSION, Verification,
                    ParamLocation)
@@ -219,6 +220,12 @@ class _RaceJournalProxy(dict):
 
 
 class BurhanScanner:
+    # R15-4: registry of LIVE scanners so the CLI's SIGINT handler can find
+    # the in-flight engine's browser driver and kill it to un-wedge a
+    # sync-playwright call interrupted mid-dispatch (weak refs — a scanner
+    # that finished must never be kept alive by this registry).
+    _active: "weakref.WeakValueDictionary[int, BurhanScanner]" = weakref.WeakValueDictionary()
+
     def __init__(self, target_url: str, cfg: ScanConfig | None = None):
         self.cfg = cfg or ScanConfig()
         self.run_id, self.seed = new_run_id(self.cfg.seed)
@@ -1603,6 +1610,10 @@ class BurhanScanner:
         self.stats.update({"requests": self.engine.requests_sent,
                            "verified": len(verified), "rejected": len(rejected),
                            "duration": round(time.time() - t0, 2)})
+        # R15-2: surface the honest transport accounting — a report that says
+        # "requests: N" must also say how many of those N never got an answer.
+        self.stats["transport_errors"] = self.engine.transport_errors
+        self.stats["transport_error_kinds"] = dict(self.engine.transport_error_kinds)
         # v4.2.1: passive raw-capture journal (supervisor directive 2026-10-03)
         # — snapshot for the independent verification packages. Aggregates every
         # engine that rode this scan's bus (main + authz identities + workflow
@@ -2151,6 +2162,7 @@ class BurhanScanner:
         browser engine and the OAST listener are torn down — a crashed
         scan must not leave a chromium process or listener threads behind.
         """
+        BurhanScanner._active[id(self)] = self   # R15-4: SIGINT finds this scan
         try:
             return self._run_phases()
         finally:
@@ -2165,6 +2177,7 @@ class BurhanScanner:
                     oast.stop()
                 except Exception:  # noqa: BLE001
                     pass
+            BurhanScanner._active.pop(id(self), None)
 
 
 # ============================================================ DOCTOR (Phase 44/45)

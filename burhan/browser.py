@@ -223,18 +223,83 @@ class BrowserEngine:
         except Exception as e:
             self.bus.emit("BrowserCookieSyncError", error=f"{type(e).__name__}: {e}"[:150])
 
+    # R15-4: SIGINT can land while the sync-playwright channel is mid-
+    # dispatch; the greenlet switch never resumes and close() blocks forever
+    # in playwright's _sync_base (live-proven: stack pinned in the r15
+    # phase-D diagnosis — process alive 60s after Ctrl-C, main thread stuck
+    # in playwright's _sync during browser.close()).
+    # Constraints discovered the hard way:
+    #   - sync-playwright CANNOT be driven from another thread
+    #     (greenlet: "cannot switch to a different thread" — proven live), so
+    #     a worker-thread watchdog is useless for CALLING close;
+    #   - but KILLING the browser's child process from a watchdog thread is
+    #     thread-safe and un-wedges the pending _sync dispatch (the transport
+    #     dies, the call returns/raises, teardown completes).
+    # So: close() runs on the caller's thread as before; a watchdog timer
+    # arms before it and hard-kills the browser child if close() overstays.
+    CLOSE_WATCHDOG_S = 10.0
+
+    def _browser_child_proc(self):
+        """The playwright-managed node driver process of this engine, if any.
+
+        Path verified live against playwright 1.57: the SYNC wrapper keeps
+        the implementation on ``_impl_obj`` (Playwright -> _connection ->
+        PipeTransport -> _proc). Killing THIS process tears down the whole
+        browser tree AND un-wedges any pending sync dispatch whose transport
+        just died."""
+        try:
+            impl = getattr(self._pw, "_impl_obj", None)
+            conn = getattr(impl, "_connection", None)
+            proc = getattr(conn, "_transport", None)
+            child = getattr(proc, "_proc", None)
+            if child is not None and hasattr(child, "send_signal"):
+                return child
+        except Exception:  # noqa: BLE001
+            pass
+        return None
+
     def close(self):
         # explicit ordered teardown (attributes may be partially initialized)
+        import threading
+        child = self._browser_child_proc()
+        fired = threading.Event()
+
+        def _watchdog():
+            if not fired.wait(self.CLOSE_WATCHDOG_S):
+                c = child or self._browser_child_proc()
+                if c is not None:
+                    self.bus.emit("BrowserCloseWatchdogFired",
+                                  detail=f"playwright teardown exceeded "
+                                         f"{self.CLOSE_WATCHDOG_S}s — killing the "
+                                         f"browser child to un-wedge the close")
+                    try:
+                        import signal as _signal
+                        c.send_signal(_signal.SIGKILL)
+                    except Exception:  # noqa: BLE001
+                        pass
+
+        wd = threading.Thread(target=_watchdog, daemon=True,
+                              name="browser-close-watchdog")
+        wd.start()
         try:
-            if self._context is not None: self._context.close()
-        except Exception: pass
-        try:
-            if self._browser is not None: self._browser.close()
-        except Exception: pass
-        try:
-            if self._pw is not None: self._pw.stop()
-        except Exception: pass
-        self._context = self._browser = self._pw = None
+            if self._context is not None:
+                try:
+                    self._context.close()
+                except Exception:  # noqa: BLE001 — teardown must never raise
+                    pass
+            if self._browser is not None:
+                try:
+                    self._browser.close()
+                except Exception:  # noqa: BLE001
+                    pass
+            if self._pw is not None:
+                try:
+                    self._pw.stop()
+                except Exception:  # noqa: BLE001
+                    pass
+        finally:
+            fired.set()  # disarm the watchdog
+            self._context = self._browser = self._pw = None
 
     def _ok(self, url: str) -> bool:
         ok, why = self.engine._scope_ok(url)
