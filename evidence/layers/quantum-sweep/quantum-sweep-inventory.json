@@ -1,15 +1,16 @@
 {
- "when": "2026-11-05T23:54:11Z",
+ "when": "2026-11-06T05:14:20Z",
  "scanned": {
-  "python_files": 208,
-  "ts_files": 146
+  "python_files": 210,
+  "ts_files": 147
  },
  "raw_counts_by_class": {
-  "SILENT_EXCEPT": 287,
-  "TOCTOU": 11,
+  "SILENT_EXCEPT": 290,
+  "TOCTOU": 13,
   "FIRST_MATCH": 5,
   "SILENT_CATCH": 1,
-  "EXPORT_UNROUTED": 2
+  "EXPORT_UNROUTED": 2,
+  "ENTRYPOINT_UNREACHABLE": 49
  },
  "cli_wiring": {
   "read_flags": [
@@ -190,7 +191,210 @@
   ],
   "holes": []
  },
- "total": 306,
+ "entrypoint_wiring": {
+  "entry_files": 11,
+  "routed_defs": 488,
+  "engine_public_functions": 1119,
+  "flagged": [
+   {
+    "file": "burhan/authorized_targets.py",
+    "name": "FetchError"
+   },
+   {
+    "file": "burhan/blake3.py",
+    "name": "blake3"
+   },
+   {
+    "file": "burhan/core.py",
+    "name": "Severity"
+   },
+   {
+    "file": "burhan/csynth.py",
+    "name": "attribute"
+   },
+   {
+    "file": "burhan/csynth.py",
+    "name": "boundary"
+   },
+   {
+    "file": "burhan/csynth.py",
+    "name": "digest"
+   },
+   {
+    "file": "burhan/detect.py",
+    "name": "CsrfDetector"
+   },
+   {
+    "file": "burhan/detect.py",
+    "name": "HeaderNameTraversalDetector"
+   },
+   {
+    "file": "burhan/detect.py",
+    "name": "ParamNameTraversalDetector"
+   },
+   {
+    "file": "burhan/oast.py",
+    "name": "SelfHostedListener"
+   },
+   {
+    "file": "burhan/pcs.py",
+    "name": "IntegrityError"
+   },
+   {
+    "file": "burhan/pcs.py",
+    "name": "MerkleTree"
+   },
+   {
+    "file": "burhan/pcs.py",
+    "name": "PCS"
+   },
+   {
+    "file": "burhan/pcs.py",
+    "name": "PCSError"
+   },
+   {
+    "file": "burhan/pcs.py",
+    "name": "key_digest"
+   },
+   {
+    "file": "burhan/pcs.py",
+    "name": "msgpack_encode"
+   },
+   {
+    "file": "burhan/proof.py",
+    "name": "IntegrityError"
+   },
+   {
+    "file": "burhan/proof.py",
+    "name": "chacha20poly1305_decrypt"
+   },
+   {
+    "file": "burhan/proof.py",
+    "name": "chacha20poly1305_encrypt"
+   },
+   {
+    "file": "burhan/proof.py",
+    "name": "ed25519_verify"
+   },
+   {
+    "file": "burhan/proof.py",
+    "name": "hkdf_sha256"
+   },
+   {
+    "file": "burhan/proof.py",
+    "name": "hkdf_sha256_expand"
+   },
+   {
+    "file": "burhan/proof.py",
+    "name": "hkdf_sha256_extract"
+   },
+   {
+    "file": "burhan/race/models.py",
+    "name": "serialize"
+   },
+   {
+    "file": "burhan/remediation.py",
+    "name": "IsolationViolation"
+   },
+   {
+    "file": "burhan/remediation.py",
+    "name": "RemediationRefused"
+   },
+   {
+    "file": "burhan/remediation.py",
+    "name": "apply_patch"
+   },
+   {
+    "file": "burhan/remediation.py",
+    "name": "assert_isolated"
+   },
+   {
+    "file": "burhan/remediation.py",
+    "name": "build_patch"
+   },
+   {
+    "file": "burhan/remediation.py",
+    "name": "closure_reexploit"
+   },
+   {
+    "file": "burhan/remediation.py",
+    "name": "reflection_probe"
+   },
+   {
+    "file": "burhan/remediation.py",
+    "name": "run_remediation"
+   },
+   {
+    "file": "burhan/repro.py",
+    "name": "SeededPRNG"
+   },
+   {
+    "file": "burhan/repro.py",
+    "name": "ValidationError"
+   },
+   {
+    "file": "burhan/repro.py",
+    "name": "derive_stream"
+   },
+   {
+    "file": "burhan/repro.py",
+    "name": "diff"
+   },
+   {
+    "file": "burhan/siem.py",
+    "name": "parse_cef"
+   },
+   {
+    "file": "burhan/statemachine.py",
+    "name": "replay"
+   },
+   {
+    "file": "burhan/statemachine.py",
+    "name": "value"
+   },
+   {
+    "file": "burhan/stepup.py",
+    "name": "StepUpChainTampered"
+   },
+   {
+    "file": "burhan/stepup.py",
+    "name": "StepUpGate"
+   },
+   {
+    "file": "burhan/stepup.py",
+    "name": "StepUpRateLimited"
+   },
+   {
+    "file": "burhan/stepup.py",
+    "name": "StepUpRequired"
+   },
+   {
+    "file": "burhan/stepup.py",
+    "name": "canonical_event"
+   },
+   {
+    "file": "burhan/stepup.py",
+    "name": "generate_master_secret"
+   },
+   {
+    "file": "burhan/symbolic/models.py",
+    "name": "Path"
+   },
+   {
+    "file": "burhan/transparency.py",
+    "name": "ValidationError"
+   },
+   {
+    "file": "burhan/xgraph.py",
+    "name": "Event"
+   },
+   {
+    "file": "burhan/xgraph.py",
+    "name": "value"
+   }
+  ]
+ },
+ "total": 360,
  "hits": [
   {
    "file": "burhan/api.py",
@@ -2508,6 +2712,51 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 127,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception as e:  # noqa: BLE001 — parse failure IS the hit",
+   "func": "scan_py",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 561,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — other classes report parse errors",
+   "func": "entrypoint_wiring_report",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 539,
+   "class": "TOCTOU",
+   "code": "open(p, encoding=\"utf-8\").read()))",
+   "func": "entrypoint_wiring_report",
+   "detail": "'p' checked at line 537 then used here (two calls)",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 735,
+   "class": "TOCTOU",
+   "code": "return json.load(open(LEDGER_PATH, encoding=\"utf-8\"))[\"entries\"]",
+   "func": "load_ledger",
+   "detail": "'LEDGER_PATH' checked at line 733 then used here (two calls)",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 745,
+   "class": "SILENT_EXCEPT",
+   "code": "except re.error:",
+   "func": "match_ledger",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/axis18_load_test.py",
    "line": 39,
    "class": "SILENT_EXCEPT",
@@ -2797,7 +3046,7 @@
   },
   {
    "file": "scripts/scheduled_hardening.py",
-   "line": 59,
+   "line": 64,
    "class": "SILENT_EXCEPT",
    "code": "except subprocess.TimeoutExpired:",
    "func": "_run",
@@ -2806,7 +3055,7 @@
   },
   {
    "file": "scripts/scheduled_hardening.py",
-   "line": 62,
+   "line": 67,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as e:  # noqa: BLE001 — a check crash is a finding",
    "func": "_run",
@@ -2815,7 +3064,7 @@
   },
   {
    "file": "scripts/scheduled_hardening.py",
-   "line": 88,
+   "line": 93,
    "class": "SILENT_EXCEPT",
    "code": "except urllib.error.HTTPError as e:",
    "func": "_api",
@@ -2824,7 +3073,7 @@
   },
   {
    "file": "scripts/scheduled_hardening.py",
-   "line": 171,
+   "line": 181,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as e:  # noqa: BLE001",
    "func": "main",
@@ -2955,7 +3204,8 @@
    "code": "h = hits[0]",
    "func": "test_live_interactsh_red_blind_oob_roundtrip",
    "detail": "positional/first-match selection over a dynamic collection",
-   "verdict": "NON_ENGINE"
+   "ledger": "QS-180",
+   "verdict": "LEDGERED(FIRST_MATCH-test)"
   },
   {
    "file": "tests/test_openapi_ingestion.py",
@@ -2964,7 +3214,8 @@
    "code": "ep = eps[0]",
    "func": "test_blue_integer_query_example_ingests_as_string",
    "detail": "positional/first-match selection over a dynamic collection",
-   "verdict": "NON_ENGINE"
+   "ledger": "QS-181",
+   "verdict": "LEDGERED(FIRST_MATCH-test)"
   },
   {
    "file": "tests/test_r10_chainrules.py",
@@ -2982,7 +3233,8 @@
    "code": "r1 = results[0]",
    "func": "test_three_scans_lifecycle_real",
    "detail": "positional/first-match selection over a dynamic collection",
-   "verdict": "NON_ENGINE"
+   "ledger": "QS-182",
+   "verdict": "LEDGERED(FIRST_MATCH-test)"
   },
   {
    "file": "tests/test_r10_prioritize.py",
@@ -2991,7 +3243,8 @@
    "code": "r2 = results[1]",
    "func": "test_three_scans_lifecycle_real",
    "detail": "positional/first-match selection over a dynamic collection",
-   "verdict": "NON_ENGINE"
+   "ledger": "QS-183",
+   "verdict": "LEDGERED(FIRST_MATCH-test)"
   },
   {
    "file": "tests/test_r10_prioritize.py",
@@ -3138,6 +3391,496 @@
    "detail": "exported symbol imported by tests but not routed through any app entry",
    "ledger": "QS-176",
    "verdict": "LEDGERED(EXPORT_UNROUTED)"
+  },
+  {
+   "file": "burhan/authorized_targets.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "FetchError",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-184",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/blake3.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "blake3",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-185",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/core.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "Severity",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-186",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/csynth.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "attribute",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-187",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/csynth.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "boundary",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-188",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/csynth.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "digest",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-189",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "CsrfDetector",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-190",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "HeaderNameTraversalDetector",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-191",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/detect.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "ParamNameTraversalDetector",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-192",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/oast.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "SelfHostedListener",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-193",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/pcs.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "IntegrityError",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-194",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/pcs.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "MerkleTree",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-195",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/pcs.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "PCS",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-196",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/pcs.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "PCSError",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-196",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/pcs.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "key_digest",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-198",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/pcs.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "msgpack_encode",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-199",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "IntegrityError",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-200",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "chacha20poly1305_decrypt",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-201",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "chacha20poly1305_encrypt",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-202",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "ed25519_verify",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-203",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "hkdf_sha256",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-204",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "hkdf_sha256_expand",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-204",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "hkdf_sha256_extract",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-204",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/race/models.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "serialize",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-207",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "IsolationViolation",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-208",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "RemediationRefused",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-209",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "apply_patch",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-210",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "assert_isolated",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-211",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "build_patch",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-212",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "closure_reexploit",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-213",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "reflection_probe",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-214",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/remediation.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "run_remediation",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-215",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/repro.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "SeededPRNG",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-216",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/repro.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "ValidationError",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-217",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/repro.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "derive_stream",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-218",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/repro.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "diff",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-219",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/siem.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "parse_cef",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-220",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/statemachine.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "replay",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-221",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/statemachine.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "value",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-222",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/stepup.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "StepUpChainTampered",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-223",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/stepup.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "StepUpGate",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-224",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/stepup.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "StepUpRateLimited",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-225",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/stepup.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "StepUpRequired",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-226",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/stepup.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "canonical_event",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-227",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/stepup.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "generate_master_secret",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-228",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/symbolic/models.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "Path",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-229",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/transparency.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "ValidationError",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-230",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/xgraph.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "Event",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-231",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/xgraph.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "value",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-232",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
   }
  ]
 }

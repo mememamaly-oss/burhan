@@ -1,0 +1,59 @@
+{
+ "part": "round-12 Part 4 — live validation on every currently-authorized target",
+ "when": "2026-11-06T05:16:57Z",
+ "run": {
+  "workflow": "live-validation (dispatched on merged main 210075f)",
+  "run_id": 42164389082,
+  "conclusion": "success",
+  "artifact_ids": [
+   13478153379,
+   13478980434
+  ]
+ },
+ "targets_and_scores": {
+  "crAPI v1.1.5 (official compose, 127.0.0.1:8888)": {
+   "wall_seconds": 74.1,
+   "requests": 4851,
+   "findings_total": 99,
+   "confirmed_positive": [
+    "jwt_signature_not_enforced (CWE-347 corrupted-signature differential)",
+    "bfla (admin function with low-priv session)"
+   ],
+   "undetermined": 0,
+   "false_positive": 0,
+   "expected_miss_with_reason": {
+    "jwt_weak_secret": "challenge-15 mechanism is algorithm confusion, not wordlist-weak secret",
+    "jwt_algorithm_confusion": "same root cause as the confirmed CWE-347 finding (shared mechanism, documented)",
+    "jwt_none_acceptance": "shares the documented no-signature-verification root cause",
+    "excessive_data_exposure": "challenges 4+5 (other-user data + internal property)",
+    "shadow_api_endpoint": "the supplied spec is main's, deployment pinned v1.1.5 — version drift documented",
+    "zombie_api_endpoint": "same spec/deployment drift basis",
+    "race_condition": "documented challenge; not part of this battery's judged set"
+   }
+  },
+  "DVGA (official image)": {
+   "verified_types_present": [
+    "missing_security_headers",
+    "secure_cookie",
+    "weak_random"
+   ],
+   "confirmed_positive": [],
+   "undetermined": 0,
+   "false_positive": 0,
+   "expected_miss_with_reason": {
+    "graphql_aliasing": "documented DVGA behavior"
+   }
+  },
+  "OWASP Juice Shop v20.3.0": "the required CI check 'Real target' ran GREEN on the merge commit 210075f (and on both round-12 PR heads) — the authorized container target, unauthenticated, as established in prior rounds"
+ },
+ "r10_layer (same run)": {
+  "lifecycle_law": "PASS — 98/98 overlapping identities read RECURRING in pass 2 (pass1 99 findings / 68.1s, pass2 98 / 56.6s, shared store, distinct seeds per the run-41920279230 lesson)",
+  "gated_replay_5_2": "REPRODUCTION_VERIFIED (csrf finding F-482b7fbd21, 1 live request, registry entry self-hosted-fixtures)",
+  "chains": "honest refusals recorded: CR-01 combined proof not executed (step2 admin function HTTP 405 on this deployment) — the pair-present precondition and refusal reason are in the artifact verbatim"
+ },
+ "vulnweb_com": {
+  "status": "STILL pending-quote-pin — honestly unresolved",
+  "evidence": "the pin-probe workflow (run 42164385826) ALSO failed to reach www.vulnweb.com from a GitHub-hosted runner (URLError: timed out, 30s) — the host is unreachable from both this sandbox AND GitHub runners (consistent with cloud-IP blocking). No quote observed -> nothing pinned (inventing one is forbidden). The authorization gate keeps refusing every vulnweb scan; this is the documented, honest state."
+ },
+ "phrasing": "confirmed positives are re-execution-verified; expected misses carry their reasons; no claims beyond these methods, targets, and this date."
+}

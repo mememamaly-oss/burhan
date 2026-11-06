@@ -1,0 +1,628 @@
+{
+ "when": "2026-11-06T04:49:34Z",
+ "results": {
+  "crapi": {
+   "target": "crapi",
+   "base": "http://127.0.0.1:8888",
+   "wall_seconds": 74.1,
+   "requests": 4851,
+   "findings_total": 99,
+   "modern2_findings": [
+    {
+     "type": "jwt_signature_not_enforced",
+     "url": "http://127.0.0.1:8888/identity/api/v2/user/dashboard",
+     "severity": "high",
+     "status": "verified",
+     "evidence": [
+      {
+       "kind": "signature_control_accepted",
+       "detail": "signature not enforced (CWE-347): a token with a CORRUPTED signature (one mid-signature character flipped) was ACCEPTED (HTTP 200) by the protected endpoint — the confusion differential’s control. original alg='RS256'; claims: ['exp', 'iat', 'role', 'sub']"
+      },
+      {
+       "kind": "probe_recipe",
+       "detail": "auth=http://127.0.0.1:8888/identity/api/auth/login; protected=http://127.0.0.1:8888/identity/api/v2/user/dashboard; jwks=http://127.0.0.1:8888/.well-known/jwks.json"
+      }
+     ],
+     "sha256": "9e847f31b904591f149083438f4001245380557f285461ecaba8a37029742fc7"
+    },
+    {
+     "type": "bfla",
+     "url": "http://127.0.0.1:8888/identity/api/v2/admin/videos/4",
+     "severity": "high",
+     "status": "verified",
+     "evidence": [
+      {
+       "kind": "function_level_boundary_bypass",
+       "detail": "BFLA (CWE-285; OWASP API5:2023): the admin-only FUNCTION DELETE /identity/api/v2/admin/videos/{video_id} EXECUTED for a lower-privilege session (role=user, account=test) — anonymous replay gated (HTTP 401), highest-privilege session (role=admin) -> HTTP 200, lower-privilege replay -> HTTP 200 with b"
+      },
+      {
+       "kind": "probe_recipe",
+       "detail": "high=admin; low=test; method=DELETE; path=video_id=4"
+      }
+     ],
+     "sha256": "553c17c45e8798d22a631a55c77aae8a8bcbe3d40f8683d34ad6e24c0e7deb3d"
+    }
+   ],
+   "boundaries": [
+    {
+     "family": "jwt_weak_secret",
+     "kind": "NOT_SUPPORTED",
+     "detail": "6 auth-shaped surfaces left unharvested (family cap 2, documented)"
+    },
+    {
+     "family": "jwt_weak_secret",
+     "kind": "TESTED_NEGATIVE",
+     "detail": "secret did not match the 27-entry wordlist (0 offline verifications)"
+    },
+    {
+     "family": "jwt_weak_secret",
+     "kind": "NO_TOKEN",
+     "detail": "no JWT on http://127.0.0.1:8888/identity/api/auth/v2.7/user/login-with-token"
+    },
+    {
+     "family": "graphql_aliasing",
+     "kind": "SKIPPED_NO_SURFACE",
+     "detail": "no GraphQL POST surface in the endpoint map"
+    },
+    {
+     "family": "excessive_data_exposure",
+     "kind": "TESTED_NEGATIVE",
+     "detail": "no secret-ish field names on http://127.0.0.1:8888/community/api/v2/community/posts/recent"
+    },
+    {
+     "family": "excessive_data_exposure",
+     "kind": "TESTED_NEGATIVE",
+     "detail": "no secret-ish field names on http://127.0.0.1:8888/community/api/v2/community/posts/{postId}"
+    },
+    {
+     "family": "excessive_data_exposure",
+     "kind": "TESTED_NEGATIVE",
+     "detail": "no secret-ish field names on http://127.0.0.1:8888/identity/api/v2/user/dashboard"
+    },
+    {
+     "family": "excessive_data_exposure",
+     "kind": "TESTED_NEGATIVE",
+     "detail": "no secret-ish field names on http://127.0.0.1:8888/workshop/api/management/users/all"
+    },
+    {
+     "family": "rebind_toctou",
+     "kind": "SKIPPED_NO_REBIND_DNS",
+     "detail": "no operator-controlled rebinding DNS configured (BURHAN_REBIND_DNS) — family skipped loudly, not silently; validated against the local fixture (fixtures/rebind_fixture.py) in tests"
+    },
+    {
+     "family": "race_condition",
+     "kind": "TESTED_NEGATIVE",
+     "detail": "http://127.0.0.1:8888/workshop/api/mechanic/signup: invariant held — 1 winner(s) <= quota 1 across a 6-wide concurrent burst (statuses [500, 500, 500, 200, 500, 500])"
+    },
+    {
+     "family": "shadow_api",
+     "kind": "NOT_SUPPORTED",
+     "detail": "36 declared paths left unchecked (ZOMBIE_PROBE_CAP=8, documented)"
+    },
+    {
+     "family": "shadow_api",
+     "kind": "TESTED_NEGATIVE",
+     "detail": "the supplied spec and the live surface agree: every declared path is alive and unflagged, every crawled in-namespace JSON endpoint is declared"
+    }
+   ],
+   "axes": {
+    "modern": {
+     "findings": 1,
+     "boundaries": [
+      {
+       "family": "jwt_algorithm_confusion",
+       "kind": "TESTED_NEGATIVE",
+       "detail": "http://127.0.0.1:8888/identity/api/v2/admin/videos/{video_id}: the differential held: forged rejected (HTTP 401), control rejected (HTTP 401)"
+      },
+      {
+       "family": "jwt_algorithm_confusion",
+       "kind": "OBSERVED_ANOMALY",
+       "detail": "the protected endpoint accepted the forged token AND the corrupted control — the confusion differential cannot isolate (both arms passed); the signature bypass is reported as jwt_signature_not_enforced"
+      },
+      {
+       "family": "jwt_algorithm_confusion",
+       "kind": "NOT_SUPPORTED",
+       "detail": "1 protected surfaces left unprobed after the differential produced its verdict on http://127.0.0.1:8888/identity/api/v2/user/dashboard (one finding per family is the honest cap, documented)"
+      },
+      {
+       "family": "jwt_none_acceptance",
+       "kind": "TESTED_NEGATIVE",
+       "detail": "http://127.0.0.1:8888/identity/api/v2/admin/videos/{video_id}: the differential held: none-variant rejected (HTTP 404), corrupted original rejected (HTTP 401)"
+      },
+      {
+       "family": "jwt_none_acceptance",
+       "kind": "OBSERVED_ANOMALY",
+       "detail": "the verifier accepted the none-variant AND the corrupted original — it does not verify signatures at all; the signature bypass is reported as jwt_signature_not_enforced"
+      },
+      {
+       "family": "jwt_none_acceptance",
+       "kind": "NOT_SUPPORTED",
+       "detail": "1 protected surfaces left unprobed after the differential produced its verdict on http://127.0.0.1:8888/identity/api/v2/user/dashboard (one finding per family is the honest cap, documented)"
+      },
+      {
+       "family": "graphql_batching_enabled",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no graphql-shaped POST endpoint in flight"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "NOT_SUPPORTED",
+       "detail": "16 POST endpoints left unprobed (POST_BUDGET=8, documented)"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "UNTESTABLE",
+       "detail": "the control request itself failed (HTTP 401) — endpoint not usable, no timing claim"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "UNTESTABLE",
+       "detail": "the control request itself failed (HTTP 401) — endpoint not usable, no timing claim"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "UNTESTABLE",
+       "detail": "the control request itself failed (HTTP 401) — endpoint not usable, no timing claim"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "UNTESTABLE",
+       "detail": "the control request itself failed (HTTP 401) — endpoint not usable, no timing claim"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "UNTESTABLE",
+       "detail": "the control request itself failed (HTTP 415) — endpoint not usable, no timing claim"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "UNTESTABLE",
+       "detail": "the control request itself failed (HTTP 415) — endpoint not usable, no timing claim"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "UNTESTABLE",
+       "detail": "the control request itself failed (HTTP 415) — endpoint not usable, no timing claim"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "UNTESTABLE",
+       "detail": "the control request itself failed (HTTP 415) — endpoint not usable, no timing claim"
+      },
+      {
+       "family": "mass_assignment",
+       "kind": "UNTESTABLE",
+       "detail": "no readable state oracle at http://127.0.0.1:8888/identity/api/auth/v2.7/user/login-with-token (HTTP 405) — zero probes sent"
+      },
+      {
+       "family": "mass_assignment",
+       "kind": "UNTESTABLE",
+       "detail": "no readable state oracle at http://127.0.0.1:8888/identity/api/auth/v4.0/user/login-with-token (HTTP 405) — zero probes sent"
+      },
+      {
+       "family": "mass_assignment",
+       "kind": "UNTESTABLE",
+       "detail": "no readable state oracle at http://127.0.0.1:8888/identity/api/v2/user/change-email (HTTP 401) — zero probes sent"
+      },
+      {
+       "family": "mass_assignment",
+       "kind": "UNTESTABLE",
+       "detail": "no readable state oracle at http://127.0.0.1:8888/identity/api/v2/user/pictures (HTTP 401) — zero probes sent"
+      },
+      {
+       "family": "prototype_pollution",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no merge-shaped endpoint in flight"
+      }
+     ],
+     "probe_counts": {
+      "jwt_algorithm_confusion": {
+       "sent": 4,
+       "cap": 12
+      },
+      "jwt_none_acceptance": {
+       "sent": 4,
+       "cap": 12
+      },
+      "graphql_batching_enabled": {
+       "sent": 0,
+       "cap": 4
+      },
+      "http_request_smuggling": {
+       "sent": 16,
+       "cap": 16
+      },
+      "mass_assignment": {
+       "sent": 0,
+       "cap": 8
+      },
+      "prototype_pollution": {
+       "sent": 0,
+       "cap": 8
+      }
+     }
+    },
+    "modern_v2": {
+     "findings": 1,
+     "boundaries": [
+      {
+       "family": "jwt_weak_secret",
+       "kind": "NOT_SUPPORTED",
+       "detail": "6 auth-shaped surfaces left unharvested (family cap 2, documented)"
+      },
+      {
+       "family": "jwt_weak_secret",
+       "kind": "TESTED_NEGATIVE",
+       "detail": "secret did not match the 27-entry wordlist (0 offline verifications)"
+      },
+      {
+       "family": "jwt_weak_secret",
+       "kind": "NO_TOKEN",
+       "detail": "no JWT on http://127.0.0.1:8888/identity/api/auth/v2.7/user/login-with-token"
+      },
+      {
+       "family": "graphql_aliasing",
+       "kind": "SKIPPED_NO_SURFACE",
+       "detail": "no GraphQL POST surface in the endpoint map"
+      },
+      {
+       "family": "excessive_data_exposure",
+       "kind": "TESTED_NEGATIVE",
+       "detail": "no secret-ish field names on http://127.0.0.1:8888/community/api/v2/community/posts/recent"
+      },
+      {
+       "family": "excessive_data_exposure",
+       "kind": "TESTED_NEGATIVE",
+       "detail": "no secret-ish field names on http://127.0.0.1:8888/community/api/v2/community/posts/{postId}"
+      },
+      {
+       "family": "excessive_data_exposure",
+       "kind": "TESTED_NEGATIVE",
+       "detail": "no secret-ish field names on http://127.0.0.1:8888/identity/api/v2/user/dashboard"
+      },
+      {
+       "family": "excessive_data_exposure",
+       "kind": "TESTED_NEGATIVE",
+       "detail": "no secret-ish field names on http://127.0.0.1:8888/workshop/api/management/users/all"
+      },
+      {
+       "family": "rebind_toctou",
+       "kind": "SKIPPED_NO_REBIND_DNS",
+       "detail": "no operator-controlled rebinding DNS configured (BURHAN_REBIND_DNS) — family skipped loudly, not silently; validated against the local fixture (fixtures/rebind_fixture.py) in tests"
+      },
+      {
+       "family": "race_condition",
+       "kind": "TESTED_NEGATIVE",
+       "detail": "http://127.0.0.1:8888/workshop/api/mechanic/signup: invariant held — 1 winner(s) <= quota 1 across a 6-wide concurrent burst (statuses [500, 500, 500, 200, 500, 500])"
+      },
+      {
+       "family": "shadow_api",
+       "kind": "NOT_SUPPORTED",
+       "detail": "36 declared paths left unchecked (ZOMBIE_PROBE_CAP=8, documented)"
+      },
+      {
+       "family": "shadow_api",
+       "kind": "TESTED_NEGATIVE",
+       "detail": "the supplied spec and the live surface agree: every declared path is alive and unflagged, every crawled in-namespace JSON endpoint is declared"
+      }
+     ],
+     "probe_counts": {
+      "jwt_weak_secret": {
+       "sent": 2,
+       "offline": 0,
+       "cap": 2
+      },
+      "graphql_aliasing": {
+       "sent": 0,
+       "offline": 0,
+       "cap": 2
+      },
+      "excessive_data_exposure": {
+       "sent": 8,
+       "offline": 0,
+       "cap": 8
+      },
+      "rebind_toctou": {
+       "sent": 0,
+       "offline": 0,
+       "cap": 4
+      },
+      "bfla": {
+       "sent": 3,
+       "offline": 0,
+       "cap": 18
+      },
+      "race_condition": {
+       "sent": 6,
+       "offline": 0,
+       "cap": 48
+      },
+      "shadow_api": {
+       "sent": 8,
+       "offline": 0,
+       "cap": 14
+      }
+     }
+    },
+    "graphql": {
+     "enabled": true,
+     "candidates": 0,
+     "endpoints": [],
+     "introspected": 0,
+     "queries": 0,
+     "mutations": 0,
+     "tests": 0,
+     "requests": 4,
+     "boundaries": 0
+    },
+    "authz": {
+     "accounts_configured": 2,
+     "accounts_logged_in": 2,
+     "roles": [
+      "admin",
+      "user"
+     ],
+     "matrix_endpoints": 18,
+     "login_errors": [],
+     "requests": 46,
+     "ran": true
+    }
+   }
+  },
+  "dvga": {
+   "target": "dvga",
+   "base": "http://127.0.0.1:5013",
+   "wall_seconds": 5.5,
+   "requests": 834,
+   "findings_total": 26,
+   "modern2_findings": [],
+   "boundaries": [
+    {
+     "family": "graphql_aliasing",
+     "kind": "SKIPPED_NO_SURFACE",
+     "detail": "no GraphQL POST surface in the endpoint map"
+    },
+    {
+     "family": "excessive_data_exposure",
+     "kind": "SKIPPED_NO_SURFACE",
+     "detail": "no JSON API GET surface in the endpoint map"
+    },
+    {
+     "family": "rebind_toctou",
+     "kind": "SKIPPED_NO_REBIND_DNS",
+     "detail": "no operator-controlled rebinding DNS configured (BURHAN_REBIND_DNS) — family skipped loudly, not silently; validated against the local fixture (fixtures/rebind_fixture.py) in tests"
+    },
+    {
+     "family": "bfla",
+     "kind": "NOT_DISCOVERED",
+     "detail": "no multi-role authz sessions in flight — 3E needs the authz config (cfg.authz) with two or more privilege levels; the sessions the BOLA battery already built are reused, nothing logs in here"
+    },
+    {
+     "family": "race_condition",
+     "kind": "NOT_DISCOVERED",
+     "detail": "no explicit opt-in candidate list (cfg.race_candidates) — the prober NEVER fires concurrent load at endpoints the operator did not name (state corruption and unintended load on live targets; see the family docstring)"
+    },
+    {
+     "family": "shadow_api",
+     "kind": "NOT_DISCOVERED",
+     "detail": "no OpenAPI/Swagger spec supplied (cfg.openapi_spec) — the shadow/zombie diff needs the declared surface to diff against"
+    }
+   ],
+   "axes": {
+    "modern": {
+     "findings": 0,
+     "boundaries": [
+      {
+       "family": "jwt_algorithm_confusion",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no auth-shaped endpoint in flight"
+      },
+      {
+       "family": "jwt_none_acceptance",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no auth-shaped endpoint in flight"
+      },
+      {
+       "family": "graphql_batching_enabled",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no graphql-shaped POST endpoint in flight"
+      },
+      {
+       "family": "http_request_smuggling",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no POST endpoint in flight"
+      },
+      {
+       "family": "mass_assignment",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no update-shaped endpoint in flight"
+      },
+      {
+       "family": "prototype_pollution",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no merge-shaped endpoint in flight"
+      }
+     ],
+     "probe_counts": {
+      "jwt_algorithm_confusion": {
+       "sent": 0,
+       "cap": 12
+      },
+      "jwt_none_acceptance": {
+       "sent": 0,
+       "cap": 12
+      },
+      "graphql_batching_enabled": {
+       "sent": 0,
+       "cap": 4
+      },
+      "http_request_smuggling": {
+       "sent": 0,
+       "cap": 16
+      },
+      "mass_assignment": {
+       "sent": 0,
+       "cap": 8
+      },
+      "prototype_pollution": {
+       "sent": 0,
+       "cap": 8
+      }
+     }
+    },
+    "modern_v2": {
+     "findings": 0,
+     "boundaries": [
+      {
+       "family": "graphql_aliasing",
+       "kind": "SKIPPED_NO_SURFACE",
+       "detail": "no GraphQL POST surface in the endpoint map"
+      },
+      {
+       "family": "excessive_data_exposure",
+       "kind": "SKIPPED_NO_SURFACE",
+       "detail": "no JSON API GET surface in the endpoint map"
+      },
+      {
+       "family": "rebind_toctou",
+       "kind": "SKIPPED_NO_REBIND_DNS",
+       "detail": "no operator-controlled rebinding DNS configured (BURHAN_REBIND_DNS) — family skipped loudly, not silently; validated against the local fixture (fixtures/rebind_fixture.py) in tests"
+      },
+      {
+       "family": "bfla",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no multi-role authz sessions in flight — 3E needs the authz config (cfg.authz) with two or more privilege levels; the sessions the BOLA battery already built are reused, nothing logs in here"
+      },
+      {
+       "family": "race_condition",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no explicit opt-in candidate list (cfg.race_candidates) — the prober NEVER fires concurrent load at endpoints the operator did not name (state corruption and unintended load on live targets; see the family docstring)"
+      },
+      {
+       "family": "shadow_api",
+       "kind": "NOT_DISCOVERED",
+       "detail": "no OpenAPI/Swagger spec supplied (cfg.openapi_spec) — the shadow/zombie diff needs the declared surface to diff against"
+      }
+     ],
+     "probe_counts": {
+      "jwt_weak_secret": {
+       "sent": 0,
+       "offline": 0,
+       "cap": 2
+      },
+      "graphql_aliasing": {
+       "sent": 0,
+       "offline": 0,
+       "cap": 2
+      },
+      "excessive_data_exposure": {
+       "sent": 0,
+       "offline": 0,
+       "cap": 8
+      },
+      "rebind_toctou": {
+       "sent": 0,
+       "offline": 0,
+       "cap": 4
+      },
+      "bfla": {
+       "sent": 0,
+       "offline": 0,
+       "cap": 18
+      },
+      "race_condition": {
+       "sent": 0,
+       "offline": 0,
+       "cap": 48
+      },
+      "shadow_api": {
+       "sent": 0,
+       "offline": 0,
+       "cap": 14
+      }
+     }
+    },
+    "graphql": {
+     "enabled": true,
+     "candidates": 1,
+     "endpoints": [
+      {
+       "url": "http://127.0.0.1:5013/graphql",
+       "source": "observed"
+      }
+     ],
+     "introspected": 0,
+     "queries": 0,
+     "mutations": 0,
+     "tests": 0,
+     "requests": 5,
+     "boundaries": 1,
+     "tests_run": 0
+    }
+   }
+  }
+ },
+ "scores": {
+  "crapi": {
+   "target": "crapi",
+   "confirmed_positive": [
+    {
+     "type": "jwt_signature_not_enforced",
+     "url": "http://127.0.0.1:8888/identity/api/v2/user/dashboard",
+     "sha256": "9e847f31b904591f149083438f4001245380557f285461ecaba8a37029742fc7",
+     "verdict": "confirmed-positive"
+    },
+    {
+     "type": "bfla",
+     "url": "http://127.0.0.1:8888/identity/api/v2/admin/videos/4",
+     "sha256": "553c17c45e8798d22a631a55c77aae8a8bcbe3d40f8683d34ad6e24c0e7deb3d",
+     "verdict": "confirmed-positive"
+    }
+   ],
+   "unjudged": [],
+   "expected_miss": [
+    {
+     "type": "jwt_weak_secret",
+     "reason": "challenge 15: forge valid JWT tokens. Mechanism in source: algorithm confusion (RSA public key re-used as the HS256 secret) — NOT a wordlist-weak secret. 3A's wordlist check targets a different mechanism; an engine hit is a confirmed positive, a miss is an honest NOT-FOUND, not a false negative."
+    },
+    {
+     "type": "excessive_data_exposure",
+     "reason": "challenges 4+5: endpoints leaking sensitive data of other users and an internal video property."
+    },
+    {
+     "type": "jwt_algorithm_confusion",
+     "reason": "challenge 15: forge valid JWT tokens. crAPI issues RS256 and serves the public key at /.well-known/jwks.json — the documented forgery is HS256 signed with that public key (the confusion differential fam1 runs verbatim)."
+    },
+    {
+     "type": "jwt_none_acceptance",
+     "reason": "challenge 15 ('find ANY one way to forge'): run 9 live-proved the dashboard reads the token's sub claim without signature verification, so the alg=none differential shares the documented mechanism's root cause (CWE-347)."
+    },
+    {
+     "type": "shadow_api_endpoint",
+     "reason": "challenge 8 names a 'shadow API endpoint' (undocumented surface); the spec supplied is main's crapi-openapi-spec.json against the pinned v1.1.5 deployment — a hit is judged against the documented spec/deployment version drift (the spec does not exist at the v1.1.5 tag)."
+    },
+    {
+     "type": "zombie_api_endpoint",
+     "reason": "spec-declared-but-dead (spec drift) and deprecated-but-alive are the OWASP API8:2023 'outdated API versions' class; the supplied spec is main's against the pinned v1.1.5 deployment — the version drift is the documented context."
+    },
+    {
+     "type": "race_condition",
+     "reason": "the declared candidate POST /workshop/api/mechanic/signup (on the official spec) has the classic check-then-insert handler in the pinned v1.1.5 source (filter(email).exists() then User.objects.create) with a UNIQUE email constraint — the single-winner invariant. The burst email is unique per run; >1 winner is a confirmed positive, 1 winner an honest TESTED_NEGATIVE (constraint held)."
+    }
+   ],
+   "ground_truth_source": "github.com/OWASP/crAPI @ main (compose pinned 1.1.5), docs/challenges.md + services/identity JwtProvider.java + ProfileController.java + openapi-spec/crapi-openapi-spec.json"
+  },
+  "dvga": {
+   "target": "dvga",
+   "confirmed_positive": [],
+   "unjudged": [],
+   "expected_miss": [
+    {
+     "type": "graphql_aliasing",
+     "reason": "'Aliases based Attack' listed under Denial of Service; also Batch/Deep Recursion/Resource Intensive/Field Duplication (other families)."
+    }
+   ],
+   "ground_truth_source": "github.com/dolevf/Damn-Vulnerable-GraphQL-Application @ master, README 'Scenarios' section"
+  }
+ }
+}

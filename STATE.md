@@ -1682,6 +1682,61 @@ All 27 checks green on f170f76; PR #7 MERGED (0071c70, 2026-11-01
   bumps, 2 scheduler bugs live-caught by the dogfood, 94 new ledger
   entries, 0 engine-unmatched at close on all four classes.
 
+
+## 2026-11-06 — ROUND 12 CLOSE: owner follow-ups (FM clarification + the generalized entrypoint class + Part-4 live validation + pin-probe honesty)
+
+- FM CLARIFICATION (owner question): the final report's "5 non-engine
+  FIRST_MATCH sites" was imprecise. Correct split: 1 ENGINE site
+  (burhan/detect.py:1514, ledger AP-059, citation-pick — hits[0] cites the
+  first storage surface while all_surfaces lists EVERY surface) + 4 TEST
+  sites, individually reviewed and ledgered this pass with per-site
+  reasoning (assertion-on-observed-element / one-element fixture /
+  self-constructed ordered list — no selection logic under test). The
+  summary accounting now carries the corrected split.
+- THE OWNER'S OBSERVATION, CONFIRMED AND ACTED ON: the same bug class
+  appeared a THIRD time in a different system — run_monitor_cycle had ZERO
+  production callers (the monitor scheduler imported its module and dropped
+  the report; every test green). The CLI-only class-(d) check reported ZERO
+  because it only models CLI wiring. FIXED PROPERLY this round:
+  scripts/audit_quantum_sweep.py gains the GENERALIZED
+  ENTRYPOINT_UNREACHABLE class — entry points are cli + every script the
+  workflows invoke + package.json chains (+ one .sh hop) + production .sh
+  runners; routing is FILE-AWARE with import resolution (relative lazy
+  imports, from-. module aliases, aliased from-imports, from-imported
+  classes incl. classmethod usage) and per-DEF fixed-point expansion.
+  Detector RED-verified on the REAL pre-fix tree (main@01d5b41: flags
+  run_monitor_cycle) and BLUE on the fixed tree — re-verified after every
+  one of the 8 calibration fixes it took (each one was a real false-route
+  the first drafts had; the worst: the word 'main' in entry text routed
+  every non-entry script's def main, which HID the real bug in drafts 1-2).
+  Permanent self-test: tests/test_quantum_sweep_entrypoint.py (the exact
+  bug shape + 5 decoys guarding each fixed false-positive source).
+  Current tree: 49 flags, every one individually classified + ledgered
+  (exception-contract 10, data-model-surface 17, detector-registry-pattern
+  3, crypto-primitives-via-module-attr 9, evidence-script-only 10). Gate
+  green. The class ships in ci.yml + the weekly scheduled run.
+- PART 4 — LIVE VALIDATION on merged main (210075f), run 42164389082
+  (success): crAPI v1.1.5 — 74.1s / 4851 requests / 99 findings; CONFIRMED:
+  jwt_signature_not_enforced (corrupted-signature differential) + bfla;
+  0 false positives, 0 undetermined; 7 expected-misses each with its
+  documented reason (challenge-15 mechanism is algorithm confusion; spec/
+  deployment version drift for shadow/zombie; etc.). DVGA — verified types
+  missing_security_headers/secure_cookie/weak_random present, 0 FP, 1
+  documented miss (graphql_aliasing). Juice Shop v20.3.0 — the required
+  'Real target' CI check green on the merge commit. r10 layer (same run):
+  lifecycle law PASS (98/98 RECURRING), gated replay 5.2
+  REPRODUCTION_VERIFIED (csrf, 1 live request), chains recorded honest
+  refusals (CR-01 step2 405 on this deployment — reason in the artifact).
+  All artifacts under evidence/layers/quantum-sweep/part4-live-validation/.
+- vulnweb.com — HONEST UNRESOLVED: the pin-probe workflow also failed to
+  reach www.vulnweb.com FROM A GITHUB RUNNER (URLError timed out, 30s) —
+  unreachable from both this sandbox and GitHub-hosted runners, consistent
+  with cloud-IP blocking. No permission sentence observed from any vantage
+  point -> NOTHING pinned (inventing one is forbidden). The gate keeps
+  refusing every vulnweb scan. Re-attempt paths for a future round: a
+  runner from a different network vantage (self-hosted runner), or the
+  owner pinning a quote they observe themselves.
+
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,
   backup/release-v4.2.5, backup/release-v4.2.6, recovery/*.
