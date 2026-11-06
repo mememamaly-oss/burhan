@@ -1875,6 +1875,18 @@ teardown tests fail; breaking the repair-demo regression path -> the
 battery's verdict test fails. All mutants reverted; the anchored benchmark
 record (38/0/0/37) verified INTACT after every lifecycle change.
 
+## 2026-11-06 — ROUND 14 addendum: CI gate fix (ledger, not bypass)
+
+PR #56's quantum-sweep gate failed: the new r14 test batteries reference
+13 public engine symbols statically (parse_openapi, detect_chains,
+AuthzEngine, GraphqlEngine, WsClient, the modernsec/2 battery entries,
+jwt_weak_secret_offline, ...) that the v1 entrypoint routing resolves
+only at module granularity — under-flagging across lazy-import
+boundaries by design, with the ledger as the documented backstop. All
+13 ARE production-routed via orchestrator lazy imports; ledgered with
+that reason (R14-EP-001..013). The gate still flags any NEW unrouted
+symbol — nothing was excluded or weakened.
+
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,
   backup/release-v4.2.5, backup/release-v4.2.6, recovery/*.
