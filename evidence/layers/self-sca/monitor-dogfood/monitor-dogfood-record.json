@@ -1,0 +1,154 @@
+{
+ "part": "round-12 Part 2.2 — monitoring dogfood firing evidence",
+ "when": "2026-11-06T00:25:07Z",
+ "configured_target": "dogfood-vulnapp (scripts/monitor/monitor-config.json)",
+ "fixture": "fixtures/vulnapp.py on 127.0.0.1:8777 (self-hosted, authorized-targets 'self-hosted-fixtures')",
+ "store": "results/monitor-dogfood.db (one shared store, two cycles)",
+ "cycles": [
+  {
+   "cycle": "cycle-1-fresh-store",
+   "run_id": "run-d6b26b92d0",
+   "wall_seconds": 102.1,
+   "findings": 199,
+   "requests": 7114,
+   "states_count": {
+    "NEW": 197
+   },
+   "alerts": [
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "04d80cbf664e99ea",
+     "type": "sql_injection",
+     "endpoint": "http://127.0.0.1:8777/vault/transfer",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    },
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "0d973b0147ed193a",
+     "type": "ssti",
+     "endpoint": "http://127.0.0.1:8777/vuln/ssti",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    },
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "12f19715bd966687",
+     "type": "sql_injection",
+     "endpoint": "http://127.0.0.1:8777/vuln/sqli_error.php",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    },
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "d25d320b21bbef2c",
+     "type": "sql_injection",
+     "endpoint": "http://127.0.0.1:8777/vuln/sqli_blind.php",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    },
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "c9772e39f5047191",
+     "type": "command_injection",
+     "endpoint": "http://127.0.0.1:8777/vuln/ping",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    },
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "35664adbd13f2d59",
+     "type": "nosql_injection",
+     "endpoint": "http://127.0.0.1:8777/vuln/nosql-login",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    },
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "2584454a5a4790d4",
+     "type": "xxe",
+     "endpoint": "http://127.0.0.1:8777/vuln/stock",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    },
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "05955adc3284c1b2",
+     "type": "xxe",
+     "endpoint": "http://127.0.0.1:8777/vuln/oob-stock",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    },
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "038dae5893d39e29",
+     "type": "sql_injection",
+     "endpoint": "http://127.0.0.1:8777/vuln/jsparam.php",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    },
+    {
+     "kind": "CRITICAL_NEW",
+     "identity": "7b3c53de60c5f410",
+     "type": "credential_exposure",
+     "endpoint": "http://127.0.0.1:8777/vuln/leak-config",
+     "severity": "critical",
+     "previous_state": null,
+     "evidence_pointer": {}
+    }
+   ],
+   "alerts_count": 10
+  },
+  {
+   "cycle": "cycle-2-shared-store",
+   "run_id": "run-5924ad05df",
+   "wall_seconds": 101.9,
+   "findings": 197,
+   "requests": 7108,
+   "states_count": {
+    "RECURRING": 195
+   },
+   "alerts": [],
+   "alerts_count": 0
+  }
+ ],
+ "policy_check": {
+  "cycle1_expected": "all NEW; alerts only for CRITICAL NEW findings",
+  "cycle2_expected": "RECURRING; ZERO alerts (the stable-run negative control)",
+  "verdict": "PASS"
+ },
+ "reference_note": "this is the worked example configuration: users copy scripts/monitor/monitor-config.json and replace target/store/schedule with their own AUTHORIZED target",
+ "run_due_end_to_end": {
+  "note": "scripts/monitor/run_due.py — the ACTUAL scheduled entry, two invocations against one shared store",
+  "run1": {
+   "exit": 0,
+   "findings": 20,
+   "alerts_count": 2,
+   "wall_seconds": 13.0
+  },
+  "run2": {
+   "exit": 0,
+   "findings": 20,
+   "alerts_count": 0,
+   "wall_seconds": 13.0
+  },
+  "policy_check": {
+   "run1_expected": "fresh store -> NEW findings -> CRITICAL_NEW alerts only",
+   "run2_expected": "RECURRING -> ZERO alerts (stable-run negative control)",
+   "verdict": "PASS"
+  },
+  "live_caught_fixed_during_dogfood": [
+   "run_due.py invoked the CLI with --target (the scan subcommand takes the target POSITIONALLY) — exited 2 with the banner on stderr where the old runner never looked; fixed + stderr now surfaced",
+   "run_due.py ran the scan and DROPPED the report: run_monitor_cycle had NO production caller — lifecycle never recorded, alerts never evaluated in the scheduled path (the alerting layer was workflow-unreachable; tested green only via direct calls — the --gated shape). Fixed: the scan now runs in-process and the report goes through run_monitor_cycle"
+  ]
+ }
+}
