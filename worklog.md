@@ -6226,6 +6226,38 @@ Stage summary:
 - Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
   close-out commit, each with CI verification.
 
+## 2026-11-07 — Round 17 P4: db_app_role.sh — option order + verify-don't-assume
+
+- RED (3 failures pinned against the OLD script via git stash): the
+  MinGW silent failure modeled by a fake psql that ignores everything
+  from the connection-string positional onward — (1) the role never
+  landed in pg_roles while the script exited 0; (2) a psql that skips
+  the SQL entirely still produced a green script; (3) a broken SQL
+  execution was not required to abort (no anchor in the old code).
+- FIX: (a) options BEFORE the connection string (-v/-f then URL — the
+  order MinGW psql honors); (b) a post-hoc VERIFICATION query: psql
+  branch checks pg_roles through -c (a DIFFERENT mechanism than the -f
+  it just used — a psql that mishandles file execution cannot also
+  hide the catalog check), prisma branch uses a raising DO block;
+  failure exits 1 with FATAL. Same verify-don't-assume discipline as
+  the TRUNCATE-trigger discovery.
+- BLUE (3/3): role actually created + -f precedes URL in the logged
+  invocation; silent-skip now FATALs; broken SQL still aborts. The
+  old script re-stashed re-fails all three (the pair is anchored both
+  ends).
+## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
+
+- RED (3 failures pinned before the fix): the tree-hygiene gate watched
+  results/** and CAPABILITY_MATRIX.md only — staging `--` (the empty
+  flag-artifact file removed in 7ed4cdf, re-tracked in 2a4210e) stayed
+  GREEN. Reproduced exactly the recurrence shape in a temp git repo:
+  gate exit 0 with `--` in the index.
+- FIX: a third DENY_RULES class "stray flag artifact" anchored to the
+  exact filename `(^|/)--$`; `--` untracked in the same commit.
+- BLUE: the staged-stray test now sees exit 1 + ::error annotation and
+  green after removal; real-tree integration green; the r16 hygiene
+  pins still pass unchanged (6/6) — rule addition only, no semantics
+  touched for existing classes.
 ## 2026-11-07 — Round 17 P3: vault on Windows — fail closed, loudly (issue #61)
 
 - The trap, avoided deliberately: the obvious "fix" (skip the mode-bit
@@ -6248,19 +6280,6 @@ Stage summary:
   ACL, issue #61; no chmod advice), POSIX pins unchanged — 0644/0666
   still rejected with the actionable message, 0600 still accepted
   (test_r17_vault_windows 3/3 + the existing vault suites 14/14).
-## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
-
-- RED (3 failures pinned before the fix): the tree-hygiene gate watched
-  results/** and CAPABILITY_MATRIX.md only — staging `--` (the empty
-  flag-artifact file removed in 7ed4cdf, re-tracked in 2a4210e) stayed
-  GREEN. Reproduced exactly the recurrence shape in a temp git repo:
-  gate exit 0 with `--` in the index.
-- FIX: a third DENY_RULES class "stray flag artifact" anchored to the
-  exact filename `(^|/)--$`; `--` untracked in the same commit.
-- BLUE: the staged-stray test now sees exit 1 + ::error annotation and
-  green after removal; real-tree integration green; the r16 hygiene
-  pins still pass unchanged (6/6) — rule addition only, no semantics
-  touched for existing classes.
 ## 2026-11-07 — Round 17 P2: doctor's exit-code contract (the no-op CI gate)
 
 - RED (pinned before the fix, through the REAL CLI surface): a doctor
@@ -6276,3 +6295,4 @@ Stage summary:
   test_legacy_env_compat green unchanged.
 - The CI-gate-is-real proof (deliberate red commit on a scratch branch,
   then revert) is scheduled for the push phase of this round.
+
