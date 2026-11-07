@@ -6248,3 +6248,17 @@ Stage summary:
   ACL, issue #61; no chmod advice), POSIX pins unchanged — 0644/0666
   still rejected with the actionable message, 0600 still accepted
   (test_r17_vault_windows 3/3 + the existing vault suites 14/14).
+## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
+
+- RED (3 failures pinned before the fix): the tree-hygiene gate watched
+  results/** and CAPABILITY_MATRIX.md only — staging `--` (the empty
+  flag-artifact file removed in 7ed4cdf, re-tracked in 2a4210e) stayed
+  GREEN. Reproduced exactly the recurrence shape in a temp git repo:
+  gate exit 0 with `--` in the index.
+- FIX: a third DENY_RULES class "stray flag artifact" anchored to the
+  exact filename `(^|/)--$`; `--` untracked in the same commit.
+- BLUE: the staged-stray test now sees exit 1 + ::error annotation and
+  green after removal; real-tree integration green; the r16 hygiene
+  pins still pass unchanged (6/6) — rule addition only, no semantics
+  touched for existing classes.
+
