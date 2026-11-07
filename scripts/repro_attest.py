@@ -34,6 +34,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+# R17-8: extend-inherited + scoped-neutralization spawn env (the same
+# contract as ci_fixture_run.py — see the full rationale there; Windows
+# Winsock needs SYSTEMROOT, and vulnapp's behavioral vars must stay
+# neutralized to protect the deterministic record under test HERE).
+from burhan.fixture_env import fixture_env  # noqa: E402
+
 PORTS = {"a": 8777, "b": 8777}   # SAME target URL for both executions —
                                    # the finding url/id/OAST-iid fields are
                                    # URL-derived; different ports = different
@@ -67,7 +73,7 @@ def run_scan(tag: str, out_dir: Path) -> dict:
 
     fixture = subprocess.Popen(
         [sys.executable, str(ROOT / "fixtures" / "vulnapp.py")],
-        env={"PORT": str(port), "PATH": "/usr/bin:/bin"},
+        env=fixture_env(port),
         stdout=open(out_dir / f"fixture-{tag}.log", "w"),
         stderr=subprocess.STDOUT)
     time.sleep(1.5)

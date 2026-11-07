@@ -6226,6 +6226,45 @@ Stage summary:
 - Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
   close-out commit, each with CI verification.
 
+## 2026-11-07 — Round 17 P8: fixture spawns extend the inherited env, isolation scoped
+
+- The live Windows finding: ci_fixture_run.py and repro_attest.py
+  spawned the fixture with a wholesale-replaced env ({"PORT", minimal
+  PATH}) — on Windows, WinError 10106 (Winsock needs SYSTEMROOT); on
+  every platform, host-required vars dropped for no benefit.
+- The deliberate isolation, PRESERVED but scoped (investigated before
+  reverting, per the owner's order): vulnapp.py reads BEHAVIORAL vars
+  (DELAY_MS/AUTH_TTL/CONFUSION/BFLA/SHADOW/RACE_MODE/SIGNOFF) used by
+  chaos/demo batteries — an inherited BFLA=1 would mutate the fixture
+  and break the deterministic record. The old wholesale replace was a
+  Linux-only way to achieve that isolation.
+- FIX: burhan/fixture_env.py — the single source of truth both scripts
+  import: EXTEND the inherited env, REMOVE the seven behavioral vars,
+  force PORT. My first attempt set them to "" and the fixture died
+  instantly (float(os.environ.get("DELAY_MS", "0")) — empty string is
+  a ValueError): the correct semantics are ABSENT-not-empty; the test
+  now pins exactly that (the live bug of the fix itself, caught by the
+  liveness check before any commit).
+- RED (2 failures pre-fix): wholesale-replace detection + lost-
+  isolation detection. BLUE (3/3): scripts route through the helper;
+  sentinel var survives; hostile BFLA=1/DELAY_MS=250 do NOT reach the
+  fixture; PORT forced.
+- THE regression risk, proven locally: two independent repro_attest
+  runs with the new env — identical Merkle root (5c451f22f0e15345…),
+  identical findings SHA-256, count 199 — REPRODUCIBLE: True.
+## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
+
+- RED (3 failures pinned before the fix): the tree-hygiene gate watched
+  results/** and CAPABILITY_MATRIX.md only — staging `--` (the empty
+  flag-artifact file removed in 7ed4cdf, re-tracked in 2a4210e) stayed
+  GREEN. Reproduced exactly the recurrence shape in a temp git repo:
+  gate exit 0 with `--` in the index.
+- FIX: a third DENY_RULES class "stray flag artifact" anchored to the
+  exact filename `(^|/)--$`; `--` untracked in the same commit.
+- BLUE: the staged-stray test now sees exit 1 + ::error annotation and
+  green after removal; real-tree integration green; the r16 hygiene
+  pins still pass unchanged (6/6) — rule addition only, no semantics
+  touched for existing classes.
 ## 2026-11-07 — Round 17 P7: UNENCODED_WRITE — the class, the 15 fixes, the Arabic proof
 
 - The live Windows finding: report writes encoded with the process
@@ -6251,19 +6290,6 @@ Stage summary:
   fail (the r16 silent-skip lesson applied to test infrastructure).
 - 11/11 new tests; gate PASS on the real tree; detector + sweep-path
   tests unchanged.
-## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
-
-- RED (3 failures pinned before the fix): the tree-hygiene gate watched
-  results/** and CAPABILITY_MATRIX.md only — staging `--` (the empty
-  flag-artifact file removed in 7ed4cdf, re-tracked in 2a4210e) stayed
-  GREEN. Reproduced exactly the recurrence shape in a temp git repo:
-  gate exit 0 with `--` in the index.
-- FIX: a third DENY_RULES class "stray flag artifact" anchored to the
-  exact filename `(^|/)--$`; `--` untracked in the same commit.
-- BLUE: the staged-stray test now sees exit 1 + ::error annotation and
-  green after removal; real-tree integration green; the r16 hygiene
-  pins still pass unchanged (6/6) — rule addition only, no semantics
-  touched for existing classes.
 ## 2026-11-07 — Round 17 P6: the readiness gate bounds total time, not iterations
 
 - The live Windows finding: the inline 60x1s READY loop declared FATAL
@@ -6359,3 +6385,28 @@ Stage summary:
 
 
 
+
+## 2026-11-07 — Round 17 P8 follow-up: the spawn-env test leaked DELAY_MS into the pytest process
+
+- SYMPTOM: after merging main (p1-p7) into audit-r17-p8-spawn-env, the
+  Engine CI job hung in `python3 -m pytest tests/ -q` for 70+ minutes
+  (no failure, no progress); on the branch's original base the same job
+  took 95 minutes vs main's 6.5 — the leak was always there, the merge
+  only pushed it past unbounded.
+- ROOT CAUSE (reproduced locally twice): test_env_helper_contract's
+  finally block deleted R17_SENTINEL and BFLA but forgot DELAY_MS=250,
+  the very hostile var the test sets. It stayed in the pytest process
+  env; every LATER test that spawns vulnapp with the (correct,
+  extend-inherited) env pattern — race prober, replay fidelity, shadow,
+  siem — inherited +250ms per request. test_race_prober's full-scan
+  wiring test alone crossed 300s locally; on CI (no per-test timeout)
+  it hung forever.
+- FIX (root cause, not symptom): save/restore of the three vars the
+  test touches — including a var the operator shell legitimately
+  exported (restore its value, don't just delete); a module-import
+  env baseline; and a permanent guard test proving the module leaves
+  the shared process env byte-identical (PYTEST_CURRENT_TEST excluded —
+  pytest's own per-call bookkeeping, not pollution).
+- RED (guard failed on the unfixed finally: DELAY_MS=250 present) ->
+  BLUE (4/4; the CI-hang pair spawn_env→race_prober: 8 passed in 7s;
+  full suite on the fixed branch completes bounded).
