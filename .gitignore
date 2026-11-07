@@ -4,3 +4,15 @@ __pycache__/
 .ruff_cache/
 node_modules/
 .next/
+
+# R16-1: results/ is the CLI's runtime --out dir (scan / benchmark /
+# replay state) — per-run output, never tracked. The tree-hygiene gate
+# (scripts/audit_tree_hygiene.py, ci job "tree-hygiene") is the CI
+# backstop; this ignore line keeps `git add -A` honest for NEW files.
+results/
+
+# Same class, specific artifact: `burhan capability-matrix` writes this
+# machine-generated matrix at the repo root (the CLI battery exercises
+# it) — it reached main via add -A in r15 (3e34202). Gate blocks
+# tracking it anywhere; this keeps add -A from sweeping it untracked.
+CAPABILITY_MATRIX.md

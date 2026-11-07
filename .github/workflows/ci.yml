@@ -206,6 +206,24 @@ jobs:
           fi
           echo "no credential patterns in tracked files"
 
+  tree-hygiene:
+    name: Tree hygiene (no tracked runtime artifacts)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # R16-1: the add -A lesson as a PERMANENT gate. r15 twice swept
+      # runtime output onto main (results/scan.json via cce5852 AND again
+      # via 217ce0b; CAPABILITY_MATRIX.md via 3e34202) — the second one
+      # was only caught because close-out forced a fresh clone. This
+      # gate fails the build for any tracked results/** path or
+      # CAPABILITY_MATRIX.md, so the failure class can never ride again
+      # regardless of who commits or how tired they are. The evidence/
+      # and fixtures/ doctrine is deliberately NOT touched: intentionally
+      # vulnerable test data is the product's ground truth.
+      - name: Runtime-artifact tracking gate
+        run: python3 scripts/audit_tree_hygiene.py --ci-gate
+
   fixture:
     name: Real fixture scan (canonical run + all report formats)
     runs-on: ubuntu-latest

@@ -1,11 +1,11 @@
 {
- "when": "2026-11-07T00:53:09Z",
+ "when": "2026-11-07T03:13:47Z",
  "scanned": {
-  "python_files": 221,
+  "python_files": 224,
   "ts_files": 147
  },
  "raw_counts_by_class": {
-  "SILENT_EXCEPT": 315,
+  "SILENT_EXCEPT": 316,
   "TOCTOU": 13,
   "FIRST_MATCH": 5,
   "SILENT_CATCH": 1,
@@ -192,8 +192,8 @@
   "holes": []
  },
  "entrypoint_wiring": {
-  "entry_files": 11,
-  "routed_defs": 387,
+  "entry_files": 12,
+  "routed_defs": 390,
   "engine_public_functions": 1125,
   "flagged": [
    {
@@ -450,7 +450,7 @@
    }
   ]
  },
- "total": 399,
+ "total": 400,
  "hits": [
   {
    "file": "burhan/api.py",
@@ -3015,6 +3015,15 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/dismiss_r16_fixture_alerts.py",
+   "line": 98,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError as e:",
+   "func": "_patch",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/evidence_bfla.py",
    "line": 42,
    "class": "SILENT_EXCEPT",
@@ -3542,7 +3551,7 @@
   },
   {
    "file": "tests/test_r15_sigint_browser.py",
-   "line": 116,
+   "line": 128,
    "class": "SILENT_EXCEPT",
    "code": "except subprocess.TimeoutExpired:",
    "func": "test_sigint_during_browser_phase_exits_cleanly",
@@ -3551,7 +3560,7 @@
   },
   {
    "file": "tests/test_r15_sigint_browser.py",
-   "line": 77,
+   "line": 89,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "test_sigint_during_browser_phase_exits_cleanly",
