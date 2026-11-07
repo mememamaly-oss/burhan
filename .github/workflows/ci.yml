@@ -271,6 +271,17 @@ jobs:
           print("benchmark regression gate OK")
           PY
 
+      # R16 close-out (skip audit): the browser-phase SIGINT guard
+      # belongs HERE — this is the only CI job with chromium. The test's
+      # own comment claimed fixture-job coverage that did not exist: the
+      # engine job installs no browser (the test skips there as a
+      # documented capability statement), and until this step no CI job
+      # ran pytest with a browser at all. The claim is finally true.
+      - name: Browser-phase SIGINT guard (the only CI job with chromium)
+        run: |
+          pip install pytest psutil
+          python3 -m pytest tests/test_r15_sigint_browser.py -q
+
       - name: Export all five report formats from the store
         run: |
           F="$RUNNER_TEMP/ci-fixture"

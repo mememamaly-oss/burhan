@@ -6196,3 +6196,32 @@ Stage summary:
   closure record; round 16 section added.
 - Open dependency PRs #1 (cryptography) and #2 (pytest) noticed;
   merge/timing decision left to the owner post-round.
+
+## 2026-11-07 — Round 16 CLOSE: strict close-out + skip audit (audit-r16-closeout)
+
+- Owner required the r15 protocol before any new round: full fresh
+  clone from remote main (7c3b1fd), suite FROM THERE. Done: pristine
+  clone, doctor 19/19, three gates PASS, suite 459 passed / 0 failed /
+  0 SKIPPED in 7:02 — on cryptography 50.0.2 + pytest 9.2.0 (the exact
+  floors of dependency PRs #1/#2: the combined post-merge state,
+  validated before either merge). Canonical fixture run + benchmark
+  gate re-run locally from the clone (the CI fixture job's own two
+  steps verbatim): F1=1.0, TP=38 FP=0 FN=0 TN=37 — the anchored
+  record intact. Zero credential patterns in the tree.
+- Skip audit (the owner's question): exactly 4 skip sites in the whole
+  suite. The tree-isolation silent skip was the r16 fix itself. The two
+  SIGINT capability skips are legitimate BUT their comment claimed
+  fixture-job coverage that did not exist (no CI job ran pytest with
+  chromium) — the fixture job now runs the SIGINT guard explicitly, so
+  the claim is true. The generator-layout guard is backstopped by the
+  drift CI job. Verdict: no silent skips remain.
+- Environment note, recorded for honesty: re-running the SIGINT test
+  STANDALONE while the canonical benchmark ran in parallel on the same
+  machine failed its final orphan check — _headless() is system-global
+  (by design, for dedicated CI/dev machines) and counted the benchmark
+  run's own live chromium as our orphan. Sequential environments (CI
+  steps, the suite run) are unaffected: the same test passed in the
+  full suite minutes earlier on the idle machine. Re-verified green on
+  the idle machine after the benchmark completed.
+- Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
+  close-out commit, each with CI verification.

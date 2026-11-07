@@ -1,5 +1,5 @@
 {
- "when": "2026-11-07T03:13:47Z",
+ "when": "2026-11-07T09:14:44Z",
  "scanned": {
   "python_files": 224,
   "ts_files": 147
@@ -3016,7 +3016,7 @@
   },
   {
    "file": "scripts/dismiss_r16_fixture_alerts.py",
-   "line": 98,
+   "line": 99,
    "class": "SILENT_EXCEPT",
    "code": "except urllib.error.HTTPError as e:",
    "func": "_patch",
@@ -3515,7 +3515,7 @@
   },
   {
    "file": "tests/test_r14_cli_battery.py",
-   "line": 296,
+   "line": 305,
    "class": "SILENT_EXCEPT",
    "code": "except subprocess.TimeoutExpired:",
    "func": "test_cli_no_secret_leakage_in_outputs",
@@ -3524,7 +3524,7 @@
   },
   {
    "file": "tests/test_r14_cli_battery.py",
-   "line": 275,
+   "line": 284,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "test_cli_no_secret_leakage_in_outputs",

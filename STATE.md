@@ -1994,6 +1994,45 @@ evidence, then this round fixed everything the evidence exposed.
   now a real always-running guard, not a conditional skip.
 - Round-15 documentation debt fixed: this file's Round-15 section.
 
+## 2026-11-07 — ROUND 16 CLOSE: strict close-out + the skip audit (owner's order)
+
+The owner required the r15 close-out protocol (fresh clone from remote
+main + the full suite from there) before any new round, and asked the
+skip-audit question the tree-isolation discovery raised. Both done:
+
+- STRICT CLOSE-OUT ON 7c3b1fd: full fresh clone (pristine tree),
+  doctor 19/19, all three gates PASS, full suite 459 passed / 0 failed
+  / 0 SKIPPED in 7:02 — every test EXECUTED (r15's close-out had 1
+  skip + 7 deselected; reconciliation: 453 then + 6 r16 tests now).
+  The suite ran on cryptography 50.0.2 + pytest 9.2.0 — the exact
+  floors of dependency PRs #1/#2, i.e. the combined post-merge state,
+  validated locally before either merge. CI green on the merge commit
+  itself (push run: 16 success + 3 skipped) and on both PR heads
+  (23 + 4 each). Canonical fixture run + benchmark gate re-run
+  locally from the clone (the CI fixture job's own two steps, same
+  commands): F1=1.0, TP=38 FP=0 — the anchored record intact.
+- SKIP AUDIT (are there other silently-skipping tests?): grep-verified
+  the whole suite — exactly 4 skip sites exist, no more.
+  (1) the tree-isolation dirty-tree precondition: the silent-skip
+  defect, fixed in c2a4884 (it now runs wherever the tree is clean,
+  including CI — proven by the first r16 CI failure). (2)+(3) the
+  SIGINT browser capability skips: legitimate, BUT the test's comment
+  claimed fixture-job coverage that did not exist — no CI job ran
+  pytest with chromium (the engine job is browserless; the fixture
+  job ran no pytest). Fixed in this close-out: the fixture job now
+  runs the SIGINT guard explicitly; the comment's claim is finally
+  true. (4) the compliance generator-layout guard: skips only if the
+  generator file moves, and the drift CI job (regenerate + git diff)
+  fails CI in that case regardless. Verdict: no remaining silent
+  skips anywhere in the suite.
+- Runtime-output note, honest: the suite writes results/scan.json
+  (the SIGINT test's real scan uses the CLI default --out) —
+  contained by design (ignored dir + hygiene gate; the isolation test
+  measures git-dirt, which stays clean). The two audit inventories
+  re-churn line numbers whenever a scanned file changes; this
+  close-out commit refreshes them (cosmetic drift: line numbers only,
+  zero new hits, both gates PASS).
+
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,
   backup/release-v4.2.5, backup/release-v4.2.6, recovery/*.
