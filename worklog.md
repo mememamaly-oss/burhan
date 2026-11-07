@@ -6226,6 +6226,31 @@ Stage summary:
 - Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
   close-out commit, each with CI verification.
 
+## 2026-11-07 — Round 17 P7: UNENCODED_WRITE — the class, the 15 fixes, the Arabic proof
+
+- The live Windows finding: report writes encoded with the process
+  locale — on Arabic Windows (cp1256) the bilingual/HTML reports
+  crashed with UnicodeEncodeError AFTER a completed scan, at the exact
+  deliverable requested. Systematic sweep: 15 sites (cli.py 11,
+  intel.py 2, replay.py write_text 1, vault.py fdopen 1).
+- FIX: encoding="utf-8" explicit at every text-mode write (binary
+  "wb" sites untouched — encoding is meaningless for bytes).
+- PERMANENT CLASS: UNENCODED_WRITE in audit_quantum_sweep — builtin
+  open in text w/a/x/+ mode or Path.write_text without encoding=, in
+  burhan/** and src/** (the owner-ordered product scope; scripts/
+  one-off evidence collectors are ASCII today and out of scope).
+  Decoys pinned both ways: "wb" NOT flagged, reads NOT flagged,
+  encoded writes NOT flagged — a noisy class would bury the real hits.
+- ARABIC e2e RED->BLUE (stash-proven non-vacuous): under LC_ALL=C +
+  PYTHONUTF8=0 (same failure class as cp1256 — ASCII preferred
+  encoding), the REAL CLI bilingual export crashed with
+  UnicodeEncodeError 'ascii' codec on the Arabic probe pre-fix; post-
+  fix it exits 0 and the output is BYTE-CORRECT UTF-8 (probe bytes
+  present verbatim, json parses, docx delivered). A companion
+  non-vacuity guard pins that the env itself makes unencoded writes
+  fail (the r16 silent-skip lesson applied to test infrastructure).
+- 11/11 new tests; gate PASS on the real tree; detector + sweep-path
+  tests unchanged.
 ## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
 
 - RED (3 failures pinned before the fix): the tree-hygiene gate watched
@@ -6239,3 +6264,4 @@ Stage summary:
   green after removal; real-tree integration green; the r16 hygiene
   pins still pass unchanged (6/6) — rule addition only, no semantics
   touched for existing classes.
+

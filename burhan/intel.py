@@ -2262,7 +2262,7 @@ class StrategyStore:
 
     def flush(self):
         if self.path:
-            json.dump(self.stats, open(self.path, "w"), indent=1)
+            json.dump(self.stats, open(self.path, "w", encoding="utf-8"), indent=1)
 
 
 # ============================================================ FAILURE MEMORY + REPAIR (Phase 18/22)
@@ -2282,7 +2282,7 @@ class FailureMemory:
 
     def flush(self):
         if self.path:
-            json.dump(self.records, open(self.path, "w"), indent=1)
+            json.dump(self.records, open(self.path, "w", encoding="utf-8"), indent=1)
 
 
 class RepairClassifier:
