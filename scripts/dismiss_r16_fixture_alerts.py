@@ -96,7 +96,14 @@ def _patch(url: str, headers: dict, body: dict) -> tuple:
         with urllib.request.urlopen(req, timeout=30) as r:
             return True, f"HTTP {r.status}"
     except urllib.error.HTTPError as e:
-        return False, f"HTTP {e.code} {e.read().decode()[:160]}"
+        # The response BODY is deliberately NOT included in the returned
+        # detail: it can echo request material back, and CodeQL's
+        # py/clear-text-logging taint model (correctly) treats
+        # print(<body of a token-authed request>) as sensitive. The
+        # status code is what an operator acts on; the 422-lesson
+        # (valid dismissed_reason values) is already recorded in the
+        # module docstring.
+        return False, f"HTTP {e.code} (body suppressed — curl to read)"
 
 
 def main() -> int:
@@ -108,7 +115,7 @@ def main() -> int:
         )
         state = _get(f"{API}/dependabot/alerts/{num}", headers)["state"]
         if state != "open":
-            print(f"dependabot #{num}: already {state} — skipped")
+            print(f"dependabot #{num}: already handled — skipped")
             continue
         ok, detail = _patch(
             f"{API}/dependabot/alerts/{num}",
@@ -125,7 +132,7 @@ def main() -> int:
     for num in SECRET_ALERT_NUMBERS:
         state = _get(f"{API}/secret-scanning/alerts/{num}", headers)["state"]
         if state != "open":
-            print(f"secret #{num}: already {state} — skipped")
+            print(f"secret #{num}: already handled — skipped")
             continue
         ok, detail = _patch(
             f"{API}/secret-scanning/alerts/{num}",
