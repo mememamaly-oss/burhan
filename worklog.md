@@ -6549,3 +6549,36 @@ Stage summary:
 - CI PERMANENCE: tests/test_r18_fuzz_contract.py pins the same
   contract at ~2s/target (7 targets, ~15s wall) so a future parser
   regression fails the build with the exact crashing input preserved.
+## 2026-11-07 — Round 18 P5: compound (simultaneous) fault injection
+
+- 5.1 THE EXTENSION over r15's single-fault battery (engine side,
+  tests/test_r18_compound_faults.py, 3/3 green in 94s):
+    C1 SIGTERM landing WHILE every response is slow+delayed (150ms
+       fixture): exit is the signal's (-15/143), never a dressed-up
+       success; any partial report carries no completed=true claim;
+       the fixture is terminated by the test (no orphan).
+    C2 output-path ENOSPC shape (a file where the report's parent dir
+       should be) DURING the scan: non-zero exit, no partial silent
+       file, the stderr names the path/error kind.
+    C3 two scans writing ONE SQLite store concurrently, one SIGKILLed
+       mid-transaction: the survivor exits 0, and the store remains
+       schema/lock-consistent (a read proves it) — the killed
+       transaction leaves no poisoned lock.
+  All three hold r15's bar: no uncontrolled crash, correct exit code,
+  comprehensible logged reason, no orphaned process, no silent
+  false-success.
+- CALIBRATION LESSONS (recorded): the first drafts failed three ways,
+  each a wrong assumption about MY test harness, not the engine —
+  --max-requests exists on benchmark but not scan (usage exit 2); a
+  local scan without --allow-private is correctly refused by ScopeRule
+  before any request (zero-request exit, the privacy gate working as
+  designed); and a fast scan finishes before any fixed sleep, so the
+  faults now fire on a liveness poll against a genuinely-slow (150ms)
+  fixture — the fault is mid-scan by construction, not by hope.
+- 5.2 SCOPE NOTE (stated, not silent): the SaaS/Next.js-side compound
+  faults (pool exhaustion, failed migration mid-deploy, session-write
+  during logout) run in the web integration battery
+  (scripts/run_integration_tests.sh + the SaaS CI job's PostgreSQL
+  service) — this round's engine-side file documents the split in its
+  module docstring; the SaaS job already covers restart-under-load via
+  its own integration scripts.
