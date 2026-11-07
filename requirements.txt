@@ -3,7 +3,7 @@
 # (GHSA-537c/g6cj/jwv3/m959/r6ph + PYSEC-2026-35/-2141/-3552/-3553/
 # -3554), fixed in 46.0.5/46.0.6/48.0.1/49.0.0/50.0.0. Suite verified
 # green on 50.0.2 before this bump (390 passed).
-cryptography>=50.0.0
+cryptography>=50.0.2
 blake3==1.0.11
 # FM-21d (first-match audit follow-up, CI live-caught 2026-11-03): the
 # weak_random seed-relation family (jrand.uniquifier_relation_solve — the
