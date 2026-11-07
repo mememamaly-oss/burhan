@@ -4,3 +4,9 @@ __pycache__/
 .ruff_cache/
 node_modules/
 .next/
+
+# R16-1: results/ is the CLI's runtime --out dir (scan / benchmark /
+# replay state) — per-run output, never tracked. The tree-hygiene gate
+# (scripts/audit_tree_hygiene.py, ci job "tree-hygiene") is the CI
+# backstop; this ignore line keeps `git add -A` honest for NEW files.
+results/
