@@ -726,25 +726,28 @@ def main():
             oast = make_oast(_up(a.target).hostname or "", mode=a.oast)
             cfg.oast = oast
         try:
-            # R15-4: SIGINT during a sync-playwright call wedges the greenlet
-            # dispatch forever (live-proven: main thread stuck in _sync_base
-            # inside page.close()/browser.close() — process survives Ctrl-C
-            # indefinitely). Default KeyboardInterrupt handling cannot unwedge
-            # it. Handler of record: kill the playwright NODE DRIVER process
-            # immediately — the transport dies, every pending _sync returns,
-            # and the normal finally-teardown then completes cleanly.
+            # R15-4: SIGINT during a sync-playwright call wedges the process
+            # forever (live-proven: KeyboardInterrupt lands INSIDE the event-
+            # loop greenlet, kills the dispatcher fiber, and _sync's
+            # `while not task.done()` can never finish — the task's loop is
+            # dead). Two-part fix:
+            #   1. while a browser driver is ALIVE the handler must NOT
+            #      raise: it records the interrupt and returns. The wakeup-
+            #      pipe monitor (burhan.browser) kills the driver on the OS
+            #      signal byte; the dead transport completes the pending
+            #      task with a real error and the scan unwinds cleanly.
+            #   2. with no driver alive (normal path) it raises
+            #      KeyboardInterrupt exactly as before.
+            # The recorded flag becomes exit code 130 after the unwind.
             import signal as _signal_mod
 
             def _sigint_burhan(signum, frame):
                 try:
-                    from burhan.browser import BrowserEngine
-                    for scanner_engine in BurhanScanner._active.values():
-                        be = getattr(scanner_engine, "browser", None)
-                        if be is not None:
-                            child = be._browser_child_proc()
-                            if child is not None:
-                                child.send_signal(_signal_mod.SIGKILL)
-                except Exception:  # noqa: BLE001 — best effort unwedging
+                    from burhan.browser import any_driver_alive, mark_sigint_seen
+                    if any_driver_alive():
+                        mark_sigint_seen()   # defer: unwedge first
+                        return
+                except Exception:  # noqa: BLE001 — fall through to default
                     pass
                 raise KeyboardInterrupt
 
@@ -755,6 +758,12 @@ def main():
                 rep = sc.run()
             finally:
                 _signal_mod.signal(_signal_mod.SIGINT, _prev_handler)
+        except KeyboardInterrupt:
+            print(json.dumps({"scan_aborted": "SIGINT",
+                              "hint": "interrupted by user — teardown completed, "
+                                      "no browser processes left behind"}),
+                  file=sys.stderr)
+            sys.exit(130)
         except Exception as e:
             # Phase 57: a refused vault (wrong key / tampered file / unauthorized
             # key) is a CONFIGURATION error that must fail fast and clean —
@@ -782,6 +791,25 @@ def main():
         _st = rep.get("stats") or {}
         _sent = _st.get("requests", 0) or 0
         _terr = _st.get("transport_errors", 0) or 0
+        # R15-4 deferred-interrupt conversion: SIGINT arrived while a browser
+        # driver was alive; the monitor killed it, the scan unwedged and
+        # wound down browserless — this is an INTERRUPTED scan, exit 130.
+        try:
+            from burhan.browser import sigint_seen
+            if sigint_seen():
+                print(json.dumps({
+                    "scan_aborted": "SIGINT",
+                    "reason": "interrupted while the browser phase was active — "
+                              "the driver was killed to unwedge the engine, "
+                              "teardown completed, no processes left behind",
+                    "requests": _sent,
+                    "hint": "the partial report is in the --out file"}),
+                    file=sys.stderr)
+                sys.exit(130)
+        except SystemExit:
+            raise
+        except Exception:  # noqa: BLE001 — flag check must never mask results
+            pass
         if _sent > 0 and _terr == _sent:
             print(json.dumps({
                 "scan_aborted": "transport",

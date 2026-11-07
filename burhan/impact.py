@@ -1317,6 +1317,18 @@ def execute_impact_probes(plan, engine, browser=None):
             b = p.chromium.launch(headless=True, args=[
                 "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"])
             pw = {"p": p, "b": b, "ctx": b.new_context()}
+            # R15-4: impact's private playwright instance is a WEDGE POINT
+            # exactly like BrowserEngine's (same _sync dispatch machinery) —
+            # it must join the shared driver registry or the SIGINT sweep
+            # would never see it.
+            try:
+                from .browser import register_driver
+                _c = getattr(getattr(p, "_impl_obj", None), "_connection", None)
+                _d = getattr(getattr(_c, "_transport", None), "_proc", None)
+                if _d is not None:
+                    register_driver(_d)
+            except Exception:  # noqa: BLE001 — registry is best-effort
+                pass
         return pw["ctx"].new_page()
 
     try:

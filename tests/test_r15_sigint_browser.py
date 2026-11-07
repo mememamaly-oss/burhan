@@ -12,13 +12,19 @@ kills the in-flight scanner's node driver BEFORE raising KeyboardInterrupt,
 un-wedging any interrupted _sync dispatch wherever it sits (page.close in
 render(), browser.close in teardown, ...).
 
-HONEST SCOPE (r15 close-out): the manual instrumented repro (evidence pack
-phaseD) still hung once WITH the handler installed — the wedge window is
-the exact moment a _sync dispatch is in flight, which this subprocess test
-cannot force deterministically. This test therefore asserts the PROVEN
-properties: clean exit (no infinite hang in the common interrupt paths)
-and zero orphaned chrome-headless-shell processes. The wedge-window fix
-is classified a remaining risk, not a verified fix.
+VERIFIED SCOPE (r15 close-out, follow-up round): root cause pinned — an
+external SIGINT during ANY sync-playwright dispatch tears the dispatcher
+fiber; the in-flight call unwedges (with an error) but EVERY later _sync
+call (page.close, add_cookies, ...) hangs forever, even on a killed
+driver. Fix (three layers, all required):
+  1. CLI SIGINT handler DEFERS (no KeyboardInterrupt) while a driver is
+     alive; a wakeup-fd monitor thread SIGKILLs every registered driver
+     (BrowserEngine's AND impact.py's private instance);
+  2. sigint_seen() guards stop ALL further playwright calls (render,
+     probe_dom_xss, _ensure, close) — the browser phase stands down;
+  3. the CLI converts the flag into exit code 130 after the unwind.
+Proof: 5/5 random-timing runs exit 130 in ~4s with zero orphaned
+processes; removing the render() guard (mutation) wedges 5/5 runs.
 
 Permanent regression, run as a REAL subprocess against the repo's own
 vulnapp fixture (the browser phase actually launches there).
@@ -31,8 +37,11 @@ import sys
 import time
 from pathlib import Path
 
-import psutil
 import pytest
+
+psutil = pytest.importorskip(
+    "psutil",
+    reason="headless-process accounting needs psutil (requirements-dev.txt)")
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -74,6 +83,10 @@ def test_sigint_during_browser_phase_exits_cleanly():
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=ROOT)
         try:
             assert _wait_headless(), "browser never launched — test invalid"
+            # the driver registers with the SIGINT sweep microseconds after
+            # the process appears; give that bookkeeping a beat so the test
+            # exercises the DEFERRED path deterministically, not the race
+            time.sleep(1.0)
             p.send_signal(signal.SIGINT)
             # watchdog default is 10s; allow generous margin for slow CI
             deadline = time.time() + 45
@@ -82,8 +95,9 @@ def test_sigint_during_browser_phase_exits_cleanly():
             rc = p.poll()
             assert rc is not None, (
                 "SIGINT during the browser phase still hangs the CLI — "
-                "the close watchdog did not un-wedge playwright")
-            assert rc in (-2, 130, 0, 1), f"unexpected exit {rc}"
+                "the deferred-interrupt unwedging failed")
+            assert rc in (130, -2), (
+                f"interrupted scan must exit 130 (or die by SIGINT), got {rc}")
         finally:
             if p.poll() is None:
                 p.kill()

@@ -110,6 +110,137 @@ def scan_html_dom_sinks(url: str, html: str) -> list[DomSink]:
     return found
 
 
+# ---------------------------------------------------------------- drivers
+# R15-4 comprehensive root: EVERY synchronous playwright dispatch in the
+# engine can wedge forever if SIGINT lands mid-dispatch (greenlet switch
+# never resumes — proven live in render()'s page.close(), but the same
+# _sync machinery guards goto/evaluate/content/... and impact.py's separate
+# instance). Killing the NODE DRIVER process un-wedges whichever call is
+# in flight. This module-level registry is the single place every driver
+# reports to, so one kill sweep covers ALL of them.
+_ACTIVE_DRIVERS: list = []      # [subprocess.Popen] — node drivers, alive
+
+# The Python-level SIGINT handler CANNOT run while the main thread is
+# blocked inside playwright's _sync (a C-level greenlet switch — the
+# interpreter never regains control to dispatch the handler: proven live,
+# stack pinned in the r15 evidence). signal.set_wakeup_fd() is the OS-level
+# escape hatch: the kernel writes one byte into our pipe for EVERY signal
+# the moment it arrives, regardless of what the main thread is doing. A
+# dedicated monitor thread blocks on that pipe and kills all drivers on
+# the first SIGINT byte — unwedging the main thread from OUTSIDE.
+_WAKEUP_R, _WAKEUP_W = None, None
+_MONITOR_THREAD = None
+
+# Set by the CLI's SIGINT handler when a browser driver is alive: the abort
+# is DEFERRED (no KeyboardInterrupt raised into the event-loop fiber — that
+# kills the loop and wedges _sync forever; the pending task can then never
+# complete no matter what dies). Instead the wakeup monitor kills the
+# driver, the dead transport completes the task with a REAL error, the
+# scan unwinds, and the CLI converts this flag into exit code 130.
+_SIGINT_SEEN = None        # threading.Event | None (created lazily, main thread)
+
+
+def sigint_seen() -> bool:
+    return _SIGINT_SEEN is not None and _SIGINT_SEEN.is_set()
+
+
+def mark_sigint_seen() -> None:
+    global _SIGINT_SEEN
+    import threading
+    if _SIGINT_SEEN is None:
+        _SIGINT_SEEN = threading.Event()
+    _SIGINT_SEEN.set()
+
+
+def any_driver_alive() -> bool:
+    for proc in _ACTIVE_DRIVERS:
+        try:
+            alive = (proc.returncode is None) if hasattr(proc, "returncode") \
+                else (proc.poll() is None)
+            if alive:
+                return True
+        except Exception:  # noqa: BLE001
+            pass
+    return False
+
+
+def register_driver(proc) -> None:
+    """Report a live playwright node driver. Called by every code path that
+    starts one (BrowserEngine._ensure, impact.py's browser replay). Also
+    lazily arms the wakeup-pipe SIGINT monitor (idempotent)."""
+    if proc is not None:
+        _ACTIVE_DRIVERS.append(proc)
+    _arm_sigint_monitor()
+
+
+def _arm_sigint_monitor() -> None:
+    """One wakeup-pipe + one monitor thread per PROCESS. The thread waits on
+    the pipe; when SIGINT arrives the kernel drops a byte in it and the
+    thread immediately SIGKILLs every registered driver (which un-wedges
+    any in-flight _sync on the main thread — the transport died). The
+    normal Python KeyboardInterrupt still fires afterwards as usual."""
+    import os
+    import signal as _signal
+    import threading
+    global _WAKEUP_R, _WAKEUP_W, _MONITOR_THREAD
+    if _MONITOR_THREAD is not None and _MONITOR_THREAD.is_alive():
+        return
+    try:
+        _WAKEUP_R, _WAKEUP_W = os.pipe()
+        os.set_blocking(_WAKEUP_W, False)
+        # keep the fd always-valid: set_wakeup_fd requires a non-blocking fd
+        _signal.set_wakeup_fd(_WAKEUP_W)
+
+        def _monitor():
+            while True:
+                try:
+                    data = os.read(_WAKEUP_R, 64)
+                except Exception:  # noqa: BLE001 — pipe closed at exit
+                    return
+                if not data:
+                    return
+                # os.read returns BYTES; iterating yields ints — the signal
+                # NUMBER arrives as a raw byte (SIGINT == 2 == b"\x02").
+                # The monitor must never die on a parse error: one TypeError
+                # on the first signal left the driver alive and the main
+                # thread wedged (live-caught in the r15 close-out).
+                try:
+                    if b"\x02" in data:        # SIGINT
+                        kill_all_drivers()
+                except Exception:  # noqa: BLE001 — keep watching regardless
+                    continue
+
+        _MONITOR_THREAD = threading.Thread(
+            target=_monitor, daemon=True, name="sigint-driver-killer")
+        _MONITOR_THREAD.start()
+    except Exception:  # noqa: BLE001 — monitor is best-effort; handler still exists
+        pass
+
+
+import signal  # module-level: the monitor compares against SIGINT
+
+
+def kill_all_drivers() -> int:
+    """SIGKILL every registered driver still alive. Returns how many were
+    signaled. Safe to call from a signal handler thread; killing the driver
+    is process-level and needs no greenlet cooperation. Accepts both
+    subprocess.Popen (classic) and asyncio's Process (playwright's driver —
+    no .poll(); .returncode is the liveness oracle there)."""
+    import signal as _signal
+    killed = 0
+    for proc in _ACTIVE_DRIVERS:
+        try:
+            alive = (proc.returncode is None) if hasattr(proc, "returncode") \
+                else (proc.poll() is None)
+            if alive:
+                proc.send_signal(_signal.SIGKILL)
+                killed += 1
+        except Exception:  # noqa: BLE001 — best-effort unwedging
+            pass
+    _ACTIVE_DRIVERS.clear()
+    return killed
+
+
 # ---------------------------------------------------------------- availability
 _AVAIL: bool | None = None
 
@@ -191,10 +322,20 @@ class BrowserEngine:
     def _ensure(self):
         if self._context is not None:
             return
+        # R15-4: never (re)start playwright after an interrupt — the old
+        # dispatcher fiber is torn and every _sync call on it wedges.
+        if sigint_seen():
+            return
         from playwright.sync_api import sync_playwright
         self._pw = sync_playwright().start()
         self._browser = self._pw.chromium.launch(
             headless=True, args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"])
+        # R15-4: this instance's node driver joins the module registry the
+        # moment it exists — the SIGINT sweep must see it even if the signal
+        # lands before the first render finishes.
+        _d = self._browser_child_proc()
+        if _d is not None:
+            register_driver(_d)
         from .http_engine import USER_AGENT   # version-derived: one UA across engine+browser
         self._context = self._browser.new_context(ignore_https_errors=True,
                                                   user_agent=USER_AGENT)
@@ -261,6 +402,13 @@ class BrowserEngine:
     def close(self):
         # explicit ordered teardown (attributes may be partially initialized)
         import threading
+        # R15-4: after an interrupt the playwright sync channel is dead
+        # (torn dispatcher fiber — ANY _sync call, even on a killed driver,
+        # hangs forever: live-proven). The monitor already SIGKILLed the
+        # driver; the browser tree died with it. Only clear our references.
+        if sigint_seen():
+            self._context = self._browser = self._pw = None
+            return
         child = self._browser_child_proc()
         fired = threading.Event()
 
@@ -308,12 +456,20 @@ class BrowserEngine:
         return ok
 
     # ---- render (runtime discovery)
-    def render(self, url: str, settle_ms: int = 500) -> dict | None:
+    def render(self, url: str, settle_ms: int = 500) -> dict:
         """Load a page in Chromium; return rendered DOM intelligence:
         {url, html, forms, links, xhrs, js_errors}. None = scope-blocked/failed."""
+        # R15-4: after an interrupt the sync channel is dead — EVERY call
+        # wedges. The whole browser phase stands down (the monitor already
+        # killed the driver; pages die with it).
+        if sigint_seen():
+            return None
         if not self._ok(url):
             return None
         self._ensure()
+        if self._context is None:
+            # _ensure stood down post-interrupt (or failed): no browser work
+            return None
         self._sync_session_cookies(url)
         xhrs: list[dict] = []
         page = self._context.new_page()
@@ -337,7 +493,13 @@ class BrowserEngine:
             self.bus.emit("BrowserRenderError", url=url, error=f"{type(e).__name__}: {e}"[:200])
             return None
         finally:
-            page.close()
+            # R15-4: after an interrupt, ANY further sync-playwright call
+            # wedges forever (the signal tore the dispatcher fiber; proven
+            # live — page.close on a dead driver still hangs). The driver
+            # is already SIGKILLed by the monitor, so the page dies with
+            # it; calling page.close() here would hang the scan.
+            if not sigint_seen():
+                page.close()
 
     def render_merge(self, pages: list[str], seed_host: str, existing: dict) -> list[Endpoint]:
         """Render pages and return NEW endpoints discovered only at runtime
@@ -431,9 +593,13 @@ class BrowserEngine:
                 qstr = ((_others + "&") if _others else "") + f"{param}={_pq}"
                 target = urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path,
                                                   qstr, ""))
+            if sigint_seen():
+                return None      # R15-4: dead channel — stand down
             if not self._ok(target):
                 return None
             self._ensure()
+            if self._context is None:
+                return None
             self._sync_session_cookies(target)
             page = self._context.new_page()
             try:
@@ -449,7 +615,10 @@ class BrowserEngine:
             except Exception as e:
                 self.bus.emit("BrowserProbeError", url=target, error=f"{type(e).__name__}: {e}"[:200])
             finally:
-                page.close()
+                # R15-4: same interrupt guard as render() — a post-interrupt
+                # page.close() wedges the engine forever.
+                if not sigint_seen():
+                    page.close()
         return None
 
 
