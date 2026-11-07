@@ -6258,4 +6258,41 @@ Stage summary:
   green after removal; real-tree integration green; the r16 hygiene
   pins still pass unchanged (6/6) — rule addition only, no semantics
   touched for existing classes.
+## 2026-11-07 — Round 17 P3: vault on Windows — fail closed, loudly (issue #61)
+
+- The trap, avoided deliberately: the obvious "fix" (skip the mode-bit
+  check on Windows so the vault 'works') would silently DOWNGRADE a real
+  security guarantee; keeping the check as-is kept rejecting every file
+  with a message that blamed the operator ('permissions 0o666 — chmod
+  it first') for something chmod cannot fix (Windows does not model
+  POSIX mode bits; verified live on Windows 11: chmod 0600 still
+  reports 0o666).
+- Decision (option b of the owner's order): on os.name == 'nt' the
+  gate raises an EXPLICIT VaultError — vault UNSUPPORTED on Windows
+  pending a real NTFS-ACL-based check, pointing at issue #61 (opened
+  with the full ACL implementation plan: icacls/pywin32 options, the
+  SYSTEM/Administrators/current-user ACE policy, and the constraint
+  that a new dependency needs an explicit owner decision per the
+  README's pure-stdlib discipline).
+- RED (pinned by test pre-fix, platform-portable simulation of the
+  Windows stat reality): the old misleading chmod message surfaced.
+- BLUE: the explicit unsupported-message contract (mentions Windows,
+  ACL, issue #61; no chmod advice), POSIX pins unchanged — 0644/0666
+  still rejected with the actionable message, 0600 still accepted
+  (test_r17_vault_windows 3/3 + the existing vault suites 14/14).
+## 2026-11-07 — Round 17 P2: doctor's exit-code contract (the no-op CI gate)
+
+- RED (pinned before the fix, through the REAL CLI surface): a doctor
+  report with a forced FAIL check printed DEGRADED and exited 0 —
+  cli.py:634 printed the JSON and fell through. CI's "Engine doctor"
+  step inherited exit 0, so the step was structurally unble to redden.
+- FIX: after printing, exit 1 iff any check reports FAIL. WARN stays
+  tolerated (the suite's existing doctor contract — test_engine_smoke
+  allows WARNs; flipping that would turn doctor into an always-failing
+  command on browser-less machines).
+- BLUE: forced-FAIL subprocess now exits 1; healthy machine exits 0
+  (direct CLI sanity + the all-pass test); test_engine_smoke (5) and
+  test_legacy_env_compat green unchanged.
+- The CI-gate-is-real proof (deliberate red commit on a scratch branch,
+  then revert) is scheduled for the push phase of this round.
 
