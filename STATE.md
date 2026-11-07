@@ -1887,6 +1887,102 @@ boundaries by design, with the ledger as the documented backstop. All
 that reason (R14-EP-001..013). The gate still flags any NEW unrouted
 symbol — nothing was excluded or weakened.
 
+## 2026-11-06/07 — ROUND 15: extreme reliability & resilience (PRs #57 + #58)
+
+(Section written in round 16 — PR #57 predated STATE.md's convention by
+accident; facts sourced from the verified closure record, not memory.)
+
+- R15-1 (work-tree pollution): the repair-demo benchmark wrote its
+  outputs to RELATIVE results/*.json paths, so running it from the repo
+  root dirtied the tree and the isolation check failed 3x. Fixed by
+  running the demo in an isolated working copy; tree_isolation then
+  passed 3/3 consecutively from a clean environment.
+- R15-2 (exit 0 on a dead target): honest-transport accounting —
+  classified transfer counters, exit 3 with a JSON diagnosis, and the
+  live-target negative stays green. Within the round's 445 passed.
+- R15-4 (SIGINT hang during browser render) — the round's CVE-grade
+  find: Playwright's sync API wedges FOREVER if any sync call (not just
+  close) runs after an external interrupt, even with a dead driver;
+  page.close() inside render() itself was enough. Root fix: a wakeup_fd
+  watchdog that kills every playwright driver (module-level registry,
+  including impact.py's independent instance), a sigint_seen guard
+  standing before EVERY playwright call after the signal
+  (render/probe/_ensure/close), deferred CLI handler + exit 130.
+  Proof: BLUE x5 at randomized timings (2.1-5.64s) all exit 130 in ~4s
+  with zero orphans; killing the render guard mutant hung 5/5 (mutant
+  dead); the permanent test asserts exit==130 with a documented
+  capability-skip in the browserless CI engine job (the path is
+  exercised in the fixture job that installs chromium).
+- CI incidents fixed in-round: psutil missing from requirements-dev
+  (collection failure, fixed + importorskip), quantum-sweep flagged
+  BrowserEngine ENTRYPOINT_UNREACHABLE — ledgered QS-233 (under-flag at
+  unit granularity; orchestrator:678 constructs it for real).
+- Process incident, stated plainly: `git add -A` under time pressure
+  carried runtime artifacts into real main commits — CAPABILITY_MATRIX
+  .md via 3e34202, results/scan.json via cce5852 AND AGAIN via 217ce0b
+  (after its e02099c removal); only the close-out's mandatory fresh
+  clone caught the second one. Both removed in PR #58 (789ca94) with
+  full green CI. Countermeasure is round 16's tree-hygiene gate below.
+- Close-out on fresh clone of 789ca94: suite 445 passed / 1 skipped /
+  7 deselected in 303s, doctor 19/19, both gates PASS, benchmark
+  exactly the documented baseline (TP=38 FP=0 FN=0 TN=37, F1=1.0), no
+  token pollution (vulnapp AWS-docs keys are intended test data).
+
+## 2026-11-07 — ROUND 16: security-tab triage + the add -A lesson as a permanent gate
+
+The owner's two direct questions after round 15 (is add -A a habit?
+are the 10 Dependabot alerts inherited or new?) were answered with
+evidence, then this round fixed everything the evidence exposed.
+
+- DEPENDABOT TIMING, PROVEN NOT ASSUMED: every one of the 10 alerts
+  (4 high / 6 medium) was created 2026-11-04T16:37:36-39Z — a single
+  scan window TWO DAYS before round 15's first commit (c994f5b,
+  11-06 20:37); merge 324753c's parent1 is the r14 close 08d3fed, and
+  the whole round changed zero runtime manifests (requirements.txt /
+  package.json / package-lock.json byte-identical to baseline; only
+  requirements-dev.txt gained test-only psutil). Inherited, not new.
+- WHAT THEY ACTUALLY ARE: all 10 are on evidence/layers/sca/inputs/*
+  (requests x5, lodash x5) — the SCA layer's deliberately-old ground
+  truth (Round-10 accept+document decision; the fixture-bump PR was
+  closed unmerged to preserve the committed OSV evidence). Dismissed
+  tolerable_risk with that reason on every alert
+  (scripts/dismiss_r16_fixture_alerts.py; instance quirk recorded:
+  this GitHub accepts only fix_started|inaccurate|no_bandwidth|
+  not_used|tolerable_risk — the first run's 422s are the receipt).
+  Post-verify: open=0, dismissed=10 with comment, fixed=0.
+- SECRET SCANNING (16 "Google API Key"): every location is one line
+  inside the allowlist regexes of the committed gitleaks default
+  config (evidence/security-sweep-2026-10-31/..., lines 619-634) —
+  detection patterns shipped as sweep evidence, not credentials. All
+  16 resolved false_positive via the same idempotent script (second
+  run skips everything — verified).
+- CODE SCANNING BASELINE, documented not dismissed: 199 open alerts
+  are ALL tool=Burhan, category=burhan-engine-fixture — the engine's
+  own SARIF dogfooded into the Security tab. ZERO CodeQL alerts open
+  (the 7 high CodeQL ever seen were dismissed in the 10-31/11-04
+  triage). The dogfood IS the product eating its own output; it stays.
+- R16-1 TREE-HYGIENE GATE (the add -A lesson, permanent):
+  scripts/audit_tree_hygiene.py --ci-gate over git ls-files — no
+  tracked results/** (the CLI's default --out dir), no
+  CAPABILITY_MATRIX.md anywhere; allowlist ledger for a future
+  genuine exception (empty today). New ci.yml job 'tree-hygiene'.
+  .gitignore gains results/. The r13 leftover
+  results/replay-rate-limit.json was untracked in the same commit —
+  replay.py mkdirs at runtime and treats a missing file as fresh
+  state by design (verified; zero runtime change). Battery
+  tests/test_r16_tree_hygiene.py: 6 cases — red->green on the real
+  tree (the integration test was RED until the untrack), classifier
+  anchors (results.py, myresults/, docs/results-overview.md allowed),
+  allowlist precedence, ::error annotations + exit codes, and the
+  evidence doctrine pinned (SCA fixtures / vulnapp / gitleaks config
+  never flagged).
+- Dependabot config unchanged ON PURPOSE: the alerts regenerate only
+  because GitHub's dependency graph parses every tracked manifest;
+  dependabot.yml only schedules UPDATE PRs (which never targeted the
+  fixtures — the one fixture-bump PR was closed unmerged, Round-10).
+  The documented dismissals are the correct surface for alerts.
+- Round-15 documentation debt fixed: this file's Round-15 section.
+
 - Round-by-round history: `git log`, worklog.md (current + history).
 - Pre-cleanup evidence: tags backup/pre-clean-2026-10-23,
   backup/release-v4.2.5, backup/release-v4.2.6, recovery/*.
