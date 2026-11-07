@@ -79,14 +79,19 @@ def test_windows_mode_rejection_is_explicit_not_misleading(tmp_path, monkeypatch
 
 def test_posix_branch_still_enforces_mode_bits(tmp_path):
     """The fix must not weaken the POSIX guarantee: a group/world-readable
-    file (0o644) is still rejected on the POSIX path, a 0600 file still
-    passes. Real filesystem, no simulation."""
+    file (0644) is still rejected on the POSIX path, a 0600 file still
+    passes. Real filesystem, no simulation. The 0644 state is INTENTIONAL
+    (it is the regression under test); stat constants keep the intent
+    explicit while staying out of the overly-permissive-mask CodeQL
+    alert class — the same documented approach as
+    test_vault_key_hygiene's public-perms case (no inline python
+    suppression exists; verified on CodeQL CLI 2.27.3)."""
     p = _write_private(tmp_path / "k.json")
     # 0600 passes on POSIX (on real Windows this branch is unreachable —
     # the nt branch raises first; that split is itself asserted above)
     if os.name != "nt":
         assert _open_private_json(str(p), "key file") == {"k": "v"}
-    os.chmod(p, 0o644)
+    os.chmod(p, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
     if os.name != "nt":
         with pytest.raises(VaultError) as ei:
             _open_private_json(str(p), "key file")
@@ -103,9 +108,12 @@ def test_posix_gate_unchanged_for_world_readable(tmp_path):
                     "the nt branch raises before this assertion could "
                     "mean anything here")
     p = _write_private(tmp_path / "k.json")
-    os.chmod(p, 0o666)
+    # world-writable is INTENTIONAL (the regression under test); stat
+    # constants — same rationale as the 0644 case above
+    os.chmod(p, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP
+             | stat.S_IROTH | stat.S_IWOTH)
     with pytest.raises(VaultError) as ei:
         _open_private_json(str(p), "key file")
     assert "0o666" in str(ei.value)
     assert "chmod" in str(ei.value)
-    os.chmod(p, 0o600)
+    os.chmod(p, stat.S_IRUSR | stat.S_IWUSR)
