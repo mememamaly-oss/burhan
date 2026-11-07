@@ -1981,6 +1981,17 @@ evidence, then this round fixed everything the evidence exposed.
   dependabot.yml only schedules UPDATE PRs (which never targeted the
   fixtures — the one fixture-bump PR was closed unmerged, Round-10).
   The documented dismissals are the correct surface for alerts.
+- THE UNMASKED LATENT LEAK (found when this round's .gitignore made
+  CAPABILITY_MATRIX.md invisible to git status): the r14 CLI battery
+  invoked `capability-matrix` with cwd=ROOT and default --out, leaving
+  the artifact in the repo root on every CI run — and the r15
+  tree-isolation test had been SILENTLY SKIPPING in CI its whole life
+  on exactly that dirty tree ("work tree already dirty"), so the leak
+  never failed anything until the ignore line let the isolation test
+  actually run and catch it (1 failed on the first r16 CI pass — the
+  gate working as designed). Fixed at the source: every battery
+  invocation now passes --out into its tmp dir. The isolation test is
+  now a real always-running guard, not a conditional skip.
 - Round-15 documentation debt fixed: this file's Round-15 section.
 
 - Round-by-round history: `git log`, worklog.md (current + history).
