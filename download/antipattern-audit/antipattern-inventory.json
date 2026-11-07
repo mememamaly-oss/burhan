@@ -1,5 +1,5 @@
 {
- "total": 377,
+ "total": 388,
  "hits": [
   {
    "file": "burhan/apath.py",
@@ -133,7 +133,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 102,
+   "line": 108,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_is_loopback_or_private",
@@ -303,33 +303,53 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 230,
+   "line": 257,
    "class": "SILENT_EXCEPT",
-   "code": "except Exception: pass",
-   "func": "close",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "_browser_child_proc",
    "detail": "body=Pass, exception unused",
-   "ledger": "AP-031",
-   "verdict": "LEDGERED(best-effort-teardown)"
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/browser.py",
-   "line": 233,
+   "line": 278,
    "class": "SILENT_EXCEPT",
-   "code": "except Exception: pass",
-   "func": "close",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "close._watchdog",
    "detail": "body=Pass, exception unused",
-   "ledger": "AP-031",
-   "verdict": "LEDGERED(best-effort-teardown)"
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/browser.py",
-   "line": 236,
+   "line": 288,
    "class": "SILENT_EXCEPT",
-   "code": "except Exception: pass",
+   "code": "except Exception:  # noqa: BLE001 — teardown must never raise",
    "func": "close",
    "detail": "body=Pass, exception unused",
-   "ledger": "AP-031",
-   "verdict": "LEDGERED(best-effort-teardown)"
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 293,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "close",
+   "detail": "body=Pass, exception unused",
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 298,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "close",
+   "detail": "body=Pass, exception unused",
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/chainphase.py",
@@ -433,17 +453,17 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 145,
+   "line": 147,
    "class": "TOCTOU",
    "code": "authz_cfg = json.load(open(_azp))",
    "func": "<module>",
-   "detail": "check(_azp) at line 144 then use",
+   "detail": "check(_azp) at line 146 then use",
    "ledger": "AP-044",
    "verdict": "LEDGERED(state-load-race)"
   },
   {
    "file": "burhan/cli.py",
-   "line": 249,
+   "line": 274,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "repair_demo",
@@ -453,17 +473,17 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 281,
+   "line": 747,
    "class": "SILENT_EXCEPT",
-   "code": "except Exception:",
-   "func": "repair_demo.regression_suite",
-   "detail": "body=Return, exception unused",
+   "code": "except Exception:  # noqa: BLE001 — best effort unwedging",
+   "func": "main._sigint_burhan",
+   "detail": "body=Pass, exception unused",
    "ledger": "AP-045",
    "verdict": "LEDGERED(tolerant-parse-of-target-input)"
   },
   {
    "file": "burhan/cli.py",
-   "line": 869,
+   "line": 953,
    "class": "FIRST[0-call]",
    "code": "n = len(sarif.get(\"runs\", [{}])[0].get(\"results\", [])) if \"runs\" in sarif else 0",
    "func": "main",
@@ -473,7 +493,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 980,
+   "line": 1064,
    "class": "BREAK",
    "code": "break",
    "func": "main",
@@ -483,7 +503,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 982,
+   "line": 1066,
    "class": "BREAK",
    "code": "break",
    "func": "main",
@@ -923,7 +943,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 203,
+   "line": 209,
    "class": "BREAK",
    "code": "break",
    "func": "_render",
@@ -933,7 +953,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 415,
+   "line": 421,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as exc:",
    "func": "_pin_target",
@@ -943,7 +963,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 438,
+   "line": 444,
    "class": "FIRST[0-call]",
    "code": "pinned = sorted(set(addrs), key=_order)[0]",
    "func": "_pin_target",
@@ -953,7 +973,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 474,
+   "line": 480,
    "class": "BREAK",
    "code": "break",
    "func": "_harvest_cookies",
@@ -963,7 +983,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 487,
+   "line": 493,
    "class": "POP0",
    "code": "victim = order.pop(0)",
    "func": "_harvest_cookies",
@@ -973,7 +993,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 617,
+   "line": 623,
    "class": "BREAK",
    "code": "break",
    "func": "_dispatch",
@@ -983,7 +1003,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 620,
+   "line": 626,
    "class": "BREAK",
    "code": "break",
    "func": "_dispatch",
@@ -993,7 +1013,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 627,
+   "line": 633,
    "class": "BREAK",
    "code": "break",
    "func": "_dispatch",
@@ -2003,7 +2023,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 315,
+   "line": 322,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_race_battery.planner_gate",
@@ -2013,47 +2033,47 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 590,
+   "line": 606,
    "class": "FIRST[0]",
    "code": "endpoints.extend(e for e in found if e.id != endpoints[0].id)",
-   "func": "run",
+   "func": "_run_phases",
    "detail": "first pick of 'endpoints'",
    "ledger": "AP-194",
    "verdict": "LEDGERED(citation-pick)"
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 782,
+   "line": 798,
    "class": "BREAK",
    "code": "break",
-   "func": "run",
+   "func": "_run_phases",
    "detail": "loop break — verdict semantics reviewed",
    "ledger": "AP-195",
    "verdict": "LEDGERED(probe-until-verdict)"
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1040,
+   "line": 1056,
    "class": "BREAK",
    "code": "break",
-   "func": "run",
+   "func": "_run_phases",
    "detail": "loop break — verdict semantics reviewed",
    "ledger": "AP-195",
    "verdict": "LEDGERED(probe-until-verdict)"
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1253,
+   "line": 1269,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
-   "func": "run",
+   "func": "_run_phases",
    "detail": "body=Pass, exception unused",
    "ledger": "AP-193",
    "verdict": "LEDGERED(gated-by-design)"
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2054,
+   "line": 2074,
    "class": "BREAK",
    "code": "break",
    "func": "_base_engine",
@@ -2063,7 +2083,27 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2324,
+   "line": 2172,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — teardown must never mask",
+   "func": "run",
+   "detail": "body=Pass, exception unused",
+   "ledger": "AP-193",
+   "verdict": "LEDGERED(gated-by-design)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 2178,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "run",
+   "detail": "body=Pass, exception unused",
+   "ledger": "AP-193",
+   "verdict": "LEDGERED(gated-by-design)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 2368,
    "class": "FIRST[0]",
    "code": "assert len(hits) == 1 and \"…\" in hits[0].evidence[0].detail and \"BBBB\" not in hits[0].evidence[0].detail",
    "func": "doctor",
@@ -3323,6 +3363,24 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/r13_axes_coverage.py",
+   "line": 37,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "<module>",
+   "detail": "body=Pass, exception unused",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r13_axes_coverage.py",
+   "line": 60,
+   "class": "FIRST[0-call]",
+   "code": "stem = os.path.splitext(os.path.basename(f))[0]",
+   "func": "<module>",
+   "detail": "first pick of a call result",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/reexec-2026-10-31/rp_gj_pathtraversal_replay.py",
    "line": 35,
    "class": "SILENT_EXCEPT",
@@ -3364,6 +3422,15 @@
    "class": "BREAK",
    "code": "break",
    "func": "vulnapp",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_axis7_negative_stability.py",
+   "line": 97,
+   "class": "BREAK",
+   "code": "break",
+   "func": "_loop",
    "detail": "loop break — verdict semantics reviewed",
    "verdict": "NON_ENGINE"
   },
@@ -3590,6 +3657,42 @@
    "code": "assert len(rows) == 1 and rows[0][\"package\"] == \"blake3\"",
    "func": "test_osv_batch_shape_guard_real",
    "detail": "first pick of 'rows'",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r14_cli_battery.py",
+   "line": 51,
+   "class": "BREAK",
+   "code": "break",
+   "func": "real_scan_result",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r14_cli_battery.py",
+   "line": 274,
+   "class": "BREAK",
+   "code": "break",
+   "func": "test_cli_no_secret_leakage_in_outputs",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r15_honest_exit.py",
+   "line": 78,
+   "class": "BREAK",
+   "code": "break",
+   "func": "test_cli_live_target_still_exits_zero",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r15_sigint_browser.py",
+   "line": 67,
+   "class": "BREAK",
+   "code": "break",
+   "func": "test_sigint_during_browser_phase_exits_cleanly",
+   "detail": "loop break — verdict semantics reviewed",
    "verdict": "NON_ENGINE"
   },
   {

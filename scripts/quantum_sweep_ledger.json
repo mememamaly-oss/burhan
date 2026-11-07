@@ -2459,6 +2459,14 @@
    "code": "WsClient",
    "class": "data-model-surface",
    "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+  },
+  {
+   "id": "QS-233",
+   "file": "burhan/browser.py",
+   "code": "BrowserEngine",
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "reason": "module-granularity under-flag: orchestrator._run_phases instantiates BrowserEngine (burhan/orchestrator.py:678 behind browser_available()) — the class IS production-wired through the scan entrypoint; the sweep's from-import routing resolves at module granularity and under-flags cross-module classes. The r15 additions (register_driver / kill_all_drivers / sigint_seen) are invoked from burhan.cli's SIGINT handler and the wakeup-fd monitor — same wiring class.",
+   "round": 15
   }
  ]
 }

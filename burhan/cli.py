@@ -234,11 +234,26 @@ def repair_demo():
     """Live full-loop self-repair with a REAL, reproducible failure:
     slow fixture (150ms/request) + degenerate timeout (5ms) -> every request times out.
     Rule-only repair (x3 = 15ms) still fails -> gate ROLLS BACK.
-    Rule + policy floor (12s) passes regression + benchmark -> ACCEPTED."""
-    import subprocess, signal as _sig
+    Rule + policy floor (12s) passes regression + benchmark -> ACCEPTED.
+
+    R15-1: the demo's benchmark outputs are RELATIVE paths (results/*.json),
+    so when it runs with cwd=<repo root> (the CLI battery does exactly that)
+    it litters untracked files into the user's tree. The whole body now runs
+    inside an ISOLATED temporary work copy (fs/tests/fixtures/benchmarks);
+    only the pytest regression step targets the real repo — the permanent
+    regression module must test the checked-out code, not a snapshot."""
+    import subprocess, signal as _sig, tempfile, shutil
     print("=" * 70)
     print(" SELF-REPAIR GATE — LIVE EXECUTION (no AI, deterministic rules)")
     print("=" * 70)
+
+    repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    workdir = tempfile.mkdtemp(prefix="burhan-repair-demo-")
+    for part in ("burhan", "fixtures", "benchmarks", "tests"):
+        shutil.copytree(os.path.join(repo, part), os.path.join(workdir, part),
+                        ignore=shutil.ignore_patterns("__pycache__"))
+    os.chdir(workdir)
+    print(f"[R15-1] isolated work copy: {workdir}")
 
     # r14: the demo-scale request budget — the anchored ~7k benchmark stream
     # belongs to CI and `burhan benchmark`; four of those on a deliberately
@@ -288,11 +303,12 @@ def repair_demo():
             # that NEVER existed in this repository, so this step failed
             # forever and the gate's verdict could never be ACCEPTED. The
             # promised permanent case now lives as a real pytest module.
+            # R15-1: runs against the REAL repo (not the demo work copy) —
+            # the regression must prove the checked-out code is fixed.
             r = subprocess.run(
                 [sys.executable, "-m", "pytest", "-q",
                  "tests/test_repair_gate_regression.py", "--no-header", "-x"],
-                capture_output=True, text=True,
-                cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                capture_output=True, text=True, cwd=repo)
             passed = r.returncode == 0
             m = re.search(r"(\d+) passed", r.stdout or "")
             return {"passed": passed, "total": int(m.group(1)) if m else 0,
@@ -329,6 +345,9 @@ def repair_demo():
                 "regression": reg, "verdict": verdict}
     finally:
         slow.terminate()
+        # R15-1: leave the user's cwd and filesystem exactly as found
+        os.chdir(repo)
+        shutil.rmtree(workdir, ignore_errors=True)
 
 
 # ============================================================ main
@@ -707,8 +726,44 @@ def main():
             oast = make_oast(_up(a.target).hostname or "", mode=a.oast)
             cfg.oast = oast
         try:
-            sc = BurhanScanner(a.target, cfg)
-            rep = sc.run()
+            # R15-4: SIGINT during a sync-playwright call wedges the process
+            # forever (live-proven: KeyboardInterrupt lands INSIDE the event-
+            # loop greenlet, kills the dispatcher fiber, and _sync's
+            # `while not task.done()` can never finish — the task's loop is
+            # dead). Two-part fix:
+            #   1. while a browser driver is ALIVE the handler must NOT
+            #      raise: it records the interrupt and returns. The wakeup-
+            #      pipe monitor (burhan.browser) kills the driver on the OS
+            #      signal byte; the dead transport completes the pending
+            #      task with a real error and the scan unwinds cleanly.
+            #   2. with no driver alive (normal path) it raises
+            #      KeyboardInterrupt exactly as before.
+            # The recorded flag becomes exit code 130 after the unwind.
+            import signal as _signal_mod
+
+            def _sigint_burhan(signum, frame):
+                try:
+                    from burhan.browser import any_driver_alive, mark_sigint_seen
+                    if any_driver_alive():
+                        mark_sigint_seen()   # defer: unwedge first
+                        return
+                except Exception:  # noqa: BLE001 — fall through to default
+                    pass
+                raise KeyboardInterrupt
+
+            _prev_handler = _signal_mod.getsignal(_signal_mod.SIGINT)
+            _signal_mod.signal(_signal_mod.SIGINT, _sigint_burhan)
+            try:
+                sc = BurhanScanner(a.target, cfg)
+                rep = sc.run()
+            finally:
+                _signal_mod.signal(_signal_mod.SIGINT, _prev_handler)
+        except KeyboardInterrupt:
+            print(json.dumps({"scan_aborted": "SIGINT",
+                              "hint": "interrupted by user — teardown completed, "
+                                      "no browser processes left behind"}),
+                  file=sys.stderr)
+            sys.exit(130)
         except Exception as e:
             # Phase 57: a refused vault (wrong key / tampered file / unauthorized
             # key) is a CONFIGURATION error that must fail fast and clean —
@@ -728,6 +783,44 @@ def main():
                 oast.stop()
         os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
         json.dump(rep, open(a.out, "w"), indent=1)
+        # R15-2: refuse fake success. A scan whose ENTIRE request budget died
+        # on the transport (every request refused/reset/timed out — the
+        # "dead target" case) is a failed scan, not a clean empty one: exit 3
+        # with the honest diagnosis on stderr. The report file is still
+        # written above so the evidence trail is complete.
+        _st = rep.get("stats") or {}
+        _sent = _st.get("requests", 0) or 0
+        _terr = _st.get("transport_errors", 0) or 0
+        # R15-4 deferred-interrupt conversion: SIGINT arrived while a browser
+        # driver was alive; the monitor killed it, the scan unwedged and
+        # wound down browserless — this is an INTERRUPTED scan, exit 130.
+        try:
+            from burhan.browser import sigint_seen
+            if sigint_seen():
+                print(json.dumps({
+                    "scan_aborted": "SIGINT",
+                    "reason": "interrupted while the browser phase was active — "
+                              "the driver was killed to unwedge the engine, "
+                              "teardown completed, no processes left behind",
+                    "requests": _sent,
+                    "hint": "the partial report is in the --out file"}),
+                    file=sys.stderr)
+                sys.exit(130)
+        except SystemExit:
+            raise
+        except Exception:  # noqa: BLE001 — flag check must never mask results
+            pass
+        if _sent > 0 and _terr == _sent:
+            print(json.dumps({
+                "scan_aborted": "transport",
+                "reason": "every request failed at the transport layer — "
+                          "the target never answered a single probe",
+                "requests": _sent,
+                "error_kinds": _st.get("transport_error_kinds", {}),
+                "hint": "check the target is up/reachable and the scope "
+                        "rules allow it; the full report is in the --out file"
+            }), file=sys.stderr)
+            sys.exit(3)
         # Phase 56: standalone credential-exposure report (masked values only —
         # the data-minimization discipline: secrets get their own channel and
         # never appear unmasked in ANY artifact).

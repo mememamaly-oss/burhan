@@ -132,6 +132,12 @@ class RequestEngine:
         self.rate_limited = 0          # 429/503 responses seen
         self.rate_limit_retries = 0    # actual retry sleeps performed
         self.rate_limit_recovered = 0  # retries that then got a normal status
+        # R15-2: honest transport accounting. A scan where EVERY request died
+        # on the network (refused/reset/timeout) used to look identical to a
+        # successful empty scan — exit 0, zero findings, no signal. These
+        # counters give the caller what it needs to refuse fake success.
+        self.transport_errors = 0               # requests ending in error Responses
+        self.transport_error_kinds: dict[str, int] = {}  # kind -> count
         # RT-02 fix (audit-rb-1): TLS peer verification is ON by default.
         # The old ctx (check_hostname=False + CERT_NONE) let a live MITM with a
         # self-signed certificate intercept engine requests and capture the
@@ -671,14 +677,25 @@ class RequestEngine:
             return resp
         except (socket.timeout, TimeoutError) as e:
             self.bus.emit("RequestTimeout", url=url, timeout=self.timeout)
+            self._count_transport_error("timeout")
             if jr is not None and rid in jr:
                 jr[rid]["response"] = {"error": f"timeout:{type(e).__name__}"}
             return Response(url=url, error=f"timeout:{type(e).__name__}", elapsed=time.time() - t0, request_id=rid)
         except Exception as e:
             self.bus.emit("RequestError", url=url, error=f"{type(e).__name__}: {e}"[:200])
+            # R15-2: classify by family so the honest exit-code logic can tell
+            # "target dead" (refused/reset) from "TLS mismatch" from "DNS"
+            kind = "refused" if "refused" in str(e).lower() else \
+                   "reset" if "reset" in str(e).lower() else \
+                   "tls" if "ssl" in type(e).__name__.lower() else "other"
+            self._count_transport_error(kind)
             if jr is not None and rid in jr:
                 jr[rid]["response"] = {"error": f"{type(e).__name__}: {e}"[:200]}
             return Response(url=url, error=f"{type(e).__name__}: {e}"[:200], elapsed=time.time() - t0, request_id=rid)
+
+    def _count_transport_error(self, kind: str) -> None:
+        self.transport_errors += 1
+        self.transport_error_kinds[kind] = self.transport_error_kinds.get(kind, 0) + 1
 
     # ---- v4.2.1: journal writer (passive capture, bounded) ----
     # RT-05 fix (audit-rb-1): credential-bearing headers must never land in the
