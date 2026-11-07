@@ -268,6 +268,16 @@ def _open_private_json(path: str, what: str) -> dict:
 
     O_NOFOLLOW (where the platform provides it) additionally refuses
     symlinked vault/key files.
+
+    R17-3 (Windows, fail-closed): Windows has no POSIX permission model
+    — every file reports mode 0o666 regardless of its real NTFS ACL, so
+    the mode-bit check below would reject EVERY key/vault file with a
+    misleading "permissions 0o666" message (verified live on Windows 11:
+    os.chmod(p, 0o600) leaves the reported mode at 0o666). The gate is
+    NOT silently skipped — that would downgrade a real security
+    guarantee — and NOT left lying. It fails closed with the true
+    situation: vault unsupported on Windows pending a genuine
+    ACL-based check (issue #61).
     """
     flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
     try:
@@ -276,6 +286,13 @@ def _open_private_json(path: str, what: str) -> dict:
         raise VaultError(f"{what} unreadable: {e}")
     try:
         st = os.fstat(fd)
+        if os.name == "nt":
+            raise VaultError(
+                f"refusing {path}: the vault's permission gate is POSIX "
+                f"mode-bit based and Windows does not model that (every "
+                f"file reports 0o666 regardless of its NTFS ACL). The "
+                f"vault is UNSUPPORTED on Windows pending a real "
+                f"ACL-based permission check — see issue #61")
         mode = st.st_mode & 0o777
         if mode & 0o077:
             raise VaultError(
