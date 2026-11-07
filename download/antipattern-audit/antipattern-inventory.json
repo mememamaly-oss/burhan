@@ -1,5 +1,5 @@
 {
- "total": 388,
+ "total": 395,
  "hits": [
   {
    "file": "burhan/apath.py",
@@ -303,7 +303,57 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 257,
+   "line": 162,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "any_driver_alive",
+   "detail": "body=Pass, exception unused",
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 198,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — pipe closed at exit",
+   "func": "_arm_sigint_monitor._monitor",
+   "detail": "body=Return, exception unused",
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 210,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — keep watching regardless",
+   "func": "_arm_sigint_monitor._monitor",
+   "detail": "body=Continue, exception unused",
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 216,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — monitor is best-effort; handler still exists",
+   "func": "_arm_sigint_monitor",
+   "detail": "body=Pass, exception unused",
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 238,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — best-effort unwedging",
+   "func": "kill_all_drivers",
+   "detail": "body=Pass, exception unused",
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 398,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "_browser_child_proc",
@@ -313,7 +363,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 278,
+   "line": 426,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "close._watchdog",
@@ -323,7 +373,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 288,
+   "line": 436,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — teardown must never raise",
    "func": "close",
@@ -333,7 +383,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 293,
+   "line": 441,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "close",
@@ -343,7 +393,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 298,
+   "line": 446,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "close",
@@ -473,9 +523,9 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 747,
+   "line": 750,
    "class": "SILENT_EXCEPT",
-   "code": "except Exception:  # noqa: BLE001 — best effort unwedging",
+   "code": "except Exception:  # noqa: BLE001 — fall through to default",
    "func": "main._sigint_burhan",
    "detail": "body=Pass, exception unused",
    "ledger": "AP-045",
@@ -483,7 +533,17 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 953,
+   "line": 811,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — flag check must never mask results",
+   "func": "main",
+   "detail": "body=Pass, exception unused",
+   "ledger": "AP-045",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 981,
    "class": "FIRST[0-call]",
    "code": "n = len(sarif.get(\"runs\", [{}])[0].get(\"results\", [])) if \"runs\" in sarif else 0",
    "func": "main",
@@ -493,7 +553,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 1064,
+   "line": 1092,
    "class": "BREAK",
    "code": "break",
    "func": "main",
@@ -503,7 +563,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 1066,
+   "line": 1094,
    "class": "BREAK",
    "code": "break",
    "func": "main",
@@ -1233,7 +1293,17 @@
   },
   {
    "file": "burhan/impact.py",
-   "line": 1343,
+   "line": 1330,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — registry is best-effort",
+   "func": "execute_impact_probes._browser_page",
+   "detail": "body=Pass, exception unused",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 1355,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "execute_impact_probes",
@@ -1243,7 +1313,7 @@
   },
   {
    "file": "burhan/impact.py",
-   "line": 1413,
+   "line": 1425,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_exec_browser._offsite",
@@ -1253,7 +1323,7 @@
   },
   {
    "file": "burhan/impact.py",
-   "line": 1428,
+   "line": 1440,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_exec_browser",
@@ -1263,7 +1333,7 @@
   },
   {
    "file": "burhan/impact.py",
-   "line": 1443,
+   "line": 1455,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as e:",
    "func": "_exec_browser",
@@ -3670,7 +3740,7 @@
   },
   {
    "file": "tests/test_r14_cli_battery.py",
-   "line": 274,
+   "line": 283,
    "class": "BREAK",
    "code": "break",
    "func": "test_cli_no_secret_leakage_in_outputs",
@@ -3688,7 +3758,7 @@
   },
   {
    "file": "tests/test_r15_sigint_browser.py",
-   "line": 67,
+   "line": 88,
    "class": "BREAK",
    "code": "break",
    "func": "test_sigint_during_browser_phase_exits_cleanly",
