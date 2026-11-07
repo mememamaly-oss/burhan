@@ -225,7 +225,7 @@ def _run_benchmark_inner(base_url, out, strategy_path, timeout, label, spawned,
     if result.get("symbolic_analysis") is not None:
         report["symbolic_analysis"] = result["symbolic_analysis"]
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
-    json.dump(report, open(out, "w"), indent=1)
+    json.dump(report, open(out, "w", encoding="utf-8"), indent=1)
     return report
 
 
@@ -790,7 +790,7 @@ def main():
             if oast is not None:
                 oast.stop()
         os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
-        json.dump(rep, open(a.out, "w"), indent=1)
+        json.dump(rep, open(a.out, "w", encoding="utf-8"), indent=1)
         # R15-2: refuse fake success. A scan whose ENTIRE request budget died
         # on the transport (every request refused/reset/timed out — the
         # "dead target" case) is a failed scan, not a clean empty one: exit 3
@@ -847,7 +847,7 @@ def main():
                        "summary": rep.get("stats", {}).get("secrets", {}),
                        "vault": rep.get("stats", {}).get("vault"),
                        "findings": cred},
-                      open(a.secrets_report, "w"), indent=1)
+                      open(a.secrets_report, "w", encoding="utf-8"), indent=1)
         if a.db:
             from burhan.store import Store
             n = Store(a.db).save_run(rep)
@@ -962,7 +962,7 @@ def main():
                 events = [build_ocsf(f, audit) for f in findings]
                 json.dump({"schema_version": "1.9.0",
                            "class": "Detection Finding",
-                           "events": events}, open(a.out, "w"),
+                           "events": events}, open(a.out, "w", encoding="utf-8"),
                           indent=1, ensure_ascii=False)
             else:  # syslog: a REAL send through SyslogSender (UDP RFC 5426 /
                    # TCP RFC 6587), plus the message log on disk
@@ -985,22 +985,22 @@ def main():
             # scanning / VS Code / DefectDojo). Verification-gated like everything
             # else: only VERIFIED findings become results.
             sarif = build_sarif(st, a.run_id)
-            json.dump(sarif, open(a.out, "w"), indent=1)
+            json.dump(sarif, open(a.out, "w", encoding="utf-8"), indent=1)
             n = len(sarif.get("runs", [{}])[0].get("results", [])) if "runs" in sarif else 0
             print(json.dumps({"report": a.out, "format": "sarif", "run_id": a.run_id or "all-verified",
                               "results": n, "sarif_version": sarif.get("version", "")}))
         elif a.format == "json":
-            json.dump(build_report(st, a.run_id), open(a.out, "w"), indent=1)
+            json.dump(build_report(st, a.run_id), open(a.out, "w", encoding="utf-8"), indent=1)
             print(json.dumps({"report": a.out, "format": a.format, "run_id": a.run_id or "overview"}))
         elif a.format == "executive":
             # Phase 64: the decision-maker view (risk posture, business impact,
             # affected assets, coverage proof) from the SAME data as the
             # technical report.
-            json.dump(build_executive(st, a.run_id), open(a.out, "w"), indent=1, ensure_ascii=False)
+            json.dump(build_executive(st, a.run_id), open(a.out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
             print(json.dumps({"report": a.out, "format": "executive", "run_id": a.run_id or "newest"}))
         elif a.format == "glass":
             # Phase 64: the iOS-style frosted-glass dashboard of the Digital Twin
-            open(a.out, "w").write(build_glass_html(st, a.run_id))
+            open(a.out, "w", encoding="utf-8").write(build_glass_html(st, a.run_id))
             print(json.dumps({"report": a.out, "format": "glass", "run_id": a.run_id or "newest"}))
         elif a.format == "bilingual":
             # Round 9, part 1: the AR/EN client report — a NEW additive format;
@@ -1016,7 +1016,7 @@ def main():
                 raise SystemExit(f"bilingual: run {run_id!r} not found in the store")
             bi = _bb(run)
             base_out = a.out[:-5] if a.out.endswith(".json") else a.out
-            json.dump(bi, open(base_out + ".json", "w"), indent=1, ensure_ascii=False)
+            json.dump(bi, open(base_out + ".json", "w", encoding="utf-8"), indent=1, ensure_ascii=False)
             _bd(bi, base_out + ".docx")
             pdf = ""
             if getattr(a, "pdf", False):
@@ -1027,7 +1027,7 @@ def main():
                               "merkle_root": bi["audit"]["merkle_root"][:16] + "…"}))
             return
         else:
-            open(a.out, "w").write(build_html(st, a.run_id))
+            open(a.out, "w", encoding="utf-8").write(build_html(st, a.run_id))
             print(json.dumps({"report": a.out, "format": a.format, "run_id": a.run_id or "overview"}))
         if a.ci:
             # ---- v4.1.0 (Phase V41-16): the explicit CI exit contract —
@@ -1371,7 +1371,7 @@ def main():
                     rep_v = v.report()
                     if a.out:
                         os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
-                        json.dump(rep_v, open(a.out, "w"), indent=1)
+                        json.dump(rep_v, open(a.out, "w", encoding="utf-8"), indent=1)
                         print(json.dumps({"report": a.out, "org": rep_v["org"],
                                           "records": len(rep_v["records"]),
                                           "classification": rep_v["classification"]}))

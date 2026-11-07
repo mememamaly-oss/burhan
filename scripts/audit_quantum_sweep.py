@@ -305,6 +305,74 @@ def scan_py(path: str) -> list[Hit]:
                                     f"then used here (two calls)"))
                     checked.pop(nm, None)
 
+
+    def walk_unencoded_write(tree: ast.Module):
+        """Class (e) — UNENCODED_WRITE (r17-7): a text-mode write whose
+        bytes depend on the process locale. open(p, "w") / write_text(s)
+        without an explicit encoding= encodes with the locale codec —
+        on every non-UTF-8 default locale (the live case: Arabic Windows
+        cp1256) any non-ASCII content (the bilingual report's Arabic
+        text, the HTML arrow ⇒) raises UnicodeEncodeError at the worst
+        possible moment: after the scan, at the report the user asked
+        for. The class fix (15 sites) + this permanent check: any NEW
+        unencoded text-mode write in burhan/** or src/** is a
+        gate-failing hit (the owner-ordered scope — product code; the
+        one-off evidence-collection scripts under scripts/ are out of
+        it, their content is ASCII today).
+        """
+        if not path.startswith(("burhan/", "src/")):
+            return
+
+        def _has_encoding_kw(call: ast.Call) -> bool:
+            return any(kw.arg == "encoding" for kw in call.keywords)
+
+        def _text_mode(call: ast.Call) -> bool:
+            """A write/append mode string among the leading str constants
+            — TEXT mode only: "wb"/"ab" carry a 'b' and encoding is
+            meaningless for bytes (a binary-mode flag would be a false
+            positive that buries the real class)."""
+            for arg in call.args:
+                if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                    m = arg.value
+                    if "b" in m:
+                        return False          # binary: encoding not applicable
+                    if any(ch in m for ch in ("w", "a", "x", "+")):
+                        return True
+                    return False              # first str constant IS the mode
+            return False
+
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call) or _has_encoding_kw(node):
+                continue
+            if isinstance(node.func, ast.Attribute):
+                # Path.write_text(s) without encoding=
+                if node.func.attr == "write_text":
+                    hits.append(Hit(path, node.lineno, "UNENCODED_WRITE",
+                                    code_at(node), fn_of(node),
+                                    "text write with no explicit encoding "
+                                    "(locale-dependent bytes — crashes on "
+                                    "non-UTF-8 locales)"))
+            elif isinstance(node.func, ast.Name):
+                # the BUILTIN open(p, "w"/"a"/"x"/"+") without encoding=
+                if node.func.id == "open" and _text_mode(node):
+                    hits.append(Hit(path, node.lineno, "UNENCODED_WRITE",
+                                    code_at(node), fn_of(node),
+                                    "text write with no explicit encoding "
+                                    "(locale-dependent bytes — crashes on "
+                                    "non-UTF-8 locales)"))
+
+
+    def fn_of(node: ast.AST) -> str:
+        # the enclosing function's name for reporting (module-level -> "-")
+        for anc in ast.walk(tree):
+            if isinstance(anc, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                try:
+                    if anc.lineno <= node.lineno <= (anc.end_lineno or anc.lineno):
+                        return anc.name
+                except Exception:  # noqa: BLE001 — reporting only
+                    pass
+        return "-"
+
     def walk_cli_unreachable(tree: ast.Module):
         """Class (d), file-local half: flags the HANDLER reads that the
         PARSER in this file never defines. burhan/cli.py itself is covered
@@ -363,6 +431,7 @@ def scan_py(path: str) -> list[Hit]:
             walk_silent_except(node)
             walk_toctou(node)
     walk_cli_unreachable(tree)
+    walk_unencoded_write(tree)
     return hits
 
 
