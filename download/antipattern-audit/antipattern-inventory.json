@@ -3740,7 +3740,7 @@
   },
   {
    "file": "tests/test_r14_cli_battery.py",
-   "line": 274,
+   "line": 283,
    "class": "BREAK",
    "code": "break",
    "func": "test_cli_no_secret_leakage_in_outputs",
