@@ -62,6 +62,18 @@ def _wait_headless(timeout: float = 90.0) -> bool:
 
 @pytest.mark.slow
 def test_sigint_during_browser_phase_exits_cleanly():
+    # Capability gate: this test proves browser-phase interrupt behavior and
+    # is ONLY meaningful where a real chromium exists. The engine job of CI
+    # installs no browser (a different job does); there the engine itself
+    # degrades honestly to static DOM analysis — same contract here. Skip is
+    # a capability statement, NOT a passed assertion: coverage of this path
+    # is carried by environments with chromium (dev sandbox, fixture job).
+    sys.path.insert(0, str(ROOT))
+    from burhan.browser import browser_available
+    if not browser_available():
+        pytest.skip("playwright/chromium unavailable — browser-phase SIGINT "
+                    "path not testable in this environment (engine degrades "
+                    "to static DOM analysis by the same condition)")
     port = 8871
     app = subprocess.Popen(
         [sys.executable, str(ROOT / "fixtures" / "vulnapp.py")],
