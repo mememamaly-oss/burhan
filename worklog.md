@@ -6485,3 +6485,34 @@ Stage summary:
   recorded here rather than silently fixed, and each corrected
   assertion now pins the ACTUAL declared contract. No production code
   was changed by this part — the laws held once stated correctly.
+## 2026-11-07 — Round 18 P7: self-SCA on the project's own manifests, wired to the weekly schedule
+
+- 7.1 RESULT (real, from the live OSV API): requirements.txt (exact
+  pins, the fully-supported manifest form) returns ZERO open OSV
+  advisories as of 2026-11-07. The npm side is honestly deferred, not
+  silently skipped: package.json carries RANGE constraints and no
+  lockfile is tracked at the repo root; the SCA layer deliberately
+  rejects lockfile-less range manifests (burhan/sca.py docstring —
+  OSV needs resolved versions). The r10 ground-truth lockfile under
+  evidence/ is test material, not a live manifest.
+- 7.2 THE GAP FOUND AND CLOSED: Round 11's monitoring layer schedules
+  TARGET scans (monitor.yml, the dogfood fixture) and Round 8's weekly
+  hardening wall runs the quality gates — but NOTHING re-ran the SCA
+  layer against THIS repo's own manifests on a schedule. New
+  scripts/self_sca_gate.py + a self-sca job in continuous-hardening.yml
+  (weekly, Monday): exit 0 clean, exit 1 on any advisory beyond the
+  committed baseline (evidence/layers/self-sca/baseline.json — the
+  known-and-accepted set, same ledger discipline as the scanner). The
+  workflow's auto-issue mechanism files the alert on failure.
+- Contract tests (6/6, network-free): empty-baseline first-run mode
+  REPORTS but does not fail (documented: failing would brick the first
+  scheduled run on a clean manifest); a non-empty baseline + new id =
+  exit 1; known id = pass; the package deferral appears verbatim in
+  every summary.
+- DISCIPLINE NOTE: the first gate test draft failed because it pinned
+  the WRONG contract (empty baseline + new advisory must fail) — the
+  documented first-run calibration semantics say otherwise; the test
+  now pins the actual documented behavior. And wiring the new script
+  surfaced a scanner interaction: an entry file must be git-TRACKED
+  before the wiring report can route it (KeyError otherwise) — true
+  only for never-committed files, so no production fix needed.

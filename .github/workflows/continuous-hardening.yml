@@ -68,3 +68,24 @@ jobs:
           name: scheduled-hardening-report
           path: ${{ runner.temp }}/hardening/hardening-report.json
           if-no-files-found: warn
+
+  self-sca:
+    name: Self-SCA (own manifests, OSV drift gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install engine dependencies
+        run: pip install -r requirements.txt
+
+      # R18 Part 7.2: the SCA layer re-run against THIS repo's own real
+      # manifests on the weekly schedule (dependency drift between pushes
+      # was otherwise invisible). New advisories beyond the committed
+      # baseline fail the job; the auto-issue mechanism files the alert.
+      - name: Self-SCA gate (requirements.txt vs committed baseline)
+        run: python3 scripts/self_sca_gate.py
