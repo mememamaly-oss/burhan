@@ -6226,6 +6226,25 @@ Stage summary:
 - Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
   close-out commit, each with CI verification.
 
+## 2026-11-07 — Round 17 P5: sweep scanner paths are separator-agnostic
+
+- RED (3 failures pinned on the unfixed scanner, all portable Windows
+  simulations): (1) pathlib-derived backslash inputs changed the
+  verdicts (KeyError class — graph keys are forward-slash literals);
+  (2) simulated Windows os.path.join in the `from . import sibling`
+  resolution flagged production-wired jrand functions
+  ENTRYPOINT_UNREACHABLE — the exact 6 live false positives; (3) a
+  backslash-named tests file's references were not collected — the
+  false-negative side of the same prefix bug.
+- FIX (root cause, single point): _posix() normalization applied
+  where paths ENTER the structures — tracked_files output, scan_py /
+  scan_ts / entrypoint_wiring_report inputs, and the one construction
+  site (mod_alias values). No per-lookup-site patches.
+- BLUE (3/3) + Linux parity proven with a stash diff: the flagged set
+  is byte-identical pre/post (61 flags); routed_defs 390->391 — the
+  +1 is the new _posix helper itself (scripts/audit_quantum_sweep.py
+  is an entry file; every entry-file def routes). Existing detector
+  tests (5/5) and the CI gate on the real tree: PASS, 0 unmatched.
 ## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
 
 - RED (3 failures pinned before the fix): the tree-hygiene gate watched
@@ -6239,3 +6258,4 @@ Stage summary:
   green after removal; real-tree integration green; the r16 hygiene
   pins still pass unchanged (6/6) — rule addition only, no semantics
   touched for existing classes.
+
