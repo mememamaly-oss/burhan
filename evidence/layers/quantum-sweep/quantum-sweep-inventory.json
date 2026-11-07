@@ -1,16 +1,16 @@
 {
- "when": "2026-11-06T16:19:23Z",
+ "when": "2026-11-07T00:53:09Z",
  "scanned": {
-  "python_files": 218,
+  "python_files": 221,
   "ts_files": 147
  },
  "raw_counts_by_class": {
-  "SILENT_EXCEPT": 298,
+  "SILENT_EXCEPT": 315,
   "TOCTOU": 13,
   "FIRST_MATCH": 5,
   "SILENT_CATCH": 1,
   "EXPORT_UNROUTED": 2,
-  "ENTRYPOINT_UNREACHABLE": 62
+  "ENTRYPOINT_UNREACHABLE": 63
  },
  "cli_wiring": {
   "read_flags": [
@@ -193,8 +193,8 @@
  },
  "entrypoint_wiring": {
   "entry_files": 11,
-  "routed_defs": 384,
-  "engine_public_functions": 1119,
+  "routed_defs": 387,
+  "engine_public_functions": 1125,
   "flagged": [
    {
     "file": "burhan/authorized_targets.py",
@@ -207,6 +207,10 @@
    {
     "file": "burhan/blake3.py",
     "name": "blake3"
+   },
+   {
+    "file": "burhan/browser.py",
+    "name": "BrowserEngine"
    },
    {
     "file": "burhan/chainphase.py",
@@ -446,7 +450,7 @@
    }
   ]
  },
- "total": 381,
+ "total": 399,
  "hits": [
   {
    "file": "burhan/api.py",
@@ -570,7 +574,47 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 132,
+   "line": 162,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "any_driver_alive",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 216,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — monitor is best-effort; handler still exists",
+   "func": "_arm_sigint_monitor",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 210,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — keep watching regardless",
+   "func": "_arm_sigint_monitor",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 238,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — best-effort unwedging",
+   "func": "kill_all_drivers",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 263,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "browser_available",
@@ -580,33 +624,73 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 230,
+   "line": 398,
    "class": "SILENT_EXCEPT",
-   "code": "except Exception: pass",
-   "func": "close",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "_browser_child_proc",
    "detail": "except swallows without re-raise/log/documented-safe comment",
-   "ledger": "AP-031",
-   "verdict": "LEDGERED(best-effort-teardown)"
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/browser.py",
-   "line": 233,
+   "line": 436,
    "class": "SILENT_EXCEPT",
-   "code": "except Exception: pass",
+   "code": "except Exception:  # noqa: BLE001 — teardown must never raise",
    "func": "close",
    "detail": "except swallows without re-raise/log/documented-safe comment",
-   "ledger": "AP-031",
-   "verdict": "LEDGERED(best-effort-teardown)"
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/browser.py",
-   "line": 236,
+   "line": 441,
    "class": "SILENT_EXCEPT",
-   "code": "except Exception: pass",
+   "code": "except Exception:  # noqa: BLE001",
    "func": "close",
    "detail": "except swallows without re-raise/log/documented-safe comment",
-   "ledger": "AP-031",
-   "verdict": "LEDGERED(best-effort-teardown)"
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 446,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 426,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "close",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 210,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — keep watching regardless",
+   "func": "_monitor",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 426,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "_watchdog",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/chainphase.py",
@@ -690,10 +774,40 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 259,
+   "line": 274,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "repair_demo",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-045",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 811,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — flag check must never mask results",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-045",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 750,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — fall through to default",
+   "func": "main",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-045",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 750,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — fall through to default",
+   "func": "_sigint_burhan",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "AP-045",
    "verdict": "LEDGERED(tolerant-parse-of-target-input)"
@@ -1010,7 +1124,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 822,
+   "line": 839,
    "class": "SILENT_EXCEPT",
    "code": "except (ValueError, TypeError):",
    "func": "sanitize_request_body",
@@ -1020,7 +1134,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 354,
+   "line": 360,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_render",
@@ -1030,7 +1144,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 408,
+   "line": 414,
    "class": "SILENT_EXCEPT",
    "code": "except ValueError:",
    "func": "_pin_target",
@@ -1040,7 +1154,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 415,
+   "line": 421,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as exc:",
    "func": "_pin_target",
@@ -1050,7 +1164,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 433,
+   "line": 439,
    "class": "SILENT_EXCEPT",
    "code": "except ValueError:",
    "func": "_pin_target",
@@ -1060,7 +1174,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 546,
+   "line": 552,
    "class": "SILENT_EXCEPT",
    "code": "except ValueError:",
    "func": "send",
@@ -1070,7 +1184,7 @@
   },
   {
    "file": "burhan/http_engine.py",
-   "line": 433,
+   "line": 439,
    "class": "SILENT_EXCEPT",
    "code": "except ValueError:",
    "func": "_order",
@@ -1190,7 +1304,17 @@
   },
   {
    "file": "burhan/impact.py",
-   "line": 1343,
+   "line": 1330,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — registry is best-effort",
+   "func": "execute_impact_probes",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 1355,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "execute_impact_probes",
@@ -1200,7 +1324,7 @@
   },
   {
    "file": "burhan/impact.py",
-   "line": 1443,
+   "line": 1455,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as e:",
    "func": "_exec_browser",
@@ -1210,7 +1334,7 @@
   },
   {
    "file": "burhan/impact.py",
-   "line": 1413,
+   "line": 1425,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_exec_browser",
@@ -1220,7 +1344,7 @@
   },
   {
    "file": "burhan/impact.py",
-   "line": 1428,
+   "line": 1440,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_exec_browser",
@@ -1230,7 +1354,17 @@
   },
   {
    "file": "burhan/impact.py",
-   "line": 1413,
+   "line": 1330,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — registry is best-effort",
+   "func": "_browser_page",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-102",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/impact.py",
+   "line": 1425,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_offsite",
@@ -1780,7 +1914,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2298,
+   "line": 2311,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _ie:",
    "func": "doctor",
@@ -1790,7 +1924,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2308,
+   "line": 2321,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _pe:",
    "func": "doctor",
@@ -1800,7 +1934,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 315,
+   "line": 322,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_race_battery",
@@ -1810,7 +1944,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1262,
+   "line": 1269,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -1820,7 +1954,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1644,
+   "line": 1655,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -1830,7 +1964,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 634,
+   "line": 641,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -1840,7 +1974,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1029,
+   "line": 1036,
    "class": "SILENT_EXCEPT",
    "code": "except AttributeError:",
    "func": "_run_phases",
@@ -1850,7 +1984,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2160,
+   "line": 2172,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — teardown must never mask",
    "func": "run",
@@ -1860,7 +1994,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2166,
+   "line": 2178,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "run",
@@ -1870,7 +2004,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 315,
+   "line": 322,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "planner_gate",
@@ -3389,6 +3523,42 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "tests/test_r15_honest_exit.py",
+   "line": 95,
+   "class": "SILENT_EXCEPT",
+   "code": "except subprocess.TimeoutExpired:",
+   "func": "test_cli_live_target_still_exits_zero",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r15_honest_exit.py",
+   "line": 79,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "test_cli_live_target_still_exits_zero",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r15_sigint_browser.py",
+   "line": 116,
+   "class": "SILENT_EXCEPT",
+   "code": "except subprocess.TimeoutExpired:",
+   "func": "test_sigint_during_browser_phase_exits_cleanly",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r15_sigint_browser.py",
+   "line": 77,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001",
+   "func": "test_sigint_during_browser_phase_exits_cleanly",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "tests/test_race_prober.py",
    "line": 64,
    "class": "SILENT_EXCEPT",
@@ -3544,6 +3714,16 @@
    "func": "-",
    "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
    "ledger": "QS-185",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "BrowserEngine",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-233",
    "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
   },
   {
