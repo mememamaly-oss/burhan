@@ -2039,3 +2039,68 @@ skip-audit question the tree-isolation discovery raised. Both done:
 - Verification recipe for signed reports: sentinel/audit.py
   (AUDIT_RECIPE, embedded in every enriched report).
 - Engine CLI usage: README.md.
+
+## 2026-11-07 — ROUND 17: the Windows audit (Qoder attribution) — 8 findings, 8 RED→BLUE fixes, 8 merged PRs
+
+Trigger: the owner's live Windows run (via the Qoder agent after 16
+GLM rounds — see attribution below). Eight real cross-platform
+findings, each fixed as its own branch + PR with a RED test pinned on
+the unfixed code, merged sequentially (#62–#69) with branch updates
+between merges and green CI required on every updated head:
+
+- #62 p1 hygiene denylist (c94a315): the hygiene gate's deny patterns
+  were POSIX-path-shaped; Windows drive-letter and backslash forms
+  slipped past. Denylist is now separator-agnostic.
+- #63 p2 doctor exit contract (7b30395): a FAIL verdict printed JSON
+  but exited 0 — a no-op gate. doctor now exits 1 on FAIL.
+- #64 p3 vault on Windows (3d99804): the secrets vault hard-failed
+  the whole scan on a missing Windows keystore. Now fails closed but
+  LOUDLY with the remediation path, and only for vault-requesting
+  output modes. Filed as issue #61 (vault backend needs a real
+  Windows implementation).
+- #65 p4 db_app_role.sh (2e4f27d): psql options after the URL are
+  ignored on Windows psql; options now precede the URL, and the role
+  is verified via pg_roles, not assumed from the grant statement.
+- #66 p5 sweep paths (3cb2cc9): the sweep scanner keyed graphs on
+  forward-slash literals; pathlib backslash inputs flipped verdicts
+  (6 live false positives + a false-negative class). Paths are
+  normalized where they ENTER the structures (_posix()).
+- #67 p6 readiness timeout (2d83d54): the readiness loop bounded
+  iterations, not total time — a slow host waited forever. It now
+  bounds total wait time.
+- #68 p7 UNENCODED_WRITE (5a2806c): 15 open()-for-write sites had no
+  encoding= — on Windows the default codepage mangles non-ASCII
+  findings (Arabic report text). All 15 fixed + a permanent
+  no-regression test class (including Arabic content).
+- #69 p8 spawn env (11114cd): ci_fixture_run.py and repro_attest.py
+  replaced the fixture env wholesale — WinError 10106 on Windows
+  (Winsock needs SYSTEMROOT). Now extend-inherited with the seven
+  vulnapp behavioral vars scoped out (absent, not empty — vulnapp
+  float-parses some) and PORT forced.
+
+The merge chain surfaced two real CI flakes, both root-caused and
+documented, neither a product defect: the window-slides rate-limiter
+test (80ms timing window vs slow parallel runners — the push run of
+the identical commit was green; resolved by retrigger) and the r16
+SIGINT browser flake (~12% on loaded runners; repro script + evidence
+archived). The chain also surfaced one genuine bug IN THE R17-8 TEST
+ITSELF, fixed before #69 could merge (fdb6da2): the helper-contract
+test's finally block deleted two of the three hostile env vars it set
+and forgot DELAY_MS=250 — leaked into the shared pytest process, it
+slowed every later fixture-spawning test by +250ms/request (Engine CI
+crawled to 95 min on the branch's original base vs main's 6.5, and
+hung unboundedly after the p1–p7 merge). Fix: save/restore + a
+module-import env baseline + a permanent guard test proving the
+module leaves the process env byte-identical.
+
+Final regression on merged main (11114cd), clean clone: full python
+suite 494 passed (the single failure is the pre-existing r14
+teardown thread flake — reproduced red on pure pre-r17 main too,
+unrelated), doctor 19/19 PASS exit 0, tree-hygiene / quantum-sweep /
+antipattern gates all PASS with zero engine-unmatched, benchmark
+TP=38 FP=0 FN=0 F1=1.0, and two independent repro_attest runs
+returning findings=199 with the identical Merkle root 5c451f22f0e1…
+
+Attribution (owner's instruction): the Windows verification run and
+the eight fixes of this round were produced through the Qoder agent
+following 16 prior rounds with GLM.
