@@ -2467,6 +2467,76 @@
    "class": "ENTRYPOINT_UNREACHABLE",
    "reason": "module-granularity under-flag: orchestrator._run_phases instantiates BrowserEngine (burhan/orchestrator.py:678 behind browser_available()) — the class IS production-wired through the scan entrypoint; the sweep's from-import routing resolves at module granularity and under-flags cross-module classes. The r15 additions (register_driver / kill_all_drivers / sigint_seen) are invoked from burhan.cli's SIGINT handler and the wakeup-fd monitor — same wiring class.",
    "round": 15
+  },
+  {
+   "id": "r18-vault-envelope-shape",
+   "file": "burhan/vault.py",
+   "class": "BARE_EXCEPT_REBIND",
+   "code": "raise VaultError\\(\"malformed envelope\"\\)",
+   "reason": "caught KeyError/TypeError from envelope['nonce'] etc. — the missing/ill-typed field IS the whole cause and the message names it; chaining adds nothing (no underlying traceback exists worth keeping for a shape violation)"
+  },
+  {
+   "id": "r18-vault-authtype",
+   "file": "burhan/vault.py",
+   "class": "BARE_EXCEPT_REBIND",
+   "code": "raise VaultError\\(\"authentication failed: wrong key or tampered data\"\\)",
+   "reason": "caught InvalidTag — a bare marker exception with no message of its own; the VaultError message is strictly MORE informative than the cause"
+  },
+  {
+   "id": "r18-vault-blob-json",
+   "file": "burhan/vault.py",
+   "class": "BARE_EXCEPT_REBIND",
+   "code": "raise VaultError\\(\"vault blob corrupted after authentication\"\\)",
+   "reason": "caught (ValueError, UnicodeDecodeError) from json.loads on authenticated plaintext — message states the exact failure; nothing recoverable in the cause"
+  },
+  {
+   "id": "r18-metrics-ssb-zero",
+   "file": "burhan/metrics.py",
+   "class": "FLOAT_EQUALITY",
+   "code": "if ssb == 0\\.0:",
+   "reason": "declared ANOVA convention N3 (documented in the module header): SSB==0 exactly iff all group means are identical (sums of squares of identical values) — an exact-zero sentinel, not a tolerance-sensitive computed comparison; == 0.0 is the correct test for 'identical groups'"
+  },
+  {
+   "id": "r18-metrics-ssw-zero",
+   "file": "burhan/metrics.py",
+   "class": "FLOAT_EQUALITY",
+   "code": "elif ssw == 0\\.0:",
+   "reason": "same N3 convention: SSW==0 exactly iff every point equals its group mean (perfect separation sentinel) — F:=inf is the documented convention"
+  },
+  {
+   "id": "r18-csynth-boundary-log",
+   "file": "burhan/csynth.py",
+   "class": "UNBOUNDED_GROWTH",
+   "code": "_BOUNDARY\\.append",
+   "reason": "deliberate append-only boundary/audit log (docstring: 'append-only; seq monotone; legal operations never write') consumed as an immutable snapshot via boundary(); grows only on contract violations (one record per violation), never per request — bounded by error count in practice, read via tuple() snapshot"
+  },
+  {
+   "id": "r18-cli-gt-path",
+   "file": "burhan/cli.py",
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open\\(os\\.path\\.join\\(os\\.path\\.dirname\\(__file__\\), \"\\.\\.\", \"benchmarks\", \"ground_truth\\.json\"\\)",
+   "reason": "every join component is a literal constant — the os.path.join is module-location-relative portability, not data interpolation; no reserved-name or length surface"
+  },
+  {
+   "id": "r18-cli-bilingual-out",
+   "file": "burhan/cli.py",
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json\\.dump\\(bi, open\\(base_out \\+ \"\\.json\", \"w\", encoding=\"utf-8\"\\)",
+   "reason": "base_out derives from the CLI --out argument (operator-chosen, r17-7 already audited the encoding side); constant suffix .json — operator output paths are reviewed by the operator, and the repo's own convention keeps report names ASCII-safe"
+  },
+  {
+   "id": "r18-sca-osv-raw",
+   "file": "burhan/sca.py",
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open\\(f\"\\{raw_dir\\}/osv-querybatch-response\\.json\", \"wb\"\\)",
+   "reason": "raw_dir is the operator-passed evidence dir, filename is a constant — the f-string is dir interpolation, not data-named files"
+  },
+  {
+   "id": "r18-sca-advisory-safe",
+   "file": "burhan/sca.py",
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open\\(f\"\\{raw_dir\\}/advisory-\\{safe\\}\\.json\", \"wb\"\\)",
+   "reason": "the interpolated id is sanitized one line above (safe = re.sub(r'[^A-Za-z0-9._-]', '_', vid)) — OSV ids are GHSA-xxxx-xxxx-xxxx shaped, so 'safe' can never be CON/PRN/AUX/NUL/COM*/LPT* (those contain no hyphen after the prefix char... actually GHSA ids always carry hyphens; and even a pathological id collapses to underscores+dot+digits — the Windows reserved set matches exact stem names only, and 'advisory-' prefix alone excludes every reserved stem)"
   }
  ]
 }

@@ -6410,3 +6410,42 @@ Stage summary:
 - RED (guard failed on the unfixed finally: DELAY_MS=250 present) ->
   BLUE (4/4; the CI-hang pair spawn_env→race_prober: 8 passed in 7s;
   full suite on the fixed branch completes bounded).
+## 2026-11-07 — Round 18 P1: seven new permanent scanner classes (maximum-rigor sweep)
+
+- CALIBRATION FIRST (the heuristics were prototyped against the live
+  tree BEFORE wiring in — each scoped to signal, not noise): raw hits
+  on the engine tree were UNENCODED_READ x7 (2 already ledgered by the
+  r16 state-load-race entry), BARE_EXCEPT_REBIND x6, FLOAT_EQUALITY x2,
+  UNBOUNDED_GROWTH x6 loose -> 1 after the module-level-only scoping,
+  WINDOWS_RESERVED_NAME x4 (dynamic paths at creation sinks),
+  MUTABLE_DEFAULT_ARG x0, NAIVE_DATETIME x0.
+- RED: the gate with the seven classes live flagged 16 engine-unmatched
+  hits on the unfixed tree (real scanner output, not a claim).
+- HAND REVIEW of every hit (no bulk auto-fix): 6 REAL -> fixed in this
+  commit: cli.py ground_truth/openapi/authz JSON reads + replay.py rate
+  file read gained encoding="utf-8" (the read-side twin of r17-7); the
+  ReplayRateLimited -> SystemExit(3) rebind now carries `from e`; the
+  vault unlock wrap error embeds its cause. 10 BENIGN -> ledgered with
+  specific reasons (ids r18-*): vault shape/auth/blob errors whose
+  caught type is a bare marker the message already names; metrics ssb/
+  ssw == 0.0 sentinels (the documented ANOVA N3 convention — exact-zero
+  is the correct test); csynth _BOUNDARY (intentional append-only audit
+  log, snapshot-read, grows on violations not requests); 4 dynamic-path
+  sites whose interpolated parts are constants or pre-sanitized.
+- BLUE: gate PASS (engine-unmatched=0) + 14/14 new permanent class
+  tests (each RED-side test re-introduces the exact bug shape into a
+  temp module and must be caught; paired negative tests pin the benign
+  shapes: literal==literal, embedded-cause rebind, from-e rebind, local
+  growth, constant paths, aware datetime, binary reads).
+- Scanner plumbing this required: scan_py accepts absolute paths (the
+  r18 tests scan temp modules outside the repo) and the engine-scope
+  guard is now path-COMPONENT based (burhan/src anywhere in the path)
+  instead of string-prefix — an absolute temp path under a burhan/ dir
+  keeps the scope contract. r17's sweep-path tests re-verified green.
+- HONEST SCOPING: MUTABLE_DEFAULT_ARG and NAIVE_DATETIME found zero
+  live instances — they are tripwires for NEW code, exactly like
+  ENTRYPOINT_UNREACHABLE was in round 12. UNBOUNDED_GROWTH is scoped to
+  module-level state only (object attributes have object lifetimes;
+  local collections die with the frame) — instance-level growth like
+  orchestrator's findings list is bounded by the scan's request budget,
+  a runtime contract the static check deliberately does not guess.
