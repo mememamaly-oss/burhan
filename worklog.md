@@ -6241,3 +6241,17 @@ Stage summary:
   test_legacy_env_compat green unchanged.
 - The CI-gate-is-real proof (deliberate red commit on a scratch branch,
   then revert) is scheduled for the push phase of this round.
+## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
+
+- RED (3 failures pinned before the fix): the tree-hygiene gate watched
+  results/** and CAPABILITY_MATRIX.md only — staging `--` (the empty
+  flag-artifact file removed in 7ed4cdf, re-tracked in 2a4210e) stayed
+  GREEN. Reproduced exactly the recurrence shape in a temp git repo:
+  gate exit 0 with `--` in the index.
+- FIX: a third DENY_RULES class "stray flag artifact" anchored to the
+  exact filename `(^|/)--$`; `--` untracked in the same commit.
+- BLUE: the staged-stray test now sees exit 1 + ::error annotation and
+  green after removal; real-tree integration green; the r16 hygiene
+  pins still pass unchanged (6/6) — rule addition only, no semantics
+  touched for existing classes.
+
