@@ -633,3 +633,58 @@ jobs:
           assert len(rep.get("findings", [])) > 0, "fixture scan must produce findings"
           print("tag-resolution action contract OK:", len(rep["findings"]), "findings")
           PY
+
+  # ROUND 18, PART 8 (owner order): close the last documented cross-platform
+  # gap. Round 17 fixed Windows; macOS stayed untested since Round 15's
+  # known-limitation note. Same honesty rule as Round 17: this job is the
+  # experiment, not the claim — if macOS breaks, that IS the finding.
+  # Scope (owner-ordered minimum): the python engine surface — doctor, the
+  # consolidated scanner gates, the full pytest suite, and the
+  # benchmark/reproducibility pair. The SaaS/PostgreSQL and Juice Shop
+  # container jobs stay Linux-only (documented, not silently skipped).
+  engine-macos:
+    name: Engine macOS (doctor / suite / scanner / repro pair)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install engine + test dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Engine doctor (19 checks)
+        run: python3 -m burhan.cli doctor
+
+      - name: Anti-pattern scanner gate (first-match carry-over + part-1 classes)
+        run: python3 scripts/audit_antipatterns.py --ci-gate
+
+      - name: Quantum sweep gate (consolidated classes, engine + TypeScript platform)
+        run: python3 scripts/audit_quantum_sweep.py --ci-gate
+
+      - name: Python security tests (incl. compliance mapping parity)
+        run: python3 -m pytest tests/ -q
+
+      # The benchmark + reproducibility gates: the deterministic record
+      # (TP=38/FP=0/F1=1.0) and the two-independent-executions Merkle match,
+      # proven on macOS the same way the Linux fixture/repro jobs prove it.
+      - name: Benchmark — canonical fixture (TP=38 / FP=0 / F1=1.0)
+        run: |
+          python3 -m burhan.cli benchmark --race
+          python3 - <<'PY'
+          import json
+          r = json.load(open("results/benchmark.json", encoding="utf-8"))
+          c = r["confusion"]
+          assert (c["TP"], c["FP"], c["FN"]) == (38, 0, 0), c
+          assert r["f1"] == 1.0, r["f1"]
+          print("macOS benchmark: TP=38 FP=0 FN=0 F1=1.0 — deterministic record intact")
+          PY
+
+      - name: Reproducibility pair (two independent executions, Merkle match)
+        run: |
+          python3 scripts/repro_attest.py --tag a --out-dir "$RUNNER_TEMP/repro"
+          python3 scripts/repro_attest.py --tag b --out-dir "$RUNNER_TEMP/repro"
+          python3 scripts/repro_attest.py --compare "$RUNNER_TEMP/repro"
