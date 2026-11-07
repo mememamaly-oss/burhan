@@ -70,7 +70,7 @@ def _load_rate_state() -> dict:
 
 def _save_rate_state(state: dict) -> None:
     _RATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    _RATE_FILE.write_text(json.dumps(state))
+    _RATE_FILE.write_text(json.dumps(state), encoding="utf-8")
 
 
 def _origin_of(proof: dict) -> str:
