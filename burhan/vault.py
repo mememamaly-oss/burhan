@@ -243,7 +243,7 @@ def _write_private_json(path: str, obj: dict) -> None:
     os.makedirs(d, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=d, prefix=".vault-tmp-")
     try:
-        with os.fdopen(fd, "w") as fh:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
             json.dump(obj, fh, indent=1)
         os.chmod(tmp, 0o600)
         os.replace(tmp, path)
