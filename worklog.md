@@ -6516,3 +6516,36 @@ Stage summary:
   surfaced a scanner interaction: an entry file must be git-TRACKED
   before the wiring report can route it (KeyError otherwise) — true
   only for never-committed files, so no production fix needed.
+## 2026-11-07 — Round 18 P4: time-boxed fuzz campaigns over the parser inventory
+
+- 4.1 INVENTORY (the untrusted-input parsers): OpenAPI JSON ingestion
+  (cli.py:678), authz config (cli.py:682), authorized-targets registry
+  (load_registry), monitor config (load_config), replay rate-state
+  file, repro payload unbox (_jload), and the consolidated scanner's
+  own AST reader (scan_py). Vault envelope decode is AEAD-gated —
+  unauthenticated bytes never reach its JSON parse (the aead_decrypt
+  verify-then-decrypt contract), so it is covered by the crypto
+  negative tests rather than fuzzed pre-auth.
+- 4.2 TOOL CHOICE (stated, per the order): atheris (coverage-guided)
+  requires a libFuzzer native build this environment cannot complete
+  reliably; the campaign uses a hypothesis-strategy-driven random
+  generator loop — a documented black-box time-boxed campaign,
+  consistent with the stdlib preference. What is lost vs coverage
+  guidance is honestly recorded; the order's bar is fully testable.
+- 4.3/4.4 RESULTS: two campaigns — calibration 15s/target (37,272
+  inputs, 105s) and confirmation 40s/target (93,062 inputs, 280s),
+  across all 7 targets. ZERO unhandled crashes, zero hangs (hard
+  deadline per target), zero silent corruptions: every input either
+  parsed (29k) or was cleanly rejected with a logged reason (64k).
+  Standout robustness proof: the authorized-targets and monitor-config
+  gates refused LOUDLY (banner + SystemExit(2) + zero side effects)
+  on every one of their 22k corrupt inputs — the refusal contract
+  held under adversarial input, not just happy paths.
+- One classification lesson during calibration (recorded, not hidden):
+  the first draft counted the gates' SystemExit(2) refusals as
+  crashes and the campaign stopped at T2 — the fix classifies a
+  banner-printed SystemExit(0|2) as the documented clean rejection
+  it is; anything else remains a crash.
+- CI PERMANENCE: tests/test_r18_fuzz_contract.py pins the same
+  contract at ~2s/target (7 targets, ~15s wall) so a future parser
+  regression fails the build with the exact crashing input preserved.
