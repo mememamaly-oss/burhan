@@ -16,3 +16,8 @@ jsonschema>=4.0
 # chrome-headless-shell processes after an interrupted scan. Test-only —
 # the engine itself never imports it.
 psutil>=5.9
+# R18 Part 3 (property-based tests): hypothesis was listed by Round 15
+# as planned-but-unused; Round 18 lands it scoped to the four core
+# invariants (merkle agreement, risk-score monotonicity, version-string
+# contracts, OCSF export laws). Test-only — the engine never imports it.
+hypothesis>=6.100
