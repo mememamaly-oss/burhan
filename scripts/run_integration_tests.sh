@@ -80,16 +80,12 @@ bunx next dev -p "${PORT}" >>"${LOG}" 2>&1 &
 SERVER_PID=$!
 trap 'kill "${SERVER_PID}" 2>/dev/null; pkill -f "next dev -p ${PORT}" 2>/dev/null' EXIT
 
-READY=0
-for i in $(seq 1 60); do
-  sleep 1
-  if curl -sf -m 2 "${URL}/api/bootstrap" >/dev/null 2>&1; then
-    READY=1
-    echo "integration server READY after ${i}s (pid ${SERVER_PID})"
-    break
-  fi
-done
-if [ "${READY}" != "1" ]; then
+# R17-6: the READY gate bounds TOTAL WAIT TIME (default 180s, env
+# BURHAN_READY_TIMEOUT), not an iteration count — the old 60x1s loop
+# called a genuinely-starting server dead on a loaded host (measured:
+# 126s boot). A dead server still fails LOUDLY inside the bound; the
+# helper's contract is pinned by tests/test_r17_wait_ready.py.
+if ! bash scripts/wait_ready.sh "${URL}/api/bootstrap"; then
   echo "FATAL: integration server failed to start"; tail -30 "${LOG}"; exit 1
 fi
 

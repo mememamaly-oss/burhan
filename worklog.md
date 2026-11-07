@@ -6226,6 +6226,35 @@ Stage summary:
 - Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
   close-out commit, each with CI verification.
 
+## 2026-11-07 — Round 17 P6: the readiness gate bounds total time, not iterations
+
+- The live Windows finding: the inline 60x1s READY loop declared FATAL
+  at ~60s while a genuinely-starting dev server needed 126s on the
+  loaded host — a false FATAL that aborted the whole integration phase.
+- FIX: scripts/wait_ready.sh — a single bounded contract: poll
+  curl -sf -m2 with 0.5s->5s backoff until a TOTAL deadline (default
+  180s = the measured 126s + ~43% headroom; a dead server still fails
+  loudly inside the bound, so the fix does not trade a false failure
+  for an unbounded hang). BURHAN_READY_TIMEOUT env override for CI
+  tuning. run_integration_tests.sh routes its gate through the helper.
+- Tests pin all four sides: the OLD-loop false-FATAL reproduced at
+  scale (2x1s budget vs 3s server -> dead), the NEW helper waits the
+  same server out (READY), a dead endpoint exits 1 within budget
+  (NOT-READY, <20s wall), the env override works, and the runner
+  cannot regress to an inline iteration-count loop.
+## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
+
+- RED (3 failures pinned before the fix): the tree-hygiene gate watched
+  results/** and CAPABILITY_MATRIX.md only — staging `--` (the empty
+  flag-artifact file removed in 7ed4cdf, re-tracked in 2a4210e) stayed
+  GREEN. Reproduced exactly the recurrence shape in a temp git repo:
+  gate exit 0 with `--` in the index.
+- FIX: a third DENY_RULES class "stray flag artifact" anchored to the
+  exact filename `(^|/)--$`; `--` untracked in the same commit.
+- BLUE: the staged-stray test now sees exit 1 + ::error annotation and
+  green after removal; real-tree integration green; the r16 hygiene
+  pins still pass unchanged (6/6) — rule addition only, no semantics
+  touched for existing classes.
 ## 2026-11-07 — Round 17 P5: sweep scanner paths are separator-agnostic
 
 - RED (3 failures pinned on the unfixed scanner, all portable Windows
@@ -6245,19 +6274,6 @@ Stage summary:
   +1 is the new _posix helper itself (scripts/audit_quantum_sweep.py
   is an entry file; every entry-file def routes). Existing detector
   tests (5/5) and the CI gate on the real tree: PASS, 0 unmatched.
-## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
-
-- RED (3 failures pinned before the fix): the tree-hygiene gate watched
-  results/** and CAPABILITY_MATRIX.md only — staging `--` (the empty
-  flag-artifact file removed in 7ed4cdf, re-tracked in 2a4210e) stayed
-  GREEN. Reproduced exactly the recurrence shape in a temp git repo:
-  gate exit 0 with `--` in the index.
-- FIX: a third DENY_RULES class "stray flag artifact" anchored to the
-  exact filename `(^|/)--$`; `--` untracked in the same commit.
-- BLUE: the staged-stray test now sees exit 1 + ::error annotation and
-  green after removal; real-tree integration green; the r16 hygiene
-  pins still pass unchanged (6/6) — rule addition only, no semantics
-  touched for existing classes.
 ## 2026-11-07 — Round 17 P4: db_app_role.sh — option order + verify-don't-assume
 
 - RED (3 failures pinned against the OLD script via git stash): the
@@ -6314,5 +6330,6 @@ Stage summary:
   test_legacy_env_compat green unchanged.
 - The CI-gate-is-real proof (deliberate red commit on a scratch branch,
   then revert) is scheduled for the push phase of this round.
+
 
 
