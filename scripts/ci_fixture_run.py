@@ -23,6 +23,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+# R17-8: the fixture spawn must EXTEND the inherited environment (a
+# wholesale-replaced env broke Windows Winsock — WinError 10106, Winsock
+# needs SYSTEMROOT — and dropped host-required vars on every platform),
+# while PRESERVING the deliberate isolation: vulnapp.py reads BEHAVIORAL
+# env vars (DELAY_MS/AUTH_TTL/CONFUSION/BFLA/SHADOW/RACE_MODE/SIGNOFF)
+# used by chaos/demo runs; an inherited BFLA=1 or RACE_MODE=broken would
+# mutate the fixture and break the deterministic record (TP=38/FP=0).
+# Shared helper => no drift between this script and repro_attest.py.
+from burhan.fixture_env import fixture_env  # noqa: E402
+
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -37,7 +47,7 @@ def main() -> int:
     # 1. spawn the fixture (same code the benchmark spawns)
     fixture = subprocess.Popen(
         [sys.executable, str(ROOT / "fixtures" / "vulnapp.py")],
-        env={"PORT": str(args.port), "PATH": "/usr/bin:/bin"},
+        env=fixture_env(args.port),
         stdout=open(out / "fixture.log", "w"), stderr=subprocess.STDOUT)
     time.sleep(1.5)
     import urllib.request

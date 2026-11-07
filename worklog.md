@@ -6226,6 +6226,32 @@ Stage summary:
 - Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
   close-out commit, each with CI verification.
 
+## 2026-11-07 — Round 17 P8: fixture spawns extend the inherited env, isolation scoped
+
+- The live Windows finding: ci_fixture_run.py and repro_attest.py
+  spawned the fixture with a wholesale-replaced env ({"PORT", minimal
+  PATH}) — on Windows, WinError 10106 (Winsock needs SYSTEMROOT); on
+  every platform, host-required vars dropped for no benefit.
+- The deliberate isolation, PRESERVED but scoped (investigated before
+  reverting, per the owner's order): vulnapp.py reads BEHAVIORAL vars
+  (DELAY_MS/AUTH_TTL/CONFUSION/BFLA/SHADOW/RACE_MODE/SIGNOFF) used by
+  chaos/demo batteries — an inherited BFLA=1 would mutate the fixture
+  and break the deterministic record. The old wholesale replace was a
+  Linux-only way to achieve that isolation.
+- FIX: burhan/fixture_env.py — the single source of truth both scripts
+  import: EXTEND the inherited env, REMOVE the seven behavioral vars,
+  force PORT. My first attempt set them to "" and the fixture died
+  instantly (float(os.environ.get("DELAY_MS", "0")) — empty string is
+  a ValueError): the correct semantics are ABSENT-not-empty; the test
+  now pins exactly that (the live bug of the fix itself, caught by the
+  liveness check before any commit).
+- RED (2 failures pre-fix): wholesale-replace detection + lost-
+  isolation detection. BLUE (3/3): scripts route through the helper;
+  sentinel var survives; hostile BFLA=1/DELAY_MS=250 do NOT reach the
+  fixture; PORT forced.
+- THE regression risk, proven locally: two independent repro_attest
+  runs with the new env — identical Merkle root (5c451f22f0e15345…),
+  identical findings SHA-256, count 199 — REPRODUCIBLE: True.
 ## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
 
 - RED (3 failures pinned before the fix): the tree-hygiene gate watched
@@ -6239,3 +6265,4 @@ Stage summary:
   green after removal; real-tree integration green; the r16 hygiene
   pins still pass unchanged (6/6) — rule addition only, no semantics
   touched for existing classes.
+
