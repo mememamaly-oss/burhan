@@ -632,7 +632,15 @@ def main():
     a = ap.parse_args()
 
     if a.cmd == "doctor":
-        print(json.dumps(doctor(), indent=1))
+        report = doctor()
+        print(json.dumps(report, indent=1))
+        # R17-2 exit contract (was: print + fall through -> always 0, so
+        # CI's "Engine doctor" step could never redden on a FAIL check):
+        #   0  every check PASS/WARN (WARN tolerated, matching the suite's
+        #       existing doctor contract — test_engine_smoke allows WARNs)
+        #   1  at least one check FAIL — the gate is real again
+        if any(c.get("status") == "FAIL" for c in report.get("checks", [])):
+            sys.exit(1)
     elif a.cmd == "scan":
         # ORD-001-REMAND (RT-03/RT-04): an operator-passed --seed must carry
         # >= 32 bytes of material (64 hex chars recommended for runs;
