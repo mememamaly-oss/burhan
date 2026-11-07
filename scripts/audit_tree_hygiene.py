@@ -53,6 +53,13 @@ DENY_RULES = [
         "session lab artifact, not a product deliverable (r15: reached "
         "main via add -A in 3e34202)",
     ),
+    (
+        re.compile(r"(^|/)--$"),
+        "stray flag artifact",
+        "empty file born of a mistyped CLI flag — removed in 7ed4cdf, "
+        "re-tracked in 2a4210e; a filename the shell ate once will be "
+        "eaten again (r17-1)",
+    ),
 ]
 
 # tracked path -> (date, reason). Empty today; any addition is a
