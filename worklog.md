@@ -6226,6 +6226,25 @@ Stage summary:
 - Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
   close-out commit, each with CI verification.
 
+## 2026-11-07 — Round 17 P4: db_app_role.sh — option order + verify-don't-assume
+
+- RED (3 failures pinned against the OLD script via git stash): the
+  MinGW silent failure modeled by a fake psql that ignores everything
+  from the connection-string positional onward — (1) the role never
+  landed in pg_roles while the script exited 0; (2) a psql that skips
+  the SQL entirely still produced a green script; (3) a broken SQL
+  execution was not required to abort (no anchor in the old code).
+- FIX: (a) options BEFORE the connection string (-v/-f then URL — the
+  order MinGW psql honors); (b) a post-hoc VERIFICATION query: psql
+  branch checks pg_roles through -c (a DIFFERENT mechanism than the -f
+  it just used — a psql that mishandles file execution cannot also
+  hide the catalog check), prisma branch uses a raising DO block;
+  failure exits 1 with FATAL. Same verify-don't-assume discipline as
+  the TRUNCATE-trigger discovery.
+- BLUE (3/3): role actually created + -f precedes URL in the logged
+  invocation; silent-skip now FATALs; broken SQL still aborts. The
+  old script re-stashed re-fails all three (the pair is anchored both
+  ends).
 ## 2026-11-07 — Round 17 P1: the stray `--` + a permanent denylist rule
 
 - RED (3 failures pinned before the fix): the tree-hygiene gate watched
@@ -6239,3 +6258,4 @@ Stage summary:
   green after removal; real-tree integration green; the r16 hygiene
   pins still pass unchanged (6/6) — rule addition only, no semantics
   touched for existing classes.
+
