@@ -6386,3 +6386,27 @@ Stage summary:
 
 
 
+## 2026-11-07 — Round 17 P8 follow-up: the spawn-env test leaked DELAY_MS into the pytest process
+
+- SYMPTOM: after merging main (p1-p7) into audit-r17-p8-spawn-env, the
+  Engine CI job hung in `python3 -m pytest tests/ -q` for 70+ minutes
+  (no failure, no progress); on the branch's original base the same job
+  took 95 minutes vs main's 6.5 — the leak was always there, the merge
+  only pushed it past unbounded.
+- ROOT CAUSE (reproduced locally twice): test_env_helper_contract's
+  finally block deleted R17_SENTINEL and BFLA but forgot DELAY_MS=250,
+  the very hostile var the test sets. It stayed in the pytest process
+  env; every LATER test that spawns vulnapp with the (correct,
+  extend-inherited) env pattern — race prober, replay fidelity, shadow,
+  siem — inherited +250ms per request. test_race_prober's full-scan
+  wiring test alone crossed 300s locally; on CI (no per-test timeout)
+  it hung forever.
+- FIX (root cause, not symptom): save/restore of the three vars the
+  test touches — including a var the operator shell legitimately
+  exported (restore its value, don't just delete); a module-import
+  env baseline; and a permanent guard test proving the module leaves
+  the shared process env byte-identical (PYTEST_CURRENT_TEST excluded —
+  pytest's own per-call bookkeeping, not pollution).
+- RED (guard failed on the unfixed finally: DELAY_MS=250 present) ->
+  BLUE (4/4; the CI-hang pair spawn_env→race_prober: 8 passed in 7s;
+  full suite on the fixed branch completes bounded).

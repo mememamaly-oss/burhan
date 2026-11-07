@@ -36,6 +36,11 @@ from burhan.fixture_env import FIXTURE_NEUTRALIZED_ENV, fixture_env
 
 _fixture_env = fixture_env  # the name the tests below were written against
 
+# r17-8 leak fix: the process env AS THIS MODULE FOUND IT. The guard
+# test at the bottom compares against this — a test module must leave
+# the shared pytest process environment exactly as it found it.
+_ENV_BASELINE = dict(os.environ)
+
 
 def _script_env_call(path: str) -> str:
     """Extract the env= argument text from a script's fixture spawn —
@@ -83,6 +88,15 @@ def test_env_helper_contract():
             "print(os.environ.get('DELAY_MS', 'MISSING'))\n"
             "print(os.environ.get('PORT', 'MISSING'))\n",
             encoding="utf-8")
+        # r17-8 leak fix: save/restore, not selective delete. The
+        # original finally deleted R17_SENTINEL and BFLA but forgot
+        # DELAY_MS — the hostile var leaked into the whole pytest
+        # process and slowed every later fixture spawn by +250ms/request
+        # (Engine CI: 95 min on this branch's base vs 6.5 on main; an
+        # unbounded hang after the p2-p7 merge). Restore also gives back
+        # a var an operator shell legitimately exported.
+        _saved = {k: os.environ.get(k)
+                  for k in ("R17_SENTINEL", "BFLA", "DELAY_MS")}
         os.environ["R17_SENTINEL"] = "survives"
         os.environ["BFLA"] = "1"       # hostile behavioral var from outside
         os.environ["DELAY_MS"] = "250" # hostile numeric var (float-parsed)
@@ -101,5 +115,33 @@ def test_env_helper_contract():
                 f"live first-attempt bug of this very fix)")
             assert port == "8123", f"PORT not forced: {port}"
         finally:
-            del os.environ["R17_SENTINEL"]
-            del os.environ["BFLA"]
+            for _k, _v in _saved.items():
+                if _v is None:
+                    os.environ.pop(_k, None)
+                else:
+                    os.environ[_k] = _v
+
+
+def test_process_env_restored_to_baseline():
+    """The leak this module itself shipped once: the hostile DELAY_MS=250
+    set for the helper-contract test survived its finally block (which
+    cleaned R17_SENTINEL and BFLA but forgot DELAY_MS), poisoned the
+    whole pytest process env, and reached every later in-process fixture
+    spawn that extends os.environ (race prober, replay fidelity, shadow,
+    siem): +250ms per request. On the branch's original base the Engine
+    CI job crawled to 95 minutes (vs main's 6.5); after the p2-p7 merge
+    it crossed into an unbounded hang. This guard would have been RED
+    on the leak and is the module's permanent no-drift pin."""
+    # PYTEST_CURRENT_TEST is pytest's own per-test bookkeeping var
+    # (set during the call phase, removed after) — not pollution.
+    now = {k: v for k, v in os.environ.items()
+           if k != "PYTEST_CURRENT_TEST"}
+    base = {k: v for k, v in _ENV_BASELINE.items()
+            if k != "PYTEST_CURRENT_TEST"}
+    if now != base:
+        leaked = {k: (v, base.get(k))
+                  for k, v in now.items() if base.get(k) != v}
+        missing = {k: v for k, v in base.items() if k not in now}
+        raise AssertionError(
+            f"this test module polluted the shared process env: "
+            f"changed/added={leaked} removed={missing}")
