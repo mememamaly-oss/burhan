@@ -6255,4 +6255,81 @@ Stage summary:
   green after removal; real-tree integration green; the r16 hygiene
   pins still pass unchanged (6/6) — rule addition only, no semantics
   touched for existing classes.
+## 2026-11-07 — Round 17 P5: sweep scanner paths are separator-agnostic
+
+- RED (3 failures pinned on the unfixed scanner, all portable Windows
+  simulations): (1) pathlib-derived backslash inputs changed the
+  verdicts (KeyError class — graph keys are forward-slash literals);
+  (2) simulated Windows os.path.join in the `from . import sibling`
+  resolution flagged production-wired jrand functions
+  ENTRYPOINT_UNREACHABLE — the exact 6 live false positives; (3) a
+  backslash-named tests file's references were not collected — the
+  false-negative side of the same prefix bug.
+- FIX (root cause, single point): _posix() normalization applied
+  where paths ENTER the structures — tracked_files output, scan_py /
+  scan_ts / entrypoint_wiring_report inputs, and the one construction
+  site (mod_alias values). No per-lookup-site patches.
+- BLUE (3/3) + Linux parity proven with a stash diff: the flagged set
+  is byte-identical pre/post (61 flags); routed_defs 390->391 — the
+  +1 is the new _posix helper itself (scripts/audit_quantum_sweep.py
+  is an entry file; every entry-file def routes). Existing detector
+  tests (5/5) and the CI gate on the real tree: PASS, 0 unmatched.
+## 2026-11-07 — Round 17 P4: db_app_role.sh — option order + verify-don't-assume
+
+- RED (3 failures pinned against the OLD script via git stash): the
+  MinGW silent failure modeled by a fake psql that ignores everything
+  from the connection-string positional onward — (1) the role never
+  landed in pg_roles while the script exited 0; (2) a psql that skips
+  the SQL entirely still produced a green script; (3) a broken SQL
+  execution was not required to abort (no anchor in the old code).
+- FIX: (a) options BEFORE the connection string (-v/-f then URL — the
+  order MinGW psql honors); (b) a post-hoc VERIFICATION query: psql
+  branch checks pg_roles through -c (a DIFFERENT mechanism than the -f
+  it just used — a psql that mishandles file execution cannot also
+  hide the catalog check), prisma branch uses a raising DO block;
+  failure exits 1 with FATAL. Same verify-don't-assume discipline as
+  the TRUNCATE-trigger discovery.
+- BLUE (3/3): role actually created + -f precedes URL in the logged
+  invocation; silent-skip now FATALs; broken SQL still aborts. The
+  old script re-stashed re-fails all three (the pair is anchored both
+  ends).
+## 2026-11-07 — Round 17 P3: vault on Windows — fail closed, loudly (issue #61)
+
+- The trap, avoided deliberately: the obvious "fix" (skip the mode-bit
+  check on Windows so the vault 'works') would silently DOWNGRADE a real
+  security guarantee; keeping the check as-is kept rejecting every file
+  with a message that blamed the operator ('permissions 0o666 — chmod
+  it first') for something chmod cannot fix (Windows does not model
+  POSIX mode bits; verified live on Windows 11: chmod 0600 still
+  reports 0o666).
+- Decision (option b of the owner's order): on os.name == 'nt' the
+  gate raises an EXPLICIT VaultError — vault UNSUPPORTED on Windows
+  pending a real NTFS-ACL-based check, pointing at issue #61 (opened
+  with the full ACL implementation plan: icacls/pywin32 options, the
+  SYSTEM/Administrators/current-user ACE policy, and the constraint
+  that a new dependency needs an explicit owner decision per the
+  README's pure-stdlib discipline).
+- RED (pinned by test pre-fix, platform-portable simulation of the
+  Windows stat reality): the old misleading chmod message surfaced.
+- BLUE: the explicit unsupported-message contract (mentions Windows,
+  ACL, issue #61; no chmod advice), POSIX pins unchanged — 0644/0666
+  still rejected with the actionable message, 0600 still accepted
+  (test_r17_vault_windows 3/3 + the existing vault suites 14/14).
+## 2026-11-07 — Round 17 P2: doctor's exit-code contract (the no-op CI gate)
+
+- RED (pinned before the fix, through the REAL CLI surface): a doctor
+  report with a forced FAIL check printed DEGRADED and exited 0 —
+  cli.py:634 printed the JSON and fell through. CI's "Engine doctor"
+  step inherited exit 0, so the step was structurally unble to redden.
+- FIX: after printing, exit 1 iff any check reports FAIL. WARN stays
+  tolerated (the suite's existing doctor contract — test_engine_smoke
+  allows WARNs; flipping that would turn doctor into an always-failing
+  command on browser-less machines).
+- BLUE: forced-FAIL subprocess now exits 1; healthy machine exits 0
+  (direct CLI sanity + the all-pass test); test_engine_smoke (5) and
+  test_legacy_env_compat green unchanged.
+- The CI-gate-is-real proof (deliberate red commit on a scratch branch,
+  then revert) is scheduled for the push phase of this round.
+
+
 
