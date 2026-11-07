@@ -5,7 +5,7 @@
 # r12 Part 2.1 (self-SCA): GHSA-6w46-j5rx-g56g / PYSEC-2026-1845
 # (vulnerable tmpdir handling) affect the resolved 9.0.2; fixed in
 # 9.0.3. Suite verified green on 9.2.0 before this bump.
-pytest>=9.0.3
+pytest>=9.2.0
 # Part 1 (SIEM export): the RFC 5424 validation dependency — a REAL parser
 # (Lark implementation of the RFC's ABNF grammar) for the syslog export
 # tests; jsonschema validates the OCSF events against the fetched v1.9.0
