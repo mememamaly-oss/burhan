@@ -6225,3 +6225,19 @@ Stage summary:
   the idle machine after the benchmark completed.
 - Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
   close-out commit, each with CI verification.
+
+## 2026-11-07 — Round 17 P2: doctor's exit-code contract (the no-op CI gate)
+
+- RED (pinned before the fix, through the REAL CLI surface): a doctor
+  report with a forced FAIL check printed DEGRADED and exited 0 —
+  cli.py:634 printed the JSON and fell through. CI's "Engine doctor"
+  step inherited exit 0, so the step was structurally unble to redden.
+- FIX: after printing, exit 1 iff any check reports FAIL. WARN stays
+  tolerated (the suite's existing doctor contract — test_engine_smoke
+  allows WARNs; flipping that would turn doctor into an always-failing
+  command on browser-less machines).
+- BLUE: forced-FAIL subprocess now exits 1; healthy machine exits 0
+  (direct CLI sanity + the all-pass test); test_engine_smoke (5) and
+  test_legacy_env_compat green unchanged.
+- The CI-gate-is-real proof (deliberate red commit on a scratch branch,
+  then revert) is scheduled for the push phase of this round.
