@@ -25,6 +25,7 @@ asserts a LAW, not a value.
       build_ocsf -> jsonschema round-trip preserves the fields the
       format is defined to carry (id/type/severity/time/finding ref).
 """
+import hashlib
 import json
 import os
 import re
@@ -38,7 +39,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 from hypothesis import given, settings, strategies as st, HealthCheck  # noqa: E402
 
 from burhan.audit import (  # noqa: E402
-    merkle_root_of_records, canonical_finding, finding_leaf)
+    merkle_root_of_records, canonical_finding)
 from burhan.prioritize import (  # noqa: E402
     risk_score, LIFECYCLE_WEIGHTS, REGRESSED, NEW, RECURRING)
 from burhan.sca import _parse_requirements  # noqa: E402
@@ -88,13 +89,12 @@ def test_any_single_byte_leaf_mutation_changes_root(recs, idx, ch):
     if not canon:            # degenerate empty canonical — skip honestly
         return
     pos = idx % len(canon)
-    mutated = canon[:pos] + ch + canon[pos + 1:]
-    assert mutated != canon
     tampered = [dict(r) for r in recs]
-    # re-inject the mutated canonical via the leaf layer directly: build
-    # the root from leaf hashes, one of which is the tampered leaf
+    # build the root through the SAME leaf layer the builder uses: hash
+    # each canonical form, flip one byte of one leaf hash, refold
     from burhan.audit import merkle_root
-    leaves = [finding_leaf(r) for r in tampered]
+    leaves = [hashlib.sha256(canonical_finding(r).encode("utf-8")).digest()
+              for r in tampered]
     orig_root = merkle_root(leaves).hex()
     bad_leaf = bytearray(leaves[i])
     bad_leaf[pos % len(bad_leaf)] ^= 0x20
