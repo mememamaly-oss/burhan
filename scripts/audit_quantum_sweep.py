@@ -93,14 +93,30 @@ TOCTOU_USES = ("open", "remove", "mkdir", "makedirs", "rmdir", "unlink",
                "read_bytes", "write_bytes", "touch")
 
 
+
+def _posix(p: str) -> str:
+    """R17-5: normalize a repo-relative path to forward slashes.
+
+    Every graph key in this scanner is a forward-slash literal
+    ('burhan/cli.py', regex-derived 'scripts/x.py'), but callers may
+    derive paths with pathlib (str(p.relative_to(base)) -> backslashes
+    on Windows) and os.path.join builds backslash paths there too —
+    separator-mismatched keys caused live Windows KeyErrors, 6 false
+    ENTRYPOINT_UNREACHABLE flags (jrand.py), and a false-negative test
+    reference collection. Normalization happens at the single point
+    where paths ENTER the data structures (the public entry points
+    below), never per-lookup-site.
+    """
+    return p.replace("\\", "/") if "\\" in p else p
+
 def tracked_files() -> list[str]:
     out = subprocess.run(["git", "ls-files"], cwd=ROOT,
                          capture_output=True, text=True).stdout.splitlines()
     skip = ("node_modules", ".git", "__pycache__", ".next", "skills",
             "download")
-    py = [f for f in out if f.endswith(".py")
+    py = [_posix(f) for f in out if f.endswith(".py")
           and not any(p in f.split("/") for p in skip)]
-    ts = [f for f in out if (f.endswith(".ts") or f.endswith(".tsx"))
+    ts = [_posix(f) for f in out if (f.endswith(".ts") or f.endswith(".tsx"))
           and not any(p in f.split("/") for p in skip)]
     return sorted(py), sorted(ts)
 
@@ -120,6 +136,7 @@ class Hit:
 
 # ============================================================== Python scans
 def scan_py(path: str) -> list[Hit]:
+    path = _posix(path)
     hits: list[Hit] = []
     try:
         src = open(os.path.join(ROOT, path), encoding="utf-8").read()
@@ -357,6 +374,7 @@ TS_CATCH_RET = re.compile(
 
 
 def scan_ts(path: str) -> list[Hit]:
+    path = _posix(path)
     src = open(os.path.join(ROOT, path), encoding="utf-8").read()
     hits: list[Hit] = []
     for i, line in enumerate(src.splitlines(), 1):
@@ -442,6 +460,7 @@ def scan_ts_exports_routed(ts_files: list[str]) -> list[Hit]:
 
 # ====================================================== class (d) cross-file
 def cli_wiring_report() -> tuple[list[Hit], dict]:
+    # R17-5: entry-set paths and file reads are separator-normalized below
     """The full class-(d) check for burhan/cli.py:
     every flag read by handler code must be defined by SOME add_argument
     in the same file (subparsers included). Returns hits + the sets for
@@ -494,6 +513,7 @@ def cli_wiring_report() -> tuple[list[Hit], dict]:
 
 
 def entrypoint_wiring_report(py_files: list[str]) -> tuple[list[Hit], dict]:
+    py_files = [_posix(f) for f in py_files]
     """Class (d+) — ENTRYPOINT_UNREACHABLE, generalized from the CLI-only
     check after the round-12 dogfood catch: run_monitor_cycle had ZERO
     production callers (the scheduler imported its module for load_config
@@ -606,7 +626,7 @@ def entrypoint_wiring_report(py_files: list[str]) -> tuple[list[Hit], dict]:
                     # `from . import sibling` — sibling module in same package
                     pkg_dir = f.rsplit("/", 1)[0]
                     for a in node.names:
-                        p = os.path.join(pkg_dir, a.name + ".py")
+                        p = _posix(os.path.join(pkg_dir, a.name + ".py"))
                         if os.path.exists(os.path.join(ROOT, p)):
                             mod_alias[a.asname or a.name] = p
             elif isinstance(node, ast.Import):
