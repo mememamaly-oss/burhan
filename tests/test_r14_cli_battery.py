@@ -128,17 +128,26 @@ def test_cli_apaths_success_and_failures(real_scan_result):
 
 def test_cli_capability_matrix_success_and_failures(real_scan_result):
     res = real_scan_result
-    r = _cli("capability-matrix", "--db", str(res["store"]))
+    # --out into the tmp dir on EVERY invocation: the default out is
+    # cwd-relative CAPABILITY_MATRIX.md, and the battery runs with
+    # cwd=ROOT — the default used to leave the artifact in the repo
+    # root (r16: that silent leak made the r15 tree-isolation test SKIP
+    # in CI on the dirty tree for its whole life, until .gitignore
+    # started hiding the file and the test finally RAN and caught it).
+    r = _cli("capability-matrix", "--db", str(res["store"]),
+             "--out", str(res["out_dir"] / "matrix.md"))
     assert r.returncode == 0, r.stderr[:300]
     assert "CAPABILITY" in r.stdout or r.stdout.strip()  # real table/JSON
     # EMPTY store -> honest message, not a crash
     empty = res["out_dir"] / "empty.db"
     empty.write_bytes(b"")
-    r = _cli("capability-matrix", "--db", str(empty))
+    r = _cli("capability-matrix", "--db", str(empty),
+             "--out", str(res["out_dir"] / "matrix-empty.md"))
     # either a clear error or an honest empty matrix — never a traceback
     assert_no_traceback(r)
     # nonexistent run-id
     r = _cli("capability-matrix", "--db", str(res["store"]),
+             "--out", str(res["out_dir"] / "matrix-nope.md"),
              "--run-id", "run-does-not-exist")
     assert_no_traceback(r)
 

@@ -6170,3 +6170,58 @@ Stage summary:
   zero external archives; phase3 still live from public history (owner
   decision pending).
 - enforce_admins: both options presented, neither executed.
+
+## 2026-11-07 — Round 16: security-tab triage + tree-hygiene gate (audit-r16-security)
+
+- Owner's two questions answered with evidence first: the 10 Dependabot
+  alerts are inherited (all created 2026-11-04T16:37Z, pre-r15; zero
+  runtime-manifest changes in the round) and sit on SCA ground-truth
+  fixtures; add -A was a real habit under pressure (3 incidents in r15)
+  — now a written rule plus a CI gate.
+- scripts/audit_tree_hygiene.py --ci-gate: no tracked results/**, no
+  CAPABILITY_MATRIX.md; allowlist ledger (empty). ci.yml job
+  'tree-hygiene'. .gitignore += results/. Untracked the r13 leftover
+  results/replay-rate-limit.json (replay.py mkdirs at runtime; missing
+  file = fresh state by design — verified no runtime change).
+  tests/test_r16_tree_hygiene.py 6/6 green; integration case was RED
+  until the untrack (real red->green, not theater).
+- scripts/dismiss_r16_fixture_alerts.py (idempotent, state-fetched
+  first): 10 Dependabot -> tolerable_risk (instance accepts only the
+  five documented reasons — first run's 422s recorded), 16 secret
+  alerts (gitleaks-config regexes, lines 619-634) -> false_positive.
+  Post-verify: dependabot open=0/dismissed=10-with-comments, secrets
+  resolved=16/16. Code scanning: 199 open are ALL tool=Burhan dogfood
+  (zero CodeQL open) — documented baseline, not dismissed.
+- STATE.md debt: round 15's missing section written from the verified
+  closure record; round 16 section added.
+- Open dependency PRs #1 (cryptography) and #2 (pytest) noticed;
+  merge/timing decision left to the owner post-round.
+
+## 2026-11-07 — Round 16 CLOSE: strict close-out + skip audit (audit-r16-closeout)
+
+- Owner required the r15 protocol before any new round: full fresh
+  clone from remote main (7c3b1fd), suite FROM THERE. Done: pristine
+  clone, doctor 19/19, three gates PASS, suite 459 passed / 0 failed /
+  0 SKIPPED in 7:02 — on cryptography 50.0.2 + pytest 9.2.0 (the exact
+  floors of dependency PRs #1/#2: the combined post-merge state,
+  validated before either merge). Canonical fixture run + benchmark
+  gate re-run locally from the clone (the CI fixture job's own two
+  steps verbatim): F1=1.0, TP=38 FP=0 FN=0 TN=37 — the anchored
+  record intact. Zero credential patterns in the tree.
+- Skip audit (the owner's question): exactly 4 skip sites in the whole
+  suite. The tree-isolation silent skip was the r16 fix itself. The two
+  SIGINT capability skips are legitimate BUT their comment claimed
+  fixture-job coverage that did not exist (no CI job ran pytest with
+  chromium) — the fixture job now runs the SIGINT guard explicitly, so
+  the claim is true. The generator-layout guard is backstopped by the
+  drift CI job. Verdict: no silent skips remain.
+- Environment note, recorded for honesty: re-running the SIGINT test
+  STANDALONE while the canonical benchmark ran in parallel on the same
+  machine failed its final orphan check — _headless() is system-global
+  (by design, for dedicated CI/dev machines) and counted the benchmark
+  run's own live chromium as our orphan. Sequential environments (CI
+  steps, the suite run) are unaffected: the same test passed in the
+  full suite minutes earlier on the idle machine. Re-verified green on
+  the idle machine after the benchmark completed.
+- Dependency PRs #1 (cryptography) and #2 (pytest) merged after this
+  close-out commit, each with CI verification.
