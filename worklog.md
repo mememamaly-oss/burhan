@@ -6170,3 +6170,29 @@ Stage summary:
   zero external archives; phase3 still live from public history (owner
   decision pending).
 - enforce_admins: both options presented, neither executed.
+
+## 2026-11-07 — Round 16: security-tab triage + tree-hygiene gate (audit-r16-security)
+
+- Owner's two questions answered with evidence first: the 10 Dependabot
+  alerts are inherited (all created 2026-11-04T16:37Z, pre-r15; zero
+  runtime-manifest changes in the round) and sit on SCA ground-truth
+  fixtures; add -A was a real habit under pressure (3 incidents in r15)
+  — now a written rule plus a CI gate.
+- scripts/audit_tree_hygiene.py --ci-gate: no tracked results/**, no
+  CAPABILITY_MATRIX.md; allowlist ledger (empty). ci.yml job
+  'tree-hygiene'. .gitignore += results/. Untracked the r13 leftover
+  results/replay-rate-limit.json (replay.py mkdirs at runtime; missing
+  file = fresh state by design — verified no runtime change).
+  tests/test_r16_tree_hygiene.py 6/6 green; integration case was RED
+  until the untrack (real red->green, not theater).
+- scripts/dismiss_r16_fixture_alerts.py (idempotent, state-fetched
+  first): 10 Dependabot -> tolerable_risk (instance accepts only the
+  five documented reasons — first run's 422s recorded), 16 secret
+  alerts (gitleaks-config regexes, lines 619-634) -> false_positive.
+  Post-verify: dependabot open=0/dismissed=10-with-comments, secrets
+  resolved=16/16. Code scanning: 199 open are ALL tool=Burhan dogfood
+  (zero CodeQL open) — documented baseline, not dismissed.
+- STATE.md debt: round 15's missing section written from the verified
+  closure record; round 16 section added.
+- Open dependency PRs #1 (cryptography) and #2 (pytest) noticed;
+  merge/timing decision left to the owner post-round.
