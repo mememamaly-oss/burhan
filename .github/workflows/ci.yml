@@ -645,7 +645,10 @@ jobs:
   engine-macos:
     name: Engine macOS (doctor / suite / scanner / repro pair)
     runs-on: macos-latest
-    timeout-minutes: 45
+    # Two runs (42427963954, 42427968858) were cancelled at exactly 45:15
+    # with the suite at 82% — the ARM runner needs ~55 min for tests/ alone.
+    # 90 leaves headroom for the benchmark + repro pair steps after it.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
@@ -653,8 +656,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install engine + test dependencies
-        run: pip install -r requirements-dev.txt
+      - name: Install engine + test dependencies (+ playwright/chromium)
+        # r18-8.7: the run-5 log (job ...128694559629) settled it — the
+        # suite went 521/0 GREEN for the first time and exposed the NEXT
+        # gate: the benchmark demands the deterministic record
+        # TP=38/FP=0, but two ground-truth detections (xss_dom @
+        # /vuln/dom-write and the browser-discovered /vuln/jsform-reflect
+        # surface) REQUIRE the render engine, exactly as ci.yml's own
+        # fixture-job comment says. This job installed no browser, so the
+        # doctor warned "playwright/chromium unavailable" and the scan
+        # landed at TP=36/FN=2. Same install as the Linux fixture job.
+        run: |
+          pip install -r requirements-dev.txt playwright
+          python3 -m playwright install --with-deps chromium
 
       - name: Engine doctor (19 checks)
         run: python3 -m burhan.cli doctor
@@ -666,7 +680,10 @@ jobs:
         run: python3 scripts/audit_quantum_sweep.py --ci-gate
 
       - name: Python security tests (incl. compliance mapping parity)
-        run: python3 -m pytest tests/ -q
+        # -v (not -q): the cancelled 45-min runs showed 4 errors + 1 failure
+        # as bare EEEE/F dots with no names — per-test lines keep every
+        # future forensic readable even if the job is cut short again.
+        run: python3 -m pytest tests/ -v --tb=short
 
       # The benchmark + reproducibility gates: the deterministic record
       # (TP=38/FP=0/F1=1.0) and the two-independent-executions Merkle match,

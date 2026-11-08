@@ -127,6 +127,10 @@ def serve(role: str, dns_port: int, http_port: int):
     handler = type(f"Fetcher_{role}", (_Fetcher,),
                    {"role": role, "dns_port": dns_port})
     srv = ThreadingHTTPServer(("127.0.0.1", http_port), handler)
+    # the actual bound http port (r18-8.5): http_port may be 0 and the
+    # parent reads this line to learn where we landed
+    print(f"rebind-{role} listening on 127.0.0.1:{srv.server_address[1]}",
+          flush=True)
     srv.serve_forever()
 
 
@@ -134,6 +138,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--role", choices=["vuln", "safe"], required=True)
     ap.add_argument("--dns-port", type=int, required=True)
-    ap.add_argument("--http-port", type=int, required=True)
+    # r18-8.5: default 0 = child-chosen ephemeral port, announced on
+    # stdout (the parent no longer pre-picks and races)
+    ap.add_argument("--http-port", type=int, default=0)
     a = ap.parse_args()
     serve(a.role, a.dns_port, a.http_port)

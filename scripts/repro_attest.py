@@ -76,15 +76,44 @@ def run_scan(tag: str, out_dir: Path) -> dict:
         env=fixture_env(port),
         stdout=open(out_dir / f"fixture-{tag}.log", "w"),
         stderr=subprocess.STDOUT)
-    time.sleep(1.5)
+    # r18-8.9: single 5s-shot probe is a Linux-shaped assumption — the
+    # macOS runner (run 7, job ...128732062786) took longer than sleep
+    # 1.5 + timeout 5 to accept the first connection, and the step died
+    # 6.7s in with URLError before the scan ever started. Same doctrine
+    # as the r18-8.2 readiness windows: poll until the fixture answers
+    # or the process dies, with a hard bound. 60s covers cold APFS/spot
+    # first-launch costs; 1.5s was tuned on Linux.
+    # (8.9b: the retry loop moved the probe INSIDE this block, which
+    # orphaned the old bare `import urllib.request` below it — the first
+    # 8.9 push failed the Linux repro job with "module 'urllib' has no
+    # attribute 'request'". Both submodules, imported here, once.)
+    import urllib.error
     import urllib.request
-    probe = urllib.request.urlopen(base + "/", timeout=5).status
-    assert probe == 200, probe
-    if fixture.poll() is not None:
+    deadline = time.time() + 60.0
+    probe_exc = None
+    while time.time() < deadline:
+        if fixture.poll() is not None:
+            tail = ""
+            try:
+                tail = (out_dir / f"fixture-{tag}.log").read_text()[-500:]
+            except Exception:  # noqa: BLE001 — diagnostics only
+                pass
+            raise SystemExit(
+                f"[{tag}] FATAL: fixture exited rc={fixture.returncode} "
+                f"before answering — fixture log tail:\n{tail}")
+        try:
+            probe = urllib.request.urlopen(base + "/", timeout=5).status
+            assert probe == 200, probe
+            probe_exc = None
+            break
+        except (urllib.error.URLError, AssertionError, OSError) as exc:
+            probe_exc = exc
+            time.sleep(0.5)
+    if probe_exc is not None:
         raise SystemExit(
-            f"[{tag}] FATAL: our fixture process exited (see "
-            f"{out_dir / f'fixture-{tag}.log'}) — the scan would silently "
-            f"hit a foreign server holding the port.")
+            f"[{tag}] FATAL: fixture never answered within 60s "
+            f"({type(probe_exc).__name__}: {probe_exc}) — see "
+            f"{out_dir / f'fixture-{tag}.log'}")
     print(f"[{tag}] fixture up on {base} (pid {fixture.pid}) — liveness verified")
 
     from burhan.auth import AuthProfile

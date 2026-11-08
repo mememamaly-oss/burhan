@@ -53,14 +53,65 @@ def _free_port() -> int:
     return port
 
 
-def _spawn(args) -> subprocess.Popen:
-    p = subprocess.Popen([sys.executable] + args,
-                         stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL)
-    return p
+def _spawn_port(args, timeout=30.0, port_flag="--port") -> tuple[int, subprocess.Popen, str]:
+    """r18-8.5: the fixture binds its OWN port (--port 0) and announces it
+    on stdout — the parent no longer races a pre-picked port against the
+    child's bind (macOS default ephemeral-port behavior differs from
+    Linux; four readiness failures across three full runs, all with EMPTY
+    captured stderr, i.e. the child never crashed — see jobs
+    128619908637/128619918328). The env is passed explicitly (the same
+    shape as the C3 compound-fault spawn, the only subprocess pattern
+    that worked on macOS in those runs). Stderr still goes to a file for
+    the failure message."""
+    import tempfile
+    errf = tempfile.NamedTemporaryFile(
+        prefix="m2-fixture-stderr-", suffix=".log", delete=False)
+    p = subprocess.Popen(
+        [sys.executable] + args + [port_flag, "0"],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=errf,
+        env={**os.environ},
+        cwd=ROOT)
+    errf.close()
+    deadline = time.time() + timeout
+    line = ""
+    while time.time() < deadline:
+        if p.poll() is not None:
+            with open(errf.name, encoding="utf-8", errors="replace") as fh:
+                tail = fh.read()[-400:]
+            raise AssertionError(
+                f"fixture died during startup rc={p.returncode} — "
+                f"stderr tail: {tail!r}")
+        # readline on the pipe would block past a dead child; poll the
+        # fd instead in a way that works everywhere: the child prints
+        # exactly one line, so a small buffered read loop is safe here
+        import select
+        r, _, _ = select.select([p.stdout], [], [], 0.5)
+        if r:
+            line = p.stdout.readline().decode("utf-8", "replace").strip()
+            m = re.search(r"listening on 127\.0\.0\.1:(\d+)", line)
+            if m:
+                return int(m.group(1)), p, errf.name
+    p.kill()
+    raise AssertionError(
+        f"fixture did not announce its port within {timeout}s — "
+        f"last stdout line: {line!r}, stderr tail: "
+        f"{_stderr_tail(errf.name)!r}")
 
 
-def _wait_port(port, timeout=10.0) -> bool:
+def _stderr_tail(path: str, limit: int = 400) -> str:
+    try:
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            return fh.read()[-limit:]
+    except OSError:
+        return "(stderr file unreadable)"
+
+
+def _wait_port(port, errfile: str | None = None, timeout=20.0) -> bool:
+    """Kept for the rebind-family fixtures (they bind a port the parent
+    supplies because the DNS/HTTP pair is created before the fetcher);
+    battery fixtures use _spawn_port above (child-chosen port)."""
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -147,24 +198,90 @@ _ALIAS = pytest.mark.skipif(not _loopback_alias_supported(),
 
 
 # ------------------------------------------------- battery RED/BLUE over HTTP
+# r18-8.6: the battery fixtures now run IN-PROCESS (a daemon thread +
+# ThreadingHTTPServer on an ephemeral port) — the exact shape of the
+# A4 reflector test that has passed on macOS in every run. Four full
+# macOS runs (through 798f8fa, jobs ...128681859580 et al.) proved the
+# modern2_fixture.py CHILD PROCESS never reaches its first print on the
+# macOS runner (alive, zero stdout, zero stderr, 30s+) while subprocess
+# spawns of vulnapp.py and burhan.cli succeed in the same runs — a
+# macOS-specific interpreter-spawn hang this test file cannot fix from
+# the outside. The battery needs HTTP endpoints; it does not need
+# process isolation (unlike the C1-C3 fault-injection tests, which keep
+# their subprocesses and pass). Serving in-process removes the hang by
+# construction; the fixture module stays importable for the CLI shape.
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+
+class _M2Handler(BaseHTTPRequestHandler):
+    mode = "vuln"
+
+    def log_message(self, *a):        # noqa: N802 — silence test servers
+        pass
+
+    def _send(self, code, doc, cookies=None):
+        body = json.dumps(doc).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        if cookies:
+            self.send_header("Set-Cookie", cookies)
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):                 # noqa: N802
+        from modern2_fixture import SAFE_SECRET, VULN_SECRET, hs256
+        if self.path.startswith("/login"):
+            secret = VULN_SECRET if self.mode == "vuln" else SAFE_SECRET
+            tok = hs256(secret, {"sub": "u1", "role": "user"})
+            return self._send(200, {"ok": True, "token": tok},
+                              cookies=f"sid={tok}; Path=/")
+        if self.path.startswith("/api/users"):
+            if self.mode == "vuln":
+                return self._send(200, [
+                    {"id": 1, "email": "a@ex.test",
+                     "password_hash": "$2b$12$fixtureNotARealHashValue000000",
+                     "is_internal": True}])
+            return self._send(200, [{"id": 1, "email": "a@ex.test"}])
+        if self.path.startswith("/graphql"):
+            return self._send(200, {"data": None,
+                                    "errors": [{"message": "POST required"}]})
+        return self._send(404, {"error": "not found"})
+
+    def do_POST(self):                # noqa: N802
+        import re as _re
+        if self.path.startswith("/graphql"):
+            n = int(self.headers.get("Content-Length", "0"))
+            try:
+                doc = json.loads(self.rfile.read(n) or b"{}")
+            except Exception:
+                return self._send(400, {"errors": [{"message": "bad json"}]})
+            q = str(doc.get("query", ""))
+            found = _re.findall(r"\ba(\d+)\s*:", q)
+            if self.mode == "safe" and len(found) > 5:
+                return self._send(200, {"errors": [{
+                    "message": "query complexity limit: max 5 aliases"}]})
+            data = {f"a{i}": "__Typename__" for i in found}
+            return self._send(200, {"data": data})
+        return self._send(404, {"error": "not found"})
+
+
+def _serve_m2(mode: str) -> int:
+    handler = type(f"H_{mode}", (_M2Handler,), {"mode": mode})
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    srv.daemon_threads = True
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv.server_address[1]
+
+
 @pytest.fixture(scope="module")
 def vuln_port():
-    port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "modern2_fixture.py"),
-                "--mode", "vuln", "--port", str(port)])
-    assert _wait_port(port), "vuln fixture did not start"
-    yield port
-    p.terminate()
+    yield _serve_m2("vuln")
 
 
 @pytest.fixture(scope="module")
 def safe_port():
-    port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "modern2_fixture.py"),
-                "--mode", "safe", "--port", str(port)])
-    assert _wait_port(port), "safe fixture did not start"
-    yield port
-    p.terminate()
+    yield _serve_m2("safe")
 
 
 def _battery(port):
@@ -242,11 +359,10 @@ def rebind_env():
     dns.start()
     probe = _ProbeListener(ip="127.0.0.2", port=0)
     probe.start()
-    port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
-                "--role", "vuln", "--dns-port", str(dns.port),
-                "--http-port", str(port)])
-    assert _wait_port(port), "rebind vuln fetcher did not start"
+    port, p, _errf = _spawn_port(
+        [os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
+         "--role", "vuln", "--dns-port", str(dns.port)],
+         port_flag="--http-port")
     yield dns, probe, p, port
     p.terminate()
 
@@ -266,12 +382,11 @@ def test_3b_blue_safe_fetcher_pins_the_validated_address():
     dns.start()
     probe = _ProbeListener(ip="127.0.0.2", port=0)
     probe.start()
-    port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
-                "--role", "safe", "--dns-port", str(dns.port),
-                "--http-port", str(port)])
+    port, p, _errf = _spawn_port(
+        [os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
+         "--role", "safe", "--dns-port", str(dns.port)],
+         port_flag="--http-port")
     try:
-        assert _wait_port(port), "rebind safe fetcher did not start"
         vuln, detail = rebind_toctou_probe(
             f"http://127.0.0.1:{port}/fetch", dns, probe, timeout=8.0)
         assert not vuln, detail
@@ -354,12 +469,11 @@ def test_adversarial_A5_flip_after_must_match_query_count():
     dns.start()
     probe = _ProbeListener(ip="127.0.0.2", port=0)
     probe.start()
-    port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
-                "--role", "vuln", "--dns-port", str(dns.port),
-                "--http-port", str(port)])
+    port, p, _errf = _spawn_port(
+        [os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
+         "--role", "vuln", "--dns-port", str(dns.port)],
+         port_flag="--http-port")
     try:
-        assert _wait_port(port)
         vuln, _detail = rebind_toctou_probe(
             f"http://127.0.0.1:{port}/fetch", dns, probe, timeout=6.0)
         assert not vuln          # the miss is the pinned, documented outcome
@@ -394,12 +508,11 @@ def test_adversarial_A6_pinned_public_fetch_never_hits_internal():
                 return
 
     threading.Thread(target=_serve, daemon=True).start()
-    port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
-                "--role", "safe", "--dns-port", str(dns.port),
-                "--http-port", str(port)])
+    port, p, _errf = _spawn_port(
+        [os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
+         "--role", "safe", "--dns-port", str(dns.port)],
+         port_flag="--http-port")
     try:
-        assert _wait_port(port)
         target = f"http://rebind.burhan.test:{up_port}/x"
         _engine().send(RequestMutation(
             endpoint=Endpoint(
