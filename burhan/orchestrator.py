@@ -2196,24 +2196,30 @@ def doctor(allow_private=False) -> dict:
         add("dns_resolution", True, "resolved scanme.nmap.org")
     except Exception as e:
         add("dns_resolution", False, str(e)[:80], "check /etc/resolv.conf")
-    # outbound TCP — bounded retry (r18-11): a single 8s timeout on a CI
-    # runner (macOS runners show transient egress blips) must not report
-    # a false FAIL/DEGRADED; 3 attempts with a 2s pause is still fast on
-    # a truly-offline machine. Same bounded-poll shape as r18-8.9.
+    # outbound TCP (r18-12): scanme.nmap.org serves both 80 and 443;
+    # the Linux Engine job's network policy passes DNS and 443 but
+    # blocks port 80 outright ("Network is unreachable", errno 101 —
+    # not a transient blip; r18-11's retries can't help a hard block).
+    # So: try 443 FIRST (works in both open and CI-restricted
+    # environments), fall back to 80, bounded 2 attempts each.
     egress_err = ""
-    for attempt in range(3):
-        try:
-            s = socket.create_connection(("scanme.nmap.org", 80), timeout=8); s.close()
-            add("network_egress", True,
-                f"TCP connect scanme.nmap.org:80 OK (attempt {attempt + 1}/3)")
-            egress_err = ""
+    egress_done = False
+    for port in (443, 80):
+        for attempt in range(2):
+            try:
+                s = socket.create_connection(("scanme.nmap.org", port), timeout=8); s.close()
+                add("network_egress", True,
+                    f"TCP connect scanme.nmap.org:{port} OK (attempt {attempt + 1}/2)")
+                egress_done = True
+                break
+            except Exception as e:  # safe: network error — recorded into egress_err, retried, surfaced in the check detail (not swallowed)
+                egress_err = f"port {port} attempt {attempt + 1}/2: {str(e)[:55]}"
+                if attempt < 1:
+                    time.sleep(2)
+        if egress_done:
             break
-        except Exception as e:  # safe: transient network error — recorded into egress_err, retried, surfaced in the check detail (not swallowed)
-            egress_err = f"attempt {attempt + 1}/3: {str(e)[:60]}"
-            if attempt < 2:
-                time.sleep(2)
-    if egress_err:
-        add("network_egress", False, egress_err, "check outbound firewall/proxy rules")
+    if not egress_done:
+        add("network_egress", False, egress_err, "check outbound firewall/proxy rules (443 and 80 both blocked)")
     # TLS
     try:
         ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
