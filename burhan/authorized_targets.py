@@ -115,6 +115,27 @@ def _is_loopback_or_private(host: str) -> bool:
     return ip.is_private or ip.is_loopback
 
 
+def _normalize_page_text(page_text: str) -> str:
+    """r18-P6 (the live ginandjuice.shop finding): the pinned quote is
+    PLAIN TEXT, the live page is HTML — the real page renders 'web
+    vulnerability scanners' as web&nbsp;vulnerability&nbsp;scanners, so
+    the verbatim `required in page` match failed against a page that
+    still carries the exact permission sentence. Normalization happens
+    ON THE PAGE SIDE ONLY (the pinned quote is compared verbatim, never
+    re-interpreted): decode the standard entities, strip tags, collapse
+    whitespace. A quote pinned from the NORMALIZED text still matches;
+    a page that dropped the sentence still fails — the gate stays
+    fail-closed, it just stops failing on encoding artifacts."""
+    import html as _html
+    import re as _re
+    try:
+        txt = _html.unescape(page_text)
+    except Exception:            # noqa: BLE001 — unescape cannot fail on str
+        txt = page_text
+    txt = _re.sub(r"<[^>]+>", " ", txt)
+    return _re.sub(r"\s+", " ", txt)
+
+
 def _candidate_permission_sentence(page_text: str) -> str:
     """For pending-quote-pin entries: print what the live page actually
     says around permission-ish vocabulary — observed evidence for the
@@ -183,9 +204,11 @@ def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
                                % (t["id"],
                                   _candidate_permission_sentence(page))), \
                     t["id"]
-            if required in page:
+            if required in page or required in _normalize_page_text(page):
                 return True, ("scope page fetched live, pinned permission "
-                              "quote verified verbatim"), t["id"]
+                              "quote verified verbatim (HTML-entity and "
+                              "whitespace normalized on the page side)"), \
+                    t["id"]
             return False, ("registry entry '%s': the pinned permission "
                            "quote is NO LONGER on the live page — the "
                            "target's published policy may have changed; "

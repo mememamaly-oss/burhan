@@ -6613,3 +6613,29 @@ of real platform findings on the very first runs:
   recurs, the follow-up is capturing fixture stderr in the readiness
   helper. Finding 1 is fully root-caused (errno 49 is deterministic
   on default macOS lo0 config).
+## 2026-11-08 — Round 18 P6: the live-validation authorization findings
+
+- THE HARD RULE held first: before ANY scan, the gate re-verified each
+  target's proof live. Results (real, from this sandbox):
+  * ginandjuice.shop — REFUSED at first: the pinned permission quote
+    was reported as no longer on the live page. ROOT CAUSE (a REAL
+    gate defect this round): the live page carries the exact sentence
+    but HTML-encoded — 'web&nbsp;vulnerability&nbsp;scanners' vs the
+    pinned plain-text quote; the verbatim string match failed on an
+    encoding artifact while the published permission was UNCHANGED.
+    RED (test pinning the live page shape, failing pre-fix) -> BLUE
+    (page-side normalization: entity decode + tag strip + whitespace
+    collapse; the QUOTE side stays verbatim — a dropped sentence still
+    refuses, fail-closed preserved; a franken-page of out-of-order
+    fragments cannot forge a match). 3/3 permanent tests; the REAL
+    live gate now authorizes.
+  * vulnweb.com — still pending-quote-pin BY DESIGN: the registry
+    records that the 2026-11-03 sandbox could not fetch the page and
+    the owner must pin the observed candidate sentence. This sandbox
+    fetched www.vulnweb.com and TIMED OUT (egress), so the gate
+    refused — correctly. NO vulnweb scan this round; the refusal is
+    the documented-correct outcome, not a gap.
+  * self-hosted fixtures — ownership proof, exercised by the canonical
+    fixture CI runs (the real-target job ran green on #81's commit).
+- The consolidated live scan campaign (every layer) against
+  ginandjuice.shop follows on this branch with the fixed gate.
