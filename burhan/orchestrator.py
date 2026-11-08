@@ -2208,8 +2208,8 @@ def doctor(allow_private=False) -> dict:
                 f"TCP connect scanme.nmap.org:80 OK (attempt {attempt + 1}/3)")
             egress_err = ""
             break
-        except Exception as e:
-            egress_err = str(e)[:80]
+        except Exception as e:  # safe: transient network error — recorded into egress_err, retried, surfaced in the check detail (not swallowed)
+            egress_err = f"attempt {attempt + 1}/3: {str(e)[:60]}"
             if attempt < 2:
                 time.sleep(2)
     if egress_err:
