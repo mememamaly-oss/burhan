@@ -472,13 +472,22 @@ class BrowserEngine:
             return None
         self._sync_session_cookies(url)
         xhrs: list[dict] = []
-        page = self._context.new_page()
-        page.on("request", lambda req: xhrs.append({
-            "method": req.method, "url": req.url,
-            "post_data": req.post_data or "",
-            "content_type": (req.headers or {}).get("content-type", ""),
-        }) if req.resource_type in ("xhr", "fetch") else None)
+        # r18-8.8: the WHOLE render body is guarded now. The macOS run-6
+        # log (job ...128718604644) showed the r15 SIGINT test failing
+        # with rc=1 (not 130): the wakeup monitor SIGKILLs the driver the
+        # instant SIGINT lands, and any playwright call raised BEFORE the
+        # old try-block started — new_page()/page.on() sat outside it —
+        # escaped render() through render_merge (unguarded) up to the
+        # CLI's generic `except Exception: raise` => exit 1. Linux wins
+        # the race differently (dispatch already inside goto), which is
+        # why the same code passed locally: rc=130, browser cleaned.
         try:
+            page = self._context.new_page()
+            page.on("request", lambda req: xhrs.append({
+                "method": req.method, "url": req.url,
+                "post_data": req.post_data or "",
+                "content_type": (req.headers or {}).get("content-type", ""),
+            }) if req.resource_type in ("xhr", "fetch") else None)
             page.goto(url, wait_until="load", timeout=int(self.timeout * 1000))
             page.wait_for_timeout(settle_ms)
             self.pages_rendered += 1
@@ -492,14 +501,22 @@ class BrowserEngine:
         except Exception as e:
             self.bus.emit("BrowserRenderError", url=url, error=f"{type(e).__name__}: {e}"[:200])
             return None
+            # r18-8.8 note: no page.close() here — after an interrupt the
+            # sync channel is dead and ANY further playwright call (even
+            # close on an already-killed driver) wedges forever; the old
+            # finally-block did this correctly for the sigint case and it
+            # is preserved below for the ordinary (non-interrupt) one.
         finally:
             # R15-4: after an interrupt, ANY further sync-playwright call
             # wedges forever (the signal tore the dispatcher fiber; proven
             # live — page.close on a dead driver still hangs). The driver
             # is already SIGKILLed by the monitor, so the page dies with
             # it; calling page.close() here would hang the scan.
-            if not sigint_seen():
-                page.close()
+            if not sigint_seen() and "page" in locals() and page is not None:
+                try:
+                    page.close()
+                except Exception:  # noqa: BLE001 — teardown must never raise
+                    pass
 
     def render_merge(self, pages: list[str], seed_host: str, existing: dict) -> list[Endpoint]:
         """Render pages and return NEW endpoints discovered only at runtime
@@ -601,7 +618,15 @@ class BrowserEngine:
             if self._context is None:
                 return None
             self._sync_session_cookies(target)
-            page = self._context.new_page()
+            # r18-8.8: same guard as render() — a SIGINT-kill of the driver
+            # can land between new_page() and the try-block and escape as
+            # an unhandled exception (the rc=1 leak, macOS run 6)
+            try:
+                page = self._context.new_page()
+            except Exception as e:  # noqa: BLE001 — probe must never crash the scan
+                self.bus.emit("BrowserRenderError", url=target,
+                              error=f"new_page: {type(e).__name__}: {e}"[:150])
+                return None
             try:
                 page.goto(target, wait_until="load", timeout=int(self.timeout * 1000))
                 page.wait_for_timeout(800)          # let onerror fire deterministically
