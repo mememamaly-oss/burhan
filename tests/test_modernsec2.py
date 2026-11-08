@@ -198,24 +198,90 @@ _ALIAS = pytest.mark.skipif(not _loopback_alias_supported(),
 
 
 # ------------------------------------------------- battery RED/BLUE over HTTP
+# r18-8.6: the battery fixtures now run IN-PROCESS (a daemon thread +
+# ThreadingHTTPServer on an ephemeral port) — the exact shape of the
+# A4 reflector test that has passed on macOS in every run. Four full
+# macOS runs (through 798f8fa, jobs ...128681859580 et al.) proved the
+# modern2_fixture.py CHILD PROCESS never reaches its first print on the
+# macOS runner (alive, zero stdout, zero stderr, 30s+) while subprocess
+# spawns of vulnapp.py and burhan.cli succeed in the same runs — a
+# macOS-specific interpreter-spawn hang this test file cannot fix from
+# the outside. The battery needs HTTP endpoints; it does not need
+# process isolation (unlike the C1-C3 fault-injection tests, which keep
+# their subprocesses and pass). Serving in-process removes the hang by
+# construction; the fixture module stays importable for the CLI shape.
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+
+class _M2Handler(BaseHTTPRequestHandler):
+    mode = "vuln"
+
+    def log_message(self, *a):        # noqa: N802 — silence test servers
+        pass
+
+    def _send(self, code, doc, cookies=None):
+        body = json.dumps(doc).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        if cookies:
+            self.send_header("Set-Cookie", cookies)
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):                 # noqa: N802
+        from modern2_fixture import SAFE_SECRET, VULN_SECRET, hs256
+        if self.path.startswith("/login"):
+            secret = VULN_SECRET if self.mode == "vuln" else SAFE_SECRET
+            tok = hs256(secret, {"sub": "u1", "role": "user"})
+            return self._send(200, {"ok": True, "token": tok},
+                              cookies=f"sid={tok}; Path=/")
+        if self.path.startswith("/api/users"):
+            if self.mode == "vuln":
+                return self._send(200, [
+                    {"id": 1, "email": "a@ex.test",
+                     "password_hash": "$2b$12$fixtureNotARealHashValue000000",
+                     "is_internal": True}])
+            return self._send(200, [{"id": 1, "email": "a@ex.test"}])
+        if self.path.startswith("/graphql"):
+            return self._send(200, {"data": None,
+                                    "errors": [{"message": "POST required"}]})
+        return self._send(404, {"error": "not found"})
+
+    def do_POST(self):                # noqa: N802
+        import re as _re
+        if self.path.startswith("/graphql"):
+            n = int(self.headers.get("Content-Length", "0"))
+            try:
+                doc = json.loads(self.rfile.read(n) or b"{}")
+            except Exception:
+                return self._send(400, {"errors": [{"message": "bad json"}]})
+            q = str(doc.get("query", ""))
+            found = _re.findall(r"\ba(\d+)\s*:", q)
+            if self.mode == "safe" and len(found) > 5:
+                return self._send(200, {"errors": [{
+                    "message": "query complexity limit: max 5 aliases"}]})
+            data = {f"a{i}": "__Typename__" for i in found}
+            return self._send(200, {"data": data})
+        return self._send(404, {"error": "not found"})
+
+
+def _serve_m2(mode: str) -> int:
+    handler = type(f"H_{mode}", (_M2Handler,), {"mode": mode})
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    srv.daemon_threads = True
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv.server_address[1]
+
+
 @pytest.fixture(scope="module")
 def vuln_port():
-    # r18-8.5: child-chosen port (announced on stdout) — no parent/child
-    # bind race; full diagnostics if it dies or stays silent
-    port, p, _errf = _spawn_port(
-        [os.path.join(ROOT, "fixtures", "modern2_fixture.py"),
-         "--mode", "vuln"])
-    yield port
-    p.terminate()
+    yield _serve_m2("vuln")
 
 
 @pytest.fixture(scope="module")
 def safe_port():
-    port, p, _errf = _spawn_port(
-        [os.path.join(ROOT, "fixtures", "modern2_fixture.py"),
-         "--mode", "safe"])
-    yield port
-    p.terminate()
+    yield _serve_m2("safe")
 
 
 def _battery(port):
