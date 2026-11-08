@@ -83,7 +83,12 @@ def run_scan(tag: str, out_dir: Path) -> dict:
     # as the r18-8.2 readiness windows: poll until the fixture answers
     # or the process dies, with a hard bound. 60s covers cold APFS/spot
     # first-launch costs; 1.5s was tuned on Linux.
+    # (8.9b: the retry loop moved the probe INSIDE this block, which
+    # orphaned the old bare `import urllib.request` below it — the first
+    # 8.9 push failed the Linux repro job with "module 'urllib' has no
+    # attribute 'request'". Both submodules, imported here, once.)
     import urllib.error
+    import urllib.request
     deadline = time.time() + 60.0
     probe_exc = None
     while time.time() < deadline:
