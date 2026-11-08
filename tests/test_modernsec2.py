@@ -53,14 +53,37 @@ def _free_port() -> int:
     return port
 
 
-def _spawn(args) -> subprocess.Popen:
+def _spawn(args) -> tuple[subprocess.Popen, "pytest.TempPathFactory"]:
+    """r18-8.4: stderr now goes to a real file, surfaced in the failure
+    message when readiness fails. The two full macOS runs (jobs
+    128608150967/128608162659) lost the actual fixture-died reason to
+    DEVNULL — the P8.2 follow-up this closes. Returns (proc, stderr-path);
+    callers that don't need the path may ignore it."""
+    import tempfile
+    errfile = tempfile.NamedTemporaryFile(
+        prefix="m2-fixture-stderr-", suffix=".log", delete=False)
     p = subprocess.Popen([sys.executable] + args,
                          stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL)
-    return p
+                         stderr=errfile)
+    errfile.close()
+    p._burhan_stderr_path = errfile.name        # surfaced on failure
+    return p, errfile.name
 
 
-def _wait_port(port, timeout=10.0) -> bool:
+def _stderr_tail(path: str, limit: int = 400) -> str:
+    try:
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            return fh.read()[-limit:]
+    except OSError:
+        return "(stderr file unreadable)"
+
+
+def _wait_port(port, errfile: str | None = None, timeout=20.0) -> bool:
+    """r18-8.4: 10s -> 20s. The macOS ARM runner failed vuln/safe
+    readiness within the old 10s window in BOTH full runs while the same
+    fixtures start in ~1s on Linux — a cold-runner interpreter+import
+    cost, not a fixture defect; P8.2's 6->15s extension of the OTHER two
+    spawn helpers missed this one."""
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -150,9 +173,10 @@ _ALIAS = pytest.mark.skipif(not _loopback_alias_supported(),
 @pytest.fixture(scope="module")
 def vuln_port():
     port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "modern2_fixture.py"),
-                "--mode", "vuln", "--port", str(port)])
-    assert _wait_port(port), "vuln fixture did not start"
+    p, errf = _spawn([os.path.join(ROOT, "fixtures", "modern2_fixture.py"),
+                      "--mode", "vuln", "--port", str(port)])
+    assert _wait_port(port, errf), \
+        f"vuln fixture did not start — stderr tail: {_stderr_tail(errf)}"
     yield port
     p.terminate()
 
@@ -160,9 +184,10 @@ def vuln_port():
 @pytest.fixture(scope="module")
 def safe_port():
     port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "modern2_fixture.py"),
-                "--mode", "safe", "--port", str(port)])
-    assert _wait_port(port), "safe fixture did not start"
+    p, errf = _spawn([os.path.join(ROOT, "fixtures", "modern2_fixture.py"),
+                      "--mode", "safe", "--port", str(port)])
+    assert _wait_port(port, errf), \
+        f"safe fixture did not start — stderr tail: {_stderr_tail(errf)}"
     yield port
     p.terminate()
 
@@ -243,10 +268,11 @@ def rebind_env():
     probe = _ProbeListener(ip="127.0.0.2", port=0)
     probe.start()
     port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
-                "--role", "vuln", "--dns-port", str(dns.port),
-                "--http-port", str(port)])
-    assert _wait_port(port), "rebind vuln fetcher did not start"
+    p, errf = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
+                      "--role", "vuln", "--dns-port", str(dns.port),
+                      "--http-port", str(port)])
+    assert _wait_port(port, errf), \
+        f"rebind vuln fetcher did not start — stderr tail: {_stderr_tail(errf)}"
     yield dns, probe, p, port
     p.terminate()
 
@@ -267,11 +293,12 @@ def test_3b_blue_safe_fetcher_pins_the_validated_address():
     probe = _ProbeListener(ip="127.0.0.2", port=0)
     probe.start()
     port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
-                "--role", "safe", "--dns-port", str(dns.port),
-                "--http-port", str(port)])
+    p, errf = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
+                      "--role", "safe", "--dns-port", str(dns.port),
+                      "--http-port", str(port)])
     try:
-        assert _wait_port(port), "rebind safe fetcher did not start"
+        assert _wait_port(port, errf), \
+            f"rebind safe fetcher did not start — stderr tail: {_stderr_tail(errf)}"
         vuln, detail = rebind_toctou_probe(
             f"http://127.0.0.1:{port}/fetch", dns, probe, timeout=8.0)
         assert not vuln, detail
@@ -355,11 +382,11 @@ def test_adversarial_A5_flip_after_must_match_query_count():
     probe = _ProbeListener(ip="127.0.0.2", port=0)
     probe.start()
     port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
-                "--role", "vuln", "--dns-port", str(dns.port),
-                "--http-port", str(port)])
+    p, errf = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
+                      "--role", "vuln", "--dns-port", str(dns.port),
+                      "--http-port", str(port)])
     try:
-        assert _wait_port(port)
+        assert _wait_port(port, errf), _stderr_tail(errf)
         vuln, _detail = rebind_toctou_probe(
             f"http://127.0.0.1:{port}/fetch", dns, probe, timeout=6.0)
         assert not vuln          # the miss is the pinned, documented outcome
@@ -395,11 +422,11 @@ def test_adversarial_A6_pinned_public_fetch_never_hits_internal():
 
     threading.Thread(target=_serve, daemon=True).start()
     port = _free_port()
-    p = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
-                "--role", "safe", "--dns-port", str(dns.port),
-                "--http-port", str(port)])
+    p, errf = _spawn([os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
+                      "--role", "safe", "--dns-port", str(dns.port),
+                      "--http-port", str(port)])
     try:
-        assert _wait_port(port)
+        assert _wait_port(port, errf), _stderr_tail(errf)
         target = f"http://rebind.burhan.test:{up_port}/x"
         _engine().send(RequestMutation(
             endpoint=Endpoint(

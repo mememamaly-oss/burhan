@@ -150,7 +150,13 @@ def test_c3_concurrent_store_writers_with_killed_transaction(tmp_path):
         p1.kill()                            # fault 2: mid-transaction kill
         rc1 = p1.wait(timeout=30)
         assert rc1 == -9
-        rc2 = p2.wait(timeout=120)
+        # r18-8.4: 120s -> 240s. Both full macOS runs timed the survivor
+        # out at 120 (jobs 128608150967/128608162659, identical
+        # fingerprints) — the DELAY_MS=150 double-writer workload on the
+        # ARM runner simply needs longer. 240 keeps this a bounded wait
+        # without flaking on a 2x-slower host; a real deadlock still
+        # fails the gate.
+        rc2 = p2.wait(timeout=240)
         assert rc2 == 0, "the surviving writer must complete cleanly"
         # the store survived the killed transaction and is readable
         st = Store(str(db))
