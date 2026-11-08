@@ -656,8 +656,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install engine + test dependencies
-        run: pip install -r requirements-dev.txt
+      - name: Install engine + test dependencies (+ playwright/chromium)
+        # r18-8.7: the run-5 log (job ...128694559629) settled it — the
+        # suite went 521/0 GREEN for the first time and exposed the NEXT
+        # gate: the benchmark demands the deterministic record
+        # TP=38/FP=0, but two ground-truth detections (xss_dom @
+        # /vuln/dom-write and the browser-discovered /vuln/jsform-reflect
+        # surface) REQUIRE the render engine, exactly as ci.yml's own
+        # fixture-job comment says. This job installed no browser, so the
+        # doctor warned "playwright/chromium unavailable" and the scan
+        # landed at TP=36/FN=2. Same install as the Linux fixture job.
+        run: |
+          pip install -r requirements-dev.txt playwright
+          python3 -m playwright install --with-deps chromium
 
       - name: Engine doctor (19 checks)
         run: python3 -m burhan.cli doctor
