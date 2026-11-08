@@ -2196,12 +2196,24 @@ def doctor(allow_private=False) -> dict:
         add("dns_resolution", True, "resolved scanme.nmap.org")
     except Exception as e:
         add("dns_resolution", False, str(e)[:80], "check /etc/resolv.conf")
-    # outbound TCP
-    try:
-        s = socket.create_connection(("scanme.nmap.org", 80), timeout=8); s.close()
-        add("network_egress", True, "TCP connect scanme.nmap.org:80 OK")
-    except Exception as e:
-        add("network_egress", False, str(e)[:80])
+    # outbound TCP — bounded retry (r18-11): a single 8s timeout on a CI
+    # runner (macOS runners show transient egress blips) must not report
+    # a false FAIL/DEGRADED; 3 attempts with a 2s pause is still fast on
+    # a truly-offline machine. Same bounded-poll shape as r18-8.9.
+    egress_err = ""
+    for attempt in range(3):
+        try:
+            s = socket.create_connection(("scanme.nmap.org", 80), timeout=8); s.close()
+            add("network_egress", True,
+                f"TCP connect scanme.nmap.org:80 OK (attempt {attempt + 1}/3)")
+            egress_err = ""
+            break
+        except Exception as e:
+            egress_err = str(e)[:80]
+            if attempt < 2:
+                time.sleep(2)
+    if egress_err:
+        add("network_egress", False, egress_err, "check outbound firewall/proxy rules")
     # TLS
     try:
         ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
