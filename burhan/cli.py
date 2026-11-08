@@ -43,7 +43,7 @@ def ensure_fixture(base_url="http://127.0.0.1:8777"):
     proc = subprocess.Popen([sys.executable, fixture],
                             env={**os.environ, "PORT": str(port)},
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    for _ in range(60):                               # wait up to ~6s for readiness
+    for _ in range(150):                              # r18-8.2: wait up to ~15s for readiness
         if _port_open(host, port):
             return proc
         if proc.poll() is not None:
@@ -61,7 +61,7 @@ def _spawn_local_fixture(port: int):
     proc = subprocess.Popen([sys.executable, fixture],
                             env={**os.environ, "PORT": str(port)},
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    for _ in range(60):
+    for _ in range(150):                              # r18-8.2: same 15s window
         if _port_open("127.0.0.1", port):
             return proc
         if proc.poll() is not None:
@@ -124,7 +124,7 @@ def run_benchmark(base_url="http://127.0.0.1:8777", out="results/benchmark.json"
 
 def _run_benchmark_inner(base_url, out, strategy_path, timeout, label, spawned,
                          race=False, race_parallel=10, race_variance=0.005, max_requests=0):
-    gt = json.load(open(os.path.join(os.path.dirname(__file__), "..", "benchmarks", "ground_truth.json")))
+    gt = json.load(open(os.path.join(os.path.dirname(__file__), "..", "benchmarks", "ground_truth.json"), encoding="utf-8"))
     # Phase 49: the benchmark exercises the FULL platform — OAST armed, so the blind
     # XXE ground-truth entry (/vuln/oob-stock) is confirmable out-of-band.
     from burhan.oast import OastServer
@@ -675,11 +675,11 @@ def main():
                 import urllib.request as _ur
                 openapi_spec = json.loads(_ur.urlopen(a.openapi_spec, timeout=a.timeout).read().decode("utf-8", "replace"))
             else:
-                openapi_spec = json.load(open(a.openapi_spec))
+                openapi_spec = json.load(open(a.openapi_spec, encoding="utf-8"))
         # Phase 56: multi-user authorization config (accounts + login flow)
         authz_cfg = None
         if a.authz_accounts:
-            authz_cfg = json.load(open(a.authz_accounts))
+            authz_cfg = json.load(open(a.authz_accounts, encoding="utf-8"))
         cfg = ScanConfig(allow_private=a.allow_private, max_pages=a.max_pages,
                          crawl=not a.no_crawl, timeout=a.timeout, seed=a.seed,
                          strategy_path=a.strategy_path, browser=not a.no_browser,
@@ -1115,7 +1115,7 @@ def main():
                 g = replay_finding_gated(proof)
             except ReplayRateLimited as e:
                 print(json.dumps({"replay": "RATE_LIMITED", "reason": str(e)}))
-                raise SystemExit(3)
+                raise SystemExit(3) from e
             print(json.dumps(g, indent=1, ensure_ascii=False))
             sys.exit(0 if g.get("replay") == "REPRODUCTION_VERIFIED" else 2)
         if a.replay:

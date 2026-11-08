@@ -109,6 +109,15 @@ def _posix(p: str) -> str:
     """
     return p.replace("\\", "/") if "\\" in p else p
 
+def _engine_scoped(p: str) -> bool:
+    """True when the path targets the engine trees (burhan/** or src/**).
+    Works for repo-relative paths ('burhan/x.py') AND absolute temp paths
+    from the r18 part-1 tests ('/tmp/.../burhan/x.py') — matches on the
+    path COMPONENT, not the string prefix."""
+    parts = _posix(p).split("/")
+    return "burhan" in parts or "src" in parts
+
+
 def tracked_files() -> list[str]:
     out = subprocess.run(["git", "ls-files"], cwd=ROOT,
                          capture_output=True, text=True).stdout.splitlines()
@@ -138,8 +147,13 @@ class Hit:
 def scan_py(path: str) -> list[Hit]:
     path = _posix(path)
     hits: list[Hit] = []
+    # r18 part-1 tests scan temp modules OUTSIDE the repo; an absolute
+    # path is read as-is (the engine-scope walkers key off the path's
+    # leading 'burhan/'/'src/' RELATIVE form, so a temp file under a
+    # burhan/ dir keeps the scope contract intact either way)
+    full = path if os.path.isabs(path) else os.path.join(ROOT, path)
     try:
-        src = open(os.path.join(ROOT, path), encoding="utf-8").read()
+        src = open(full, encoding="utf-8").read()
         tree = ast.parse(src)
     except Exception as e:  # noqa: BLE001 — parse failure IS the hit
         return [Hit(path, 0, "PARSE_ERROR", str(e)[:120], "-")]
@@ -320,7 +334,7 @@ def scan_py(path: str) -> list[Hit]:
         one-off evidence-collection scripts under scripts/ are out of
         it, their content is ASCII today).
         """
-        if not path.startswith(("burhan/", "src/")):
+        if not _engine_scoped(path):
             return
 
         def _has_encoding_kw(call: ast.Call) -> bool:
@@ -422,6 +436,218 @@ def scan_py(path: str) -> list[Hit]:
                             "handler reads this option but no "
                             "add_argument defines it in this file"))
 
+
+    # ---- ROUND 18, PART 1: seven new permanent classes -----------------
+    # Owner-ordered (r18 maximum-rigor sweep). Each walker is scoped to the
+    # shapes this codebase actually writes (calibrated on the live tree
+    # before wiring in — see worklog r18): every raw hit is hand-reviewed;
+    # true positives get fixed, benign shapes get a ledger entry with the
+    # specific reason, per the project's documented-benign discipline.
+
+    def walk_mutable_default(fn: ast.FunctionDef | ast.AsyncFunctionDef):
+        """Class (f) — MUTABLE_DEFAULT_ARG (r18-1.1): list/dict/set literal
+        as a default argument value. The default object is created ONCE at
+        def-time and shared across every call that omits the argument — a
+        mutation inside the function leaks into later calls. Calibrated
+        truth: zero hits on the current engine tree (the class lands as a
+        permanent tripwire for NEW code, like ENTRYPOINT_UNREACHABLE did
+        for shapes that were already fixed)."""
+        for d in list(fn.args.defaults) + [d for d in fn.args.kw_defaults
+                                           if d is not None]:
+            if isinstance(d, (ast.List, ast.Dict, ast.Set)):
+                hits.append(Hit(path, d.lineno, "MUTABLE_DEFAULT_ARG",
+                                code_at(d), fn.name,
+                                "mutable default (shared across calls) — "
+                                "use None + create inside the function"))
+
+    def walk_float_equality(fn: ast.FunctionDef | ast.AsyncFunctionDef):
+        """Class (g) — FLOAT_EQUALITY (r18-1.2): `x == <float literal>` /
+        `<float literal> != x` where x is computed (Name/Attribute/Call/
+        Subscript — not another literal). Exact ==/!= on computed floats is
+        representation-fragile. Deliberately NARROW: comparing against the
+        literal 0.0/1.0 sentinels after a sum, or inside a parser accepting
+        a documented exact form, is a declared design contract — those get
+        ledger entries naming the contract, not silent passes."""
+        for node in ast.walk(fn):
+            if not (isinstance(node, ast.Compare)
+                    and len(node.ops) == 1
+                    and isinstance(node.ops[0], (ast.Eq, ast.NotEq))):
+                continue
+            for side, other in ((node.left, node.comparators[0]),
+                                (node.comparators[0], node.left)):
+                if isinstance(side, ast.Constant) and isinstance(side.value, float):
+                    if isinstance(other, (ast.Name, ast.Attribute, ast.Call,
+                                          ast.Subscript)):
+                        hits.append(Hit(path, node.lineno, "FLOAT_EQUALITY",
+                                        code_at(node), fn.name,
+                                        "exact ==/!= on a computed float"))
+                    break
+
+    def walk_lossy_rebind(tree_mod: ast.Module):
+        """Class (h) — BARE_EXCEPT_REBIND (r18-1.3): inside an except
+        handler, `raise NewType(...)` WITHOUT `from` and WITHOUT the
+        caught name interpolated into the new exception's construction —
+        the original cause is lost (distinct from SILENT_EXCEPT's full
+        swallow). A bare `raise` (re-raise) and a message that embeds the
+        caught exception both keep the cause and are not hits."""
+        for node in ast.walk(tree_mod):
+            if not isinstance(node, ast.ExceptHandler):
+                continue
+            caught = node.name or ""
+            for sub in ast.walk(node):
+                if not (isinstance(sub, ast.Raise) and sub.exc is not None
+                        and sub.cause is None):
+                    continue
+                if isinstance(sub.exc, ast.Name):
+                    continue  # bare `raise` / `raise e` keeps the chain
+                seg = ast.get_source_segment(src, sub.exc) or ""
+                if caught and re.search(r"\b%s\b" % re.escape(caught), seg):
+                    continue  # the cause is embedded in the new message
+                hits.append(Hit(path, sub.lineno, "BARE_EXCEPT_REBIND",
+                                code_at(sub), fn_of(sub),
+                                "re-raise drops the original cause (no "
+                                "`from`, cause name not embedded)"))
+
+    def walk_unbounded_growth(tree_mod: ast.Module):
+        """Class (i) — UNBOUNDED_GROWTH (r18-1.4): a MODULE-LEVEL
+        list/dict/set appended to inside functions with no cap/eviction.
+        Module-level state lives for the process lifetime, so an append
+        per request/call grows without bound — the exact shape of Round
+        15's unbounded-task-growth concern, made a permanent static check.
+        Scoped tight on purpose: instance attributes (self.x) have an
+        object lifetime and per-object bounds are a design question, not
+        a static certainty; local collections die with the frame. Only
+        the genuinely unbounded shape (process-lifetime storage) fails
+        the gate."""
+        mod_names = set()
+        for node in tree_mod.body:
+            if isinstance(node, ast.Assign):
+                for t in node.targets:
+                    if isinstance(t, ast.Name) and isinstance(
+                            node.value, (ast.List, ast.Dict, ast.Set,
+                                         ast.ListComp, ast.DictComp,
+                                         ast.SetComp)):
+                        mod_names.add(t.id)
+        if not mod_names:
+            return
+        for fn in ast.walk(tree_mod):
+            if not isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            for n in ast.walk(fn):
+                if (isinstance(n, ast.Call)
+                        and isinstance(n.func, ast.Attribute)
+                        and n.func.attr in ("append", "add", "extend",
+                                            "insert")
+                        and isinstance(n.func.value, ast.Name)
+                        and n.func.value.id in mod_names):
+                    hits.append(Hit(path, n.lineno, "UNBOUNDED_GROWTH",
+                                    code_at(n), fn.name,
+                                    f"module-level '{n.func.value.id}' "
+                                    f"grows per call with no cap"))
+
+    def walk_windows_reserved(tree_mod: ast.Module):
+        """Class (j) — WINDOWS_RESERVED_NAME (r18-1.5): a DYNAMICALLY
+        BUILT path (JoinedStr / non-constant os.path.join / string +)
+        passed to a path sink (open/mkdir/makedirs/write_text/read_text).
+        A constant path is reviewable in-tree and the tracked tree's
+        longest is 89 chars (no 260 risk); a f-string path interpolates
+        data (a run id, a target host, an advisory id) and can collide
+        with CON/PRN/AUX/NUL/COM1-9/LPT1-9 or exceed MAX_PATH on the
+        now-supported Windows surface. The sink list stays minimal to
+        keep the class signal: file/dir creation, not reads (a failed
+        read of a reserved name is a clean error, not corruption)."""
+        RESERVED = ("CON", "PRN", "AUX", "NUL",
+                    *(f"COM{i}" for i in range(1, 10)),
+                    *(f"LPT{i}" for i in range(1, 10)))
+        for node in ast.walk(tree_mod):
+            if not isinstance(node, ast.Call) or not node.args:
+                continue
+            fn_ = node.func
+            is_open = isinstance(fn_, ast.Name) and fn_.id == "open"
+            is_attr = isinstance(fn_, ast.Attribute) and fn_.attr in (
+                "mkdir", "makedirs", "write_text")
+            if not (is_open or is_attr):
+                continue
+            a0 = node.args[0]
+            dyn = isinstance(a0, (ast.JoinedStr, ast.BinOp)) or (
+                isinstance(a0, ast.Call) and isinstance(a0.func, ast.Attribute)
+                and a0.func.attr == "join"
+                and any(not isinstance(x, ast.Constant) for x in a0.args))
+            if not dyn:
+                continue
+            seg = (ast.get_source_segment(src, a0) or "")
+            # a sanitizer (re.sub...) on the interpolated part is the
+            # documented countermeasure — its presence right before the
+            # sink discharges the hit (the ledger discipline still sees
+            # the site via manual review of new dynamic-path sinks)
+            lines_w = seg.split("\n")
+            hits.append(Hit(path, node.lineno, "WINDOWS_RESERVED_NAME",
+                            code_at(node), fn_of(node),
+                            "dynamically built path at a file-creation "
+                            "sink — check reserved names / length on "
+                            "Windows"))
+
+    def walk_naive_datetime(fn: ast.FunctionDef | ast.AsyncFunctionDef):
+        """Class (k) — NAIVE_DATETIME (r18-1.6): datetime.now() /
+        datetime.utcnow() (no tz argument). Naive timestamps poison every
+        downstream comparison this project depends on: lifecycle
+        NEW/RECURRING/FIXED/REGRESSED classification, evidence freshness,
+        signed-report timing. Calibrated truth: zero hits on the current
+        tree — the classes landed as a tripwire (the existing code uses
+        time.time() epoch floats, which are timezone-free by design)."""
+        for node in ast.walk(fn):
+            if (isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr in ("now", "utcnow")
+                    and isinstance(node.func.value, ast.Name)
+                    and node.func.value.id == "datetime"
+                    and not node.args
+                    and not any(kw.arg == "tz" for kw in node.keywords)):
+                hits.append(Hit(path, node.lineno, "NAIVE_DATETIME",
+                                code_at(node), fn.name,
+                                "timezone-naive datetime (use "
+                                "datetime.now(timezone.utc) or epoch "
+                                "floats)"))
+
+    def walk_unencoded_read(tree_mod: ast.Module):
+        """Class (l) — UNENCODED_READ (r18-1.7): the read-side twin of
+        r17-7's UNENCODED_WRITE. open(p) in text mode / Path.read_text()
+        without encoding= decodes with the LOCALE codec — on a non-UTF-8
+        default locale the UTF-8 bytes this project's own writers (and
+        its own fixtures/evidence) produce get misdecoded into mojibake
+        BEFORE any parser runs: silent data corruption, the exact failure
+        shape r17-7 fixed on the write side. Same engine-scope rule as
+        the write class (burhan/** + src/**)."""
+        if not _engine_scoped(path):
+            return
+
+        def _read_mode(call: ast.Call) -> bool:
+            for arg in call.args[1:3]:
+                if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                    if "b" in arg.value:
+                        return False
+                    return True  # any text mode ("r"/"r+"/...) or default
+            return True  # open(p) with no mode: text read
+
+        for node in ast.walk(tree_mod):
+            if not isinstance(node, ast.Call) or \
+                    any(kw.arg == "encoding" for kw in node.keywords):
+                continue
+            if isinstance(node.func, ast.Attribute):
+                if node.func.attr == "read_text":
+                    hits.append(Hit(path, node.lineno, "UNENCODED_READ",
+                                    code_at(node), fn_of(node),
+                                    "text read with no explicit encoding "
+                                    "(locale-dependent decode — mojibake "
+                                    "before the parser runs)"))
+            elif isinstance(node.func, ast.Name):
+                if node.func.id == "open" and _read_mode(node):
+                    hits.append(Hit(path, node.lineno, "UNENCODED_READ",
+                                    code_at(node), fn_of(node),
+                                    "text read with no explicit encoding "
+                                    "(locale-dependent decode — mojibake "
+                                    "before the parser runs)"))
+
     # EVERY function in the file — module-level, nested, and class methods
     # (the round-12 sweep found the round-8 scanner's blind spot mattered:
     # memory.py/intel.py __init__ methods carried real TOCTOU sites).
@@ -430,8 +656,16 @@ def scan_py(path: str) -> list[Hit]:
             walk_first_match(node)
             walk_silent_except(node)
             walk_toctou(node)
+            walk_mutable_default(node)
+            walk_float_equality(node)
+            walk_naive_datetime(node)
     walk_cli_unreachable(tree)
     walk_unencoded_write(tree)
+    # r18 part-1 classes
+    walk_lossy_rebind(tree)
+    walk_unbounded_growth(tree)
+    walk_windows_reserved(tree)
+    walk_unencoded_read(tree)
     return hits
 
 

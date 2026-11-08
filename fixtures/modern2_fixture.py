@@ -96,6 +96,10 @@ class _Handler(BaseHTTPRequestHandler):
 def serve(mode: str, port: int):
     handler = type(f"Handler_{mode}", (_Handler,), {"mode": mode})
     srv = ThreadingHTTPServer(("127.0.0.1", port), handler)
+    # the actual bound port, for --port 0; flush matters: the parent reads
+    # this line to learn where we landed (r18-8.5)
+    print(f"modern2-{mode} listening on 127.0.0.1:{srv.server_address[1]}",
+          flush=True)
     srv.serve_forever()
 
 

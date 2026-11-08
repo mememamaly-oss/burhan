@@ -389,9 +389,9 @@ class Vault:
         aad = f"{VAULT_FORMAT}|wrap|key={key_id}"
         try:
             blob_key = aead_decrypt(wk, aad, cls._env_of(wrap))
-        except VaultError:
+        except VaultError as e:
             raise VaultError(f"unlock failed for key {key_id}: "
-                             f"wrong key file or tampered wrap")
+                             f"wrong key file or tampered wrap ({e})") from e
         v = cls(path, key_id, key_data, envelope, blob_key, None)
         v._payload = v._decrypt_blob()
         return v

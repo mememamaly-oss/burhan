@@ -55,7 +55,7 @@ def _load_rate_state() -> dict:
     if not _RATE_FILE.exists():
         return {}
     try:
-        state = json.loads(_RATE_FILE.read_text())
+        state = json.loads(_RATE_FILE.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError, ValueError) as e:
         raise RuntimeError(
             f"replay rate-limit state corrupt at {_RATE_FILE} "

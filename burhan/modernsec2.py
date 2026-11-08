@@ -379,7 +379,30 @@ class _ProbeListener(threading.Thread):
         super().__init__(daemon=True)
         self.srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.srv.bind((ip, port))
+        self.platform_single_loopback = False
+        try:
+            self.srv.bind((ip, port))
+        except OSError:
+            # r18-8.2 (the macOS finding): Linux routes all of 127/8 on
+            # lo, but macOS binds ONLY 127.0.0.1 by default — binding
+            # 127.0.0.2 raises EADDRNOTAVAIL (errno 49). The rebinding
+            # oracle needs a SECOND loopback alias to prove the safe
+            # fetcher pins the validated address (a connection to a
+            # DIFFERENT ip than the probe's would miss the listener);
+            # when the platform has no such alias the listener binds
+            # 127.0.0.1 and records the limitation for the caller.
+            if ip != "127.0.0.1":
+                # record the limitation: the oracle's DISTINCT-address
+                # semantics are unavailable here; callers reading
+                # probe.platform_single_loopback know the RED side can
+                # only prove 'connection followed the flip', and the
+                # BLUE side's no-hit assertion is still meaningful only
+                # if the flipped address is REACHABLE — tests gate on
+                # this flag and skip with the documented reason.
+                self.platform_single_loopback = True
+                self.srv.bind(("127.0.0.1", port))
+            else:
+                raise
         self.srv.listen(8)
         self.srv.settimeout(6.0)
         self.ip, self.port = self.srv.getsockname()[:2]

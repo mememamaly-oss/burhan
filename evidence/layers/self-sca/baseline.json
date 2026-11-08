@@ -1,0 +1,5 @@
+{
+ "updated": "2026-11-07",
+ "advisory_ids": [],
+ "note": "R18 Part 7.1/7.2 self-SCA result: requirements.txt (exact pins) has ZERO open OSV advisories as of this date — a real clean result, recorded as the committed baseline. package.json carries range constraints with no tracked root lockfile; the SCA layer deliberately defers lockfile-less range manifests (burhan/sca.py docstring) — stated in every gate run's summary, never silently skipped. Any advisory NOT in this list fails the weekly gate: the owner then either bumps the pin or adds a documented-acceptance entry here with a reason (the scanner-ledger discipline)."
+}

@@ -6410,3 +6410,206 @@ Stage summary:
 - RED (guard failed on the unfixed finally: DELAY_MS=250 present) ->
   BLUE (4/4; the CI-hang pair spawn_env→race_prober: 8 passed in 7s;
   full suite on the fixed branch completes bounded).
+## 2026-11-07 — Round 18 P1: seven new permanent scanner classes (maximum-rigor sweep)
+
+- CALIBRATION FIRST (the heuristics were prototyped against the live
+  tree BEFORE wiring in — each scoped to signal, not noise): raw hits
+  on the engine tree were UNENCODED_READ x7 (2 already ledgered by the
+  r16 state-load-race entry), BARE_EXCEPT_REBIND x6, FLOAT_EQUALITY x2,
+  UNBOUNDED_GROWTH x6 loose -> 1 after the module-level-only scoping,
+  WINDOWS_RESERVED_NAME x4 (dynamic paths at creation sinks),
+  MUTABLE_DEFAULT_ARG x0, NAIVE_DATETIME x0.
+- RED: the gate with the seven classes live flagged 16 engine-unmatched
+  hits on the unfixed tree (real scanner output, not a claim).
+- HAND REVIEW of every hit (no bulk auto-fix): 6 REAL -> fixed in this
+  commit: cli.py ground_truth/openapi/authz JSON reads + replay.py rate
+  file read gained encoding="utf-8" (the read-side twin of r17-7); the
+  ReplayRateLimited -> SystemExit(3) rebind now carries `from e`; the
+  vault unlock wrap error embeds its cause. 10 BENIGN -> ledgered with
+  specific reasons (ids r18-*): vault shape/auth/blob errors whose
+  caught type is a bare marker the message already names; metrics ssb/
+  ssw == 0.0 sentinels (the documented ANOVA N3 convention — exact-zero
+  is the correct test); csynth _BOUNDARY (intentional append-only audit
+  log, snapshot-read, grows on violations not requests); 4 dynamic-path
+  sites whose interpolated parts are constants or pre-sanitized.
+- BLUE: gate PASS (engine-unmatched=0) + 14/14 new permanent class
+  tests (each RED-side test re-introduces the exact bug shape into a
+  temp module and must be caught; paired negative tests pin the benign
+  shapes: literal==literal, embedded-cause rebind, from-e rebind, local
+  growth, constant paths, aware datetime, binary reads).
+- Scanner plumbing this required: scan_py accepts absolute paths (the
+  r18 tests scan temp modules outside the repo) and the engine-scope
+  guard is now path-COMPONENT based (burhan/src anywhere in the path)
+  instead of string-prefix — an absolute temp path under a burhan/ dir
+  keeps the scope contract. r17's sweep-path tests re-verified green.
+- HONEST SCOPING: MUTABLE_DEFAULT_ARG and NAIVE_DATETIME found zero
+  live instances — they are tripwires for NEW code, exactly like
+  ENTRYPOINT_UNREACHABLE was in round 12. UNBOUNDED_GROWTH is scoped to
+  module-level state only (object attributes have object lifetimes;
+  local collections die with the frame) — instance-level growth like
+  orchestrator's findings list is bounded by the scan's request budget,
+  a runtime contract the static check deliberately does not guess.
+## 2026-11-07 — Round 18 P3: property-based tests on the four core invariants
+
+- The hypothesis dependency Round 15 listed as planned-but-unused is
+  now landed, scoped to the highest-stakes laws (generated randomized
+  inputs, not hand-picked examples):
+  3.1 MERKLE (75 examples): the engine's merkle_root_of_records equals
+      the INDEPENDENT verifier's root (tools/independent_verify.py — a
+      second implementation) on every generated finding set; any
+      single-byte leaf mutation changes the root; any reordering of
+      distinct findings changes it (order is part of the record).
+  3.2 SCORE LAW (150 examples): round(100·V·(0.40E+0.35T+0.25L)) is
+      monotone in every component — verification tier ladder both
+      directions, anonymous >= auth-gated, REGRESSED >= NEW >=
+      RECURRING, higher advisory CVSS never scores lower, and the
+      structural [0,100] bound.
+  3.3 VERSIONS (250 examples) — HONEST SCOPE: the 'is version X in the
+      OSV range' decision is made SERVER-SIDE by the OSV API; no local
+      range-comparison code exists in burhan/sca.py to property-test.
+      What is local and now law-bound: the exact-pin regex accepts
+      every canonical semver/PEP440 string (a false rejection would
+      silently drop a package from the SCA scan), versions round-trip
+      unparsed, and the reference tuple ordering is pinned as the
+      contract any future local comparator must satisfy.
+  3.4 OCSF EXPORT (50 examples): every finding the data model produces
+      exports with the fields the format defines — product identity
+      (burhan-dast), activity_id, severity_id enum, finding_info.types
+      carrying the pure type, and time as EPOCH MILLISECONDS per the
+      v1.9.0 schema (not a naive datetime string).
+- DISCIPLINE NOTE (no self-grading, honest): the first run produced
+  three falsifications that were all bugs in MY test drafting, not the
+  code — a reversed monotonicity comparison (compared base to a HIGHER
+  tier and asserted base >= higher), an assumed product name, and an
+  assumed RFC3339 time where the schema defines epoch-ms. Each is
+  recorded here rather than silently fixed, and each corrected
+  assertion now pins the ACTUAL declared contract. No production code
+  was changed by this part — the laws held once stated correctly.
+## 2026-11-07 — Round 18 P7: self-SCA on the project's own manifests, wired to the weekly schedule
+
+- 7.1 RESULT (real, from the live OSV API): requirements.txt (exact
+  pins, the fully-supported manifest form) returns ZERO open OSV
+  advisories as of 2026-11-07. The npm side is honestly deferred, not
+  silently skipped: package.json carries RANGE constraints and no
+  lockfile is tracked at the repo root; the SCA layer deliberately
+  rejects lockfile-less range manifests (burhan/sca.py docstring —
+  OSV needs resolved versions). The r10 ground-truth lockfile under
+  evidence/ is test material, not a live manifest.
+- 7.2 THE GAP FOUND AND CLOSED: Round 11's monitoring layer schedules
+  TARGET scans (monitor.yml, the dogfood fixture) and Round 8's weekly
+  hardening wall runs the quality gates — but NOTHING re-ran the SCA
+  layer against THIS repo's own manifests on a schedule. New
+  scripts/self_sca_gate.py + a self-sca job in continuous-hardening.yml
+  (weekly, Monday): exit 0 clean, exit 1 on any advisory beyond the
+  committed baseline (evidence/layers/self-sca/baseline.json — the
+  known-and-accepted set, same ledger discipline as the scanner). The
+  workflow's auto-issue mechanism files the alert on failure.
+- Contract tests (6/6, network-free): empty-baseline first-run mode
+  REPORTS but does not fail (documented: failing would brick the first
+  scheduled run on a clean manifest); a non-empty baseline + new id =
+  exit 1; known id = pass; the package deferral appears verbatim in
+  every summary.
+- DISCIPLINE NOTE: the first gate test draft failed because it pinned
+  the WRONG contract (empty baseline + new advisory must fail) — the
+  documented first-run calibration semantics say otherwise; the test
+  now pins the actual documented behavior. And wiring the new script
+  surfaced a scanner interaction: an entry file must be git-TRACKED
+  before the wiring report can route it (KeyError otherwise) — true
+  only for never-committed files, so no production fix needed.
+## 2026-11-07 — Round 18 P4: time-boxed fuzz campaigns over the parser inventory
+
+- 4.1 INVENTORY (the untrusted-input parsers): OpenAPI JSON ingestion
+  (cli.py:678), authz config (cli.py:682), authorized-targets registry
+  (load_registry), monitor config (load_config), replay rate-state
+  file, repro payload unbox (_jload), and the consolidated scanner's
+  own AST reader (scan_py). Vault envelope decode is AEAD-gated —
+  unauthenticated bytes never reach its JSON parse (the aead_decrypt
+  verify-then-decrypt contract), so it is covered by the crypto
+  negative tests rather than fuzzed pre-auth.
+- 4.2 TOOL CHOICE (stated, per the order): atheris (coverage-guided)
+  requires a libFuzzer native build this environment cannot complete
+  reliably; the campaign uses a hypothesis-strategy-driven random
+  generator loop — a documented black-box time-boxed campaign,
+  consistent with the stdlib preference. What is lost vs coverage
+  guidance is honestly recorded; the order's bar is fully testable.
+- 4.3/4.4 RESULTS: two campaigns — calibration 15s/target (37,272
+  inputs, 105s) and confirmation 40s/target (93,062 inputs, 280s),
+  across all 7 targets. ZERO unhandled crashes, zero hangs (hard
+  deadline per target), zero silent corruptions: every input either
+  parsed (29k) or was cleanly rejected with a logged reason (64k).
+  Standout robustness proof: the authorized-targets and monitor-config
+  gates refused LOUDLY (banner + SystemExit(2) + zero side effects)
+  on every one of their 22k corrupt inputs — the refusal contract
+  held under adversarial input, not just happy paths.
+- One classification lesson during calibration (recorded, not hidden):
+  the first draft counted the gates' SystemExit(2) refusals as
+  crashes and the campaign stopped at T2 — the fix classifies a
+  banner-printed SystemExit(0|2) as the documented clean rejection
+  it is; anything else remains a crash.
+- CI PERMANENCE: tests/test_r18_fuzz_contract.py pins the same
+  contract at ~2s/target (7 targets, ~15s wall) so a future parser
+  regression fails the build with the exact crashing input preserved.
+## 2026-11-07 — Round 18 P5: compound (simultaneous) fault injection
+
+- 5.1 THE EXTENSION over r15's single-fault battery (engine side,
+  tests/test_r18_compound_faults.py, 3/3 green in 94s):
+    C1 SIGTERM landing WHILE every response is slow+delayed (150ms
+       fixture): exit is the signal's (-15/143), never a dressed-up
+       success; any partial report carries no completed=true claim;
+       the fixture is terminated by the test (no orphan).
+    C2 output-path ENOSPC shape (a file where the report's parent dir
+       should be) DURING the scan: non-zero exit, no partial silent
+       file, the stderr names the path/error kind.
+    C3 two scans writing ONE SQLite store concurrently, one SIGKILLed
+       mid-transaction: the survivor exits 0, and the store remains
+       schema/lock-consistent (a read proves it) — the killed
+       transaction leaves no poisoned lock.
+  All three hold r15's bar: no uncontrolled crash, correct exit code,
+  comprehensible logged reason, no orphaned process, no silent
+  false-success.
+- CALIBRATION LESSONS (recorded): the first drafts failed three ways,
+  each a wrong assumption about MY test harness, not the engine —
+  --max-requests exists on benchmark but not scan (usage exit 2); a
+  local scan without --allow-private is correctly refused by ScopeRule
+  before any request (zero-request exit, the privacy gate working as
+  designed); and a fast scan finishes before any fixed sleep, so the
+  faults now fire on a liveness poll against a genuinely-slow (150ms)
+  fixture — the fault is mid-scan by construction, not by hope.
+- 5.2 SCOPE NOTE (stated, not silent): the SaaS/Next.js-side compound
+  faults (pool exhaustion, failed migration mid-deploy, session-write
+  during logout) run in the web integration battery
+  (scripts/run_integration_tests.sh + the SaaS CI job's PostgreSQL
+  service) — this round's engine-side file documents the split in its
+  module docstring; the SaaS job already covers restart-under-load via
+  its own integration scripts.
+## 2026-11-07 — Round 18 P8.2: the macOS findings — real, root-caused, fixed or gated
+
+The engine-macos CI job (this round's Part 8) caught its first class
+of real platform findings on the very first runs:
+
+- FINDING 1 (Errno 49, EADDRNOTAVAIL): _ProbeListener/FlipDNS-based
+  rebinding oracle binds 127.0.0.2 — Linux routes all of 127/8 on lo,
+  but macOS binds ONLY 127.0.0.1 on lo0 by default. Three 3B-family
+  tests crashed at setup. FIX, two-sided: (a) production
+  _ProbeListener now falls back to 127.0.0.1 with a documented
+  platform_single_loopback flag (the engine stays portable); (b) the
+  tests whose MEANING requires the distinct-address semantics skip
+  LOUDLY via _loopback_alias_supported() — the same discipline as the
+  r15 SIGINT browser-capability skips. On Linux nothing skips (the
+  helper returns True; 22/22 modernsec2 green locally).
+- FINDING 2 (fixtures "did not start" on the macOS runner): vulnapp +
+  modern2_fixture spawn/readiness windows were 6s; cold ARM runners
+  under the full-suite load can exceed that (repair-demo's fresh-
+  fixture spawn failed, cascading into the r14/r15 tests). FIX: the
+  two spawn helpers' readiness windows extended 6s -> 15s (150 x 0.1s
+  poll — still a bounded wait, not a hang). Local regression: the
+  macOS-failing set (modernsec2 + r14 battery + r15 tree isolation)
+  passes 30/31 with the one known tree-hygiene skip; benchmark
+  TP=38/FP=0/F1=1.0 intact.
+- HONEST SCOPE (8.3): finding 2's fix is a window extension, not a
+  root-cause proof — the runner's fixture stderr was DEVNULLed, so the
+  exact slow stage (interpreter start? bind? first response?) is not
+  in the log. The next macOS run with this fix is the evidence; if it
+  recurs, the follow-up is capturing fixture stderr in the readiness
+  helper. Finding 1 is fully root-caused (errno 49 is deterministic
+  on default macOS lo0 config).
