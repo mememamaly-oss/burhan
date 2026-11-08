@@ -119,6 +119,33 @@ def test_3a_garbage_token_is_skipped():
     assert matched is None and attempts == 0
 
 
+def _loopback_alias_supported(ip="127.0.0.2") -> bool:
+    """r18-8.2 (the macOS finding): Linux routes all of 127/8 on lo, but
+    macOS binds only 127.0.0.1 on lo0 — binding 127.0.0.2 raises
+    EADDRNOTAVAIL (errno 49, the live CI failure). The 3B rebinding
+    oracle NEEDS a second alias to mean what it asserts (a fetch to the
+    flipped internal address reaching a listener the validated public
+    address could not). On platforms without it the oracle would be a
+    DIFFERENT experiment, so the affected tests skip LOUDLY with this
+    documented reason — the same discipline as the r15 SIGINT
+    browser-capability skips."""
+    import socket as _s
+    try:
+        with _s.socket() as sk:
+            sk.bind((ip, 0))
+        return True
+    except OSError:
+        return False
+
+
+_ALIAS = pytest.mark.skipif(not _loopback_alias_supported(),
+                            reason="platform routes only 127.0.0.1 on "
+                                   "loopback (macOS default) — the rebind "
+                                   "oracle's distinct-address semantics "
+                                   "need a second 127/8 alias; see "
+                                   "r18-8.2 in worklog.md")
+
+
 # ------------------------------------------------- battery RED/BLUE over HTTP
 @pytest.fixture(scope="module")
 def vuln_port():
@@ -207,6 +234,10 @@ def test_battery_runs_with_zero_requests_when_no_surfaces():
 @pytest.fixture()
 def rebind_env():
     """(dns, probe_listener, fetcher_proc, http_port) — vuln role."""
+    if not _loopback_alias_supported():
+        pytest.skip("platform routes only 127.0.0.1 on loopback "
+                    "(macOS default) — the rebind oracle needs a second "
+                    "127/8 alias; see r18-8.2 in worklog.md")
     dns = FlipDNS(port=0)
     dns.start()
     probe = _ProbeListener(ip="127.0.0.2", port=0)
@@ -229,6 +260,7 @@ def test_3b_red_vulnerable_fetcher_rebinds_to_internal(rebind_env):
     assert dns.queries >= 2, "the vulnerable client must have resolved twice"
 
 
+@_ALIAS
 def test_3b_blue_safe_fetcher_pins_the_validated_address():
     dns = FlipDNS(port=0)
     dns.start()
@@ -314,6 +346,7 @@ def test_adversarial_A4_reflector_is_the_declared_surface_limit():
         srv.shutdown()
 
 
+@_ALIAS
 def test_adversarial_A5_flip_after_must_match_query_count():
     # flip_after=2 + a single-validation target: the rebind is MISSED — the
     # documented tuning parameter, pinned so the limit stays visible
@@ -335,6 +368,7 @@ def test_adversarial_A5_flip_after_must_match_query_count():
         p.terminate()
 
 
+@_ALIAS
 def test_adversarial_A6_pinned_public_fetch_never_hits_internal():
     # safe fetcher pinned to a REACHABLE public upstream: fetch succeeds and
     # the internal listener is never hit — no false positive

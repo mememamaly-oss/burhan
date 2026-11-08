@@ -6582,3 +6582,34 @@ Stage summary:
   service) — this round's engine-side file documents the split in its
   module docstring; the SaaS job already covers restart-under-load via
   its own integration scripts.
+## 2026-11-07 — Round 18 P8.2: the macOS findings — real, root-caused, fixed or gated
+
+The engine-macos CI job (this round's Part 8) caught its first class
+of real platform findings on the very first runs:
+
+- FINDING 1 (Errno 49, EADDRNOTAVAIL): _ProbeListener/FlipDNS-based
+  rebinding oracle binds 127.0.0.2 — Linux routes all of 127/8 on lo,
+  but macOS binds ONLY 127.0.0.1 on lo0 by default. Three 3B-family
+  tests crashed at setup. FIX, two-sided: (a) production
+  _ProbeListener now falls back to 127.0.0.1 with a documented
+  platform_single_loopback flag (the engine stays portable); (b) the
+  tests whose MEANING requires the distinct-address semantics skip
+  LOUDLY via _loopback_alias_supported() — the same discipline as the
+  r15 SIGINT browser-capability skips. On Linux nothing skips (the
+  helper returns True; 22/22 modernsec2 green locally).
+- FINDING 2 (fixtures "did not start" on the macOS runner): vulnapp +
+  modern2_fixture spawn/readiness windows were 6s; cold ARM runners
+  under the full-suite load can exceed that (repair-demo's fresh-
+  fixture spawn failed, cascading into the r14/r15 tests). FIX: the
+  two spawn helpers' readiness windows extended 6s -> 15s (150 x 0.1s
+  poll — still a bounded wait, not a hang). Local regression: the
+  macOS-failing set (modernsec2 + r14 battery + r15 tree isolation)
+  passes 30/31 with the one known tree-hygiene skip; benchmark
+  TP=38/FP=0/F1=1.0 intact.
+- HONEST SCOPE (8.3): finding 2's fix is a window extension, not a
+  root-cause proof — the runner's fixture stderr was DEVNULLed, so the
+  exact slow stage (interpreter start? bind? first response?) is not
+  in the log. The next macOS run with this fix is the evidence; if it
+  recurs, the follow-up is capturing fixture stderr in the readiness
+  helper. Finding 1 is fully root-caused (errno 49 is deterministic
+  on default macOS lo0 config).

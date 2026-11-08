@@ -43,7 +43,7 @@ def ensure_fixture(base_url="http://127.0.0.1:8777"):
     proc = subprocess.Popen([sys.executable, fixture],
                             env={**os.environ, "PORT": str(port)},
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    for _ in range(60):                               # wait up to ~6s for readiness
+    for _ in range(150):                              # r18-8.2: wait up to ~15s for readiness
         if _port_open(host, port):
             return proc
         if proc.poll() is not None:
@@ -61,7 +61,7 @@ def _spawn_local_fixture(port: int):
     proc = subprocess.Popen([sys.executable, fixture],
                             env={**os.environ, "PORT": str(port)},
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    for _ in range(60):
+    for _ in range(150):                              # r18-8.2: same 15s window
         if _port_open("127.0.0.1", port):
             return proc
         if proc.poll() is not None:
