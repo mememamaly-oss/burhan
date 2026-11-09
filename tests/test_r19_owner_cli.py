@@ -66,7 +66,7 @@ class TestOwnerCli:
         assert r.returncode == 0
         ticket = json.loads(r.stdout)["ticket"]
         r = run_cli(["owner", "transfer-take", "--store", store,
-                     "--ticket", ticket, "--new-password", "buyer-pass-1"])
+                     f"--ticket={ticket}", "--new-password", "buyer-pass-1"])
         assert r.returncode == 0
         assert json.loads(r.stdout)["owner_gate"] == "ownership_transferred"
         # seller's credential is DEAD (the acceptance criterion)

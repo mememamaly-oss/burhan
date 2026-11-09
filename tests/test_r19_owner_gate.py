@@ -125,6 +125,16 @@ class TestOwnershipTransfer:
         with pytest.raises(OwnerGateRequired, match="did not verify"):
             OwnerGate(store).transfer_arm("wrong")
 
+    def test_tickets_never_lead_with_dash(self, store):
+        # regression: a ticket starting with "-" makes argparse treat
+        # it as an option (`--ticket -abc` fails to parse) and the
+        # buyer can NEVER complete the takeover. The arm must re-roll
+        # until the ticket is dash-free at position 0.
+        OwnerGate.setup(store, "seller-pass-1")
+        g = OwnerGate(store)
+        for _ in range(64):
+            assert not g.transfer_arm("seller-pass-1").startswith("-")
+
     def test_ticket_single_use(self, store):
         OwnerGate.setup(store, "seller-pass-1")
         g = OwnerGate(store)

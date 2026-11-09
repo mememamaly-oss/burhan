@@ -259,8 +259,15 @@ class OwnerGate:
             raise OwnerGateRequired(
                 "transfer arming refused — the current owner password "
                 "did not verify")
+        # A leading "-" would make argparse treat the ticket as an
+        # option, not a value (`--ticket -abc` fails to parse), and the
+        # buyer could never complete the takeover. Re-roll instead; the
+        # ticket stays 256 bits of CSPRNG output either way.
         ticket = base64.urlsafe_b64encode(
             secrets.token_bytes(32)).decode("ascii").rstrip("=")
+        while ticket.startswith("-"):
+            ticket = base64.urlsafe_b64encode(
+                secrets.token_bytes(32)).decode("ascii").rstrip("=")
         data["transfer"] = {"ticket_b64": ticket,
                             "expires_ts": time.time() + TRANSFER_TTL_S,
                             "consumed": False}
