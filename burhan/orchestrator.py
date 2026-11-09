@@ -707,8 +707,42 @@ class BurhanScanner:
                                   if not (_DGR.search(_gscope(u)) or _SGR.search(_gscope(u)))
                                   and not _LOGOUT_QRE.search(_gscope(u))
                                   and not any(x and x in u for x in _excl)][:15]
-                new_eps = self.browser.render_merge(render_targets, self.target.host, existing)
+                # R19-1b (found while testing the SPA fix): render_merge
+                # received target.host — the HOSTNAME WITHOUT PORT — while
+                # every netloc comparison inside uses host:port. On any
+                # non-standard port (WebGoat's :8080 among them) EVERY
+                # rendered link failed the same-host check and the whole
+                # browser link harvest was silently dropped.
+                _seed_netloc = urllib.parse.urlsplit(self.target.url).netloc
+                new_eps = self.browser.render_merge(render_targets, _seed_netloc, existing)
                 endpoints.extend(e for e in new_eps if e.id not in {x.id for x in endpoints})
+                # R19-1 (live-caught on WebGoat 2026.4): the SPA surface
+                # arrives in two runtime-only carriers the static BFS
+                # cannot reach — hash-fragment routes the browser RENDERED
+                # (spa_route:*) and XHR channels it OBSERVED fetching
+                # (xhr:observed, e.g. the JSON lesson menu). The crawler's
+                # JSON mining + route mapping only run when those URLs are
+                # PAGE-FETCHED, so the SPA carriers are re-crawled as
+                # extra seeds through the SAME budget/gate machinery as
+                # the original crawl (no privileged path): the menu's JSON
+                # body is mined for routes, mapped lesson pages are
+                # fetched, and their forms join the surface.
+                spa_seeds = [e.url for e in endpoints
+                             if any(t.startswith(("spa_route:", "xhr:observed"))
+                                    for t in (e.tags or []))]
+                if spa_seeds:
+                    spa_found, _js2, _spa_stats = d.crawl(
+                        self.target.url, extra_seeds=spa_seeds[:24],
+                        exclude_urls=([self.cfg.auth.login_url]
+                                      if self.cfg.auth else []) + _excl)
+                    before = {e.id for e in endpoints}
+                    endpoints.extend(e for e in spa_found if e.id not in before
+                                     and e.id != endpoints[0].id)
+                    self.stats.setdefault("spa_expansion", {}).update({
+                        "seeds": len(spa_seeds[:24]),
+                        "new_endpoints": len([e for e in spa_found if e.id not in before])})
+                    self.bus.emit("SpaExpansionCompleted", seeds=len(spa_seeds[:24]),
+                                  new_endpoints=self.stats["spa_expansion"]["new_endpoints"])
                 self.stats["endpoints"] = len(endpoints)
                 self.stats["browser_pages"] = self.browser.pages_rendered
                 self.bus.emit("BrowserRenderCompleted", pages=self.browser.pages_rendered,

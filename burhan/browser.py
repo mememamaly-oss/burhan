@@ -23,6 +23,7 @@ from __future__ import annotations
 import re, urllib.parse
 
 from .core import DiscoverySource, Endpoint, Parameter, ParamLocation, Evidence
+from .discovery import hash_route_target  # R19-1: SPA route->resource mapping
 
 # ---------------------------------------------------------------- static scanner
 # DOM sources: client-side readable attacker-controlled input channels.
@@ -543,6 +544,44 @@ class BrowserEngine:
                     ep = _mk_dom_endpoint(full, url, "GET", [], json_hint=None)
                     if ep and ep.id not in existing and ep.id not in [e.id for e in new_eps]:
                         new_eps.append(ep)
+                    # R19-1 (live-caught on WebGoat 2026.4): a rendered
+                    # link carrying a hash-fragment is a SPA route — the
+                    # browser has RENDERED the navigation (Backbone built
+                    # the whole lesson menu), and _mk_dom_endpoint strips
+                    # the fragment, collapsing all 40 routes onto the one
+                    # host page. Map the route to the resource the client
+                    # fetches for it; the mapped page becomes a probeable
+                    # endpoint and the orchestrator's SPA expansion pass
+                    # page-fetches it (its forms are the attack surface).
+                    frag = full.split("#", 1)[1] if "#" in full else ""
+                    if frag:
+                        target = hash_route_target(url, frag)
+                        if target and urllib.parse.urlsplit(target).netloc == seed_host:
+                            ep_rt = _mk_dom_endpoint(target, url, "GET", [], json_hint=None)
+                            if ep_rt:
+                                ep_rt.tags.append("spa_route:" + frag[:80])
+                                if ep_rt.id not in existing \
+                                        and ep_rt.id not in [e.id for e in new_eps]:
+                                    new_eps.append(ep_rt)
+            # R19-1: observed same-host GET XHR/fetch channels become
+            # ENDPOINTS (bounded). The WebGoat lesson menu
+            # (service/lessonmenu.mvc) is fetched by the SPA in front of
+            # the browser's eyes — observed but never recorded, so its
+            # JSON body (the whole curriculum tree) was never mined. The
+            # orchestrator's SPA expansion pass page-fetches these tagged
+            # channels; the JSON mining in discovery turns their bodies
+            # into lesson endpoints.
+            for x in r["xhrs"][:30]:
+                if (x.get("method") or "GET").upper() not in ("GET", "HEAD"):
+                    continue
+                xu = urllib.parse.urlsplit(x.get("url") or "")
+                if not xu.scheme or xu.netloc != seed_host:
+                    continue
+                ep_x = _mk_dom_endpoint(x["url"], url, "GET", [], json_hint=None)
+                if ep_x and ep_x.id not in existing \
+                        and ep_x.id not in [e.id for e in new_eps]:
+                    ep_x.tags.append("xhr:observed")
+                    new_eps.append(ep_x)
         return new_eps
 
     # ---- DOM XSS execution probe
