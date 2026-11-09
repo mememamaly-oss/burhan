@@ -273,11 +273,16 @@ def _json_route_values(body: str) -> list[str]:
     """R19-1 (live-caught on WebGoat 2026.4): the SPA's navigation tree
     arrives as JSON (service/lessonmenu.mvc) with every route in a
     "link" value — '#lesson/HttpBasics.lesson'. Walk ALL string values
-    of the parsed document (nested arrays/objects) and return those
-    shaped like a route or URL, each passing the plausible_js_url
-    precision gate (the DISC-01 lesson applied to a new carrier). A
-    body that fails json.loads yields nothing — no regex fishing in
-    arbitrary text."""
+    of the parsed document (nested arrays/objects) and return the
+    NAVIGATION-shaped ones: '#'-prefixed SPA routes and root-absolute
+    in-app paths. Non-fragment values are NOT mined — live-caught on
+    Juice Shop: rest/admin/application-configuration (36KB of logos,
+    mail hosts and i18n strings) passed the old plausible_js_url gate
+    and exploded the endpoint map 108 -> 551, scattering the fixed
+    scan budget off the real surface (verified floor 59 -> 57). A
+    config/document payload is not a navigation tree. A body that
+    fails json.loads yields nothing — no regex fishing in arbitrary
+    text."""
     try:
         doc = json.loads(body)
     except Exception:
@@ -286,9 +291,14 @@ def _json_route_values(body: str) -> list[str]:
     def _walk(node):
         if isinstance(node, str):
             v = node.strip()
-            if v.startswith("#") and len(v) > 1:
+            if v.startswith("#") and len(v) > 1 and "/" in v:
                 out.append(v)
-            elif plausible_js_url(v):
+            elif v.startswith("/") and not v.startswith("//") \
+                    and len(v) > 1 and plausible_js_url(v) \
+                    and "." not in v.rsplit("/", 1)[-1]:
+                # in-app root path WITHOUT a file extension in the leaf
+                # ('/rest/memories', '/profile') — a real client-side
+                # route shape; asset/logo filenames stay out
                 out.append(v)
         elif isinstance(node, dict):
             for vv in node.values():

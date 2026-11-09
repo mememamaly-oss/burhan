@@ -1,7 +1,7 @@
 {
- "when": "2026-11-09T11:51:47Z",
+ "when": "2026-11-09T12:52:45Z",
  "scanned": {
-  "python_files": 243,
+  "python_files": 245,
   "ts_files": 147
  },
  "raw_counts_by_class": {
@@ -15,7 +15,7 @@
   "BARE_EXCEPT_REBIND": 5,
   "SILENT_CATCH": 1,
   "EXPORT_UNROUTED": 2,
-  "ENTRYPOINT_UNREACHABLE": 65
+  "ENTRYPOINT_UNREACHABLE": 66
  },
  "cli_wiring": {
   "read_flags": [
@@ -53,6 +53,7 @@
    "min_risk",
    "modern_v2",
    "new_key",
+   "new_password",
    "no_browser",
    "no_crawl",
    "no_oast",
@@ -63,6 +64,9 @@
    "org",
    "origin_probe",
    "out",
+   "owner_gate",
+   "owner_password",
+   "password",
    "paths_only",
    "port",
    "prioritize_store",
@@ -83,11 +87,13 @@
    "secrets_report",
    "seed",
    "status",
+   "store",
    "strategy_path",
    "symbolic",
    "syslog_host",
    "syslog_port",
    "syslog_proto",
+   "ticket",
    "timeout",
    "token",
    "type",
@@ -132,6 +138,7 @@
    "min_risk",
    "modern_v2",
    "new_key",
+   "new_password",
    "no_browser",
    "no_crawl",
    "no_oast",
@@ -142,6 +149,9 @@
    "org",
    "origin_probe",
    "out",
+   "owner_gate",
+   "owner_password",
+   "password",
    "paths_only",
    "pdf",
    "port",
@@ -163,11 +173,13 @@
    "secrets_report",
    "seed",
    "status",
+   "store",
    "strategy_path",
    "symbolic",
    "syslog_host",
    "syslog_port",
    "syslog_proto",
+   "ticket",
    "timeout",
    "token",
    "type",
@@ -184,6 +196,7 @@
    "doctor",
    "findings",
    "impact",
+   "owner",
    "repair-demo",
    "report",
    "reproduce",
@@ -198,8 +211,8 @@
  },
  "entrypoint_wiring": {
   "entry_files": 13,
-  "routed_defs": 395,
-  "engine_public_functions": 1129,
+  "routed_defs": 403,
+  "engine_public_functions": 1146,
   "flagged": [
    {
     "file": "burhan/authorized_targets.py",
@@ -300,6 +313,10 @@
    {
     "file": "burhan/oast.py",
     "name": "SelfHostedListener"
+   },
+   {
+    "file": "burhan/owner_gate.py",
+    "name": "OwnerGateRateLimited"
    },
    {
     "file": "burhan/pcs.py",
@@ -463,7 +480,7 @@
    }
   ]
  },
- "total": 531,
+ "total": 532,
  "hits": [
   {
    "file": "burhan/api.py",
@@ -817,7 +834,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 819,
+   "line": 927,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — flag check must never mask results",
    "func": "main",
@@ -827,7 +844,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 758,
+   "line": 866,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — fall through to default",
    "func": "main",
@@ -837,7 +854,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 758,
+   "line": 866,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — fall through to default",
    "func": "_sigint_burhan",
@@ -857,7 +874,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 1019,
+   "line": 1127,
    "class": "WINDOWS_RESERVED_NAME",
    "code": "json.dump(bi, open(base_out + \".json\", \"w\", encoding=\"utf-8\"), indent=1, ensure_ascii=False)",
    "func": "main",
@@ -1047,7 +1064,7 @@
   },
   {
    "file": "burhan/discovery.py",
-   "line": 283,
+   "line": 288,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_json_route_values",
@@ -1057,7 +1074,7 @@
   },
   {
    "file": "burhan/discovery.py",
-   "line": 925,
+   "line": 935,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_loopback_normalize",
@@ -1067,7 +1084,7 @@
   },
   {
    "file": "burhan/discovery.py",
-   "line": 868,
+   "line": 878,
    "class": "SILENT_EXCEPT",
    "code": "except ValueError:",
    "func": "openapi",
@@ -2037,7 +2054,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2365,
+   "line": 2399,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _ie:",
    "func": "doctor",
@@ -2047,7 +2064,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2375,
+   "line": 2409,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _pe:",
    "func": "doctor",
@@ -2067,7 +2084,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1305,
+   "line": 1339,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -2077,7 +2094,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1691,
+   "line": 1725,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -2097,7 +2114,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1072,
+   "line": 1106,
    "class": "SILENT_EXCEPT",
    "code": "except AttributeError:",
    "func": "_run_phases",
@@ -2107,7 +2124,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2208,
+   "line": 2242,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — teardown must never mask",
    "func": "run",
@@ -2117,7 +2134,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2214,
+   "line": 2248,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "run",
@@ -5135,6 +5152,16 @@
    "func": "-",
    "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
    "ledger": "QS-193",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/owner_gate.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "OwnerGateRateLimited",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-236",
    "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
   },
   {

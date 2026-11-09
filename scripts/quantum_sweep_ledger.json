@@ -2551,6 +2551,13 @@
    "code": "plausible_js_url",
    "class": "ENTRYPOINT_UNREACHABLE",
    "reason": "r19-1: the JS-extraction precision gate (DISC-01), called inside DiscoveryEngine.crawl's JS/static extraction blocks and now also from _json_route_values (the JSON-menu miner) plus the r19 SPA tests. The call sites live inside the crawl() method body; the scanner's callable routing sees the method through the class (see the DiscoveryEngine entry above) — documented-benign, same shape as QS-222."
+  },
+  {
+   "id": "QS-236",
+   "file": "burhan/owner_gate.py",
+   "code": "OwnerGateRateLimited",
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "reason": "r19-2: the rate-limit EXCEPTION class. Production raises it from OwnerGate._rate_guard (called by unlock_scan/change/transfer — all wired through the CLI's owner command and the scan gate); the CLI catches the OwnerGateError BASE class, so the subclass name appears literally only in tests. Same shape as QS-222's data-model note: exception classes are consumed as types, and the base-class catch IS the production reference."
   }
  ]
 }

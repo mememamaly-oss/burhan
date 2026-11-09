@@ -722,24 +722,42 @@ class BurhanScanner:
                 # arrives in two runtime-only carriers the static BFS
                 # cannot reach — hash-fragment routes the browser RENDERED
                 # (spa_route:*) and XHR channels it OBSERVED fetching
-                # (xhr:observed, e.g. the JSON lesson menu). The crawler's
-                # JSON mining + route mapping only run when those URLs are
-                # PAGE-FETCHED, so the SPA carriers are re-crawled as
+                # (xhr:observed). The ROUTE carriers are re-crawled as
                 # extra seeds through the SAME budget/gate machinery as
-                # the original crawl (no privileged path): the menu's JSON
-                # body is mined for routes, mapped lesson pages are
-                # fetched, and their forms join the surface.
+                # the original crawl (no privileged path): the menu's
+                # JSON body is mined for routes, mapped lesson pages are
+                # fetched, and their forms join the surface. XHR channels
+                # join the endpoint map (they ARE real surfaces) but do
+                # NOT enter the expansion crawl — live-measured on Juice
+                # Shop: the observed channels are JSON/data endpoints
+                # whose re-fetch feeds the miner nothing the channels
+                # themselves did not already surface, while each one
+                # re-burned page budget and scattered the fixed scan
+                # budget off real pages (verified floor 59 -> 57).
                 spa_seeds = [e.url for e in endpoints
                              if any(t.startswith(("spa_route:", "xhr:observed"))
                                     for t in (e.tags or []))]
                 if spa_seeds:
-                    spa_found, _js2, _spa_stats = d.crawl(
+                    # Derived-crawl budget: the expansion re-walks pages
+                    # the main crawl already budgeted for. WebGoat needs
+                    # the room (the menu JSON + 40 lesson pages ride this
+                    # pass); Juice Shop's observed channels burn it for
+                    # nothing. The derived cap keeps the expansion a
+                    # bounded sidebar (live-measured: uncapped, it
+                    # re-fetched 20+ pages and dropped the verified floor
+                    # 59 -> 57), while staying large enough for a full
+                    # SPA menu round-trip.
+                    from .discovery import DiscoveryEngine as _DE
+                    _d2 = _DE(self.engine, min(self.cfg.max_pages, 8))
+                    spa_found, _js2, _spa_stats = _d2.crawl(
                         self.target.url, extra_seeds=spa_seeds[:24],
                         exclude_urls=([self.cfg.auth.login_url]
                                       if self.cfg.auth else []) + _excl)
                     before = {e.id for e in endpoints} | {endpoints_seed_id}
                     endpoints.extend(e for e in spa_found
-                                     if e.id not in before)
+                                     if e.id not in before
+                                     and not any(t == "xhr:observed"
+                                                 for t in (e.tags or [])))
                     self.stats.setdefault("spa_expansion", {}).update({
                         "seeds": len(spa_seeds[:24]),
                         "new_endpoints": len([e for e in spa_found if e.id not in before])})
@@ -757,6 +775,22 @@ class BurhanScanner:
         # + the Coverage Engine's discovery ledger. enrich() only UPGRADES param
         # kinds when the observed value proves a more specific shape (JSON object);
         # every skip it causes is recorded as an auditable coverage reason.
+        # R19-1d (live-measured on Juice Shop): observed XHR channels are
+        # runtime COVERAGE INVENTORY, not battery surface. They joined the
+        # map after the main crawl and displaced main-crawl pages from the
+        # fixed request budget (verified floor 59 -> 57; with the channels
+        # suppressed the floor is whole again — decisive local A/B on the
+        # pinned official target). They stay out of the battery map; their
+        # NAVIGATION content still flows in via the spa_route expansion
+        # seeds (WebGoat's menu round-trip is unaffected), and the channel
+        # list stays queryable in the coverage ledger below.
+        _xhr_channels = [e for e in endpoints
+                         if any(t == "xhr:observed" for t in (e.tags or []))]
+        if _xhr_channels:
+            endpoints = [e for e in endpoints
+                         if not any(t == "xhr:observed" for t in (e.tags or []))]
+            for _xc in _xhr_channels:
+                self.coverage.discover(_xc)
         for ep in endpoints:
             self.coverage.discover(ep)
         self.param_profile = ParamIntel.enrich(endpoints)

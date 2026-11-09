@@ -141,13 +141,15 @@ class TestJsonRouteValues:
         assert _json_route_values(body) == ["#lesson/OK.lesson"]
 
     def test_bare_identifiers_stay_out(self):
-        # i18n label keys ('webgoat.title') have no route shape... but
-        # note: 'webgoat.title' IS extension-shaped. It maps to a
-        # resource URL that 404s on the live app — harmless (one dead
-        # endpoint), and the alternative (whitelisting extensions)
-        # would break the general case. Documented trade-off.
-        vals = _json_route_values(json.dumps({"name": "webgoat.title"}))
-        assert vals == ["webgoat.title"]   # extracted, then filtered by mapping
+        # r19-1c tightening (Juice Shop regression): non-fragment,
+        # non-root-path values are NOT mined at all — an i18n label
+        # key like 'webgoat.title' is config text, not navigation
+        # (the live application-configuration payload passed the old
+        # broad gate and exploded the map 108 -> 551).
+        vals = _json_route_values(json.dumps({"name": "webgoat.title",
+                                              "logo": "JuiceShop_Logo.png",
+                                              "mail": "donotreply@owasp-juice.shop"}))
+        assert vals == []
 
 
 # ---------------------------------------------------------- integration level
