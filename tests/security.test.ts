@@ -183,12 +183,20 @@ describe("login rate limiter (audit 2026-10-23; shared store 2026-10-31)", () =>
   });
 
   test.skipIf(!PG)("window slides (expired hits free the key)", async () => {
-    // 3 hits / 80ms window: the 4th is blocked, but after the window
-    // passes the bucket frees itself (no permanent lockout).
-    for (let i = 0; i < 3; i++) await rateLimit("slide", 3, 80);
-    expect((await rateLimit("slide", 3, 80)).allowed).toBe(false);
-    await new Promise((r) => setTimeout(r, 120));
-    const later = await rateLimit("slide", 3, 80);
+    // 3 hits / 2s window: the 4th is blocked, but after the window
+    // passes the bucket frees itself (no permanent lockout). The
+    // window is 2s, not 80ms: the blocking assertion needs all four
+    // PG round-trips inside one window, and a loaded CI runner (this
+    // suite runs beside two Engine suites) can stretch a round-trip
+    // past 50ms — an 80ms window expired the early hits before the
+    // 4th call and flaked the test (observed 2026-11-09, the adjacent
+    // test ran 11 calls in 199ms). 2s keeps ~10x margin over that
+    // degradation; the sleep must exceed the window measured from the
+    // LAST hit, hence 2.1s.
+    for (let i = 0; i < 3; i++) await rateLimit("slide", 3, 2_000);
+    expect((await rateLimit("slide", 3, 2_000)).allowed).toBe(false);
+    await new Promise((r) => setTimeout(r, 2_100));
+    const later = await rateLimit("slide", 3, 2_000);
     expect(later.allowed).toBe(true);
   });
 });
