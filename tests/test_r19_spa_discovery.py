@@ -316,9 +316,25 @@ class TestCrawlDiscoversSpaRoutes:
         # the orchestrator's SPA expansion composition: tagged URLs become
         # extra seeds; the crawl fetches the menu (JSON mined: Beta was
         # ONLY in the JSON, never in any HTML) and every lesson page
+        # R19-1d regression (the shipped rule): spa_route carriers always
+        # seed the expansion; an OBSERVED channel seeds it only when it is
+        # resource-shaped (an extension in the leaf — lessonmenu.mvc). A
+        # bare data channel must NEVER launch it — live-measured on Juice
+        # Shop, /rest/* channel re-crawls burned page budget for zero new
+        # surface and displaced the verified floor 59 -> 58.
         spa_seeds = [e.url for e in new_eps
-                     if any(t.startswith(("spa_route:", "xhr:observed"))
+                     if any(t.startswith("spa_route:")
                             for t in (e.tags or []))]
+        # the resource-shaped menu channel joins the seeds (its JSON
+        # carries lessons no HTML link has — Beta is menu-only)
+        for e in new_eps:
+            if any(t == "xhr:observed" for t in (e.tags or [])) \
+                    and e.url not in spa_seeds:
+                leaf = urllib.parse.urlsplit(e.url).path.rsplit("/", 1)[-1]
+                if "." in leaf:
+                    spa_seeds.append(e.url)
+        assert spa_seeds, "spa_route carriers missing — the expansion has no seeds"
+        assert f"{base}/service/lessonmenu.mvc" in spa_seeds
         disc = DiscoveryEngine(eng, max_pages=10)
         endpoints, _js, _stats = disc.crawl(f"{base}/start.mvc",
                                             extra_seeds=spa_seeds)

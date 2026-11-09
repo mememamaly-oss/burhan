@@ -718,46 +718,55 @@ class BurhanScanner:
                 _seed_netloc = urllib.parse.urlsplit(self.target.url).netloc
                 new_eps = self.browser.render_merge(render_targets, _seed_netloc, existing)
                 endpoints.extend(e for e in new_eps if e.id not in {x.id for x in endpoints})
+                # R19-1d: the observed-channel URL PATHS are remembered
+                # for the whole run — a channel may re-enter the map
+                # later through the expansion re-crawl with a FRESH
+                # endpoint object (no xhr tag: the crawler re-discovers
+                # the URL as a plain page). Path membership, not tags,
+                # is the durable identity (live-measured: 10 channel-born
+                # ghosts re-entered this way and displaced the floor
+                # 59 -> 58 by pushing /saved-payment-methods off the
+                # budget edge — it sits at request 2494/2500 on main).
+                self._xhr_channel_paths = {
+                    urllib.parse.urlsplit(e.url).path
+                    for e in new_eps if any(t == "xhr:observed" for t in (e.tags or []))}
                 # R19-1 (live-caught on WebGoat 2026.4): the SPA surface
                 # arrives in two runtime-only carriers the static BFS
                 # cannot reach — hash-fragment routes the browser RENDERED
                 # (spa_route:*) and XHR channels it OBSERVED fetching
-                # (xhr:observed). The ROUTE carriers are re-crawled as
-                # extra seeds through the SAME budget/gate machinery as
-                # the original crawl (no privileged path): the menu's
-                # JSON body is mined for routes, mapped lesson pages are
-                # fetched, and their forms join the surface. XHR channels
-                # join the endpoint map (they ARE real surfaces) but do
-                # NOT enter the expansion crawl — live-measured on Juice
-                # Shop: the observed channels are JSON/data endpoints
-                # whose re-fetch feeds the miner nothing the channels
-                # themselves did not already surface, while each one
-                # re-burned page budget and scattered the fixed scan
-                # budget off real pages (verified floor 59 -> 57).
+                # (xhr:observed). Only the ROUTE carriers seed the
+                # expansion crawl (same budget/gate machinery as the
+                # original crawl — no privileged path): the menu's JSON
+                # body is mined for routes, mapped lesson pages are
+                # fetched, and their forms join the surface. An OBSERVED
+                # channel seeds the expansion only when it is itself
+                # resource-shaped (an extension in the leaf — WebGoat's
+                # lessonmenu.mvc): a navigation carrier is a RESOURCE the
+                # SPA loads, while data channels are extensionless API
+                # paths. Live-measured on Juice Shop: the /rest/* and
+                # /api/* re-fetches fed the route miner nothing and
+                # displaced the verified floor 59 -> 58. Without the
+                # seeded round-trip the menu's JSON-only lessons (Beta)
+                # would be unreachable — fixture-proven.
                 spa_seeds = [e.url for e in endpoints
-                             if any(t.startswith(("spa_route:", "xhr:observed"))
+                             if any(t.startswith("spa_route:")
                                     for t in (e.tags or []))]
+                for e in endpoints:
+                    if any(t == "xhr:observed" for t in (e.tags or [])) \
+                            and e.url not in spa_seeds:
+                        leaf = urllib.parse.urlsplit(e.url).path.rsplit("/", 1)[-1]
+                        if "." in leaf:
+                            spa_seeds.append(e.url)
                 if spa_seeds:
-                    # Derived-crawl budget: the expansion re-walks pages
-                    # the main crawl already budgeted for. WebGoat needs
-                    # the room (the menu JSON + 40 lesson pages ride this
-                    # pass); Juice Shop's observed channels burn it for
-                    # nothing. The derived cap keeps the expansion a
-                    # bounded sidebar (live-measured: uncapped, it
-                    # re-fetched 20+ pages and dropped the verified floor
-                    # 59 -> 57), while staying large enough for a full
-                    # SPA menu round-trip.
-                    from .discovery import DiscoveryEngine as _DE
-                    _d2 = _DE(self.engine, min(self.cfg.max_pages, 8))
-                    spa_found, _js2, _spa_stats = _d2.crawl(
+                    spa_found, _js2, _spa_stats = d.crawl(
                         self.target.url, extra_seeds=spa_seeds[:24],
                         exclude_urls=([self.cfg.auth.login_url]
                                       if self.cfg.auth else []) + _excl)
                     before = {e.id for e in endpoints} | {endpoints_seed_id}
                     endpoints.extend(e for e in spa_found
                                      if e.id not in before
-                                     and not any(t == "xhr:observed"
-                                                 for t in (e.tags or [])))
+                                     and urllib.parse.urlsplit(e.url).path
+                                     not in getattr(self, "_xhr_channel_paths", set()))
                     self.stats.setdefault("spa_expansion", {}).update({
                         "seeds": len(spa_seeds[:24]),
                         "new_endpoints": len([e for e in spa_found if e.id not in before])})
@@ -775,20 +784,24 @@ class BurhanScanner:
         # + the Coverage Engine's discovery ledger. enrich() only UPGRADES param
         # kinds when the observed value proves a more specific shape (JSON object);
         # every skip it causes is recorded as an auditable coverage reason.
-        # R19-1d (live-measured on Juice Shop): observed XHR channels are
-        # runtime COVERAGE INVENTORY, not battery surface. They joined the
-        # map after the main crawl and displaced main-crawl pages from the
-        # fixed request budget (verified floor 59 -> 57; with the channels
-        # suppressed the floor is whole again — decisive local A/B on the
-        # pinned official target). They stay out of the battery map; their
-        # NAVIGATION content still flows in via the spa_route expansion
-        # seeds (WebGoat's menu round-trip is unaffected), and the channel
-        # list stays queryable in the coverage ledger below.
+        # R19-1d (decisive local A/B on the pinned official target): observed
+        # XHR channels are runtime COVERAGE INVENTORY, not battery surface —
+        # with the channels in the map the verified floor reads 58, with them
+        # ledgered-only it reads 60. They displaced main-crawl pages from the
+        # fixed request budget (/saved-payment-methods sits at request
+        # 2494/2500 on main — the budget's very edge). Their NAVIGATION
+        # content still flows in through the resource-shaped expansion seeds
+        # above (WebGoat's menu round-trip), and the channel list stays
+        # queryable in the coverage ledger.
         _xhr_channels = [e for e in endpoints
-                         if any(t == "xhr:observed" for t in (e.tags or []))]
+                         if any(t == "xhr:observed" for t in (e.tags or []))
+                         or urllib.parse.urlsplit(e.url).path
+                         in getattr(self, "_xhr_channel_paths", set())]
         if _xhr_channels:
             endpoints = [e for e in endpoints
-                         if not any(t == "xhr:observed" for t in (e.tags or []))]
+                         if not any(t == "xhr:observed" for t in (e.tags or []))
+                         and urllib.parse.urlsplit(e.url).path
+                         not in getattr(self, "_xhr_channel_paths", set())]
             for _xc in _xhr_channels:
                 self.coverage.discover(_xc)
         for ep in endpoints:
