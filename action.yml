@@ -103,6 +103,22 @@ runs:
       run: |
         set -euo pipefail
         export PYTHONPATH="${{ github.action_path }}:${PYTHONPATH:-}"
+        # R19-2b: the engine's scan path gates on the owner password
+        # BEFORE its first request. CI automation carries its OWN
+        # throwaway gate store on the runner (random password, dies with
+        # the workspace). A buyer's armed installation is untouched:
+        # their store lives in their working directory and
+        # BURHAN_OWNER_GATE pins this run to the throwaway path. An
+        # operator who wants the gate active in their workflow exports
+        # their own BURHAN_OWNER_GATE + BURHAN_OWNER_PASSWORD — the env
+        # takes precedence and no init happens (the store exists).
+        if [ -z "${BURHAN_OWNER_GATE:-}" ] || [ ! -f "${BURHAN_OWNER_GATE:-}" ]; then
+          export BURHAN_OWNER_GATE="$RUNNER_TEMP/burhan-action-gate.json"
+        fi
+        if [ ! -f "$BURHAN_OWNER_GATE" ]; then
+          export BURHAN_OWNER_PASSWORD="$(head -c 32 /dev/urandom | base64 | tr -d '=+/')"
+          python3 -m burhan.cli owner init --password "$BURHAN_OWNER_PASSWORD"
+        fi
         ARGS=(--out "${{ inputs.out }}" --max-pages "${{ inputs.max-pages }}" --timeout "${{ inputs.timeout }}")
         if [ "${{ inputs.allow-private }}" = "true" ]; then ARGS+=(--allow-private); fi
         if [ -n "${{ inputs.seed }}" ]; then ARGS+=(--seed "${{ inputs.seed }}"); fi
