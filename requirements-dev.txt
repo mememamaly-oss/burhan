@@ -15,7 +15,7 @@ jsonschema>=4.26.0
 # R15-4 regression (test_r15_sigint_browser): counts orphaned
 # chrome-headless-shell processes after an interrupted scan. Test-only —
 # the engine itself never imports it.
-psutil>=5.9
+psutil>=7.2.2
 # R18 Part 3 (property-based tests): hypothesis was listed by Round 15
 # as planned-but-unused; Round 18 lands it scoped to the four core
 # invariants (merkle agreement, risk-score monotonicity, version-string
