@@ -2104,3 +2104,100 @@ returning findings=199 with the identical Merkle root 5c451f22f0e1…
 Attribution (owner's instruction): the Windows verification run and
 the eight fixes of this round were produced through the Qoder agent
 following 16 prior rounds with GLM.
+
+## 2026-11-09 — ROUND 19: SPA hash-fragment discovery + the owner-password scan gate (PR #86)
+
+Round 18's consolidated record lives in worklog.md 2026-11-07/08
+(P1–P6: seven new scanner classes with fuzz/compound-fault/mutation
+suites, the macOS CI campaign, doctor egress fixes, and the
+live-validation authorization findings); this entry records round 19,
+landed as r19-1-webgoat-spa.
+
+PART 1 — SPA HASH-FRAGMENT DISCOVERY (the WebGoat 40-lesson
+collapse). Live-caught on WebGoat 2026.4 (official JAR): the app
+routes its entire curriculum through hash-fragment SPA routes
+(start.mvc#lesson/X.lesson) and serves the navigation tree as JSON
+(service/lessonmenu.mvc). Four stacked gaps hid the whole lesson
+surface (the authenticated scan surfaced 14 endpoints instead of the
+40-lesson attack surface, 5 forms per lesson page): (1) fragment-
+bearing hrefs were dropped and fragments stripped from every URL
+(correct for fetching, so all routes collapsed onto the host page) —
+fragments are now recorded and mapped to the resource the client
+actually fetches ('#lesson/X.lesson' -> GET /X.lesson, live-verified:
+the route prefix is the router's namespace, not a path); the fragment
+itself is never fetched (wire-proven test); (2) the crawl admitted
+only text/html|text/plain as pages — the JSON menu was fetched and
+DISCARDED; JSON bodies are now mined through the same
+plausible_js_url precision gate (DISC-01 applied to a new carrier);
+(3) route resolution is dual-anchored (menu directory AND crawl
+seed-root — WebGoat's menu lives at a different depth than the
+resources it names; resolving against the menu dir alone 404s,
+live-verified); (4) render_merge received target.host (hostname
+without port) while every same-host check compares netloc — on any
+non-standard port EVERY rendered browser link was silently dropped;
+the full netloc is passed, and observed same-host XHR channels (the
+menu!) become tagged endpoints. The orchestrator re-crawls tagged
+carriers (spa_route:* / xhr:observed) as extra seeds through the SAME
+budget/gate machinery — no privileged path. Regression:
+tests/test_r19_spa_discovery.py (18) with fixture bytes verbatim from
+the live official JAR.
+
+PART 1 close — channel-born endpoints stay out of the battery map
+(path-durable identity). The Juice Shop floor regression (59 -> 58:
+/saved-payment-methods was probed at request 2494/2500, the budget's
+very edge — channel-born ghosts spent that margin) closed and
+live-proven on the pinned official target: spa_route carriers ALWAYS
+seed expansion; observed XHR channels only when resource-shaped; a
+channel's URL PATH is remembered for the whole run and the re-crawl
+re-discovers channel URLs as FRESH untagged endpoints. Verified 60 >=
+floor 59, REAL-TARGET GATES OK (was 58).
+
+PART 2 — THE OWNER-PASSWORD SCAN GATE (the owner's order: scan
+execution controlled by the installation owner's password — first
+setup sets it, change requires the current one, a sale transfers to
+the buyer's OWN password with no dependency on the seller).
+burhan/owner_gate.py in the stepup.py (r9p2) discipline: scrypt
+verifier + per-store salt (never plaintext), atomic-exclusive
+O_CREAT|O_EXCL setup (no silent reset), tamper-evident hash chain
+over every attempt, sliding-window rate limit (5/300s), zero network.
+Transfer: the seller arms a one-time 256-bit ticket (15min TTL,
+authenticated by their password); the buyer consumes it and installs
+their own password — the seller's credential dies at that moment. 16
+module acceptance tests cover the owner's measurable criteria (no
+scan without a passing gate, no default/backdoor value, change
+requires the current password, buyer independence, ticket
+single-use/expiry/forgery, verifier-only storage, no network
+surface). CLI wiring (0c2f7b2): `burhan owner init / change /
+transfer-arm / transfer-take / status` + the scan path requires the
+gate (exit 2, zero requests, before the browser even boots) — 4
+subprocess-driven tests exactly as an operator runs them.
+
+CI RIDES THE GATE (ac0dbe4): every automation path that drives
+'burhan.cli scan' as a subprocess carries its own throwaway store —
+conftest session store (random password, tempdir) via
+BURHAN_OWNER_GATE / BURHAN_OWNER_PASSWORD; the gate's OWN refusal
+tests strip both variables from the child env so session defaults
+never leak into the negative tests; action.yml dogfood inits a store
+on the runner when the operator did not export their own; the sigint
+browser test arms its own local store.
+
+FLAKE CLOSURES (the round's timing lessons, all the same medicine —
+stop betting on blind timing): (a) the compound-fault C3 kill
+(two writers, one SQLite store, writer 1 SIGKILLed mid-transaction)
+now anchors on OBSERVED store activity (the shared -wal existing
+with size > 0 means both engines are past the gate and actually
+writing) instead of a blind 10s spawn window, with one bounded retry
+for fast runners — three flakes of one fingerprint closed; (b) a
+base64url handover ticket starting with '-' (~1/64 odds, measured
+1.55% over 200k draws) made argparse treat it as an option, so the
+buyer could NEVER complete the takeover — transfer_arm re-rolls until
+position 0 is not a dash (written as a while-condition: engine code
+keeps zero bare 'break's, antipattern engine-unmatched 0), the CLI
+test uses the dash-safe --ticket= form, and a regression test pins
+the shape over 64 consecutive arms; (c) the SaaS rate-limit
+'window slides' test used an 80ms window while a loaded runner
+stretches a PG round-trip past 50ms (observed: the adjacent test ran
+11 calls in 199ms) — window 80ms -> 2s, sleep -> 2.1s, the property
+under test unchanged.
+
+- Round-by-round history: `git log`, worklog.md (current + history).
