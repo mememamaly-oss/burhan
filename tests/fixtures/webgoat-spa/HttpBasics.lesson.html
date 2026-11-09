@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+
+
+<!-- Model is setup in the class StartLesson -->
+<div id="lessonInstructions"></div>
+
+<div id="message" class="info"></div>
+<br/>
+
+<!DOCTYPE html>
+
+<html>
+
+	<div class="lesson-page-wrapper">
+        <!-- reuse this lesson-page-wrapper block for each 'page' of content in your lesson -->
+		<!-- include content here, or can be placed in another location. Content will be presented via asciidocs files,
+		which you put in src/main/resources/lessonplans/{lang}/{fileName}.adoc -->
+		<div class="sect1">
+<h2 id="_concept">Concept</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This lesson presents the basics for understanding the transfer of data between the browser and a web application and
+what you can change when you trap a request with an HTTP attack proxy. In order to attack and defend the web, one must first understand the
+protocols behind the web.</p>
+</div>
+<div class="sect2">
+<h3 id="_what_is_http">What is HTTP</h3>
+<div class="paragraph">
+<p>HTTP or the Hyper Text Transfer Protocol is a <a href="https://www.geeksforgeeks.org/computer-networks/open-systems-interconnection-model-osi/">layer 7 protocol</a> used by the browser and web servers to send and receive data. This data is commonly sent
+in the form of HTML files used to render websites. By default HTTP is a stateless protocol, meaning the server does not remember
+anything about the client between requests. Through cookies, HTTP can store information like session data and
+preferences across multiple requests.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_anatomy_of_an_http_request">Anatomy of an HTTP request</h3>
+<div class="paragraph">
+<p>All HTTP requests start by the client sending a request to the server, the server processing the request, and the
+responding to the client.</p>
+</div>
+<div class="paragraph">
+<p>A request contains three main parts. Observe the example below of a client sending a request, and see if you can find them:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="http">POST /submit HTTP/1.1
+Host: example.com
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:145.0)
+Content-Type: application/json
+Cookie: session_id=abc123xyz;
+Accept: text/html,application/json
+Connection: keep-alive
+
+{&quot;submit&quot;:true}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first line contains the request method, location, query parameters (represented as <code>?param=value</code>), and the protocol version. Subsequent lines down known as <strong>headers</strong> contain
+additional metadata telling the server and client how to communicate, what formats to use, what to cache and much more.
+Headers are stored in the following format: <code>Header: Value</code>. After headers, there is a new line marking the beginning of
+the request body. The request body contains actual data being sent, examples of request body include HTML files, JSON
+data and images. A request body is optional, it appears most commonly in <code>POST</code>, requests, but is a legal field in every
+request type besides <code>GET</code>.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Example HTTP request</caption>
+<colgroup>
+<col style="width: 50%;"/>
+<col style="width: 50%;"/>
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Request Line</th>
+<th class="tableblock halign-left valign-top">Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>POST /submit HTTP/1.1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>POST</code> is the HTTP request method. There are <code>9</code> HTTP request methods defined in the standard. Click
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods">here</a> for information on the HTTP methods.
+<code>/submit</code> is the endpoint location, commonly used to tell the server which file to retrieve. In this example and in modern
+servers a file extension is omitted.
+<code>HTTP/1.1</code> tells the server which version of the HTTP protocol it is using.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Host: example.com</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The host header specifies the domain name and port number of the destination of the request.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:145.0) Gecko/20100101 Firefox/145.0</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The User-Agent header sends information about the client to the server.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Content-Type: application/json</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The Content-Type header tells the server what type of data the client is sending.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Cookie: session_id=abc123xyz;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">As mentioned earlier HTTP is a stateless protocol by default. The cookie header is used to store state across requests.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Accept: text/html,application/json</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The accept header tells the server what formats the client wants back as a response.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BLANK</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A request&#8217;s body always starts after a blank line.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>{"submit": true}</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The request&#8217;s body is a JSON object.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_anatomy_of_an_http_response">Anatomy of an HTTP response</h3>
+<div class="paragraph">
+<p>Below is the response from the given HTTP request.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="http">HTTP/1.1 200
+Content-Type: application/json
+Date: Thu, 09 Apr 2026 20:01:34 GMT
+Connection: keep-alive
+Keep-Alive: timeout=60
+Set-Cookie: session_id=new_id;
+Content-Length: 39
+
+{&quot;message&quot;: &quot;Successfully submitted&quot;}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>HTTP responses follow a similar format to HTTP requests. Like an HTTP request, the first line contains the HTTP
+protocol version, but unlike requests, responses have a status code. Status codes are three-digit numbers used as a standard to tell the client
+how the server handled the request. You are likely already familiar with some HTTP status codes, like <code>404</code>, which means
+the server did not find what the client was requesting. For more information on status codes along with a list of codes
+and their meanings, check out this <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status">helpful reference guide from Mozilla</a>.</p>
+</div>
+<div class="paragraph">
+<p>After the status line, the rest of the response follows the same structure as a request: headers come next, followed by a blank line,
+and then the optional message body.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Example HTTP response</caption>
+<colgroup>
+<col style="width: 50%;"/>
+<col style="width: 50%;"/>
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Response Line</th>
+<th class="tableblock halign-left valign-top">Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>HTTP/1.1 200</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The HTTP protocol version (HTTP 1.1) followed by the status code.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Content-Type: application/json</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The Content-Type header tells the client what type of data the server is sending.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Date: Thu, 09 Apr 2026 20:01:34 GMT</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The date header tells the client when the server received the request. This header is almost completely exclusive to responses.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Connection: keep-alive</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Tells the client that the server wants to reuse the same TCP connection.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Keep-Alive: timeout=60</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Says the TCP connection should stay open for 60 seconds before being closed.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Set-Cookie: session_id=new_id;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the client&#8217;s session_id cookie to a new value.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BLANK</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A response&#8217;s body always starts after a blank line.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>{"message": "Successfully submitted"}</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The response&#8217;s body is a JSON object.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+	</div>
+
+	<div class="lesson-page-wrapper">
+		<!-- reuse this block for each 'page' of content -->
+        <!-- sample ascii doc content for second page -->
+		<div class="paragraph">
+<p>Enter your name in the input field below and press "Go!" to submit.	The server will accept the request, reverse the
+input and display it back to the user, illustrating the basics of handling an HTTP request.</p>
+</div>
+<div class="sect1">
+<h2 id="_try_it">Try It!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Enter your name in the input field below and press "Go!" to submit. Use the Developer Tools to view the HTTP request and response.
+Can you see the response with the reversed username?</p>
+</div>
+</div>
+</div>
+        <!-- if including attack, reuse this section, leave classes in place -->
+		<div class="attack-container">
+			<div class="assignment-success"><i class="fa fa-2 fa-check hidden" aria-hidden="true"></i></div>
+			<!-- using attack-form class on your form will allow your request to be ajaxified and stay within the display framework for webgoat -->
+            <!-- you can write your own custom forms, but standard form submission will take you to your endpoint and outside of the WebGoat framework -->
+            <!-- of course, you can write your own ajax submission /handling in your own javascript if you like -->
+			<form class="attack-form" accept-charset="UNKNOWN"
+				method="POST" name="form"
+				action="/WebGoat/HttpBasics/attack1">
+				<div id="lessonContent">
+					<form accept-charset="UNKNOWN" method="POST" name="form"
+						action="/WebGoat/#attack/307/100">
+						Enter your name: <input name="person" value="" type="TEXT"/><input
+							name="SUBMIT" value="Go!" type="SUBMIT" class="spacing"/>
+					</form>
+				</div>
+			</form>
+			<!-- do not remove the two following div's, this is where your feedback/output will land -->
+			<div class="attack-feedback"></div>
+			<div class="attack-output"></div>
+			<!-- ... of course, you can move them if you want to, but that will not look consistent to other lessons -->
+		</div>
+
+	</div>
+
+    <div class="lesson-page-wrapper">
+        <div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In previous examples, you utilized HTML forms and browser JavaScript to send HTTP requests. Sometimes, attackers need to
+send HTTP requests with external tools rather than relying on functionality built into the website.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples_of_external_tools">Examples of external tools</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>The <a href="https://curl.se/docs/manpage.html">curl</a> command</p>
+</li>
+<li>
+<p>Python <a href="https://docs.python-requests.org/en/latest/index.html">requests</a> module</p>
+</li>
+<li>
+<p>An HTTP Attack Proxy like Burp or Zap</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_assignment">The assignment</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Send an HTTP request to the endpoint <code>/WebGoat/HttpBasics/external</code> with the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A user agent of <code>Attacker</code></p>
+</li>
+<li>
+<p>A request method of <code>PUT</code></p>
+</li>
+<li>
+<p>A content type of <code>application/json</code></p>
+</li>
+<li>
+<p>The body <code>{"external": true}</code></p>
+</li>
+<li>
+<p><strong>Ensure you include the <code>JSESSIONID</code> header from your browser</strong></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Enter the secret code returned by the endpoint above in the box below to solve this lesson.</strong></p>
+</div>
+</div>
+</div>
+        <div class="attack-container">
+            <div class="assignment-success"><i class="fa fa-2 fa-check hidden" aria-hidden="true"></i></div>
+            <form class="attack-form" accept-charset="UNKNOWN" name="intercept-request"
+                  method="POST"
+                  action="/WebGoat/HttpBasics/externalcheck">
+                <input type="text" value="" name="code"/>
+                <input type="submit" value="Submit"/>
+            </form>
+            <div class="attack-feedback"></div>
+            <div class="attack-output"></div>
+        </div>
+    </div>
+
+	<div class="lesson-page-wrapper">
+        <!-- reuse this lesson-page-wrapper block for each 'page' of content in your lesson -->
+        <!-- include content here. Content will be presented via asciidocs files,
+        which you put in src/main/resources/plugin/lessonplans/{lang}/{fileName}.adoc -->
+		<div class="sect1">
+<h2 id="_html_forms">HTML Forms</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>What type of HTTP verb does WebGoat use when submitting the form in this assignment? A POST or a GET?
+And can you find the magic number?</p>
+</div>
+</div>
+</div>
+		<div class="attack-container">
+			<div class="assignment-success"><i class="fa fa-2 fa-check hidden" aria-hidden="true"></i></div>
+			<!-- using attack-form class on your form, will allow your request to be ajaxified and stay within the display framework for webgoat -->
+                <!-- using attack-form class on your form will allow your request to be ajaxified and stay within the display framework for webgoat -->
+                <!-- you can write your own custom forms, but standard form submission will take you to your endpoint and outside of the WebGoat framework -->
+                <!-- of course, you can write your own ajax submission /handling in your own javascript if you like -->
+				<form class="attack-form" accept-charset="UNKNOWN"
+					method="POST" name="form"
+					action="/WebGoat/HttpBasics/attack2">
+					<script>
+					    // sample custom javascript in the recommended way ...
+					    // a namespace has been assigned for it, but you can roll your own if you prefer
+					    webgoat.customjs.assignRandomVal = function () {
+							var x = Math.floor((Math.random() * 100) + 1);
+							document.getElementById("magic_num").value = x;
+						};
+						webgoat.customjs.assignRandomVal();
+					</script>
+					<input type="hidden" name="magic_num" id="magic_num" value="foo" />
+					<table>
+						<tr>
+							<td>Is this form sending a POST or a GET:</td>
+							<td><input name="answer" value="" type="TEXT" /></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>What is the magic number:</td>
+							<td><input name="magic_answer" value="" type="TEXT" /><input
+								name="SUBMIT" value="Go!" type="SUBMIT" class="spacing" /></td>
+							<td></td>
+						</tr>
+					</table>
+				</form>
+				<!-- do not remove the two following div's, this is where your feedback/output will land -->
+				<div class="attack-feedback"></div>
+				<div class="attack-output"></div>
+				<!-- ... of course, you can move them if you want to, but that will not look consistent to other lessons -->
+		</div>
+	</div>
+
+	<div class="lesson-page-wrapper"> <div class="sect1">
+<h2 id="_https_and_tls">HTTPS and TLS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The HTTP protocol contains a major flaw. All of the traffic sent between the client and server is not encrypted. This
+means the traffic is readable by anyone with a simple man in the middle attack. HTTPS <em>(Hyper Text Transfer Protocol
+Secure)</em> adds <strong>confidentiality</strong> and <strong>integrity</strong> to the insecure HTTP protocol through various forms of cryptography.</p>
+</div>
+<div class="paragraph">
+<p><code>Transport Layer Security</code> <em>(TLS)</em> is a protocol used to facilitate an encrypted connection between a client and server,
+while also verifying that data sent in the connection has not been tampered with. HTTPS uses TLS to secure the HTTP protocol.</p>
+</div>
+<div class="paragraph">
+<p>As secure data transmission grew more important, HTTPS adoption became widespread. Today, browsers flag all plain HTTP traffic as insecure, and search engines prioritize HTTPS results. This marks a significant shift from earlier practices and paves the way for a deeper look at how HTTPS achieves security.</p>
+</div>
+<div class="sect2">
+<h3 id="_how_do_tls_certificates_secure_http">How do TLS certificates secure HTTP?</h3>
+
+</div>
+<div class="sect2">
+<h3 id="_confidentiality">Confidentiality</h3>
+<div class="paragraph">
+<p>TLS protects confidentiality by establishing an encrypted connection between the client and server. It uses <a href="https://en.wikipedia.org/wiki/Public-key_cryptography">public key cryptography</a> along with key exchange algorithms like
+Diffie–Hellman to securely agree on shared keys, which are then used to encrypt all data sent across the connection.
+This prevents anyone who intercepts the traffic from reading it, helping to ensure that sensitive information stays private.</p>
+</div>
+<div class="paragraph">
+<p>Check out this <a href="https://www.cloudflare.com/learning/ssl/what-happens-in-a-tls-handshake/">article by Cloudflare</a> to learn
+more about the TLS handshake, and what happens behind the scenes to establish an encrypted connection.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_integrity">Integrity</h3>
+<div class="paragraph">
+<p>Every server supporting TLS has a <code>certificate</code> containing a public key, and a separate private key. If the
+website is deployed on the internet, the certificate is almost always signed by a <code>certificate authority</code>.
+<code>Certificate Authorities</code> are trusted companies that issue and verify digital certificates to prove ownership of a
+domain. A signed certificate is crucial to integrity because it cryptographically verifies a website&#8217;s identity, ensuring that the site
+you&#8217;re connecting to is the one it claims to be, and is indeed the owner of its domain.
+You might have seen a message like the one below saying that the browser does not trust the certificate used by
+the website. Messages like this are common on certificates used in development or deployed on internal networks.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="images/untrusted-ssl.png" alt="Image showcasing untrusted certificate error in Firefox"/></span></p>
+</div>
+</div>
+</div>
+</div>
+	</div>
+
+<div class="lesson-page-wrapper">
+    <span id="quiz_id" data-quiz_id="httpbasics"></span>
+    <link rel="stylesheet" type="text/css" href="/WebGoat/css/quiz.css"/>
+    <script src="/WebGoat/js/quiz.js" language="JavaScript"></script>
+    <link rel="import" type="application/json" href="/WebGoat/lesson_js/questions.json"/>
+    <div class="paragraph">
+<p>Understanding how the HTTP protocol works is an essential prerequisite for the rest of the exercises in WebGoat.</p>
+</div>
+<div class="paragraph">
+<p>Time for a quiz!</p>
+</div>
+    <div class="attack-container">
+        <div class="assignment-success"><i class="fa fa-2 fa-check hidden" aria-hidden="true"></i></div>
+        <div class="container-fluid">
+            <form id="quiz-form" class="attack-form" accept-charset="UNKNOWN"
+                  method="POST" name="form"
+                  action="/WebGoat/HttpBasics/quiz" role="form">
+                <div id="q_container"></div>
+                <br />
+                <input name="Quiz_solutions" value="Submit answers" type="SUBMIT"/>
+            </form>
+        </div>
+        <div class="attack-feedback"></div>
+        <div class="attack-output"></div>
+    </div>
+</div>
+
+</html>
+
+
+</html>

@@ -2537,6 +2537,27 @@
    "class": "WINDOWS_RESERVED_NAME",
    "code": "open\\(f\"\\{raw_dir\\}/advisory-\\{safe\\}\\.json\", \"wb\"\\)",
    "reason": "the interpolated id is sanitized one line above (safe = re.sub(r'[^A-Za-z0-9._-]', '_', vid)) — OSV ids are GHSA-xxxx-xxxx-xxxx shaped, so 'safe' can never be CON/PRN/AUX/NUL/COM*/LPT* (those contain no hyphen after the prefix char... actually GHSA ids always carry hyphens; and even a pathological id collapses to underscores+dot+digits — the Windows reserved set matches exact stem names only, and 'advisory-' prefix alone excludes every reserved stem)"
+  },
+  {
+   "id": "QS-234",
+   "file": "burhan/discovery.py",
+   "code": "DiscoveryEngine",
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "reason": "r19-1: the crawler engine class is instantiated by BurhanScanner.run (burhan/orchestrator.py:578, routed from the CI fixture/real-target entry scripts) and now also referenced by tests/test_r19_spa_discovery.py. Production reachability is via the orchestrator's constructor call; the scanner's module-granularity cross-file routing resolves the import, and the class instantiation is the production reference (classes are deliberately out of the scanner's callable scope v1 — same record shape as QS-222's data-model note)."
+  },
+  {
+   "id": "QS-235",
+   "file": "burhan/discovery.py",
+   "code": "plausible_js_url",
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "reason": "r19-1: the JS-extraction precision gate (DISC-01), called inside DiscoveryEngine.crawl's JS/static extraction blocks and now also from _json_route_values (the JSON-menu miner) plus the r19 SPA tests. The call sites live inside the crawl() method body; the scanner's callable routing sees the method through the class (see the DiscoveryEngine entry above) — documented-benign, same shape as QS-222."
+  },
+  {
+   "id": "QS-236",
+   "file": "burhan/owner_gate.py",
+   "code": "OwnerGateRateLimited",
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "reason": "r19-2: the rate-limit EXCEPTION class. Production raises it from OwnerGate._rate_guard (called by unlock_scan/change/transfer — all wired through the CLI's owner command and the scan gate); the CLI catches the OwnerGateError BASE class, so the subclass name appears literally only in tests. Same shape as QS-222's data-model note: exception classes are consumed as types, and the base-class catch IS the production reference."
   }
  ]
 }

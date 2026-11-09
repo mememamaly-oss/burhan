@@ -362,6 +362,14 @@ def main():
                         "graphql aliasing, excessive data exposure, rebind TOCTOU) — off by default")
     s.add_argument("--out", default="results/scan.json"); s.add_argument("--strategy-path")
     s.add_argument("--db", default="", help="persist run+findings to this SQLite store")
+    s.add_argument("--owner-password", default="",
+                   help="R19-2: authorize the scan with the owner password "
+                        "(interactive prompt when a gate store exists and no "
+                        "value is supplied)")
+    s.add_argument("--owner-gate", default="owner-gate.json",
+                   help="R19-2: the owner gate store file (default: "
+                        "owner-gate.json in the working directory; set the "
+                        "BURHAN_OWNER_GATE env var for a fixed location)")
     s.add_argument("--prioritize-store", default="",
                    help="round 10 part 1: path to the shared SQLite store whose "
                         "prior runs of this target drive the finding lifecycle "
@@ -475,6 +483,20 @@ def main():
                    help="race battery timing-variance threshold in seconds (default: 0.005)")
     sub.add_parser("doctor")
     sub.add_parser("repair-demo")
+    own = sub.add_parser("owner", help="R19-2: the installation owner's "
+                                       "password gate — scans refuse without it")
+    own.add_argument("action", choices=["init", "change", "transfer-arm",
+                                        "transfer-take", "status"])
+    own.add_argument("--store", default="owner-gate.json",
+                     help="the gate store file (default: owner-gate.json "
+                          "in the working directory)")
+    own.add_argument("--password", default="",
+                     help="the current password (interactive prompt when "
+                          "omitted; prefer the prompt)")
+    own.add_argument("--new-password", default="",
+                     help="change / transfer-take: the NEW password")
+    own.add_argument("--ticket", default="",
+                     help="transfer-take: the one-time handover ticket")
     cmp = sub.add_parser("compliance", help="P2-C: the OWASP/CWE/PCI DSS "
                                           "mapping registry — one row per "
                                           "detector class")
@@ -631,6 +653,68 @@ def main():
     vp.add_argument("--all", action="store_true")
     a = ap.parse_args()
 
+    if a.cmd == "owner":
+        # R19-2: the owner-password gate CLI. Store location resolution:
+        # --store > BURHAN_OWNER_GATE env > ./owner-gate.json. Passwords
+        # are prompted via getpass when not supplied (never echoed).
+        import getpass
+        import burhan.owner_gate as og
+        store = os.environ.get("BURHAN_OWNER_GATE", a.store)
+        gate = og.OwnerGate(store)
+        try:
+            if a.action == "status":
+                if not gate.exists():
+                    print(json.dumps({"owner_gate": "absent",
+                                      "scans": "refused until `burhan owner "
+                                               "init` sets a password"}))
+                    sys.exit(0)
+                n = gate.verify_chain()
+                print(json.dumps({"owner_gate": "armed",
+                                  "audit_events": n,
+                                  "store": store}))
+                sys.exit(0)
+            if a.action == "init":
+                pw = a.password or getpass.getpass("owner password: ")
+                og.OwnerGate.setup(store, pw)
+                print(json.dumps({"owner_gate": "installed",
+                                  "note": "scans now require this password"}))
+            elif a.action == "transfer-take":
+                # the BUYER's action: the one-time ticket IS the
+                # authorization (the seller authenticated when arming
+                # it) — the buyer's own NEW password is the only other
+                # input. No current-owner secret is needed or wanted:
+                # the buyer must not depend on the seller.
+                ticket = a.ticket or getpass.getpass("handover ticket: ")
+                new = a.new_password or getpass.getpass("YOUR new owner password: ")
+                gate.transfer_take(ticket, new)
+                print(json.dumps({"owner_gate": "ownership_transferred",
+                                  "note": "your password is now the only "
+                                          "valid one — the previous owner's "
+                                          "credential is dead"}))
+            elif a.action == "change":
+                pw = a.password or getpass.getpass("owner password: ")
+                new = a.new_password or getpass.getpass("NEW owner password: ")
+                gate.change_password(pw, new)
+                print(json.dumps({"owner_gate": "password_changed"}))
+            elif a.action == "transfer-arm":
+                pw = a.password or getpass.getpass("owner password: ")
+                ticket = gate.transfer_arm(pw)
+                print(json.dumps({
+                    "owner_gate": "transfer_armed",
+                    "ticket": ticket,
+                    "ttl_seconds": og.TRANSFER_TTL_S,
+                    "note": "hand this ONE-TIME ticket to the buyer: they run "
+                            "`burhan owner transfer-take` with it and their "
+                            "own new password; your password dies at that "
+                            "moment"}))
+        except (og.OwnerGateError, og.OwnerGateRateLimited,
+                og.OwnerGateChainTampered, og.OwnerGateTransferError,
+                FileExistsError) as e:
+            print(json.dumps({"owner_gate": "refused", "reason": str(e)}),
+                  file=sys.stderr)
+            sys.exit(2)
+        sys.exit(0)
+
     if a.cmd == "doctor":
         report = doctor()
         print(json.dumps(report, indent=1))
@@ -642,6 +726,30 @@ def main():
         if any(c.get("status") == "FAIL" for c in report.get("checks", [])):
             sys.exit(1)
     elif a.cmd == "scan":
+        # R19-2: the owner-password gate. Resolution order: --owner-password
+        # (tests/automation), else interactive prompt when a gate store
+        # exists, else BURHAN_OWNER_PASSWORD (operator env). NO default
+        # value exists — an installation whose gate is armed refuses every
+        # scan without a passing credential (exit 2, zero requests); an
+        # installation with NO gate yet also refuses, pointing at
+        # `burhan owner init` (there is no bypass flag).
+        import burhan.owner_gate as og
+        _og_store = os.environ.get("BURHAN_OWNER_GATE", a.owner_gate)
+        _og = og.OwnerGate(_og_store)
+        _og_pw = a.owner_password or os.environ.get("BURHAN_OWNER_PASSWORD", "")
+        if not _og_pw and _og.exists():
+            import getpass
+            _og_pw = getpass.getpass("owner password (scan gate): ")
+        try:
+            _og.unlock_scan(_og_pw or None)
+        except og.OwnerGateError as e:
+            print(json.dumps({"scan_aborted": "owner gate refused",
+                              "reason": str(e),
+                              "hint": "set yours with `burhan owner init`, or "
+                                      "supply --owner-password / the "
+                                      "BURHAN_OWNER_PASSWORD env var"}),
+                  file=sys.stderr)
+            sys.exit(2)
         # ORD-001-REMAND (RT-03/RT-04): an operator-passed --seed must carry
         # >= 32 bytes of material (64 hex chars recommended for runs;
         # >= 64 utf-8 chars otherwise). Weak seeds (dates, timestamps,
