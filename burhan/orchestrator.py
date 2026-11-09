@@ -576,7 +576,9 @@ class BurhanScanner:
         # the login page itself is excluded from page-fetches — re-fetching it
         # clobbers the authenticated session cookie with a fresh anonymous one)
         d = DiscoveryEngine(self.engine, self.cfg.max_pages)
-        endpoints: list[Endpoint] = [Endpoint(url=self.target.url, source=DiscoverySource.SEED)]
+        _seed_ep = Endpoint(url=self.target.url, source=DiscoverySource.SEED)
+        endpoints: list[Endpoint] = [_seed_ep]
+        endpoints_seed_id = _seed_ep.id   # the scan root — excluded from crawl merges
         # ---- AUTH-06: a successful json_login contributes the CREDENTIALED
         # login endpoint to the map. The JWT families harvest their token by
         # replaying exactly this surface (form-encoded replay would 415 on a
@@ -603,7 +605,7 @@ class BurhanScanner:
             found, js, crawl_stats = d.crawl(self.target.url, extra_seeds=auth_seeds,
                                              exclude_urls=([self.cfg.auth.login_url]
                                                            if self.cfg.auth else []) + _excl)
-            endpoints.extend(e for e in found if e.id != endpoints[0].id)
+            endpoints.extend(e for e in found if e.id != endpoints_seed_id)
             # V411-DISC-SAFE: destructive-GET page-fetch skips are auditable
             # boundaries, never silent (live-caught on DVGA: /start_over
             # re-seeded the whole DB on a passive crawl fetch)
@@ -735,9 +737,9 @@ class BurhanScanner:
                         self.target.url, extra_seeds=spa_seeds[:24],
                         exclude_urls=([self.cfg.auth.login_url]
                                       if self.cfg.auth else []) + _excl)
-                    before = {e.id for e in endpoints}
-                    endpoints.extend(e for e in spa_found if e.id not in before
-                                     and e.id != endpoints[0].id)
+                    before = {e.id for e in endpoints} | {endpoints_seed_id}
+                    endpoints.extend(e for e in spa_found
+                                     if e.id not in before)
                     self.stats.setdefault("spa_expansion", {}).update({
                         "seeds": len(spa_seeds[:24]),
                         "new_endpoints": len([e for e in spa_found if e.id not in before])})

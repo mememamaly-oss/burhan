@@ -165,7 +165,7 @@ class _SpaTarget(http.server.HTTPServer):
                     menu = [
                         {"link": "#lesson/Alpha.lesson", "name": "alpha",
                          "children": [{"link": "#lesson/Beta.lesson"}]},
-                        {"link": "#lesson/Gamma.lesson", "name": "gamma",
+                        {"link": "#lesson/Delta.lesson", "name": "delta",
                          "children": []},
                     ]
                     body = json.dumps(menu).encode()
@@ -321,11 +321,11 @@ class TestCrawlDiscoversSpaRoutes:
         endpoints, _js, _stats = disc.crawl(f"{base}/start.mvc",
                                             extra_seeds=spa_seeds)
         urls = {e.url for e in endpoints}
-        for leaf in ("Alpha.lesson", "Beta.lesson", "Gamma.lesson"):
+        for leaf in ("Alpha.lesson", "Beta.lesson", "Delta.lesson"):
             assert f"{base}/{leaf}" in urls, \
                 f"lesson {leaf} missing — SPA expansion did not reach it"
         # every lesson's FORM was parsed (page-fetched, not just listed)
-        for leaf in ("Alpha.lesson", "Beta.lesson", "Gamma.lesson"):
+        for leaf in ("Alpha.lesson", "Beta.lesson", "Delta.lesson"):
             form_ep = next((e for e in endpoints
                             if e.url.endswith("/app/service/attack")
                             and any(f"field_{leaf}" in (p.name or "")
