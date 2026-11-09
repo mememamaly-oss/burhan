@@ -159,6 +159,28 @@ def test_c3_concurrent_store_writers_with_killed_transaction(tmp_path):
             except OSError:
                 pass
             time.sleep(0.2)
+        # Bounded retry: on a FAST runner the first writer pair can
+        # complete before the WAL anchor even observes activity — a
+        # timing miss, not an engine fault (the engine exited CLEANLY;
+        # local: 5/5 green, CI ARM runners flaked pre-r18-8.4 twice too).
+        # One fresh pair gets a second chance; a second miss is a real
+        # red. The engine-level contract (survivor + store readable)
+        # is asserted identically either way.
+        for _attempt in (1, 2):
+            if p1.poll() is None:
+                break
+            p1 = subprocess.Popen(
+                CLI + ["scan", f"http://127.0.0.1:{port}", "--no-browser", "--allow-private",
+                       "--logic-active", "--out", str(out1), "--db", str(db)],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            _w0 = time.time() + 60
+            while time.time() < _w0 and p1.poll() is None:
+                try:
+                    if os.path.exists(_wal) and os.path.getsize(_wal) > 0:
+                        break
+                except OSError:
+                    pass
+                time.sleep(0.2)
         assert p1.poll() is None, "writer 1 finished before the kill could land"
         time.sleep(1.0)                      # let transactions interleave
         p1.kill()                            # fault 2: mid-transaction kill
