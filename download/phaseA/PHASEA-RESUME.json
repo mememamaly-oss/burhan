@@ -1,0 +1,38 @@
+{
+ "date": "2026-11-10T23:20:00Z",
+ "phase": "A (baseline & safety)",
+ "overall": "PENDING — A.3b CI gate on PR #93 not yet green; everything else DONE",
+ "items": {
+  "A.1_backup": {
+   "status": "DONE",
+   "evidence": "/home/z/my-project/backups/burhan-phaseA-2026-11-10T22-03.bundle (442MB, --all incl. origin/main 025caa64bf) + .sha256 = cb0ab9a433c6a232fc40c8cbbb322b7f2d326432df0b8de43f5fb916e1c676ba; bundle verify: 'records a complete history'"
+  },
+  "A.2_baseline": {
+   "status": "DONE",
+   "evidence": "761 tracked files on origin/main (git ls-tree -r); 458 test fns (git grep -c 'def test_' tests/); root = 45 items; top-20 largest listed in report; pack 423.15 MiB (git count-objects -vH); CI on 025caa64bf: 28 success/3 skipped + macOS tail (run #555; #554 completed/success same commit)"
+  },
+  "A.3a_secrets_scan": {
+   "status": "DONE",
+   "evidence": "scripts/phaseA_secrets_scan.py over 628 commits (--all --reflog): 2415 raw hits, ALL dummy (jwt x2359 Juice-Shop/crAPI/DVGA demo tokens in evidence; AKIAUNITTESTKEY00001 x20; MIIE... truncated fixture headers x24; users.yml demo x12). Real-token patterns (ghp_/github_pat/xox/npm/gcp/bearer/aws_secret): ZERO. .env blob in 35 commits 2026-10-03..2026-10-17: DATABASE_URL=file:/home/z/my-project/db/custom.db (sqlite path, benign, worklog-verified twice). Full output: backups/phaseA-scan-results.txt. NO filter-repo needed."
+  },
+  "A.3b_guard": {
+   "status": "PENDING",
+   "evidence": "PR #93 (49b21af on phaseA/secrets-guard): gate DENY_RULES += credential artifacts (.secrets/, .env*, *.pat/*.pem/*.key, id_rsa/ed25519) + CREDENTIAL_ALLOWLIST(.env.example) + .gitignore lockstep + tests/test_phaseA_secrets_guard.py. RED on base: 4 failed/1 passed; GREEN: 5/5 + r16/r17 green + live gate rc=0; local suite 588 passed/1 skipped (494.90s); mutations M1-M5 all killed. AWAITING: CI 31/31 + merge."
+  }
+ },
+ "ci_watch": {
+  "pr": 93,
+  "head": "49b21af",
+  "checks_used": 0,
+  "cap": 3,
+  "note": "Rule 5: max 3 checks, different commands, save before each wait"
+ },
+ "next_steps_after_merge": [
+  "Phase A closes; write PHASEA-REPORT.md in download/phaseA/ (in-repo)",
+  "Wait for owner review before Phase B (inventoried from KNOWN_LIMITATIONS/COVERAGE_REPORT/worklog/SECURITY_AUDIT + TODO grep)"
+ ],
+ "env_notes": {
+  "stale_clone": "main worktree /home/z/my-project/burhan was stale (audit-r15-resilience @217ce0b, 580 mode-only dirt); phase work created in fresh worktree /home/z/my-project/burhan-phaseA from origin/main 025caa64bf",
+  "pat": "recovered from workspace-repo history this session if wiped; NEVER tracked in burhan (gate now enforces)"
+ }
+}
