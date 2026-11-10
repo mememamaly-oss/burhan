@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 import urllib.parse
 
 
@@ -106,11 +107,23 @@ class SecurityMemory:
     def save(self) -> None:
         if not self.path:
             return
-        tmp = self.path + ".tmp"
-        os.makedirs(os.path.dirname(os.path.abspath(self.path)) or ".", exist_ok=True)
-        with open(tmp, "w", encoding="utf-8") as fh:
-            json.dump(self._data, fh, indent=1, ensure_ascii=False)
-        os.replace(tmp, self.path)          # atomic all-or-nothing
+        # C3 occurrence #5: a FIXED tmp name races between concurrent
+        # writers of one memory store (torn document / dead writer). The
+        # vault.py discipline: unique mkstemp name per write, same dir,
+        # cleaned up on failure, then one atomic rename.
+        d = os.path.dirname(os.path.abspath(self.path)) or "."
+        os.makedirs(d, exist_ok=True)
+        fd, tmp = tempfile.mkstemp(dir=d, prefix=".memory-tmp-")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(self._data, fh, indent=1, ensure_ascii=False)
+            os.replace(tmp, self.path)          # atomic all-or-nothing
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
 
     # ------------------------------------------------------------ change logic
     def app_changed(self, target_url: str, stats: dict) -> dict:

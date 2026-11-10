@@ -5,7 +5,7 @@
    "file": "burhan/api.py",
    "code": "except\\ Exception:",
    "class": "error-response",
-   "reason": "API handler: invalid JSON is answered with HTTP 400 to the client — the failure is observable to the caller, not swallowed",
+   "reason": "API handler: invalid JSON is answered with HTTP 400 to the client \u2014 the failure is observable to the caller, not swallowed",
    "scanner_class": "SILENT_EXCEPT",
    "line": 284,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -15,7 +15,7 @@
    "file": "burhan/auth.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 104,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -25,7 +25,7 @@
    "file": "burhan/auth.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 240,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -35,7 +35,7 @@
    "file": "burhan/authorized_targets.py",
    "code": "reg\\ =\\ json\\.load\\(open\\(path,\\ encoding=\"utf\\-8\"\\)\\)",
    "class": "state-load-race",
-   "reason": "registry exists-then-open: a torn read collapses into the adjacent corrupt-load handler -> the loud SystemExit(2) banner — the gate fails LOUD on a raced registry, never scans",
+   "reason": "registry exists-then-open: a torn read collapses into the adjacent corrupt-load handler -> the loud SystemExit(2) banner \u2014 the gate fails LOUD on a raced registry, never scans",
    "scanner_class": "TOCTOU",
    "line": 54,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -45,7 +45,7 @@
    "file": "burhan/authorized_targets.py",
    "code": "except\\ Exception:",
    "class": "fail-closed-default",
-   "reason": "_is_loopback_or_private: a getaddrinfo failure returns False = 'not provably the operator's own host' -> the target falls to the public-target path where an unlisted host is REFUSED — the default is the safe verdict on purpose",
+   "reason": "_is_loopback_or_private: a getaddrinfo failure returns False = 'not provably the operator's own host' -> the target falls to the public-target path where an unlisted host is REFUSED \u2014 the default is the safe verdict on purpose",
    "scanner_class": "SILENT_EXCEPT",
    "line": 102,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -55,7 +55,7 @@
    "file": "burhan/authz.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 316,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -65,7 +65,7 @@
    "file": "burhan/authz.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 323,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -75,7 +75,7 @@
    "file": "burhan/browser.py",
    "code": "except\\ Exception:\\ pass",
    "class": "best-effort-teardown",
-   "reason": "close(): best-effort cleanup — a failed close must not mask the scan result; nothing is decided on the swallowed error",
+   "reason": "close(): best-effort cleanup \u2014 a failed close must not mask the scan result; nothing is decided on the swallowed error",
    "scanner_class": "SILENT_EXCEPT",
    "line": 230,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -105,7 +105,7 @@
    "file": "burhan/chainphase.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 95,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -115,7 +115,7 @@
    "file": "burhan/chainphase.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 513,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -125,7 +125,7 @@
    "file": "burhan/cli.py",
    "code": "authz_cfg\\ =\\ json\\.load\\(open\\(_azp\\)\\)",
    "class": "state-load-race",
-   "reason": "authz fixture load: exists-then-open on a repo-local file; the race collapses into a parse error handled right below — no security decision on the window",
+   "reason": "authz fixture load: exists-then-open on a repo-local file; the race collapses into a parse error handled right below \u2014 no security decision on the window",
    "scanner_class": "TOCTOU",
    "line": 145,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -135,7 +135,7 @@
    "file": "burhan/cli.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 249,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -145,7 +145,7 @@
    "file": "burhan/cli.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 281,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -155,7 +155,7 @@
    "file": "burhan/cli.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 281,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -165,7 +165,7 @@
    "file": "burhan/core.py",
    "code": "except\\ Exception:",
    "class": "fail-closed-default",
-   "reason": "is_private_ip: any ambiguity returns True = REJECT (SSRF gate) — the default is the safe verdict on purpose",
+   "reason": "is_private_ip: any ambiguity returns True = REJECT (SSRF gate) \u2014 the default is the safe verdict on purpose",
    "scanner_class": "SILENT_EXCEPT",
    "line": 103,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -175,7 +175,7 @@
    "file": "burhan/core.py",
    "code": "except\\ Exception\\ as\\ exc:",
    "class": "reason-returned",
-   "reason": "pin_transport_address: the exception text is RETURNED as the dns-unresolvable reason — observable to the caller, not swallowed",
+   "reason": "pin_transport_address: the exception text is RETURNED as the dns-unresolvable reason \u2014 observable to the caller, not swallowed",
    "scanner_class": "SILENT_EXCEPT",
    "line": 139,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -185,7 +185,7 @@
    "file": "burhan/detect.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 498,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -195,7 +195,7 @@
    "file": "burhan/detect.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 498,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -205,7 +205,7 @@
    "file": "burhan/detect.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1339,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -215,7 +215,7 @@
    "file": "burhan/detect.py",
    "code": "s_url,\\ r1,\\ r2\\ =\\ hits\\[0\\]",
    "class": "citation-pick",
-   "reason": "hits[0]: the finding cites the first storage surface while all_surfaces lists EVERY surface in the evidence — citation, not a dropped candidate",
+   "reason": "hits[0]: the finding cites the first storage surface while all_surfaces lists EVERY surface in the evidence \u2014 citation, not a dropped candidate",
    "scanner_class": "FIRST[0]",
    "line": 1514,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -225,7 +225,7 @@
    "file": "burhan/detect.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 2717,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -235,7 +235,7 @@
    "file": "burhan/discovery.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 54,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -245,7 +245,7 @@
    "file": "burhan/discovery.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 760,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -255,7 +255,7 @@
    "file": "burhan/graphql.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 313,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -265,7 +265,7 @@
    "file": "burhan/graphql.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 332,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -275,7 +275,7 @@
    "file": "burhan/graphql.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 553,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -285,7 +285,7 @@
    "file": "burhan/graphql.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 676,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -295,7 +295,7 @@
    "file": "burhan/http_engine.py",
    "code": "except\\ Exception\\ as\\ exc:",
    "class": "reason-returned",
-   "reason": "_pin_target: the exception text is returned as the pin failure reason — observable to the caller",
+   "reason": "_pin_target: the exception text is returned as the pin failure reason \u2014 observable to the caller",
    "scanner_class": "SILENT_EXCEPT",
    "line": 415,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -305,7 +305,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 225,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -315,7 +315,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 377,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -325,7 +325,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 586,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -335,7 +335,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 630,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -345,7 +345,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 667,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -355,7 +355,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 683,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -365,7 +365,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 731,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -375,7 +375,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 936,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -385,7 +385,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1230,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -395,7 +395,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1343,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -405,7 +405,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1413,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -415,7 +415,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1413,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -425,7 +425,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1428,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -435,7 +435,7 @@
    "file": "burhan/impact.py",
    "code": "except\\ Exception\\ as\\ e:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1443,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -445,7 +445,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 47,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -455,7 +455,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception:\\ return\\ False",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 277,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -465,7 +465,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception:\\ return\\ False",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 277,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -475,7 +475,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1776,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -485,7 +485,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1870,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -495,7 +495,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1870,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -505,7 +505,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1886,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -515,7 +515,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1886,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -525,7 +525,7 @@
    "file": "burhan/intel.py",
    "code": "self\\.stats\\ =\\ json\\.load\\(open\\(path\\)\\)",
    "class": "state-load-race",
-   "reason": "strategy-stats load: exists-then-open; a race collapses into the adjacent except -> fresh stats — no security decision",
+   "reason": "strategy-stats load: exists-then-open; a race collapses into the adjacent except -> fresh stats \u2014 no security decision",
    "scanner_class": "TOCTOU",
    "line": 2244,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -545,7 +545,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 2313,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -575,7 +575,7 @@
    "file": "burhan/modernsec.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 138,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -585,7 +585,7 @@
    "file": "burhan/modernsec.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 264,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -595,7 +595,7 @@
    "file": "burhan/modernsec.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 273,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -605,7 +605,7 @@
    "file": "burhan/modernsec.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 282,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -615,7 +615,7 @@
    "file": "burhan/modernsec.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 291,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -625,7 +625,7 @@
    "file": "burhan/modernsec.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 683,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -635,7 +635,7 @@
    "file": "burhan/modernsec2.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 153,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -645,7 +645,7 @@
    "file": "burhan/modernsec2.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 240,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -655,7 +655,7 @@
    "file": "burhan/modernsec2.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 355,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -665,7 +665,7 @@
    "file": "burhan/modernsec2.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 400,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -675,7 +675,7 @@
    "file": "burhan/modernsec2.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 405,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -685,7 +685,7 @@
    "file": "burhan/modernsec2.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 461,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -693,7 +693,7 @@
   {
    "id": "AP-181",
    "file": "burhan/modernsec2.py",
-   "code": "except\\ Exception\\ as\\ e:\\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001\\ —\\ probe\\ errors\\ are\\ outcomes",
+   "code": "except\\ Exception\\ as\\ e:\\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001\\ \u2014\\ probe\\ errors\\ are\\ outcomes",
    "class": "probe-outcome",
    "reason": "rebind_toctou_probe: probe errors ARE outcomes (inline comment); the boundary records the observed cause",
    "scanner_class": "SILENT_EXCEPT",
@@ -705,7 +705,7 @@
    "file": "burhan/paramintel.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 74,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -715,7 +715,7 @@
    "file": "burhan/race/__init__.py",
    "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 65,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -725,7 +725,7 @@
    "file": "burhan/race/__init__.py",
    "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 74,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -735,7 +735,7 @@
    "file": "burhan/race/engine.py",
    "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 143,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -745,7 +745,7 @@
    "file": "burhan/race/engine.py",
    "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 180,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -755,7 +755,7 @@
    "file": "burhan/race/engine.py",
    "code": "except\\ Exception:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ noqa:\\ BLE001",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 180,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -765,7 +765,7 @@
    "file": "burhan/symbolic/models.py",
    "code": "except\\ Exception:",
    "class": "verdict-correct",
-   "reason": "verify_result_signature: an exception during signature verification means INVALID — returning False is the correct security verdict, not a swallowed error",
+   "reason": "verify_result_signature: an exception during signature verification means INVALID \u2014 returning False is the correct security verdict, not a swallowed error",
    "scanner_class": "SILENT_EXCEPT",
    "line": 244,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -775,7 +775,7 @@
    "file": "burhan/weakrand.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 234,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -785,7 +785,7 @@
    "file": "burhan/websocket.py",
    "code": "except\\ Exception:",
    "class": "best-effort-teardown",
-   "reason": "close(): teardown — the handshake outcome is already recorded",
+   "reason": "close(): teardown \u2014 the handshake outcome is already recorded",
    "scanner_class": "SILENT_EXCEPT",
    "line": 559,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -805,7 +805,7 @@
    "file": "burhan/websocket.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 585,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -815,7 +815,7 @@
    "file": "burhan/websocket.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 824,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -825,7 +825,7 @@
    "file": "burhan/workflow.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 157,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -835,7 +835,7 @@
    "file": "burhan/workflow.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 350,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -845,7 +845,7 @@
    "file": "burhan/workflow.py",
    "code": "except\\ Exception:",
    "class": "tolerant-parse-of-target-input",
-   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' — the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
+   "reason": "the scanned TARGET's data (forms/headers/JSON/cookies) must not crash the scan: a parse failure means 'not the sought shape' \u2014 the negative verdict is the correct outcome, and family-level refusals carry their own boundary records",
    "scanner_class": "SILENT_EXCEPT",
    "line": 598,
    "origin": "round-8-ledger (code re-verified at same line)"
@@ -855,7 +855,7 @@
    "file": "burhan/api.py",
    "code": "except\\ KeyboardInterrupt:",
    "class": "SILENT_EXCEPT",
-   "reason": "KeyboardInterrupt during serve loop -> finally closes the server — clean shutdown",
+   "reason": "KeyboardInterrupt during serve loop -> finally closes the server \u2014 clean shutdown",
    "scanner_class": "SILENT_EXCEPT",
    "line": 315,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -865,7 +865,7 @@
    "file": "burhan/authorized_targets.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "authorization gate refuses with the reason in the return value — fail-closed, the refusal is the observable record",
+   "reason": "authorization gate refuses with the reason in the return value \u2014 fail-closed, the refusal is the observable record",
    "scanner_class": "SILENT_EXCEPT",
    "line": 99,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -875,7 +875,7 @@
    "file": "burhan/authorized_targets.py",
    "code": "except\\ FetchError\\ as\\ e:",
    "class": "SILENT_EXCEPT",
-   "reason": "authorization gate refuses with the reason in the return value — fail-closed, the refusal is the observable record",
+   "reason": "authorization gate refuses with the reason in the return value \u2014 fail-closed, the refusal is the observable record",
    "scanner_class": "SILENT_EXCEPT",
    "line": 159,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -885,7 +885,7 @@
    "file": "burhan/authorized_targets.py",
    "code": "except\\ \\(FetchError,\\ ValueError\\)\\ as\\ e:",
    "class": "SILENT_EXCEPT",
-   "reason": "authorization gate refuses with the reason in the return value — fail-closed, the refusal is the observable record",
+   "reason": "authorization gate refuses with the reason in the return value \u2014 fail-closed, the refusal is the observable record",
    "scanner_class": "SILENT_EXCEPT",
    "line": 186,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -895,7 +895,7 @@
    "file": "burhan/authorized_targets.py",
    "code": "except\\ OSError\\ as\\ e:",
    "class": "SILENT_EXCEPT",
-   "reason": "authorization gate refuses with the reason in the return value — fail-closed, the refusal is the observable record",
+   "reason": "authorization gate refuses with the reason in the return value \u2014 fail-closed, the refusal is the observable record",
    "scanner_class": "SILENT_EXCEPT",
    "line": 202,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -905,7 +905,7 @@
    "file": "burhan/authz.py",
    "code": "except\\ \\(ValueError,\\ TypeError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "non-serializable session values are skipped in the cache VIEW copy — the scan session itself is unaffected",
+   "reason": "non-serializable session values are skipped in the cache VIEW copy \u2014 the scan session itself is unaffected",
    "scanner_class": "SILENT_EXCEPT",
    "line": 210,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -915,7 +915,7 @@
    "file": "burhan/browser.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "Playwright import probe sets module _AVAIL=False — the doctor reports browser_engine WARN (degraded, not broken); documented degrade",
+   "reason": "Playwright import probe sets module _AVAIL=False \u2014 the doctor reports browser_engine WARN (degraded, not broken); documented degrade",
    "scanner_class": "SILENT_EXCEPT",
    "line": 132,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -925,7 +925,7 @@
    "file": "burhan/chainrules.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "chain prover returns (None, reason) — the honest no-proof verdict with its reason",
+   "reason": "chain prover returns (None, reason) \u2014 the honest no-proof verdict with its reason",
    "scanner_class": "SILENT_EXCEPT",
    "line": 177,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -935,7 +935,7 @@
    "file": "burhan/chainrules.py",
    "code": "except\\ \\(ValueError,\\ IndexError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "chain prover returns (None, reason) — the honest no-proof verdict with its reason",
+   "reason": "chain prover returns (None, reason) \u2014 the honest no-proof verdict with its reason",
    "scanner_class": "SILENT_EXCEPT",
    "line": 186,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -945,7 +945,7 @@
    "file": "burhan/chainrules.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "chain prover returns (None, reason) — the honest no-proof verdict with its reason",
+   "reason": "chain prover returns (None, reason) \u2014 the honest no-proof verdict with its reason",
    "scanner_class": "SILENT_EXCEPT",
    "line": 204,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -955,7 +955,7 @@
    "file": "burhan/cli.py",
    "code": "except\\ OSError:",
    "class": "SILENT_EXCEPT",
-   "reason": "port-probe OSError -> False (port closed is the answer) and benchmark child timeout -> kill+wait — both are the probe's honest verdict",
+   "reason": "port-probe OSError -> False (port closed is the answer) and benchmark child timeout -> kill+wait \u2014 both are the probe's honest verdict",
    "scanner_class": "SILENT_EXCEPT",
    "line": 24,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -965,7 +965,7 @@
    "file": "burhan/cli.py",
    "code": "except\\ subprocess\\.TimeoutExpired:",
    "class": "SILENT_EXCEPT",
-   "reason": "port-probe OSError -> False (port closed is the answer) and benchmark child timeout -> kill+wait — both are the probe's honest verdict",
+   "reason": "port-probe OSError -> False (port closed is the answer) and benchmark child timeout -> kill+wait \u2014 both are the probe's honest verdict",
    "scanner_class": "SILENT_EXCEPT",
    "line": 119,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -975,7 +975,7 @@
    "file": "burhan/core.py",
    "code": "except\\ OSError:",
    "class": "SILENT_EXCEPT",
-   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) \u2014 degrade chain, final branch fails loudly",
    "scanner_class": "SILENT_EXCEPT",
    "line": 88,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -985,7 +985,7 @@
    "file": "burhan/core.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) \u2014 degrade chain, final branch fails loudly",
    "scanner_class": "SILENT_EXCEPT",
    "line": 93,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -995,7 +995,7 @@
    "file": "burhan/core.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) \u2014 degrade chain, final branch fails loudly",
    "scanner_class": "SILENT_EXCEPT",
    "line": 134,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1005,7 +1005,7 @@
    "file": "burhan/core.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) \u2014 degrade chain, final branch fails loudly",
    "scanner_class": "SILENT_EXCEPT",
    "line": 155,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1015,7 +1015,7 @@
    "file": "burhan/core.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "address-parse fallback to the next strategy (literal -> DNS) — degrade chain, final branch fails loudly",
+   "reason": "address-parse fallback to the next strategy (literal -> DNS) \u2014 degrade chain, final branch fails loudly",
    "scanner_class": "SILENT_EXCEPT",
    "line": 155,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1025,7 +1025,7 @@
    "file": "burhan/detect.py",
    "code": "except\\ \\(ValueError,\\ OverflowError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "entity-normalize decoder drops unparseable entities and returns the original match — documented decode-degrade",
+   "reason": "entity-normalize decoder drops unparseable entities and returns the original match \u2014 documented decode-degrade",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1202,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1035,7 +1035,7 @@
    "file": "burhan/detect.py",
    "code": "except\\ \\(ValueError,\\ OverflowError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "entity-normalize decoder drops unparseable entities and returns the original match — documented decode-degrade",
+   "reason": "entity-normalize decoder drops unparseable entities and returns the original match \u2014 documented decode-degrade",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1202,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1045,7 +1045,7 @@
    "file": "burhan/discovery.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "openapi candidate that is not JSON is skipped for the next candidate — documented candidate filter",
+   "reason": "openapi candidate that is not JSON is skipped for the next candidate \u2014 documented candidate filter",
    "scanner_class": "SILENT_EXCEPT",
    "line": 703,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1055,7 +1055,7 @@
    "file": "burhan/evidence.py",
    "code": "except\\ Exception\\ as\\ e:",
    "class": "SILENT_EXCEPT",
-   "reason": "replay-finding param-shape parse default (RP-1) — the replay records its own verdict; engine errors update the result dict",
+   "reason": "replay-finding param-shape parse default (RP-1) \u2014 the replay records its own verdict; engine errors update the result dict",
    "scanner_class": "SILENT_EXCEPT",
    "line": 724,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1065,7 +1065,7 @@
    "file": "burhan/http_engine.py",
    "code": "except\\ \\(ValueError,\\ TypeError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) \u2014 the send path records retries via bus.emit",
    "scanner_class": "SILENT_EXCEPT",
    "line": 822,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1075,7 +1075,7 @@
    "file": "burhan/http_engine.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) \u2014 the send path records retries via bus.emit",
    "scanner_class": "SILENT_EXCEPT",
    "line": 354,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1085,7 +1085,7 @@
    "file": "burhan/http_engine.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) \u2014 the send path records retries via bus.emit",
    "scanner_class": "SILENT_EXCEPT",
    "line": 408,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1095,7 +1095,7 @@
    "file": "burhan/http_engine.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) \u2014 the send path records retries via bus.emit",
    "scanner_class": "SILENT_EXCEPT",
    "line": 433,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1105,7 +1105,7 @@
    "file": "burhan/http_engine.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) \u2014 the send path records retries via bus.emit",
    "scanner_class": "SILENT_EXCEPT",
    "line": 546,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1115,7 +1115,7 @@
    "file": "burhan/http_engine.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) — the send path records retries via bus.emit",
+   "reason": "parse fallback within a documented best-effort chain (JSON flag, retry ladder clamp) \u2014 the send path records retries via bus.emit",
    "scanner_class": "SILENT_EXCEPT",
    "line": 433,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1125,7 +1125,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "ParamLocation parse default to QUERY — same default the engine's own parser uses",
+   "reason": "ParamLocation parse default to QUERY \u2014 same default the engine's own parser uses",
    "scanner_class": "SILENT_EXCEPT",
    "line": 56,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1135,7 +1135,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "ParamLocation parse default to QUERY — same default the engine's own parser uses",
+   "reason": "ParamLocation parse default to QUERY \u2014 same default the engine's own parser uses",
    "scanner_class": "SILENT_EXCEPT",
    "line": 85,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1145,7 +1145,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "ParamLocation parse default to QUERY — same default the engine's own parser uses",
+   "reason": "ParamLocation parse default to QUERY \u2014 same default the engine's own parser uses",
    "scanner_class": "SILENT_EXCEPT",
    "line": 112,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1155,7 +1155,7 @@
    "file": "burhan/intel.py",
    "code": "except\\ Exception\\ as\\ e:",
    "class": "SILENT_EXCEPT",
-   "reason": "ParamLocation parse default to QUERY — same default the engine's own parser uses",
+   "reason": "ParamLocation parse default to QUERY \u2014 same default the engine's own parser uses",
    "scanner_class": "SILENT_EXCEPT",
    "line": 2335,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1165,7 +1165,7 @@
    "file": "burhan/jrand.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "parse failure returns None — caller treats None as no-signal (weakrand heuristics are opportunistic)",
+   "reason": "parse failure returns None \u2014 caller treats None as no-signal (weakrand heuristics are opportunistic)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 230,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1175,7 +1175,7 @@
    "file": "burhan/memory.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "corrupt memory is discarded with an in-code comment stating the safety rationale and the reset shape — the comment IS on the body (reviewer-verified); stats unaffected",
+   "reason": "corrupt memory is discarded with an in-code comment stating the safety rationale and the reset shape \u2014 the comment IS on the body (reviewer-verified); stats unaffected",
    "scanner_class": "SILENT_EXCEPT",
    "line": 47,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1185,7 +1185,7 @@
    "file": "burhan/modernsec.py",
    "code": "except\\ OSError:",
    "class": "SILENT_EXCEPT",
-   "reason": "raw-socket probe failure returns (None, None) — probe-absent is honest for timing side channels",
+   "reason": "raw-socket probe failure returns (None, None) \u2014 probe-absent is honest for timing side channels",
    "scanner_class": "SILENT_EXCEPT",
    "line": 576,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1195,7 +1195,7 @@
    "file": "burhan/modernsec.py",
    "code": "except\\ \\(ValueError,\\ IndexError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "raw-socket probe failure returns (None, None) — probe-absent is honest for timing side channels",
+   "reason": "raw-socket probe failure returns (None, None) \u2014 probe-absent is honest for timing side channels",
    "scanner_class": "SILENT_EXCEPT",
    "line": 583,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1205,7 +1205,7 @@
    "file": "burhan/modernsec2.py",
    "code": "except\\ \\(socket\\.timeout,\\ OSError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "DNS/HTTP self-hosted listener loops: socket-closed -> return (stop()), timeout -> continue, OSError -> return — listener teardown/liveness semantics, the channel is auxiliary",
+   "reason": "DNS/HTTP self-hosted listener loops: socket-closed -> return (stop()), timeout -> continue, OSError -> return \u2014 listener teardown/liveness semantics, the channel is auxiliary",
    "scanner_class": "SILENT_EXCEPT",
    "line": 392,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1215,7 +1215,7 @@
    "file": "burhan/modernsec2.py",
    "code": "except\\ socket\\.timeout:",
    "class": "SILENT_EXCEPT",
-   "reason": "DNS/HTTP self-hosted listener loops: socket-closed -> return (stop()), timeout -> continue, OSError -> return — listener teardown/liveness semantics, the channel is auxiliary",
+   "reason": "DNS/HTTP self-hosted listener loops: socket-closed -> return (stop()), timeout -> continue, OSError -> return \u2014 listener teardown/liveness semantics, the channel is auxiliary",
    "scanner_class": "SILENT_EXCEPT",
    "line": 439,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1225,7 +1225,7 @@
    "file": "burhan/modernsec2.py",
    "code": "except\\ OSError:",
    "class": "SILENT_EXCEPT",
-   "reason": "DNS/HTTP self-hosted listener loops: socket-closed -> return (stop()), timeout -> continue, OSError -> return — listener teardown/liveness semantics, the channel is auxiliary",
+   "reason": "DNS/HTTP self-hosted listener loops: socket-closed -> return (stop()), timeout -> continue, OSError -> return \u2014 listener teardown/liveness semantics, the channel is auxiliary",
    "scanner_class": "SILENT_EXCEPT",
    "line": 441,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1235,7 +1235,7 @@
    "file": "burhan/monitor.py",
    "code": "except\\ \\(urllib\\.error\\.HTTPError,\\ urllib\\.error\\.URLError,",
    "class": "SILENT_EXCEPT",
-   "reason": "alert-delivery failure is returned in the result (round-11 CI-gate restructure) — the except types are narrowed and the failure rides the run record",
+   "reason": "alert-delivery failure is returned in the result (round-11 CI-gate restructure) \u2014 the except types are narrowed and the failure rides the run record",
    "scanner_class": "SILENT_EXCEPT",
    "line": 147,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1245,7 +1245,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 136,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1255,7 +1255,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 235,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1265,7 +1265,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 251,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1275,7 +1275,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 460,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1285,7 +1285,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 480,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1295,7 +1295,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 511,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1305,7 +1305,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 504,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1315,7 +1315,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 522,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1325,7 +1325,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ OSError:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 594,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1335,7 +1335,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 670,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1345,7 +1345,7 @@
    "file": "burhan/oast.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries — the audit surface is stats-only (orchestrator.py:1634)",
+   "reason": "provider teardown/poll/parse internals: stop() is idempotent best-effort close; poll() transients keep polling until deadline; _hit()/hits() degrade malformed entries \u2014 the audit surface is stats-only (orchestrator.py:1634)",
    "scanner_class": "SILENT_EXCEPT",
    "line": 674,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1355,7 +1355,7 @@
    "file": "burhan/orchestrator.py",
    "code": "except\\ Exception\\ as\\ _ie:",
    "class": "SILENT_EXCEPT",
-   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording \u2014 see per-line entries",
    "scanner_class": "SILENT_EXCEPT",
    "line": 2267,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1365,7 +1365,7 @@
    "file": "burhan/orchestrator.py",
    "code": "except\\ Exception\\ as\\ _pe:",
    "class": "SILENT_EXCEPT",
-   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording \u2014 see per-line entries",
    "scanner_class": "SILENT_EXCEPT",
    "line": 2277,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1375,7 +1375,7 @@
    "file": "burhan/orchestrator.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording \u2014 see per-line entries",
    "scanner_class": "SILENT_EXCEPT",
    "line": 315,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1385,7 +1385,7 @@
    "file": "burhan/orchestrator.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording \u2014 see per-line entries",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1253,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1395,7 +1395,7 @@
    "file": "burhan/orchestrator.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording \u2014 see per-line entries",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1635,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1405,7 +1405,7 @@
    "file": "burhan/orchestrator.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording \u2014 see per-line entries",
    "scanner_class": "SILENT_EXCEPT",
    "line": 625,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1415,7 +1415,7 @@
    "file": "burhan/orchestrator.py",
    "code": "except\\ AttributeError:",
    "class": "SILENT_EXCEPT",
-   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording \u2014 see per-line entries",
    "scanner_class": "SILENT_EXCEPT",
    "line": 1020,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1425,7 +1425,7 @@
    "file": "burhan/orchestrator.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording — see per-line entries",
+   "reason": "doctor check-failure path: the check's False + error detail land in the doctor output (observable); remaining sites are WARN-path recording or stats-recording \u2014 see per-line entries",
    "scanner_class": "SILENT_EXCEPT",
    "line": 315,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1435,7 +1435,7 @@
    "file": "burhan/prioritize.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "urlsplit failure returns the raw string — normalize-degrade",
+   "reason": "urlsplit failure returns the raw string \u2014 normalize-degrade",
    "scanner_class": "SILENT_EXCEPT",
    "line": 138,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1445,7 +1445,7 @@
    "file": "burhan/proof.py",
    "code": "except\\ \\(InvalidSignature,\\ ValueError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "reason": "verification helper returns False on malformed input \u2014 fail-closed boolean verifier, not a swallow",
    "scanner_class": "SILENT_EXCEPT",
    "line": 136,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1455,7 +1455,7 @@
    "file": "burhan/proof.py",
    "code": "except\\ \\(TypeError,\\ ValueError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "reason": "verification helper returns False on malformed input \u2014 fail-closed boolean verifier, not a swallow",
    "scanner_class": "SILENT_EXCEPT",
    "line": 190,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1465,7 +1465,7 @@
    "file": "burhan/proof.py",
    "code": "except\\ \\(KeyError,\\ TypeError,\\ ValueError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "reason": "verification helper returns False on malformed input \u2014 fail-closed boolean verifier, not a swallow",
    "scanner_class": "SILENT_EXCEPT",
    "line": 239,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1475,7 +1475,7 @@
    "file": "burhan/proof.py",
    "code": "except\\ \\(KeyError,\\ ValueError,\\ TypeError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "reason": "verification helper returns False on malformed input \u2014 fail-closed boolean verifier, not a swallow",
    "scanner_class": "SILENT_EXCEPT",
    "line": 269,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1485,7 +1485,7 @@
    "file": "burhan/proof.py",
    "code": "except\\ \\(KeyError,\\ ValueError,\\ TypeError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "verification helper returns False on malformed input — fail-closed boolean verifier, not a swallow",
+   "reason": "verification helper returns False on malformed input \u2014 fail-closed boolean verifier, not a swallow",
    "scanner_class": "SILENT_EXCEPT",
    "line": 423,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1493,9 +1493,9 @@
   {
    "id": "QS-150",
    "file": "burhan/race/engine.py",
-   "code": "except\\ http\\.client\\.RemoteDisconnected\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ قطع\\ بلا\\ استجابة",
+   "code": "except\\ http\\.client\\.RemoteDisconnected\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ \u0642\u0637\u0639\\ \u0628\u0644\u0627\\ \u0627\u0633\u062a\u062c\u0627\u0628\u0629",
    "class": "SILENT_EXCEPT",
-   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) — classification, not swallowing",
+   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) \u2014 classification, not swallowing",
    "scanner_class": "SILENT_EXCEPT",
    "line": 131,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1503,9 +1503,9 @@
   {
    "id": "QS-151",
    "file": "burhan/race/engine.py",
-   "code": "except\\ http\\.client\\.BadStatusLine\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ ليس\\ HTTP",
+   "code": "except\\ http\\.client\\.BadStatusLine\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ \u0644\u064a\u0633\\ HTTP",
    "class": "SILENT_EXCEPT",
-   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) — classification, not swallowing",
+   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) \u2014 classification, not swallowing",
    "scanner_class": "SILENT_EXCEPT",
    "line": 133,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1513,9 +1513,9 @@
   {
    "id": "QS-152",
    "file": "burhan/race/engine.py",
-   "code": "except\\ ConnectionError\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ رفض/قطع\\ وصل",
+   "code": "except\\ ConnectionError\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ \u0631\u0641\u0636/\u0642\u0637\u0639\\ \u0648\u0635\u0644",
    "class": "SILENT_EXCEPT",
-   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) — classification, not swallowing",
+   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) \u2014 classification, not swallowing",
    "scanner_class": "SILENT_EXCEPT",
    "line": 135,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1523,9 +1523,9 @@
   {
    "id": "QS-153",
    "file": "burhan/race/engine.py",
-   "code": "except\\ \\(http\\.client\\.HTTPException,\\ OSError\\)\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ ما\\ تبقى",
+   "code": "except\\ \\(http\\.client\\.HTTPException,\\ OSError\\)\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ \u0645\u0627\\ \u062a\u0628\u0642\u0649",
    "class": "SILENT_EXCEPT",
-   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) — classification, not swallowing",
+   "reason": "send_one maps exception types to boundary labels recorded in the result (connection_reset / malformed_response / engine_error) \u2014 classification, not swallowing",
    "scanner_class": "SILENT_EXCEPT",
    "line": 137,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1535,7 +1535,7 @@
    "file": "burhan/race/gates.py",
    "code": "except\\ \\(TypeError,\\ ValueError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "validation gate returns False on malformed input — fail-closed",
+   "reason": "validation gate returns False on malformed input \u2014 fail-closed",
    "scanner_class": "SILENT_EXCEPT",
    "line": 108,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1545,7 +1545,7 @@
    "file": "burhan/race/gates.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "validation gate returns False on malformed input — fail-closed",
+   "reason": "validation gate returns False on malformed input \u2014 fail-closed",
    "scanner_class": "SILENT_EXCEPT",
    "line": 143,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1555,7 +1555,7 @@
    "file": "burhan/race/gates.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "validation gate returns False on malformed input — fail-closed",
+   "reason": "validation gate returns False on malformed input \u2014 fail-closed",
    "scanner_class": "SILENT_EXCEPT",
    "line": 166,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1565,7 +1565,7 @@
    "file": "burhan/race/integration.py",
    "code": "except\\ engine\\.RaceEngineError\\ as\\ e:",
    "class": "SILENT_EXCEPT",
-   "reason": "RaceEngineError becomes a RaceResult with race_detected=False — fail-closed result object",
+   "reason": "RaceEngineError becomes a RaceResult with race_detected=False \u2014 fail-closed result object",
    "scanner_class": "SILENT_EXCEPT",
    "line": 106,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1575,7 +1575,7 @@
    "file": "burhan/remediation.py",
    "code": "except\\ RemediationRefused\\ as\\ e:",
    "class": "SILENT_EXCEPT",
-   "reason": "RemediationRefused returns the refused-report-only status — the refusal is the record",
+   "reason": "RemediationRefused returns the refused-report-only status \u2014 the refusal is the record",
    "scanner_class": "SILENT_EXCEPT",
    "line": 275,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1585,7 +1585,7 @@
    "file": "burhan/remediation.py",
    "code": "except\\ RemediationRefused\\ as\\ e:",
    "class": "SILENT_EXCEPT",
-   "reason": "RemediationRefused returns the refused-report-only status — the refusal is the record",
+   "reason": "RemediationRefused returns the refused-report-only status \u2014 the refusal is the record",
    "scanner_class": "SILENT_EXCEPT",
    "line": 296,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1595,7 +1595,7 @@
    "file": "burhan/sca.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "CVSS parse fallback returns an explicit note in the result — recorded",
+   "reason": "CVSS parse fallback returns an explicit note in the result \u2014 recorded",
    "scanner_class": "SILENT_EXCEPT",
    "line": 251,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1605,7 +1605,7 @@
    "file": "burhan/secrets.py",
    "code": "except\\ Exception:",
    "class": "SILENT_EXCEPT",
-   "reason": "vault-encryption failure sets vault_ref=None and the finding note records 'raw value intentionally not retained' — recorded in the note",
+   "reason": "vault-encryption failure sets vault_ref=None and the finding note records 'raw value intentionally not retained' \u2014 recorded in the note",
    "scanner_class": "SILENT_EXCEPT",
    "line": 151,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1615,7 +1615,7 @@
    "file": "burhan/siem.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "urlsplit origin failure degrades to '-' — the CEF/OCSF field contract for absent origin",
+   "reason": "urlsplit origin failure degrades to '-' \u2014 the CEF/OCSF field contract for absent origin",
    "scanner_class": "SILENT_EXCEPT",
    "line": 241,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1625,7 +1625,7 @@
    "file": "burhan/siem.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "urlsplit origin failure degrades to '-' — the CEF/OCSF field contract for absent origin",
+   "reason": "urlsplit origin failure degrades to '-' \u2014 the CEF/OCSF field contract for absent origin",
    "scanner_class": "SILENT_EXCEPT",
    "line": 558,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1635,7 +1635,7 @@
    "file": "burhan/symbolic/integration.py",
    "code": "except\\ Exception\\ as\\ e:\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\#\\ injected\\ sender\\ failure\\ =\\ honest\\ boundary",
    "class": "SILENT_EXCEPT",
-   "reason": "injected-sender failure sets verified='transport_error' + honest_boundary + signs the result — the failure is the record",
+   "reason": "injected-sender failure sets verified='transport_error' + honest_boundary + signs the result \u2014 the failure is the record",
    "scanner_class": "SILENT_EXCEPT",
    "line": 71,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1645,7 +1645,7 @@
    "file": "burhan/symbolic/models.py",
    "code": "except\\ \\(InvalidSignature,\\ ValueError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "ed25519 verify returns False on malformed input — fail-closed boolean verifier",
+   "reason": "ed25519 verify returns False on malformed input \u2014 fail-closed boolean verifier",
    "scanner_class": "SILENT_EXCEPT",
    "line": 211,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1655,7 +1655,7 @@
    "file": "burhan/symbolic/parser.py",
    "code": "except\\ SyntaxError:",
    "class": "SILENT_EXCEPT",
-   "reason": "SyntaxError falls through to the word-form fallback — documented two-stage parser",
+   "reason": "SyntaxError falls through to the word-form fallback \u2014 documented two-stage parser",
    "scanner_class": "SILENT_EXCEPT",
    "line": 217,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1665,7 +1665,7 @@
    "file": "burhan/symbolic/solver.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "parse failure returns None — no-signal for the symbolic solver",
+   "reason": "parse failure returns None \u2014 no-signal for the symbolic solver",
    "scanner_class": "SILENT_EXCEPT",
    "line": 46,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1675,7 +1675,7 @@
    "file": "burhan/vault.py",
    "code": "except\\ OSError:",
    "class": "SILENT_EXCEPT",
-   "reason": "chmod best-effort on private files — the open() below enforces the real constraint (fd-level); documented",
+   "reason": "chmod best-effort on private files \u2014 the open() below enforces the real constraint (fd-level); documented",
    "scanner_class": "SILENT_EXCEPT",
    "line": 253,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1685,7 +1685,7 @@
    "file": "burhan/vault.py",
    "code": "except\\ OSError:",
    "class": "SILENT_EXCEPT",
-   "reason": "chmod best-effort on private files — the open() below enforces the real constraint (fd-level); documented",
+   "reason": "chmod best-effort on private files \u2014 the open() below enforces the real constraint (fd-level); documented",
    "scanner_class": "SILENT_EXCEPT",
    "line": 295,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1695,7 +1695,7 @@
    "file": "burhan/weakrand.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "parse failure returns None — opportunistic heuristic, no-signal is honest",
+   "reason": "parse failure returns None \u2014 opportunistic heuristic, no-signal is honest",
    "scanner_class": "SILENT_EXCEPT",
    "line": 221,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1705,7 +1705,7 @@
    "file": "burhan/websocket.py",
    "code": "except\\ \\(socket\\.timeout,\\ TimeoutError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "recv timeout/connection failure returns None — the documented no-frame contract",
+   "reason": "recv timeout/connection failure returns None \u2014 the documented no-frame contract",
    "scanner_class": "SILENT_EXCEPT",
    "line": 489,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1715,7 +1715,7 @@
    "file": "burhan/websocket.py",
    "code": "except\\ \\(ConnectionError,\\ OSError\\):",
    "class": "SILENT_EXCEPT",
-   "reason": "recv timeout/connection failure returns None — the documented no-frame contract",
+   "reason": "recv timeout/connection failure returns None \u2014 the documented no-frame contract",
    "scanner_class": "SILENT_EXCEPT",
    "line": 491,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1723,9 +1723,9 @@
   {
    "id": "QS-173",
    "file": "burhan/xgraph.py",
-   "code": "except\\ Exception\\ as\\ e:\\ \\ \\#\\ noqa:\\ BLE001\\ —\\ psi=0,\\ engine\\ stays\\ alive",
+   "code": "except\\ Exception\\ as\\ e:\\ \\ \\#\\ noqa:\\ BLE001\\ \u2014\\ psi=0,\\ engine\\ stays\\ alive",
    "class": "SILENT_EXCEPT",
-   "reason": "node-run failure sets ok=False with the error note in the returned _NodeRun — recorded",
+   "reason": "node-run failure sets ok=False with the error note in the returned _NodeRun \u2014 recorded",
    "scanner_class": "SILENT_EXCEPT",
    "line": 522,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1735,7 +1735,7 @@
    "file": "burhan/xgraph.py",
    "code": "except\\ Exception:\\ \\ \\#\\ noqa:\\ BLE001",
    "class": "SILENT_EXCEPT",
-   "reason": "node-run failure sets ok=False with the error note in the returned _NodeRun — recorded",
+   "reason": "node-run failure sets ok=False with the error note in the returned _NodeRun \u2014 recorded",
    "scanner_class": "SILENT_EXCEPT",
    "line": 622,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1765,7 +1765,7 @@
    "file": "burhan/evidence.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "replay_finding RP-1 param-shape reconstruction: a stored ParamLocation string that no longer parses defaults to QUERY — the same default the engine's own classifier uses; the replay verdict (REPRODUCTION_*) records the outcome",
+   "reason": "replay_finding RP-1 param-shape reconstruction: a stored ParamLocation string that no longer parses defaults to QUERY \u2014 the same default the engine's own classifier uses; the replay verdict (REPRODUCTION_*) records the outcome",
    "scanner_class": "SILENT_EXCEPT",
    "line": 653,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1775,7 +1775,7 @@
    "file": "burhan/evidence.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "replay_finding RP-1 param-shape reconstruction: a stored ParamLocation string that no longer parses defaults to QUERY — the same default the engine's own classifier uses; the replay verdict (REPRODUCTION_*) records the outcome",
+   "reason": "replay_finding RP-1 param-shape reconstruction: a stored ParamLocation string that no longer parses defaults to QUERY \u2014 the same default the engine's own classifier uses; the replay verdict (REPRODUCTION_*) records the outcome",
    "scanner_class": "SILENT_EXCEPT",
    "line": 658,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1785,7 +1785,7 @@
    "file": "burhan/evidence.py",
    "code": "except\\ ValueError:",
    "class": "SILENT_EXCEPT",
-   "reason": "replay_finding RP-1 param-shape reconstruction: a stored ParamLocation string that no longer parses defaults to QUERY — the same default the engine's own classifier uses; the replay verdict (REPRODUCTION_*) records the outcome",
+   "reason": "replay_finding RP-1 param-shape reconstruction: a stored ParamLocation string that no longer parses defaults to QUERY \u2014 the same default the engine's own classifier uses; the replay verdict (REPRODUCTION_*) records the outcome",
    "scanner_class": "SILENT_EXCEPT",
    "line": 664,
    "origin": "round-12 manual review (code block read in full this pass)"
@@ -1795,20 +1795,20 @@
    "file": "tests/test_oast_interactsh.py",
    "code": "h\\ =\\ hits\\[0\\]",
    "class": "FIRST_MATCH-test",
-   "reason": "assertion on an arbitrary OBSERVED interaction: the live roundtrip test polls interact.sh, asserts hits is non-empty, then reads one element to assert protocol/ip attribution. The hits arrive in network-timing order — position carries no meaning and no candidate is dropped; any element would satisfy the same assertion. Assertion-shape, not selection-logic.",
+   "reason": "assertion on an arbitrary OBSERVED interaction: the live roundtrip test polls interact.sh, asserts hits is non-empty, then reads one element to assert protocol/ip attribution. The hits arrive in network-timing order \u2014 position carries no meaning and no candidate is dropped; any element would satisfy the same assertion. Assertion-shape, not selection-logic.",
    "scanner_class": "FIRST_MATCH",
    "line": 68,
-   "origin": "round-12 close (owner follow-up): the final report said '5 non-engine' without per-site classification — corrected: 1 site IS engine (detect.py:1514, AP-059 citation-pick) and these 4 test sites are now individually reviewed + ledgered"
+   "origin": "round-12 close (owner follow-up): the final report said '5 non-engine' without per-site classification \u2014 corrected: 1 site IS engine (detect.py:1514, AP-059 citation-pick) and these 4 test sites are now individually reviewed + ledgered"
   },
   {
    "id": "QS-181",
    "file": "tests/test_openapi_ingestion.py",
    "code": "ep\\ =\\ eps\\[0\\]",
    "class": "FIRST_MATCH-test",
-   "reason": "the fixture spec (CRAPAI_ORDERS_SPEC) declares EXACTLY ONE path; the preceding line already asserts eps is non-empty. Indexing [0] of a single-element list the test itself constructed from a one-path fixture — no selection among alternatives exists.",
+   "reason": "the fixture spec (CRAPAI_ORDERS_SPEC) declares EXACTLY ONE path; the preceding line already asserts eps is non-empty. Indexing [0] of a single-element list the test itself constructed from a one-path fixture \u2014 no selection among alternatives exists.",
    "scanner_class": "FIRST_MATCH",
    "line": 58,
-   "origin": "round-12 close (owner follow-up): the final report said '5 non-engine' without per-site classification — corrected: 1 site IS engine (detect.py:1514, AP-059 citation-pick) and these 4 test sites are now individually reviewed + ledgered"
+   "origin": "round-12 close (owner follow-up): the final report said '5 non-engine' without per-site classification \u2014 corrected: 1 site IS engine (detect.py:1514, AP-059 citation-pick) and these 4 test sites are now individually reviewed + ledgered"
   },
   {
    "id": "QS-182",
@@ -1818,7 +1818,7 @@
    "reason": "results is the test's OWN ordered 3-tuple built in scan order (scan 1/2/3 appended sequentially in the loop above); [0]/[1]/[2] index the test's own construction by known position. Self-constructed indexing, not engine selection logic.",
    "scanner_class": "FIRST_MATCH",
    "line": 329,
-   "origin": "round-12 close (owner follow-up): the final report said '5 non-engine' without per-site classification — corrected: 1 site IS engine (detect.py:1514, AP-059 citation-pick) and these 4 test sites are now individually reviewed + ledgered"
+   "origin": "round-12 close (owner follow-up): the final report said '5 non-engine' without per-site classification \u2014 corrected: 1 site IS engine (detect.py:1514, AP-059 citation-pick) and these 4 test sites are now individually reviewed + ledgered"
   },
   {
    "id": "QS-183",
@@ -1828,7 +1828,7 @@
    "reason": "same list, second element = scan 2 by construction (see r1 entry). Self-constructed indexing, not engine selection logic.",
    "scanner_class": "FIRST_MATCH",
    "line": 338,
-   "origin": "round-12 close (owner follow-up): the final report said '5 non-engine' without per-site classification — corrected: 1 site IS engine (detect.py:1514, AP-059 citation-pick) and these 4 test sites are now individually reviewed + ledgered"
+   "origin": "round-12 close (owner follow-up): the final report said '5 non-engine' without per-site classification \u2014 corrected: 1 site IS engine (detect.py:1514, AP-059 citation-pick) and these 4 test sites are now individually reviewed + ledgered"
   },
   {
    "id": "QS-184",
@@ -1846,7 +1846,7 @@
    "file": "burhan/blake3.py",
    "code": "blake3",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test — that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test \u2014 that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "crypto-primitives-via-module-attr",
@@ -1857,7 +1857,7 @@
    "file": "burhan/core.py",
    "code": "Severity",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -1868,7 +1868,7 @@
    "file": "burhan/csynth.py",
    "code": "attribute",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -1879,7 +1879,7 @@
    "file": "burhan/csynth.py",
    "code": "boundary",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -1890,7 +1890,7 @@
    "file": "burhan/csynth.py",
    "code": "digest",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -1901,7 +1901,7 @@
    "file": "burhan/detect.py",
    "code": "CsrfDetector",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "Detector subclasses registered via the Detector registry and instantiated through the registry dispatch in routed phase code; v1.1 routes direct name-calls only — known bounded gap, the registry indirection is documented here [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "Detector subclasses registered via the Detector registry and instantiated through the registry dispatch in routed phase code; v1.1 routes direct name-calls only \u2014 known bounded gap, the registry indirection is documented here [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "detector-registry-pattern",
@@ -1912,7 +1912,7 @@
    "file": "burhan/detect.py",
    "code": "HeaderNameTraversalDetector",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "Detector subclasses registered via the Detector registry and instantiated through the registry dispatch in routed phase code; v1.1 routes direct name-calls only — known bounded gap, the registry indirection is documented here [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "Detector subclasses registered via the Detector registry and instantiated through the registry dispatch in routed phase code; v1.1 routes direct name-calls only \u2014 known bounded gap, the registry indirection is documented here [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "detector-registry-pattern",
@@ -1923,7 +1923,7 @@
    "file": "burhan/detect.py",
    "code": "ParamNameTraversalDetector",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "Detector subclasses registered via the Detector registry and instantiated through the registry dispatch in routed phase code; v1.1 routes direct name-calls only — known bounded gap, the registry indirection is documented here [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "Detector subclasses registered via the Detector registry and instantiated through the registry dispatch in routed phase code; v1.1 routes direct name-calls only \u2014 known bounded gap, the registry indirection is documented here [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "detector-registry-pattern",
@@ -1934,7 +1934,7 @@
    "file": "burhan/oast.py",
    "code": "SelfHostedListener",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -1956,7 +1956,7 @@
    "file": "burhan/pcs.py",
    "code": "MerkleTree",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -1967,7 +1967,7 @@
    "file": "burhan/pcs.py",
    "code": "PCS",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -1989,7 +1989,7 @@
    "file": "burhan/pcs.py",
    "code": "key_digest",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test — that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test \u2014 that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "crypto-primitives-via-module-attr",
@@ -2000,7 +2000,7 @@
    "file": "burhan/pcs.py",
    "code": "msgpack_encode",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test — that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test \u2014 that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "crypto-primitives-via-module-attr",
@@ -2022,7 +2022,7 @@
    "file": "burhan/proof.py",
    "code": "chacha20poly1305_decrypt",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test — that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test \u2014 that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "crypto-primitives-via-module-attr",
@@ -2033,7 +2033,7 @@
    "file": "burhan/proof.py",
    "code": "chacha20poly1305_encrypt",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test — that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test \u2014 that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "crypto-primitives-via-module-attr",
@@ -2044,7 +2044,7 @@
    "file": "burhan/proof.py",
    "code": "ed25519_verify",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test — that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test \u2014 that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "crypto-primitives-via-module-attr",
@@ -2055,7 +2055,7 @@
    "file": "burhan/proof.py",
    "code": "hkdf_sha256",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test — that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test \u2014 that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "crypto-primitives-via-module-attr",
@@ -2066,7 +2066,7 @@
    "file": "burhan/proof.py",
    "code": "hkdf_sha256_expand",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test — that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test \u2014 that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "crypto-primitives-via-module-attr",
@@ -2077,7 +2077,7 @@
    "file": "burhan/proof.py",
    "code": "hkdf_sha256_extract",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test — that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "the engine's own crypto primitives: called inside Vault/PCS/proof through module-attr chains (jrand.X / vault.X style) that v1.1 resolves at module granularity; every primitive has a dedicated correctness test \u2014 that is their consumer contract [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "crypto-primitives-via-module-attr",
@@ -2088,7 +2088,7 @@
    "file": "burhan/race/models.py",
    "code": "serialize",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -2121,7 +2121,7 @@
    "file": "burhan/remediation.py",
    "code": "apply_patch",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2132,7 +2132,7 @@
    "file": "burhan/remediation.py",
    "code": "assert_isolated",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2143,7 +2143,7 @@
    "file": "burhan/remediation.py",
    "code": "build_patch",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2154,7 +2154,7 @@
    "file": "burhan/remediation.py",
    "code": "closure_reexploit",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2165,7 +2165,7 @@
    "file": "burhan/remediation.py",
    "code": "reflection_probe",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2176,7 +2176,7 @@
    "file": "burhan/remediation.py",
    "code": "run_remediation",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2187,7 +2187,7 @@
    "file": "burhan/repro.py",
    "code": "SeededPRNG",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -2209,7 +2209,7 @@
    "file": "burhan/repro.py",
    "code": "derive_stream",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2220,7 +2220,7 @@
    "file": "burhan/repro.py",
    "code": "diff",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2231,7 +2231,7 @@
    "file": "burhan/siem.py",
    "code": "parse_cef",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2242,7 +2242,7 @@
    "file": "burhan/statemachine.py",
    "code": "replay",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py — MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "invoked by scripts/run_r9_live.py or scripts/siem_export_evidence.py \u2014 MANUAL evidence generators deliberately NOT wired as workflow entries (round-9's record); the functions are the documented evidence-generation surface for those scripts [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "evidence-script-only",
@@ -2253,7 +2253,7 @@
    "file": "burhan/statemachine.py",
    "code": "value",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -2275,7 +2275,7 @@
    "file": "burhan/stepup.py",
    "code": "StepUpGate",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -2308,7 +2308,7 @@
    "file": "burhan/stepup.py",
    "code": "canonical_event",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -2319,7 +2319,7 @@
    "file": "burhan/stepup.py",
    "code": "generate_master_secret",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -2330,7 +2330,7 @@
    "file": "burhan/symbolic/models.py",
    "code": "Path",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -2352,7 +2352,7 @@
    "file": "burhan/xgraph.py",
    "code": "Event",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -2363,7 +2363,7 @@
    "file": "burhan/xgraph.py",
    "code": "value",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) — not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
+   "reason": "data-model / helper surface consumed by tests as constructors and values (enums, events, chain-step helpers) \u2014 not entry-point logic; production use flows through module-attr/classmethod chains routed at class granularity [round-12 close, class (d+) v1.1: flag = tests-reference-but-no-production-entrypoint; RED->BLUE proven on the real run_monitor_cycle bug]",
    "scanner_class": "ENTRYPOINT_UNREACHABLE",
    "line": 0,
    "classification": "data-model-surface",
@@ -2374,98 +2374,98 @@
    "file": "burhan/authz.py",
    "code": "AuthzEngine",
    "class": "detector-registry-pattern",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-002",
    "file": "burhan/chainphase.py",
    "code": "HashCryptoChainPhase",
    "class": "evidence-script-only",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-003",
    "file": "burhan/chainrules.py",
    "code": "chains_summary",
    "class": "detector-registry-pattern",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-004",
    "file": "burhan/chainrules.py",
    "code": "detect_chains",
    "class": "detector-registry-pattern",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-005",
    "file": "burhan/discovery.py",
    "code": "parse_openapi",
    "class": "crypto-primitives-via-module-attr",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-006",
    "file": "burhan/evidence.py",
    "code": "build_proof",
    "class": "data-model-surface",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-007",
    "file": "burhan/graphql.py",
    "code": "GraphqlEngine",
    "class": "detector-registry-pattern",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-008",
    "file": "burhan/modernsec.py",
    "code": "run_modern_battery",
    "class": "detector-registry-pattern",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-009",
    "file": "burhan/modernsec2.py",
    "code": "FlipDNS",
    "class": "data-model-surface",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-010",
    "file": "burhan/modernsec2.py",
    "code": "jwt_weak_secret_offline",
    "class": "crypto-primitives-via-module-attr",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-011",
    "file": "burhan/modernsec2.py",
    "code": "rebind_toctou_probe",
    "class": "detector-registry-pattern",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-012",
    "file": "burhan/modernsec2.py",
    "code": "run_modern_battery_v2",
    "class": "detector-registry-pattern",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "R14-EP-013",
    "file": "burhan/websocket.py",
    "code": "WsClient",
    "class": "data-model-surface",
-   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) — classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
+   "reason": "r14: the new CLI battery + regression tests reference these public engine symbols statically (previously only reached via orchestrator lazy imports, which the v1 routing graph resolves at module granularity and can under-flag). All are production-routed through orchestrator's lazy from-imports (modernsec/2 batteries, chainrules detect_chains, authz engine, graphql engine, WsClient in the ws attack path, parse_openapi in discovery ingestion) \u2014 classified to keep the gate green without weakening it: entrypoint_wiring still flags any NEW unrouted symbol."
   },
   {
    "id": "QS-233",
    "file": "burhan/browser.py",
    "code": "BrowserEngine",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "module-granularity under-flag: orchestrator._run_phases instantiates BrowserEngine (burhan/orchestrator.py:678 behind browser_available()) — the class IS production-wired through the scan entrypoint; the sweep's from-import routing resolves at module granularity and under-flags cross-module classes. The r15 additions (register_driver / kill_all_drivers / sigint_seen) are invoked from burhan.cli's SIGINT handler and the wakeup-fd monitor — same wiring class.",
+   "reason": "module-granularity under-flag: orchestrator._run_phases instantiates BrowserEngine (burhan/orchestrator.py:678 behind browser_available()) \u2014 the class IS production-wired through the scan entrypoint; the sweep's from-import routing resolves at module granularity and under-flags cross-module classes. The r15 additions (register_driver / kill_all_drivers / sigint_seen) are invoked from burhan.cli's SIGINT handler and the wakeup-fd monitor \u2014 same wiring class.",
    "round": 15
   },
   {
@@ -2473,91 +2473,121 @@
    "file": "burhan/vault.py",
    "class": "BARE_EXCEPT_REBIND",
    "code": "raise VaultError\\(\"malformed envelope\"\\)",
-   "reason": "caught KeyError/TypeError from envelope['nonce'] etc. — the missing/ill-typed field IS the whole cause and the message names it; chaining adds nothing (no underlying traceback exists worth keeping for a shape violation)"
+   "reason": "caught KeyError/TypeError from envelope['nonce'] etc. \u2014 the missing/ill-typed field IS the whole cause and the message names it; chaining adds nothing (no underlying traceback exists worth keeping for a shape violation)"
   },
   {
    "id": "r18-vault-authtype",
    "file": "burhan/vault.py",
    "class": "BARE_EXCEPT_REBIND",
    "code": "raise VaultError\\(\"authentication failed: wrong key or tampered data\"\\)",
-   "reason": "caught InvalidTag — a bare marker exception with no message of its own; the VaultError message is strictly MORE informative than the cause"
+   "reason": "caught InvalidTag \u2014 a bare marker exception with no message of its own; the VaultError message is strictly MORE informative than the cause"
   },
   {
    "id": "r18-vault-blob-json",
    "file": "burhan/vault.py",
    "class": "BARE_EXCEPT_REBIND",
    "code": "raise VaultError\\(\"vault blob corrupted after authentication\"\\)",
-   "reason": "caught (ValueError, UnicodeDecodeError) from json.loads on authenticated plaintext — message states the exact failure; nothing recoverable in the cause"
+   "reason": "caught (ValueError, UnicodeDecodeError) from json.loads on authenticated plaintext \u2014 message states the exact failure; nothing recoverable in the cause"
   },
   {
    "id": "r18-metrics-ssb-zero",
    "file": "burhan/metrics.py",
    "class": "FLOAT_EQUALITY",
    "code": "if ssb == 0\\.0:",
-   "reason": "declared ANOVA convention N3 (documented in the module header): SSB==0 exactly iff all group means are identical (sums of squares of identical values) — an exact-zero sentinel, not a tolerance-sensitive computed comparison; == 0.0 is the correct test for 'identical groups'"
+   "reason": "declared ANOVA convention N3 (documented in the module header): SSB==0 exactly iff all group means are identical (sums of squares of identical values) \u2014 an exact-zero sentinel, not a tolerance-sensitive computed comparison; == 0.0 is the correct test for 'identical groups'"
   },
   {
    "id": "r18-metrics-ssw-zero",
    "file": "burhan/metrics.py",
    "class": "FLOAT_EQUALITY",
    "code": "elif ssw == 0\\.0:",
-   "reason": "same N3 convention: SSW==0 exactly iff every point equals its group mean (perfect separation sentinel) — F:=inf is the documented convention"
+   "reason": "same N3 convention: SSW==0 exactly iff every point equals its group mean (perfect separation sentinel) \u2014 F:=inf is the documented convention"
   },
   {
    "id": "r18-csynth-boundary-log",
    "file": "burhan/csynth.py",
    "class": "UNBOUNDED_GROWTH",
    "code": "_BOUNDARY\\.append",
-   "reason": "deliberate append-only boundary/audit log (docstring: 'append-only; seq monotone; legal operations never write') consumed as an immutable snapshot via boundary(); grows only on contract violations (one record per violation), never per request — bounded by error count in practice, read via tuple() snapshot"
+   "reason": "deliberate append-only boundary/audit log (docstring: 'append-only; seq monotone; legal operations never write') consumed as an immutable snapshot via boundary(); grows only on contract violations (one record per violation), never per request \u2014 bounded by error count in practice, read via tuple() snapshot"
   },
   {
    "id": "r18-cli-gt-path",
    "file": "burhan/cli.py",
    "class": "WINDOWS_RESERVED_NAME",
    "code": "open\\(os\\.path\\.join\\(os\\.path\\.dirname\\(__file__\\), \"\\.\\.\", \"benchmarks\", \"ground_truth\\.json\"\\)",
-   "reason": "every join component is a literal constant — the os.path.join is module-location-relative portability, not data interpolation; no reserved-name or length surface"
+   "reason": "every join component is a literal constant \u2014 the os.path.join is module-location-relative portability, not data interpolation; no reserved-name or length surface"
   },
   {
    "id": "r18-cli-bilingual-out",
    "file": "burhan/cli.py",
    "class": "WINDOWS_RESERVED_NAME",
    "code": "json\\.dump\\(bi, open\\(base_out \\+ \"\\.json\", \"w\", encoding=\"utf-8\"\\)",
-   "reason": "base_out derives from the CLI --out argument (operator-chosen, r17-7 already audited the encoding side); constant suffix .json — operator output paths are reviewed by the operator, and the repo's own convention keeps report names ASCII-safe"
+   "reason": "base_out derives from the CLI --out argument (operator-chosen, r17-7 already audited the encoding side); constant suffix .json \u2014 operator output paths are reviewed by the operator, and the repo's own convention keeps report names ASCII-safe"
   },
   {
    "id": "r18-sca-osv-raw",
    "file": "burhan/sca.py",
    "class": "WINDOWS_RESERVED_NAME",
    "code": "open\\(f\"\\{raw_dir\\}/osv-querybatch-response\\.json\", \"wb\"\\)",
-   "reason": "raw_dir is the operator-passed evidence dir, filename is a constant — the f-string is dir interpolation, not data-named files"
+   "reason": "raw_dir is the operator-passed evidence dir, filename is a constant \u2014 the f-string is dir interpolation, not data-named files"
   },
   {
    "id": "r18-sca-advisory-safe",
    "file": "burhan/sca.py",
    "class": "WINDOWS_RESERVED_NAME",
    "code": "open\\(f\"\\{raw_dir\\}/advisory-\\{safe\\}\\.json\", \"wb\"\\)",
-   "reason": "the interpolated id is sanitized one line above (safe = re.sub(r'[^A-Za-z0-9._-]', '_', vid)) — OSV ids are GHSA-xxxx-xxxx-xxxx shaped, so 'safe' can never be CON/PRN/AUX/NUL/COM*/LPT* (those contain no hyphen after the prefix char... actually GHSA ids always carry hyphens; and even a pathological id collapses to underscores+dot+digits — the Windows reserved set matches exact stem names only, and 'advisory-' prefix alone excludes every reserved stem)"
+   "reason": "the interpolated id is sanitized one line above (safe = re.sub(r'[^A-Za-z0-9._-]', '_', vid)) \u2014 OSV ids are GHSA-xxxx-xxxx-xxxx shaped, so 'safe' can never be CON/PRN/AUX/NUL/COM*/LPT* (those contain no hyphen after the prefix char... actually GHSA ids always carry hyphens; and even a pathological id collapses to underscores+dot+digits \u2014 the Windows reserved set matches exact stem names only, and 'advisory-' prefix alone excludes every reserved stem)"
   },
   {
    "id": "QS-234",
    "file": "burhan/discovery.py",
    "code": "DiscoveryEngine",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "r19-1: the crawler engine class is instantiated by BurhanScanner.run (burhan/orchestrator.py:578, routed from the CI fixture/real-target entry scripts) and now also referenced by tests/test_r19_spa_discovery.py. Production reachability is via the orchestrator's constructor call; the scanner's module-granularity cross-file routing resolves the import, and the class instantiation is the production reference (classes are deliberately out of the scanner's callable scope v1 — same record shape as QS-222's data-model note)."
+   "reason": "r19-1: the crawler engine class is instantiated by BurhanScanner.run (burhan/orchestrator.py:578, routed from the CI fixture/real-target entry scripts) and now also referenced by tests/test_r19_spa_discovery.py. Production reachability is via the orchestrator's constructor call; the scanner's module-granularity cross-file routing resolves the import, and the class instantiation is the production reference (classes are deliberately out of the scanner's callable scope v1 \u2014 same record shape as QS-222's data-model note)."
   },
   {
    "id": "QS-235",
    "file": "burhan/discovery.py",
    "code": "plausible_js_url",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "r19-1: the JS-extraction precision gate (DISC-01), called inside DiscoveryEngine.crawl's JS/static extraction blocks and now also from _json_route_values (the JSON-menu miner) plus the r19 SPA tests. The call sites live inside the crawl() method body; the scanner's callable routing sees the method through the class (see the DiscoveryEngine entry above) — documented-benign, same shape as QS-222."
+   "reason": "r19-1: the JS-extraction precision gate (DISC-01), called inside DiscoveryEngine.crawl's JS/static extraction blocks and now also from _json_route_values (the JSON-menu miner) plus the r19 SPA tests. The call sites live inside the crawl() method body; the scanner's callable routing sees the method through the class (see the DiscoveryEngine entry above) \u2014 documented-benign, same shape as QS-222."
   },
   {
    "id": "QS-236",
    "file": "burhan/owner_gate.py",
    "code": "OwnerGateRateLimited",
    "class": "ENTRYPOINT_UNREACHABLE",
-   "reason": "r19-2: the rate-limit EXCEPTION class. Production raises it from OwnerGate._rate_guard (called by unlock_scan/change/transfer — all wired through the CLI's owner command and the scan gate); the CLI catches the OwnerGateError BASE class, so the subclass name appears literally only in tests. Same shape as QS-222's data-model note: exception classes are consumed as types, and the base-class catch IS the production reference."
+   "reason": "r19-2: the rate-limit EXCEPTION class. Production raises it from OwnerGate._rate_guard (called by unlock_scan/change/transfer \u2014 all wired through the CLI's owner command and the scan gate); the CLI catches the OwnerGateError BASE class, so the subclass name appears literally only in tests. Same shape as QS-222's data-model note: exception classes are consumed as types, and the base-class catch IS the production reference."
+  },
+  {
+   "id": "QS-237",
+   "file": "burhan/owner_gate.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "mkstemp cleanup best-effort \u2014 the tmp file may already be renamed away by os.replace or never created; the failure is re-raised by the enclosing 'raise' (vault.py QS-168 discipline)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 166,
+   "origin": "r20 concurrent-writer race fix (C3 occurrence #5)"
+  },
+  {
+   "id": "QS-238",
+   "file": "burhan/memory.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "mkstemp cleanup best-effort \u2014 the tmp file may already be renamed away by os.replace or never created; the failure is re-raised by the enclosing 'raise' (vault.py QS-168 discipline)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 124,
+   "origin": "r20 concurrent-writer race fix (C3 occurrence #5)"
+  },
+  {
+   "id": "QS-239",
+   "file": "burhan/stepup.py",
+   "code": "except\\ OSError:",
+   "class": "SILENT_EXCEPT",
+   "reason": "mkstemp cleanup best-effort \u2014 the tmp file may already be renamed away by os.replace or never created; the failure is re-raised by the enclosing 'raise' (vault.py QS-168 discipline)",
+   "scanner_class": "SILENT_EXCEPT",
+   "line": 147,
+   "origin": "r20 concurrent-writer race fix (C3 occurrence #5)"
   }
  ]
 }

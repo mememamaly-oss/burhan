@@ -1,12 +1,12 @@
 {
- "when": "2026-11-09T12:52:45Z",
+ "when": "2026-11-10T01:44:26Z",
  "scanned": {
-  "python_files": 245,
+  "python_files": 247,
   "ts_files": 147
  },
  "raw_counts_by_class": {
-  "SILENT_EXCEPT": 342,
-  "TOCTOU": 13,
+  "SILENT_EXCEPT": 350,
+  "TOCTOU": 14,
   "WINDOWS_RESERVED_NAME": 81,
   "UNENCODED_READ": 3,
   "UNBOUNDED_GROWTH": 6,
@@ -480,7 +480,7 @@
    }
   ]
  },
- "total": 532,
+ "total": 541,
  "hits": [
   {
    "file": "burhan/api.py",
@@ -1694,7 +1694,7 @@
   },
   {
    "file": "burhan/memory.py",
-   "line": 47,
+   "line": 48,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "__init__",
@@ -1704,13 +1704,23 @@
   },
   {
    "file": "burhan/memory.py",
-   "line": 43,
+   "line": 44,
    "class": "TOCTOU",
    "code": "with open(path, encoding=\"utf-8\") as fh:",
    "func": "__init__",
-   "detail": "'path' checked at line 41 then used here (two calls)",
+   "detail": "'path' checked at line 42 then used here (two calls)",
    "ledger": "AP-161",
    "verdict": "LEDGERED(state-load-race)"
+  },
+  {
+   "file": "burhan/memory.py",
+   "line": 124,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "save",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-238",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
    "file": "burhan/metrics.py",
@@ -2054,7 +2064,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2399,
+   "line": 2412,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _ie:",
    "func": "doctor",
@@ -2064,7 +2074,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2409,
+   "line": 2422,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _pe:",
    "func": "doctor",
@@ -2084,7 +2094,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1339,
+   "line": 1352,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -2094,7 +2104,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1725,
+   "line": 1738,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -2114,7 +2124,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1106,
+   "line": 1119,
    "class": "SILENT_EXCEPT",
    "code": "except AttributeError:",
    "func": "_run_phases",
@@ -2124,7 +2134,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2242,
+   "line": 2255,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — teardown must never mask",
    "func": "run",
@@ -2134,7 +2144,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2248,
+   "line": 2261,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "run",
@@ -2150,6 +2160,16 @@
    "func": "planner_gate",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-138",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/owner_gate.py",
+   "line": 166,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_save",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-237",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
@@ -2450,6 +2470,16 @@
    "func": "build_ocsf",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-162",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/stepup.py",
+   "line": 147,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_save",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-239",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
@@ -4053,6 +4083,15 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/r19_webgoat_live_check.py",
+   "line": 40,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError:",
+   "func": "register",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/repro_attest.py",
    "line": 109,
    "class": "SILENT_EXCEPT",
@@ -4625,7 +4664,7 @@
   },
   {
    "file": "tests/test_r15_sigint_browser.py",
-   "line": 128,
+   "line": 142,
    "class": "SILENT_EXCEPT",
    "code": "except subprocess.TimeoutExpired:",
    "func": "test_sigint_during_browser_phase_exits_cleanly",
@@ -4634,11 +4673,56 @@
   },
   {
    "file": "tests/test_r15_sigint_browser.py",
-   "line": 89,
+   "line": 90,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "test_sigint_during_browser_phase_exits_cleanly",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 136,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_tail",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 179,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 230,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 201,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 199,
+   "class": "TOCTOU",
+   "code": "if os.path.exists(_wal) and os.path.getsize(_wal) > 0:",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "'_wal' checked at line 177 then used here (two calls)",
    "verdict": "NON_ENGINE"
   },
   {
