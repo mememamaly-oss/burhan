@@ -13,7 +13,7 @@ blake3==1.0.11
 # every deployment that installed this file — CI runs 41730552234/41732292967
 # caught the pin failing on exactly that. It is a runtime engine dependency;
 # the weakrand battery now records UNTESTABLE loudly if it is ever absent.
-numpy>=1.24
+numpy>=2.5.4
 
 # Round 9, part 1: the bilingual (AR/EN) client report renders .docx via
 # python-docx at runtime (build_bilingual_docx) — a declared engine dependency
