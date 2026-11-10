@@ -591,7 +591,7 @@ jobs:
       # actual behavior on every dispatch. If GitHub ever starts enforcing
       # the documented behavior, this step turns red and the note in
       # docs/github-action.md must be updated. Consumers should still move
-      # to mememamaly-oss/burhan@v5.0.0 — the redirect is observed-working,
+      # to mememamaly-oss/burhan@v5.2.0 — the redirect is observed-working,
       # not a guarantee.
       - name: Run the action — LEGACY pre-rename ref (mememamaly-oss/Sen@v4.5.0, expected to fail per docs)
         uses: mememamaly-oss/Sen@v4.5.0
@@ -614,8 +614,8 @@ jobs:
           print("legacy-ref action contract OK:", len(rep["findings"]), "findings")
           PY
 
-      - name: Run the action (mememamaly-oss/burhan@v5.0.0 — current published tag)
-        uses: mememamaly-oss/burhan@v5.0.0
+      - name: Run the action (mememamaly-oss/burhan@v5.2.0 — current published tag)
+        uses: mememamaly-oss/burhan@v5.2.0
         with:
           target: http://127.0.0.1:8789
           out: burhan-result.json
