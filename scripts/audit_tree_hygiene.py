@@ -60,7 +60,47 @@ DENY_RULES = [
         "re-tracked in 2a4210e; a filename the shell ate once will be "
         "eaten again (r17-1)",
     ),
+    # Phase-A.3b (2026-11-10): credential artifacts. History shows the
+    # class is real: `git add -A` swept .env into git via the b9c8b03
+    # container-junk commit (benign 1-line sqlite path, untracked two
+    # weeks later in 88fa11c) — next time the file may not be benign.
+    # The staged file itself is the failure; no content sniffing (that
+    # is a scanner's job, not a tree gate's).
+    (
+        re.compile(r"^\.secrets/"),
+        "credential artifact",
+        "local credential store — never tracked (.secrets/ holds "
+        "operator tokens; the 9e9037c accident class, Phase A audit)",
+    ),
+    (
+        re.compile(r"(^|/)(id_rsa|id_ed25519)(\.|$)"),
+        "credential artifact",
+        "SSH private key by name — staging it must fail the build",
+    ),
+    (
+        re.compile(r"(^|/)\.env(\.[^.]+)?$"),
+        "credential artifact",
+        "environment file — the exact 9e9037c accident (.env tracked "
+        "for two weeks); .env.example stays allowed as the template",
+    ),
+    (
+        re.compile(r".*\.(pat|pem|key)$"),
+        "credential artifact",
+        "credential-bearing extension (*.pat/*.pem/*.key) — staging it "
+        "must fail the build (Phase A audit)",
+    ),
 ]
+
+# Tracked exceptions for the credential rules above, same reviewed-ledger
+# discipline as ALLOWLIST: (date, reason). These are REAL product files
+# whose names merely resemble credentials.
+CREDENTIAL_ALLOWLIST = {
+    ".env.example": (
+        "2026-11-10",
+        "the shipped environment template — documented in README and "
+        "INSTALLATION_GUIDE; contains placeholders only",
+    ),
+}
 
 # tracked path -> (date, reason). Empty today; any addition is a
 # reviewed, documented decision that the gate prints on every run.
@@ -85,6 +125,8 @@ def violation(path: str):
         return None
     for pattern, label, why in DENY_RULES:
         if pattern.search(path):
+            if path in CREDENTIAL_ALLOWLIST:
+                return None
             return (label, why)
     return None
 

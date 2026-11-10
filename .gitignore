@@ -16,3 +16,16 @@ results/
 # it) — it reached main via add -A in r15 (3e34202). Gate blocks
 # tracking it anywhere; this keeps add -A from sweeping it untracked.
 CAPABILITY_MATRIX.md
+
+# Phase-A.3b (2026-11-10): credential artifacts must never be swept in by
+# add -A. The tree-hygiene gate DENY_RULES make tracking them fail CI; these
+# lines keep `git add -A` honest in the first place. .env.example stays
+# tracked (CREDENTIAL_ALLOWLIST in the gate, placeholders only).
+.secrets/
+.env
+.env.*
+!.env.example
+*.pat
+*.pem
+*.key
+id_rsa*
