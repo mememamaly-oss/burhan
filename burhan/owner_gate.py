@@ -40,6 +40,7 @@ import hashlib
 import json
 import os
 import secrets
+import tempfile
 import time
 
 GENESIS = hashlib.sha256(b"burhan-owner-gate-genesis-v1").hexdigest()
@@ -146,10 +147,25 @@ class OwnerGate:
             return json.load(fh)
 
     def _save(self, data: dict) -> None:
-        tmp = self.path + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as fh:
-            json.dump(data, fh, indent=1)
-        os.replace(tmp, self.path)
+        # C3 occurrence #5 (CI-live-caught, Engine job 129559174929): a
+        # FIXED tmp name is SHARED by every writer of this store — one
+        # writer's os.replace() removes the tmp file out from under the
+        # other's pending replace (survivor dies, FileNotFoundError) or
+        # interleaves into it (torn document replaces the store). The
+        # vault.py discipline: a UNIQUE mkstemp name per write in the
+        # same directory, cleaned up on failure, then one atomic rename.
+        d = os.path.dirname(os.path.abspath(self.path)) or "."
+        fd, tmp = tempfile.mkstemp(dir=d, prefix=".owner-gate-tmp-")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(data, fh, indent=1)
+            os.replace(tmp, self.path)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
 
     # ---- the audit chain --------------------------------------------------
     def append_event(self, event: dict) -> dict:

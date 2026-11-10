@@ -1,5 +1,5 @@
 {
- "total": 395,
+ "total": 419,
  "hits": [
   {
    "file": "burhan/apath.py",
@@ -293,7 +293,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 94,
+   "line": 95,
    "class": "BREAK",
    "code": "break        # one sink per source pattern is enough for planning",
    "func": "scan_dom_sinks",
@@ -303,7 +303,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 162,
+   "line": 163,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "any_driver_alive",
@@ -313,7 +313,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 198,
+   "line": 199,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — pipe closed at exit",
    "func": "_arm_sigint_monitor._monitor",
@@ -323,7 +323,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 210,
+   "line": 211,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — keep watching regardless",
    "func": "_arm_sigint_monitor._monitor",
@@ -333,7 +333,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 216,
+   "line": 217,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — monitor is best-effort; handler still exists",
    "func": "_arm_sigint_monitor",
@@ -343,7 +343,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 238,
+   "line": 239,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — best-effort unwedging",
    "func": "kill_all_drivers",
@@ -353,7 +353,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 398,
+   "line": 399,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "_browser_child_proc",
@@ -363,7 +363,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 426,
+   "line": 427,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "close._watchdog",
@@ -373,7 +373,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 436,
+   "line": 437,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — teardown must never raise",
    "func": "close",
@@ -383,7 +383,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 441,
+   "line": 442,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "close",
@@ -393,10 +393,20 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 446,
+   "line": 447,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "close",
+   "detail": "body=Pass, exception unused",
+   "ledger": "R15-AP-001",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 519,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — teardown must never raise",
+   "func": "render",
    "detail": "body=Pass, exception unused",
    "ledger": "R15-AP-001",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
@@ -523,7 +533,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 750,
+   "line": 866,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — fall through to default",
    "func": "main._sigint_burhan",
@@ -533,7 +543,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 811,
+   "line": 927,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — flag check must never mask results",
    "func": "main",
@@ -543,7 +553,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 981,
+   "line": 1097,
    "class": "FIRST[0-call]",
    "code": "n = len(sarif.get(\"runs\", [{}])[0].get(\"results\", [])) if \"runs\" in sarif else 0",
    "func": "main",
@@ -553,7 +563,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 1092,
+   "line": 1208,
    "class": "BREAK",
    "code": "break",
    "func": "main",
@@ -563,7 +573,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 1094,
+   "line": 1210,
    "class": "BREAK",
    "code": "break",
    "func": "main",
@@ -803,7 +813,7 @@
   },
   {
    "file": "burhan/discovery.py",
-   "line": 54,
+   "line": 55,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "endpoint_gate_scope",
@@ -813,7 +823,17 @@
   },
   {
    "file": "burhan/discovery.py",
-   "line": 370,
+   "line": 288,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_json_route_values",
+   "detail": "body=Return, exception unused",
+   "ledger": "AP-073",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/discovery.py",
+   "line": 484,
    "class": "POP0",
    "code": "url = queue.pop(0)",
    "func": "crawl",
@@ -823,7 +843,7 @@
   },
   {
    "file": "burhan/discovery.py",
-   "line": 760,
+   "line": 935,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_loopback_normalize",
@@ -1693,11 +1713,11 @@
   },
   {
    "file": "burhan/memory.py",
-   "line": 43,
+   "line": 44,
    "class": "TOCTOU",
    "code": "with open(path, encoding=\"utf-8\") as fh:",
    "func": "<module>",
-   "detail": "check(path) at line 41 then use",
+   "detail": "check(path) at line 42 then use",
    "ledger": "AP-161",
    "verdict": "LEDGERED(state-load-race)"
   },
@@ -1863,7 +1883,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 400,
+   "line": 423,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "run",
@@ -1873,7 +1893,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 405,
+   "line": 428,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "run",
@@ -1883,7 +1903,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 461,
+   "line": 484,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "run",
@@ -1893,7 +1913,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 487,
+   "line": 510,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as e:      # noqa: BLE001 — probe errors are outcomes",
    "func": "rebind_toctou_probe",
@@ -1903,33 +1923,13 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 547,
+   "line": 570,
    "class": "POP0",
    "code": "o = stack.pop(0)",
    "func": "_json_scalar",
    "detail": "pop(0) positional take",
    "ledger": "AP-182",
    "verdict": "LEDGERED(worklist-pop)"
-  },
-  {
-   "file": "burhan/modernsec2.py",
-   "line": 692,
-   "class": "BREAK",
-   "code": "break",
-   "func": "_bfla",
-   "detail": "loop break — verdict semantics reviewed",
-   "ledger": "AP-183",
-   "verdict": "LEDGERED(probe-until-verdict)"
-  },
-  {
-   "file": "burhan/modernsec2.py",
-   "line": 706,
-   "class": "BREAK",
-   "code": "break",
-   "func": "_bfla",
-   "detail": "loop break — verdict semantics reviewed",
-   "ledger": "AP-183",
-   "verdict": "LEDGERED(probe-until-verdict)"
   },
   {
    "file": "burhan/modernsec2.py",
@@ -1943,7 +1943,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 774,
+   "line": 729,
    "class": "BREAK",
    "code": "break",
    "func": "_bfla",
@@ -1953,7 +1953,27 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 833,
+   "line": 738,
+   "class": "BREAK",
+   "code": "break",
+   "func": "_bfla",
+   "detail": "loop break — verdict semantics reviewed",
+   "ledger": "AP-183",
+   "verdict": "LEDGERED(probe-until-verdict)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 797,
+   "class": "BREAK",
+   "code": "break",
+   "func": "_bfla",
+   "detail": "loop break — verdict semantics reviewed",
+   "ledger": "AP-183",
+   "verdict": "LEDGERED(probe-until-verdict)"
+  },
+  {
+   "file": "burhan/modernsec2.py",
+   "line": 856,
    "class": "BREAK",
    "code": "break",
    "func": "_race_prober",
@@ -1963,7 +1983,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 991,
+   "line": 1014,
    "class": "BREAK",
    "code": "break",
    "func": "_shadow_api",
@@ -2103,17 +2123,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 606,
-   "class": "FIRST[0]",
-   "code": "endpoints.extend(e for e in found if e.id != endpoints[0].id)",
-   "func": "_run_phases",
-   "detail": "first pick of 'endpoints'",
-   "ledger": "AP-194",
-   "verdict": "LEDGERED(citation-pick)"
-  },
-  {
-   "file": "burhan/orchestrator.py",
-   "line": 798,
+   "line": 881,
    "class": "BREAK",
    "code": "break",
    "func": "_run_phases",
@@ -2123,7 +2133,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1056,
+   "line": 1139,
    "class": "BREAK",
    "code": "break",
    "func": "_run_phases",
@@ -2133,7 +2143,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1269,
+   "line": 1352,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -2143,7 +2153,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2074,
+   "line": 2157,
    "class": "BREAK",
    "code": "break",
    "func": "_base_engine",
@@ -2153,7 +2163,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2172,
+   "line": 2255,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — teardown must never mask",
    "func": "run",
@@ -2163,7 +2173,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2178,
+   "line": 2261,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "run",
@@ -2173,7 +2183,27 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2368,
+   "line": 2297,
+   "class": "BREAK",
+   "code": "break",
+   "func": "doctor",
+   "detail": "loop break — verdict semantics reviewed",
+   "ledger": "AP-195",
+   "verdict": "LEDGERED(probe-until-verdict)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 2303,
+   "class": "BREAK",
+   "code": "break",
+   "func": "doctor",
+   "detail": "loop break — verdict semantics reviewed",
+   "ledger": "AP-195",
+   "verdict": "LEDGERED(probe-until-verdict)"
+  },
+  {
+   "file": "burhan/orchestrator.py",
+   "line": 2469,
    "class": "FIRST[0]",
    "code": "assert len(hits) == 1 and \"…\" in hits[0].evidence[0].detail and \"BBBB\" not in hits[0].evidence[0].detail",
    "func": "doctor",
@@ -3155,7 +3185,7 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 127,
+   "line": 158,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as e:  # noqa: BLE001 — parse failure IS the hit",
    "func": "scan_py",
@@ -3164,7 +3194,7 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 206,
+   "line": 237,
    "class": "BREAK",
    "code": "observable = True; break",
    "func": "scan_py.walk_silent_except",
@@ -3173,7 +3203,7 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 219,
+   "line": 250,
    "class": "BREAK",
    "code": "observable = True; break",
    "func": "scan_py.walk_silent_except",
@@ -3182,7 +3212,7 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 229,
+   "line": 260,
    "class": "BREAK",
    "code": "observable = True; break",
    "func": "scan_py.walk_silent_except",
@@ -3191,7 +3221,7 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 231,
+   "line": 262,
    "class": "BREAK",
    "code": "break",
    "func": "scan_py.walk_silent_except",
@@ -3200,7 +3230,7 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 241,
+   "line": 272,
    "class": "BREAK",
    "code": "observable = True; break",
    "func": "scan_py.walk_silent_except",
@@ -3209,7 +3239,7 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 243,
+   "line": 274,
    "class": "BREAK",
    "code": "observable = True; break",
    "func": "scan_py.walk_silent_except",
@@ -3218,7 +3248,25 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 415,
+   "line": 386,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — reporting only",
+   "func": "scan_py.fn_of",
+   "detail": "body=Pass, exception unused",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 484,
+   "class": "BREAK",
+   "code": "break",
+   "func": "scan_py.walk_float_equality",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 736,
    "class": "BREAK",
    "code": "routed_libs.add(lf); changed = True; break",
    "func": "scan_ts_exports_routed",
@@ -3227,25 +3275,25 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 531,
+   "line": 854,
    "class": "TOCTOU",
    "code": "pkg_text = open(pkg_path, encoding=\"utf-8\").read() if os.path.exists(pkg_path) else \"\"",
    "func": "<module>",
-   "detail": "check(pkg_path) at line 531 then use",
+   "detail": "check(pkg_path) at line 854 then use",
    "verdict": "NON_ENGINE"
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 539,
+   "line": 862,
    "class": "TOCTOU",
    "code": "open(p, encoding=\"utf-8\").read()))",
    "func": "<module>",
-   "detail": "check(p) at line 537 then use",
+   "detail": "check(p) at line 860 then use",
    "verdict": "NON_ENGINE"
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 561,
+   "line": 884,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — other classes report parse errors",
    "func": "entrypoint_wiring_report",
@@ -3254,11 +3302,11 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 735,
+   "line": 1058,
    "class": "TOCTOU",
    "code": "return json.load(open(LEDGER_PATH, encoding=\"utf-8\"))[\"entries\"]",
    "func": "<module>",
-   "detail": "check(LEDGER_PATH) at line 733 then use",
+   "detail": "check(LEDGER_PATH) at line 1056 then use",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3340,6 +3388,60 @@
    "code": "except Exception:",
    "func": "main",
    "detail": "body=Continue, exception unused",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 91,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns._t",
+   "detail": "body=Continue, exception unused",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 136,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns._json_or_none",
+   "detail": "body=Return, exception unused",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 153,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns._reg",
+   "detail": "body=Return, exception unused",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 171,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns._mon",
+   "detail": "body=Return, exception unused",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 190,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns._rate",
+   "detail": "body=Return, exception unused",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 202,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns._repro",
+   "detail": "body=Return, exception unused",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3460,6 +3562,24 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/repro_attest.py",
+   "line": 99,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — diagnostics only",
+   "func": "run_scan",
+   "detail": "body=Pass, exception unused",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/repro_attest.py",
+   "line": 108,
+   "class": "BREAK",
+   "code": "break",
+   "func": "run_scan",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/reverify/gj_replay.py",
    "line": 39,
    "class": "SILENT_EXCEPT",
@@ -3565,6 +3685,15 @@
    "code": "_jwt_families(st2, [eps[0], eps[1]])",
    "func": "test_differential_targets_strong_named_surfaces_first",
    "detail": "first pick of 'eps'",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_modernsec2.py",
+   "line": 257,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "body=Return, exception unused",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3758,11 +3887,101 @@
   },
   {
    "file": "tests/test_r15_sigint_browser.py",
-   "line": 88,
+   "line": 89,
    "class": "BREAK",
    "code": "break",
    "func": "test_sigint_during_browser_phase_exits_cleanly",
    "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r17_db_role_script.py",
+   "line": 116,
+   "class": "FIRST[0-call]",
+   "code": "first_call = fake_env[\"log\"].read_text().splitlines()[0].split(\"\\x1f\")",
+   "func": "test_role_actually_created_and_option_order_fixed",
+   "detail": "first pick of a call result",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r17_unencoded_write.py",
+   "line": 118,
+   "class": "FIRST[0-call]",
+   "code": "run.setdefault(\"findings\", [{}])[0].setdefault(\"id\", \"F-AR-1\")",
+   "func": "_bilingual_export",
+   "detail": "first pick of a call result",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r17_wait_ready.py",
+   "line": 71,
+   "class": "BREAK",
+   "code": "break",
+   "func": "test_old_iteration_count_loop_false_fatals_on_slow_start",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 177,
+   "class": "TOCTOU",
+   "code": "if os.path.exists(_wal) and os.path.getsize(_wal) > 0:",
+   "func": "<module>",
+   "detail": "check(_wal) at line 199 then use",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 199,
+   "class": "TOCTOU",
+   "code": "if os.path.exists(_wal) and os.path.getsize(_wal) > 0:",
+   "func": "<module>",
+   "detail": "check(_wal) at line 199 then use",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 175,
+   "class": "BREAK",
+   "code": "break  # one died on its own — the asserts below speak",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 178,
+   "class": "BREAK",
+   "code": "break",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 191,
+   "class": "BREAK",
+   "code": "break",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 200,
+   "class": "BREAK",
+   "code": "break",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "loop break — verdict semantics reviewed",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 230,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "body=Pass, exception unused",
    "verdict": "NON_ENGINE"
   },
   {

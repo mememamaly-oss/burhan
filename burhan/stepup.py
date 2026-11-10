@@ -31,6 +31,7 @@ import hashlib
 import json
 import os
 import secrets
+import tempfile
 import time
 
 GENESIS = hashlib.sha256(b"burhan-stepup-genesis-v1").hexdigest()
@@ -130,10 +131,22 @@ class StepUpGate:
             return json.load(fh)
 
     def _save(self, data: dict) -> None:
-        tmp = self.path + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as fh:
-            json.dump(data, fh, indent=1)
-        os.replace(tmp, self.path)
+        # C3 occurrence #5: a FIXED tmp name races between concurrent
+        # writers of one store (torn document / dead writer). The
+        # vault.py discipline: unique mkstemp name per write, same dir,
+        # cleaned up on failure, then one atomic rename.
+        d = os.path.dirname(os.path.abspath(self.path)) or "."
+        fd, tmp = tempfile.mkstemp(dir=d, prefix=".stepup-tmp-")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(data, fh, indent=1)
+            os.replace(tmp, self.path)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
 
     # ---- the audit chain ------------------------------------------------
     def append_event(self, event: dict) -> dict:
