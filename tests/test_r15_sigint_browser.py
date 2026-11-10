@@ -31,6 +31,7 @@ vulnapp fixture (the browser phase actually launches there).
 """
 from __future__ import annotations
 
+import os
 import signal
 import subprocess
 import sys
@@ -61,7 +62,7 @@ def _wait_headless(timeout: float = 90.0) -> bool:
 
 
 @pytest.mark.slow
-def test_sigint_during_browser_phase_exits_cleanly():
+def test_sigint_during_browser_phase_exits_cleanly(tmp_path):
     # Capability gate: this test proves browser-phase interrupt behavior and
     # is ONLY meaningful where a real chromium exists. The engine job of CI
     # installs no browser (a different job does); there the engine itself
@@ -89,10 +90,23 @@ def test_sigint_during_browser_phase_exits_cleanly():
             except Exception:  # noqa: BLE001
                 time.sleep(0.25)
 
+        # R19-2b: the scan path gates on the owner password BEFORE
+        # its first request. This test drives the CLI as a real
+        # subprocess, so it arms its OWN throwaway gate store in
+        # tmp_path (the conftest session store would do, but a local
+        # one keeps the test self-contained); the gate's refusal
+        # contract itself is covered by tests/test_r19_owner_cli.py.
+        from burhan.owner_gate import OwnerGate
+        _gate = tmp_path / "gate.json"
+        if not _gate.exists():
+            OwnerGate.setup(str(_gate), "sigint-browser-pass-1")
         p = subprocess.Popen(
             [sys.executable, "-m", "burhan.cli", "scan", base + "/",
              "--allow-private"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=ROOT)
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=ROOT,
+            env={**os.environ,
+                 "BURHAN_OWNER_GATE": str(_gate),
+                 "BURHAN_OWNER_PASSWORD": "sigint-browser-pass-1"})
         try:
             assert _wait_headless(), "browser never launched — test invalid"
             # the driver registers with the SIGINT sweep microseconds after

@@ -1,16 +1,21 @@
 {
- "when": "2026-11-07T09:14:44Z",
+ "when": "2026-11-10T01:44:26Z",
  "scanned": {
-  "python_files": 224,
+  "python_files": 247,
   "ts_files": 147
  },
  "raw_counts_by_class": {
-  "SILENT_EXCEPT": 316,
-  "TOCTOU": 13,
+  "SILENT_EXCEPT": 350,
+  "TOCTOU": 14,
+  "WINDOWS_RESERVED_NAME": 81,
+  "UNENCODED_READ": 3,
+  "UNBOUNDED_GROWTH": 6,
   "FIRST_MATCH": 5,
+  "FLOAT_EQUALITY": 8,
+  "BARE_EXCEPT_REBIND": 5,
   "SILENT_CATCH": 1,
   "EXPORT_UNROUTED": 2,
-  "ENTRYPOINT_UNREACHABLE": 63
+  "ENTRYPOINT_UNREACHABLE": 66
  },
  "cli_wiring": {
   "read_flags": [
@@ -48,6 +53,7 @@
    "min_risk",
    "modern_v2",
    "new_key",
+   "new_password",
    "no_browser",
    "no_crawl",
    "no_oast",
@@ -58,6 +64,9 @@
    "org",
    "origin_probe",
    "out",
+   "owner_gate",
+   "owner_password",
+   "password",
    "paths_only",
    "port",
    "prioritize_store",
@@ -78,11 +87,13 @@
    "secrets_report",
    "seed",
    "status",
+   "store",
    "strategy_path",
    "symbolic",
    "syslog_host",
    "syslog_port",
    "syslog_proto",
+   "ticket",
    "timeout",
    "token",
    "type",
@@ -127,6 +138,7 @@
    "min_risk",
    "modern_v2",
    "new_key",
+   "new_password",
    "no_browser",
    "no_crawl",
    "no_oast",
@@ -137,6 +149,9 @@
    "org",
    "origin_probe",
    "out",
+   "owner_gate",
+   "owner_password",
+   "password",
    "paths_only",
    "pdf",
    "port",
@@ -158,11 +173,13 @@
    "secrets_report",
    "seed",
    "status",
+   "store",
    "strategy_path",
    "symbolic",
    "syslog_host",
    "syslog_port",
    "syslog_proto",
+   "ticket",
    "timeout",
    "token",
    "type",
@@ -179,6 +196,7 @@
    "doctor",
    "findings",
    "impact",
+   "owner",
    "repair-demo",
    "report",
    "reproduce",
@@ -192,9 +210,9 @@
   "holes": []
  },
  "entrypoint_wiring": {
-  "entry_files": 12,
-  "routed_defs": 390,
-  "engine_public_functions": 1125,
+  "entry_files": 13,
+  "routed_defs": 403,
+  "engine_public_functions": 1146,
   "flagged": [
    {
     "file": "burhan/authorized_targets.py",
@@ -254,7 +272,15 @@
    },
    {
     "file": "burhan/discovery.py",
+    "name": "DiscoveryEngine"
+   },
+   {
+    "file": "burhan/discovery.py",
     "name": "parse_openapi"
+   },
+   {
+    "file": "burhan/discovery.py",
+    "name": "plausible_js_url"
    },
    {
     "file": "burhan/evidence.py",
@@ -287,6 +313,10 @@
    {
     "file": "burhan/oast.py",
     "name": "SelfHostedListener"
+   },
+   {
+    "file": "burhan/owner_gate.py",
+    "name": "OwnerGateRateLimited"
    },
    {
     "file": "burhan/pcs.py",
@@ -450,7 +480,7 @@
    }
   ]
  },
- "total": 400,
+ "total": 541,
  "hits": [
   {
    "file": "burhan/api.py",
@@ -524,7 +554,17 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 173,
+   "line": 133,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:            # noqa: BLE001 — unescape cannot fail on str",
+   "func": "_normalize_page_text",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-014",
+   "verdict": "LEDGERED(fail-closed-default)"
+  },
+  {
+   "file": "burhan/authorized_targets.py",
+   "line": 194,
    "class": "SILENT_EXCEPT",
    "code": "except FetchError as e:",
    "func": "authorize",
@@ -534,7 +574,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 200,
+   "line": 223,
    "class": "SILENT_EXCEPT",
    "code": "except (FetchError, ValueError) as e:",
    "func": "authorize",
@@ -544,7 +584,7 @@
   },
   {
    "file": "burhan/authorized_targets.py",
-   "line": 216,
+   "line": 239,
    "class": "SILENT_EXCEPT",
    "code": "except OSError as e:",
    "func": "authorize",
@@ -574,7 +614,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 162,
+   "line": 163,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "any_driver_alive",
@@ -584,7 +624,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 216,
+   "line": 217,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — monitor is best-effort; handler still exists",
    "func": "_arm_sigint_monitor",
@@ -594,7 +634,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 210,
+   "line": 211,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — keep watching regardless",
    "func": "_arm_sigint_monitor",
@@ -604,7 +644,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 238,
+   "line": 239,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — best-effort unwedging",
    "func": "kill_all_drivers",
@@ -614,7 +654,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 263,
+   "line": 264,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "browser_available",
@@ -624,7 +664,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 398,
+   "line": 399,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "_browser_child_proc",
@@ -634,7 +674,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 436,
+   "line": 437,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — teardown must never raise",
    "func": "close",
@@ -644,7 +684,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 441,
+   "line": 442,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "close",
@@ -654,7 +694,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 446,
+   "line": 447,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "close",
@@ -664,7 +704,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 426,
+   "line": 427,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "close",
@@ -674,7 +714,17 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 210,
+   "line": 519,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — teardown must never raise",
+   "func": "render",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-092",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/browser.py",
+   "line": 211,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — keep watching regardless",
    "func": "_monitor",
@@ -684,7 +734,7 @@
   },
   {
    "file": "burhan/browser.py",
-   "line": 426,
+   "line": 427,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "_watchdog",
@@ -784,7 +834,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 811,
+   "line": 927,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — flag check must never mask results",
    "func": "main",
@@ -794,7 +844,7 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 750,
+   "line": 866,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — fall through to default",
    "func": "main",
@@ -804,13 +854,43 @@
   },
   {
    "file": "burhan/cli.py",
-   "line": 750,
+   "line": 866,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — fall through to default",
    "func": "_sigint_burhan",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "AP-045",
    "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 127,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "gt = json.load(open(os.path.join(os.path.dirname(__file__), \"..\", \"benchmarks\", \"ground_truth.json\"), encoding=\"utf-8\"))",
+   "func": "_run_benchmark_inner",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "ledger": "r18-cli-gt-path",
+   "verdict": "LEDGERED(WINDOWS_RESERVED_NAME)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 1127,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(bi, open(base_out + \".json\", \"w\", encoding=\"utf-8\"), indent=1, ensure_ascii=False)",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "ledger": "r18-cli-bilingual-out",
+   "verdict": "LEDGERED(WINDOWS_RESERVED_NAME)"
+  },
+  {
+   "file": "burhan/cli.py",
+   "line": 147,
+   "class": "UNENCODED_READ",
+   "code": "authz_cfg = json.load(open(_azp))",
+   "func": "_run_benchmark_inner",
+   "detail": "text read with no explicit encoding (locale-dependent decode — mojibake before the parser runs)",
+   "ledger": "AP-044",
+   "verdict": "LEDGERED(state-load-race)"
   },
   {
    "file": "burhan/core.py",
@@ -881,6 +961,16 @@
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-099",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/csynth.py",
+   "line": 96,
+   "class": "UNBOUNDED_GROWTH",
+   "code": "_BOUNDARY.append({\"seq\": len(_BOUNDARY) + 1, \"category\": category,",
+   "func": "_record",
+   "detail": "module-level '_BOUNDARY' grows per call with no cap",
+   "ledger": "r18-csynth-boundary-log",
+   "verdict": "LEDGERED(UNBOUNDED_GROWTH)"
   },
   {
    "file": "burhan/detect.py",
@@ -964,7 +1054,7 @@
   },
   {
    "file": "burhan/discovery.py",
-   "line": 54,
+   "line": 55,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "endpoint_gate_scope",
@@ -974,7 +1064,17 @@
   },
   {
    "file": "burhan/discovery.py",
-   "line": 760,
+   "line": 288,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_json_route_values",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "AP-073",
+   "verdict": "LEDGERED(tolerant-parse-of-target-input)"
+  },
+  {
+   "file": "burhan/discovery.py",
+   "line": 935,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_loopback_normalize",
@@ -984,7 +1084,7 @@
   },
   {
    "file": "burhan/discovery.py",
-   "line": 703,
+   "line": 878,
    "class": "SILENT_EXCEPT",
    "code": "except ValueError:",
    "func": "openapi",
@@ -1553,6 +1653,26 @@
    "verdict": "LEDGERED(tolerant-parse-of-target-input)"
   },
   {
+   "file": "burhan/intel.py",
+   "line": 2244,
+   "class": "UNENCODED_READ",
+   "code": "self.stats = json.load(open(path))",
+   "func": "__init__",
+   "detail": "text read with no explicit encoding (locale-dependent decode — mojibake before the parser runs)",
+   "ledger": "AP-153",
+   "verdict": "LEDGERED(state-load-race)"
+  },
+  {
+   "file": "burhan/intel.py",
+   "line": 2274,
+   "class": "UNENCODED_READ",
+   "code": "self.records = json.load(open(path))",
+   "func": "__init__",
+   "detail": "text read with no explicit encoding (locale-dependent decode — mojibake before the parser runs)",
+   "ledger": "AP-155",
+   "verdict": "LEDGERED(state-load-race)"
+  },
+  {
    "file": "burhan/jrand.py",
    "line": 148,
    "class": "SILENT_EXCEPT",
@@ -1574,7 +1694,7 @@
   },
   {
    "file": "burhan/memory.py",
-   "line": 47,
+   "line": 48,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "__init__",
@@ -1584,13 +1704,43 @@
   },
   {
    "file": "burhan/memory.py",
-   "line": 43,
+   "line": 44,
    "class": "TOCTOU",
    "code": "with open(path, encoding=\"utf-8\") as fh:",
    "func": "__init__",
-   "detail": "'path' checked at line 41 then used here (two calls)",
+   "detail": "'path' checked at line 42 then used here (two calls)",
    "ledger": "AP-161",
    "verdict": "LEDGERED(state-load-race)"
+  },
+  {
+   "file": "burhan/memory.py",
+   "line": 124,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "save",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-238",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/metrics.py",
+   "line": 416,
+   "class": "FLOAT_EQUALITY",
+   "code": "if ssb == 0.0:",
+   "func": "anova_one_way",
+   "detail": "exact ==/!= on a computed float",
+   "ledger": "r18-metrics-ssb-zero",
+   "verdict": "LEDGERED(FLOAT_EQUALITY)"
+  },
+  {
+   "file": "burhan/metrics.py",
+   "line": 418,
+   "class": "FLOAT_EQUALITY",
+   "code": "elif ssw == 0.0:",
+   "func": "anova_one_way",
+   "detail": "exact ==/!= on a computed float",
+   "ledger": "r18-metrics-ssw-zero",
+   "verdict": "LEDGERED(FLOAT_EQUALITY)"
   },
   {
    "file": "burhan/modernsec.py",
@@ -1724,7 +1874,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 487,
+   "line": 510,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as e:      # noqa: BLE001 — probe errors are outcomes",
    "func": "rebind_toctou_probe",
@@ -1734,7 +1884,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 392,
+   "line": 415,
    "class": "SILENT_EXCEPT",
    "code": "except (socket.timeout, OSError):",
    "func": "run",
@@ -1744,7 +1894,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 400,
+   "line": 423,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "run",
@@ -1754,7 +1904,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 405,
+   "line": 428,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "run",
@@ -1764,7 +1914,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 439,
+   "line": 462,
    "class": "SILENT_EXCEPT",
    "code": "except socket.timeout:",
    "func": "run",
@@ -1774,7 +1924,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 441,
+   "line": 464,
    "class": "SILENT_EXCEPT",
    "code": "except OSError:",
    "func": "run",
@@ -1784,7 +1934,7 @@
   },
   {
    "file": "burhan/modernsec2.py",
-   "line": 461,
+   "line": 484,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "run",
@@ -1914,7 +2064,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2311,
+   "line": 2412,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _ie:",
    "func": "doctor",
@@ -1924,7 +2074,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2321,
+   "line": 2422,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as _pe:",
    "func": "doctor",
@@ -1944,7 +2094,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1269,
+   "line": 1352,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -1954,7 +2104,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1655,
+   "line": 1738,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -1964,7 +2114,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 641,
+   "line": 643,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_run_phases",
@@ -1974,7 +2124,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 1036,
+   "line": 1119,
    "class": "SILENT_EXCEPT",
    "code": "except AttributeError:",
    "func": "_run_phases",
@@ -1984,7 +2134,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2172,
+   "line": 2255,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — teardown must never mask",
    "func": "run",
@@ -1994,7 +2144,7 @@
   },
   {
    "file": "burhan/orchestrator.py",
-   "line": 2178,
+   "line": 2261,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "run",
@@ -2010,6 +2160,16 @@
    "func": "planner_gate",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-138",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/owner_gate.py",
+   "line": 166,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_save",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-237",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
@@ -2081,6 +2241,16 @@
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-148",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/proof.py",
+   "line": 316,
+   "class": "BARE_EXCEPT_REBIND",
+   "code": "raise IntegrityError(\"aead: authentication failed\")",
+   "func": "chacha20poly1305_decrypt",
+   "detail": "re-raise drops the original cause (no `from`, cause name not embedded)",
+   "ledger": "QS-200",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
   },
   {
    "file": "burhan/race/__init__.py",
@@ -2233,6 +2403,16 @@
    "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
+   "file": "burhan/remediation.py",
+   "line": 138,
+   "class": "BARE_EXCEPT_REBIND",
+   "code": "raise RemediationRefused(",
+   "func": "build_patch",
+   "detail": "re-raise drops the original cause (no `from`, cause name not embedded)",
+   "ledger": "QS-209",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
    "file": "burhan/sca.py",
    "line": 251,
    "class": "SILENT_EXCEPT",
@@ -2241,6 +2421,26 @@
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-160",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/sca.py",
+   "line": 172,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(f\"{raw_dir}/osv-querybatch-response.json\", \"wb\").write(raw)",
+   "func": "osv_query_batch",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "ledger": "r18-sca-osv-raw",
+   "verdict": "LEDGERED(WINDOWS_RESERVED_NAME)"
+  },
+  {
+   "file": "burhan/sca.py",
+   "line": 200,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(f\"{raw_dir}/advisory-{safe}.json\", \"wb\").write(raw)",
+   "func": "osv_fetch_advisories",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "ledger": "r18-sca-advisory-safe",
+   "verdict": "LEDGERED(WINDOWS_RESERVED_NAME)"
   },
   {
    "file": "burhan/secrets.py",
@@ -2270,6 +2470,16 @@
    "func": "build_ocsf",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-162",
+   "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/stepup.py",
+   "line": 147,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_save",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "ledger": "QS-239",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
   },
   {
@@ -2334,13 +2544,43 @@
   },
   {
    "file": "burhan/vault.py",
-   "line": 295,
+   "line": 312,
    "class": "SILENT_EXCEPT",
    "code": "except OSError:",
    "func": "_open_private_json",
    "detail": "except swallows without re-raise/log/documented-safe comment",
    "ledger": "QS-168",
    "verdict": "LEDGERED(SILENT_EXCEPT)"
+  },
+  {
+   "file": "burhan/vault.py",
+   "line": 133,
+   "class": "BARE_EXCEPT_REBIND",
+   "code": "raise VaultError(\"malformed envelope\")",
+   "func": "aead_decrypt",
+   "detail": "re-raise drops the original cause (no `from`, cause name not embedded)",
+   "ledger": "r18-vault-envelope-shape",
+   "verdict": "LEDGERED(BARE_EXCEPT_REBIND)"
+  },
+  {
+   "file": "burhan/vault.py",
+   "line": 141,
+   "class": "BARE_EXCEPT_REBIND",
+   "code": "raise VaultError(\"authentication failed: wrong key or tampered data\")",
+   "func": "aead_decrypt",
+   "detail": "re-raise drops the original cause (no `from`, cause name not embedded)",
+   "ledger": "r18-vault-authtype",
+   "verdict": "LEDGERED(BARE_EXCEPT_REBIND)"
+  },
+  {
+   "file": "burhan/vault.py",
+   "line": 416,
+   "class": "BARE_EXCEPT_REBIND",
+   "code": "raise VaultError(\"vault blob corrupted after authentication\")",
+   "func": "_decrypt_blob",
+   "detail": "re-raise drops the original cause (no `from`, cause name not embedded)",
+   "ledger": "r18-vault-blob-json",
+   "verdict": "LEDGERED(BARE_EXCEPT_REBIND)"
   },
   {
    "file": "burhan/weakrand.py",
@@ -2889,6 +3129,15 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/audit_antipatterns.py",
+   "line": 97,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "src = open(os.path.join(ROOT, path), encoding=\"utf-8\").read()",
+   "func": "scan_py",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/audit_first_match_fullrepo.py",
    "line": 94,
    "class": "SILENT_EXCEPT",
@@ -2898,8 +3147,44 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/audit_first_match_fullrepo.py",
+   "line": 93,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "tree = ast.parse(open(os.path.join(ROOT, path), encoding=\"utf-8\").read())",
+   "func": "scan_py",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_first_match_fullrepo.py",
+   "line": 99,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "src_lines = open(os.path.join(ROOT, path), encoding=\"utf-8\").read().splitlines()",
+   "func": "scan_py",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_first_match_fullrepo.py",
+   "line": 194,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "src = open(os.path.join(ROOT, path), encoding=\"utf-8\").read().splitlines()",
+   "func": "scan_ts",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_first_match_fullrepo.py",
+   "line": 225,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "src = open(os.path.join(ROOT, h[\"file\"]), encoding=\"utf-8\").read()",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 127,
+   "line": 158,
    "class": "SILENT_EXCEPT",
    "code": "except Exception as e:  # noqa: BLE001 — parse failure IS the hit",
    "func": "scan_py",
@@ -2908,7 +3193,16 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 561,
+   "line": 386,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — reporting only",
+   "func": "scan_py",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 884,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001 — other classes report parse errors",
    "func": "entrypoint_wiring_report",
@@ -2917,29 +3211,110 @@
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 539,
+   "line": 862,
    "class": "TOCTOU",
    "code": "open(p, encoding=\"utf-8\").read()))",
    "func": "entrypoint_wiring_report",
-   "detail": "'p' checked at line 537 then used here (two calls)",
+   "detail": "'p' checked at line 860 then used here (two calls)",
    "verdict": "NON_ENGINE"
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 735,
+   "line": 1058,
    "class": "TOCTOU",
    "code": "return json.load(open(LEDGER_PATH, encoding=\"utf-8\"))[\"entries\"]",
    "func": "load_ledger",
-   "detail": "'LEDGER_PATH' checked at line 733 then used here (two calls)",
+   "detail": "'LEDGER_PATH' checked at line 1056 then used here (two calls)",
    "verdict": "NON_ENGINE"
   },
   {
    "file": "scripts/audit_quantum_sweep.py",
-   "line": 745,
+   "line": 1068,
    "class": "SILENT_EXCEPT",
    "code": "except re.error:",
    "func": "match_ledger",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 386,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — reporting only",
+   "func": "fn_of",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 681,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "src = open(os.path.join(ROOT, path), encoding=\"utf-8\").read()",
+   "func": "scan_ts",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 772,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "src = open(os.path.join(ROOT, path), encoding=\"utf-8\").read()",
+   "func": "cli_wiring_report",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 712,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "lib_src = {f: open(os.path.join(ROOT, f), encoding=\"utf-8\").read()",
+   "func": "scan_ts_exports_routed",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 700,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(ROOT, f), encoding=\"utf-8\").read()",
+   "func": "scan_ts_exports_routed",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 704,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(ROOT, f), encoding=\"utf-8\").read()",
+   "func": "scan_ts_exports_routed",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 883,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "tree = ast.parse(open(os.path.join(ROOT, f), encoding=\"utf-8\").read())",
+   "func": "entrypoint_wiring_report",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 1011,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(ROOT, f), encoding=\"utf-8\").read()))",
+   "func": "entrypoint_wiring_report",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/audit_quantum_sweep.py",
+   "line": 755,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(ROOT, f), encoding=\"utf-8\").read()",
+   "func": "scan_ts_exports_routed",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -2988,6 +3363,15 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/axis19_gap_probe.py",
+   "line": 34,
+   "class": "UNBOUNDED_GROWTH",
+   "code": "OUT.append({\"id\": tid, \"name\": name, \"status\": \"PASS\" if ok else \"FAIL\", \"evidence\": str(evidence)[:300]})",
+   "func": "check",
+   "detail": "module-level 'OUT' grows per call with no cap",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/bootstrap_demo_data.py",
    "line": 49,
    "class": "SILENT_EXCEPT",
@@ -3015,6 +3399,24 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/ci_fixture_run.py",
+   "line": 68,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "authz_cfg = json.load(open(ROOT / \"benchmarks\" / \"authz_accounts.json\"))",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/ci_fixture_run.py",
+   "line": 51,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "stdout=open(out / \"fixture.log\", \"w\"), stderr=subprocess.STDOUT)",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/dismiss_r16_fixture_alerts.py",
    "line": 99,
    "class": "SILENT_EXCEPT",
@@ -3033,12 +3435,39 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/evidence_bfla.py",
+   "line": 102,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "with open(os.path.join(out, \"RED_BLUE.json\"), \"w\", encoding=\"utf-8\") as fh:",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/evidence_bfla.py",
+   "line": 116,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "with open(os.path.join(out, \"REGRESSION.json\"), \"w\", encoding=\"utf-8\") as fh:",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/evidence_part0.py",
    "line": 42,
    "class": "SILENT_EXCEPT",
    "code": "except OSError:",
    "func": "_spawn",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/evidence_part0.py",
+   "line": 106,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "with open(os.path.join(out_dir, name), \"w\", encoding=\"utf-8\") as fh:",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3051,12 +3480,30 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/evidence_race.py",
+   "line": 140,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "with open(os.path.join(out, name), \"w\", encoding=\"utf-8\") as fh:",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/evidence_shadow.py",
    "line": 38,
    "class": "SILENT_EXCEPT",
    "code": "except OSError:",
    "func": "_spawn",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/evidence_shadow.py",
+   "line": 120,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "with open(os.path.join(out, name), \"w\", encoding=\"utf-8\") as fh:",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3069,12 +3516,192 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/final-2026-10-31/xss_iframe_browser_proof.py",
+   "line": 24,
+   "class": "UNBOUNDED_GROWTH",
+   "code": "RESULTS.append({\"name\": name, \"ok\": ok, \"evidence\": evidence})",
+   "func": "check",
+   "detail": "module-level 'RESULTS' grows per call with no cap",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 136,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 202,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 91,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 151,
+   "class": "SILENT_EXCEPT",
+   "code": "except SystemExit:",
+   "func": "run_campaigns",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 153,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 169,
+   "class": "SILENT_EXCEPT",
+   "code": "except SystemExit:",
+   "func": "run_campaigns",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 171,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 190,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "run_campaigns",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 91,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_t",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 136,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_json_or_none",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 151,
+   "class": "SILENT_EXCEPT",
+   "code": "except SystemExit:",
+   "func": "_reg",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 153,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_reg",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 169,
+   "class": "SILENT_EXCEPT",
+   "code": "except SystemExit:",
+   "func": "_mon",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 171,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_mon",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 190,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_rate",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/fuzz_parsers.py",
+   "line": 202,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "_repro",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/gen_round8_report.py",
+   "line": 162,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "live = json.load(open(os.path.join(",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/gen_round8_report.py",
+   "line": 164,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "base = json.load(open(os.path.join(",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/greengate_browser_e2e.py",
    "line": 37,
    "class": "SILENT_EXCEPT",
    "code": "except urllib.error.HTTPError as e:",
    "func": "api",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/greengate_browser_e2e.py",
+   "line": 24,
+   "class": "UNBOUNDED_GROWTH",
+   "code": "OUT.append({\"id\": tid, \"name\": name, \"status\": \"PASS\" if ok else \"FAIL\", \"evidence\": evidence})",
+   "func": "check",
+   "detail": "module-level 'OUT' grows per call with no cap",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3093,6 +3720,15 @@
    "code": "except Exception:  # noqa: BLE001",
    "func": "main",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/live_validate_modern2.py",
+   "line": 260,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "with open(out / f\"{name}-scan.json\", \"w\", encoding=\"utf-8\") as fh:",
+   "func": "write_report",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3123,6 +3759,42 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/monitor/dogfood_firing_evidence.py",
+   "line": 61,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "authz_cfg = json.load(open(ROOT / \"benchmarks\" / \"authz_accounts.json\"))",
+   "func": "scan_cycle",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/monitor/dogfood_firing_evidence.py",
+   "line": 44,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "stdout=open(OUT / \"fixture.log\", \"w\"), stderr=subprocess.STDOUT)",
+   "func": "start_fixture",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/monitoring_oast_evidence.py",
+   "line": 187,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "(odir / \"SHA256SUMS\").write_text(\"\\n\".join(stamps[:1]) + \"\\n\")",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/monitoring_oast_evidence.py",
+   "line": 188,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "(mdir / \"SHA256SUMS\").write_text(stamps[1] + \"\\n\")",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/p44_local_chain.py",
    "line": 124,
    "class": "SILENT_EXCEPT",
@@ -3150,6 +3822,42 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/qa_live_battery.py",
+   "line": 74,
+   "class": "UNBOUNDED_GROWTH",
+   "code": "OUT.append((tid, name, st, evidence))",
+   "func": "check",
+   "detail": "module-level 'OUT' grows per call with no cap",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/qa_live_battery.py",
+   "line": 79,
+   "class": "UNBOUNDED_GROWTH",
+   "code": "OUT.append((tid, name, \"BLOCKED\", why))",
+   "func": "blocked",
+   "detail": "module-level 'OUT' grows per call with no cap",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_close_evidence.py",
+   "line": 28,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "(DST / \"r10-live-validation.json\").write_text(",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_close_evidence.py",
+   "line": 80,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "(DST / \"summary.json\").write_text(",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/r10_part1_evidence.py",
    "line": 68,
    "class": "SILENT_EXCEPT",
@@ -3159,12 +3867,48 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/r10_part1_evidence.py",
+   "line": 48,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "text = open(os.path.join(ROOT, \"fixtures\", \"vulnapp.py\"),",
+   "func": "variant_file",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/r10_part2_evidence.py",
    "line": 51,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "scan_twin",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part2_evidence.py",
+   "line": 190,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(out, open(os.path.join(EV, \"BLUE.json\"), \"w\"), indent=1,",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part2_evidence.py",
+   "line": 111,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(out, open(os.path.join(EV, \"RED.json\"), \"w\"), indent=1)",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part2_evidence.py",
+   "line": 209,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(EV, \"SHA256SUMS\"), \"w\").write(\"\\n\".join(lines) + \"\\n\")",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3186,12 +3930,147 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 78,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(repo_out, open(os.path.join(EV, \"repo-requirements-sca.json\"),",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 89,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(EV, \"repo-package-json-refusal.json\"), \"w\"),",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 102,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(old1, open(os.path.join(EV, \"old-requirements-sca.json\"), \"w\"),",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 117,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(old2, open(os.path.join(EV, \"old-package-lock-sca.json\"), \"w\"),",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 181,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(kev, open(os.path.join(EV, \"KEV-and-summary.json\"), \"w\"),",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 64,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(out, open(os.path.join(EV, \"RED.json\"), \"w\"), indent=1)",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 199,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(EV, \"SHA256SUMS\"), \"w\").write(\"\\n\".join(lines) + \"\\n\")",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 55,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(ROOT, \"burhan\", \"compliance.py\")).read()",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 57,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(ROOT, \"burhan\", \"report.py\")).read()",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part3_evidence.py",
+   "line": 135,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(EV, \"kev-catalog-live.json\"), \"wb\").write(r.read())",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/r10_part4_evidence.py",
    "line": 105,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "main",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part4_evidence.py",
+   "line": 210,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(blue, open(os.path.join(EV, \"BLUE.json\"), \"w\"),",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part4_evidence.py",
+   "line": 49,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(EV, \"SHA256SUMS\"), \"w\").write(\"\\n\".join(lines) + \"\\n\")",
+   "func": "_sha256sums",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part4_evidence.py",
+   "line": 84,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(out, open(os.path.join(EV, \"RED.json\"), \"w\"), indent=1)",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part4_evidence.py",
+   "line": 68,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "pri = open(os.path.join(ROOT, \"burhan\", \"prioritize.py\")).read()",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/r10_part4_evidence.py",
+   "line": 73,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "open(os.path.join(ROOT, \"burhan\", f)).read()",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3204,12 +4083,84 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/r19_webgoat_live_check.py",
+   "line": 40,
+   "class": "SILENT_EXCEPT",
+   "code": "except urllib.error.HTTPError:",
+   "func": "register",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/repro_attest.py",
    "line": 109,
+   "class": "SILENT_EXCEPT",
+   "code": "except (urllib.error.URLError, AssertionError, OSError) as exc:",
+   "func": "run_scan",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/repro_attest.py",
+   "line": 144,
    "class": "SILENT_EXCEPT",
    "code": "except subprocess.TimeoutExpired:",
    "func": "run_scan",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/repro_attest.py",
+   "line": 99,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:  # noqa: BLE001 — diagnostics only",
+   "func": "run_scan",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/repro_attest.py",
+   "line": 127,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "authz_cfg = json.load(open(ROOT / \"benchmarks\" / \"authz_accounts.json\"))",
+   "func": "run_scan",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/repro_attest.py",
+   "line": 204,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "summary.write_text(",
+   "func": "compare",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/repro_attest.py",
+   "line": 77,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "stdout=open(out_dir / f\"fixture-{tag}.log\", \"w\"),",
+   "func": "run_scan",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/reverify/store_run_and_replay.py",
+   "line": 52,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "authz_cfg = json.load(open(ROOT / \"benchmarks\" / \"authz_accounts.json\"))",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/reverify/store_run_and_replay.py",
+   "line": 35,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "stdout=open(EV / \"fixture.log\", \"w\"), stderr=subprocess.STDOUT)",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3249,6 +4200,51 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/run_r9_live.py",
+   "line": 67,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "self.log = open(f\"/tmp/render/{self.logname}-{self.port}.log\", \"w\")",
+   "func": "start",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/run_r9_live.py",
+   "line": 104,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "src = json.load(open(os.path.join(",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/run_r9_live.py",
+   "line": 174,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "original = open(os.path.join(ROOT, \"fixtures\", \"vulnapp.py\"),",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/run_r9_live.py",
+   "line": 202,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "with open(os.path.join(OUT, \"remediation.patch\"), \"w\",",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/run_r9_live.py",
+   "line": 195,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "assert open(os.path.join(ROOT, \"fixtures\", \"vulnapp.py\"),",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/scheduled_hardening.py",
    "line": 64,
    "class": "SILENT_EXCEPT",
@@ -3285,6 +4281,15 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "scripts/scheduled_hardening.py",
+   "line": 177,
+   "class": "FLOAT_EQUALITY",
+   "code": "if b[\"f1\"] != 1.0 or c[\"TP\"] != 38 or c[\"FP\"] != 0:",
+   "func": "main",
+   "detail": "exact ==/!= on a computed float",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "scripts/siem_export_evidence.py",
    "line": 120,
    "class": "SILENT_EXCEPT",
@@ -3300,6 +4305,33 @@
    "code": "except socket.timeout:",
    "func": "listen",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/siem_export_evidence.py",
+   "line": 42,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "(SPECS / \"rfc5424-section6-abnf.txt\").write_text(",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/siem_export_evidence.py",
+   "line": 54,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "(SPECS / \"cef-excerpt-character-encoding.txt\").write_text(",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "scripts/siem_export_evidence.py",
+   "line": 65,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "(SPECS / \"cef-excerpt-extension-dictionary.txt\").write_text(",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3348,6 +4380,15 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "tests/test_bilingual_report.py",
+   "line": 22,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "return json.load(open(os.path.join(EVIDENCE, name), encoding=\"utf-8\"))",
+   "func": "_real_report",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "tests/test_engine_smoke.py",
    "line": 54,
    "class": "SILENT_EXCEPT",
@@ -3376,7 +4417,16 @@
   },
   {
    "file": "tests/test_modernsec2.py",
-   "line": 70,
+   "line": 107,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_stderr_tail",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_modernsec2.py",
+   "line": 121,
    "class": "SILENT_EXCEPT",
    "code": "except OSError:",
    "func": "_wait_port",
@@ -3385,7 +4435,16 @@
   },
   {
    "file": "tests/test_modernsec2.py",
-   "line": 359,
+   "line": 188,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_loopback_alias_supported",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_modernsec2.py",
+   "line": 507,
    "class": "SILENT_EXCEPT",
    "code": "except OSError:",
    "func": "test_adversarial_A6_pinned_public_fetch_never_hits_internal",
@@ -3394,7 +4453,16 @@
   },
   {
    "file": "tests/test_modernsec2.py",
-   "line": 359,
+   "line": 257,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "do_POST",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_modernsec2.py",
+   "line": 507,
    "class": "SILENT_EXCEPT",
    "code": "except OSError:",
    "func": "_serve",
@@ -3487,12 +4555,57 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "tests/test_r10_sca.py",
+   "line": 110,
+   "class": "FLOAT_EQUALITY",
+   "code": "assert sev[\"base_score\"] == 7.5 and sev[\"vector\"].startswith(\"CVSS:3.1\")",
+   "func": "test_severity_is_the_advisory_s_own",
+   "detail": "exact ==/!= on a computed float",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r10_sca.py",
+   "line": 174,
+   "class": "FLOAT_EQUALITY",
+   "code": "assert f1[\"severity_data\"][\"base_score\"] == 7.5",
+   "func": "test_build_sca_findings_hermetic",
+   "detail": "exact ==/!= on a computed float",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r10_sca.py",
+   "line": 249,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "json.dump(out, open(tmp_path / \"repo-sca.json\", \"w\"), indent=1,",
+   "func": "test_repo_own_requirements_plain_result",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r10_unified.py",
+   "line": 124,
+   "class": "FLOAT_EQUALITY",
+   "code": "assert comps[\"verification\"][\"weight\"] == 1.00",
+   "func": "test_chain_j3_components_and_score",
+   "detail": "exact ==/!= on a computed float",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "tests/test_r10_unified.py",
    "line": 266,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "_spawn_chainapp",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r10_unified.py",
+   "line": 351,
+   "class": "FLOAT_EQUALITY",
+   "code": "assert chain_row[\"risk_components\"][\"verification\"][\"weight\"] == 1.00",
+   "func": "test_unified_triple_category_real",
+   "detail": "exact ==/!= on a computed float",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3551,7 +4664,7 @@
   },
   {
    "file": "tests/test_r15_sigint_browser.py",
-   "line": 128,
+   "line": 142,
    "class": "SILENT_EXCEPT",
    "code": "except subprocess.TimeoutExpired:",
    "func": "test_sigint_during_browser_phase_exits_cleanly",
@@ -3560,11 +4673,56 @@
   },
   {
    "file": "tests/test_r15_sigint_browser.py",
-   "line": 89,
+   "line": 90,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:  # noqa: BLE001",
    "func": "test_sigint_during_browser_phase_exits_cleanly",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 136,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "_tail",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 179,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 230,
+   "class": "SILENT_EXCEPT",
+   "code": "except Exception:",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 201,
+   "class": "SILENT_EXCEPT",
+   "code": "except OSError:",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_r18_compound_faults.py",
+   "line": 199,
+   "class": "TOCTOU",
+   "code": "if os.path.exists(_wal) and os.path.getsize(_wal) > 0:",
+   "func": "test_c3_concurrent_store_writers_with_killed_transaction",
+   "detail": "'_wal' checked at line 177 then used here (two calls)",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3574,6 +4732,15 @@
    "code": "except OSError:",
    "func": "_spawn",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_repair_gate_regression.py",
+   "line": 33,
+   "class": "FLOAT_EQUALITY",
+   "code": "assert action[\"action\"][\"multiply_timeout\"] == 3.0",
+   "func": "test_timeout_error_classifies_as_timeout_spike",
+   "detail": "exact ==/!= on a computed float",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3622,12 +4789,30 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "tests/test_siem_cli.py",
+   "line": 19,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "SCAN = json.load(open(ROOT / \"evidence/full-reverify/fixtures-vulnapp/scan.json\",",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "tests/test_siem_export.py",
    "line": 184,
    "class": "SILENT_EXCEPT",
    "code": "except (ParseError, LarkError):",
    "func": "test_rfc5424_negative_controls_rejected",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_siem_export.py",
+   "line": 35,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "SCAN = json.load(open(ROOT / \"evidence/full-reverify/fixtures-vulnapp/scan.json\",",
+   "func": "-",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3640,12 +4825,66 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "tests/test_stepup_remediation.py",
+   "line": 166,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "self.log = open(os.path.join(self.workdir, f\"fixture-{self.port}.log\"),",
+   "func": "start",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_stepup_remediation.py",
+   "line": 202,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "original_bytes = open(os.path.join(ROOT, \"fixtures\", \"vulnapp.py\"),",
+   "func": "lab",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_stepup_remediation.py",
+   "line": 361,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "body = open(os.path.join(lab[\"clone_dir\"], \"vulnapp.py\"),",
+   "func": "test_patch_applies_only_to_the_clone_file",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_stepup_remediation.py",
+   "line": 256,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "assert open(os.path.join(ROOT, \"fixtures\", \"vulnapp.py\"),",
+   "func": "test_real_red_to_blue_on_live_clone",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_stepup_remediation.py",
+   "line": 358,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "assert open(os.path.join(ROOT, \"fixtures\", \"vulnapp.py\"),",
+   "func": "test_patch_applies_only_to_the_clone_file",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "tests/test_vault_key_hygiene.py",
    "line": 147,
    "class": "SILENT_EXCEPT",
    "code": "except VaultError:",
    "func": "test_open_pins_the_checked_descriptor_toctou_hardening",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tests/test_vault_key_hygiene.py",
+   "line": 103,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "real = json.load(open(tmp_path / \"designer.key\"))",
+   "func": "test_every_vaulterror_path_is_key_free",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3658,12 +4897,66 @@
    "verdict": "NON_ENGINE"
   },
   {
+   "file": "tools/append_transparency.py",
+   "line": 220,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "tmp.write_text(\"\".join(",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tools/append_transparency.py",
+   "line": 208,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "args.out_entry.write_text(",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tools/append_transparency.py",
+   "line": 230,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "tmp.write_text(\"\".join(",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
    "file": "tools/independent_verify.py",
    "line": 152,
    "class": "SILENT_EXCEPT",
    "code": "except Exception:",
    "func": "ed25519_verify",
    "detail": "except swallows without re-raise/log/documented-safe comment",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tools/transparency_selftest.py",
+   "line": 77,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "log_file.write_text(json.dumps(entry, sort_keys=True) + \"\\n\",",
+   "func": "_sign_into",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tools/transparency_selftest.py",
+   "line": 80,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "pubkey_file.write_text(entry[\"public_key\"] + \"\\n\", encoding=\"utf-8\")",
+   "func": "_sign_into",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
+   "verdict": "NON_ENGINE"
+  },
+  {
+   "file": "tools/transparency_selftest.py",
+   "line": 209,
+   "class": "WINDOWS_RESERVED_NAME",
+   "code": "(args.out / \"RESULTS.md\").write_text(\"\\n\".join(lines) + \"\\n\", encoding=\"utf-8\")",
+   "func": "main",
+   "detail": "dynamically built path at a file-creation sink — check reserved names / length on Windows",
    "verdict": "NON_ENGINE"
   },
   {
@@ -3839,11 +5132,31 @@
    "file": "burhan/discovery.py",
    "line": 0,
    "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "DiscoveryEngine",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-234",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/discovery.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
    "code": "parse_openapi",
    "func": "-",
    "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
    "ledger": "R14-EP-005",
    "verdict": "LEDGERED(crypto-primitives-via-module-attr)"
+  },
+  {
+   "file": "burhan/discovery.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "plausible_js_url",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-235",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
   },
   {
    "file": "burhan/evidence.py",
@@ -3923,6 +5236,16 @@
    "func": "-",
    "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
    "ledger": "QS-193",
+   "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
+  },
+  {
+   "file": "burhan/owner_gate.py",
+   "line": 0,
+   "class": "ENTRYPOINT_UNREACHABLE",
+   "code": "OwnerGateRateLimited",
+   "func": "-",
+   "detail": "public engine function referenced by tests but reachable from NO production entry point (cli/workflows/package.json/.sh; import-resolution aware)",
+   "ledger": "QS-236",
    "verdict": "LEDGERED(ENTRYPOINT_UNREACHABLE)"
   },
   {

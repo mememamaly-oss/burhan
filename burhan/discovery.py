@@ -2,6 +2,7 @@
 Phase 5: Endpoint/Parameter Intelligence (parameters classified on ingest).
 """
 from __future__ import annotations
+import json
 import re, urllib.parse
 from html.parser import HTMLParser
 from .websocket import harvest_ws_bindings, harvest_ws_shapes, observe_ws_urls  # V411-WS + V4.3.2
@@ -63,6 +64,7 @@ class _LinkParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.links, self.forms = [], []   # forms: (action, method, [params])
+        self.hash_routes = []             # R19-1: SPA hash-fragment routes (#lesson/X.lesson)
         self.divforms = []                # DISC-10: div-based pseudo-forms
         self._cur_form = None
         self._cur_divform = None
@@ -84,6 +86,19 @@ class _LinkParser(HTMLParser):
         a = dict(attrs)
         if tag == "a" and a.get("href"):
             self.links.append(a["href"])
+            # R19-1: an href carrying a hash-fragment is a SPA route to a
+            # distinct resource (WebGoat's #lesson/X.lesson -> GET /X.lesson).
+            # Record the fragment; the crawl loop maps it to the route
+            # target. A bare "#" (form submit-to-self) and anchor-only
+            # fragments stay out — the route regex demands a
+            # resource-shaped leaf.
+            h = a["href"]
+            if "#" in h and not h.startswith("#"):
+                frag = h.split("#", 1)[1]
+                if frag:
+                    self.hash_routes.append(frag)
+            elif h.startswith("#") and len(h) > 1:
+                self.hash_routes.append(h[1:])
         elif tag in ("link", "script") and a.get("href") or (tag == "script" and a.get("src")):
             self.links.append(a.get("href") or a.get("src"))
         elif tag == "form":
@@ -254,6 +269,47 @@ def plausible_js_url(s: str) -> bool:
     return ("/" in s) or ("?" in s) or (_JS_URL_PATHISH.search(s) is not None)
 
 
+def _json_route_values(body: str) -> list[str]:
+    """R19-1 (live-caught on WebGoat 2026.4): the SPA's navigation tree
+    arrives as JSON (service/lessonmenu.mvc) with every route in a
+    "link" value — '#lesson/HttpBasics.lesson'. Walk ALL string values
+    of the parsed document (nested arrays/objects) and return the
+    NAVIGATION-shaped ones: '#'-prefixed SPA routes and root-absolute
+    in-app paths. Non-fragment values are NOT mined — live-caught on
+    Juice Shop: rest/admin/application-configuration (36KB of logos,
+    mail hosts and i18n strings) passed the old plausible_js_url gate
+    and exploded the endpoint map 108 -> 551, scattering the fixed
+    scan budget off the real surface (verified floor 59 -> 57). A
+    config/document payload is not a navigation tree. A body that
+    fails json.loads yields nothing — no regex fishing in arbitrary
+    text."""
+    try:
+        doc = json.loads(body)
+    except Exception:
+        return []
+    out: list[str] = []
+    def _walk(node):
+        if isinstance(node, str):
+            v = node.strip()
+            if v.startswith("#") and len(v) > 1 and "/" in v:
+                out.append(v)
+            elif v.startswith("/") and not v.startswith("//") \
+                    and len(v) > 1 and plausible_js_url(v) \
+                    and "." not in v.rsplit("/", 1)[-1]:
+                # in-app root path WITHOUT a file extension in the leaf
+                # ('/rest/memories', '/profile') — a real client-side
+                # route shape; asset/logo filenames stay out
+                out.append(v)
+        elif isinstance(node, dict):
+            for vv in node.values():
+                _walk(vv)
+        elif isinstance(node, list):
+            for vv in node:
+                _walk(vv)
+    _walk(doc)
+    return out
+
+
 # DISC-10: a div-form's JS usually serializes inputs as JSON (live-proven on
 # ginandjuice.shop subscribeNow.js: JSON.stringify(value) + Content-Type
 # application/json;charset=UTF-8). Statically learnable from fetched JS assets;
@@ -275,6 +331,28 @@ DESTRUCTIVE_GET_RE = re.compile(
     r"initiali[sz]e|setup|install|migrate|seed[_-]?(all|db|data)|"
     r"flush[_-]?(all|db|cache[_-]?all)|clear[_-]?(all|db|data)|purge|wipe|"
     r"truncate|drop[_-]?(all|db|table|data))", re.I)
+
+
+# R19-1: hash-fragment SPA route -> fetchable resource mapping.
+# WebGoat 2026.4 (live-verified): '#lesson/HttpBasics.lesson' is fetched
+# by the Backbone router as GET /WebGoat/HttpBasics.lesson (the lesson's
+# form-bearing HTML); /WebGoat/lesson/HttpBasics.lesson is 404 — the
+# route prefix is the router's namespace, NOT a path component.
+_HASH_ROUTE_LEAF_RE = re.compile(r"^/?([A-Za-z0-9_][\w./-]*\.[A-Za-z]{2,8})$")
+
+
+def hash_route_target(page_url: str, fragment: str) -> str:
+    """Map a hash-fragment SPA route to the resource URL the client
+    actually fetches. Only resource-shaped leaves (carrying a file
+    extension) map; extensionless SPA paths ('/users/42') and plain
+    anchors return '' — never guessed. Resolution is against the PAGE'S
+    DIRECTORY (urljoin would treat 'start.mvc/' as a directory)."""
+    m = _HASH_ROUTE_LEAF_RE.match(fragment or "")
+    if not m:
+        return ""
+    leaf = m.group(1).rsplit("/", 1)[-1]
+    dir_url = (page_url or "").rsplit("/", 1)[0] + "/"
+    return urllib.parse.urljoin(dir_url, leaf)
 
 
 class DiscoveryEngine:
@@ -319,6 +397,39 @@ class DiscoveryEngine:
         if p.scheme not in ("http", "https"): return ""
         return urllib.parse.urlunsplit((p.scheme, p.netloc, p.path, p.query, ""))
 
+    # R19-1 (live-caught on WebGoat 2026.4): the app routes its 40-lesson
+    # curriculum through HASH-FRAGMENT SPA routes — every menu link is
+    # start.mvc#lesson/HttpBasics.lesson. The crawler's _normalize strips
+    # the fragment (correctly: the SERVER never sees it), so all 40 routes
+    # collapsed onto the single start.mvc page and the authenticated scan
+    # surfaced 14 endpoints instead of the lesson surface. A fragment IS a
+    # distinct client-side route to a distinct RESOURCE though: WebGoat's
+    # Backbone router maps #lesson/<name> to a GET of /<name>.lesson (the
+    # lesson's HTML with its forms — the real attack surface). The route
+    # is preserved as a virtual path so it becomes a PROBEABLE endpoint;
+    # it is never page-fetched as a URL (the fragment is not sent to the
+    # server — fetching would just return start.mvc again).
+    _HASH_ROUTE_RE = re.compile(r"^/?([A-Za-z0-9_][\w./-]*\.[A-Za-z]{2,8})$")
+
+    def _hash_route_target(self, page_url: str, fragment: str) -> str:
+        """Instance wrapper — see the module-level hash_route_target."""
+        return hash_route_target(page_url, fragment)
+
+    def _route_from_value(self, page_url: str, value: str) -> str:
+        """R19-1: a route-shaped string found in HTML fragments or JSON
+        values -> the resource URL the client fetches. Accepts both the
+        '#lesson/X.lesson' fragment form and a path-like '/X.lesson'
+        form; anything else maps to '' (no guessing)."""
+        v = (value or "").strip()
+        if v.startswith("#"):
+            v = v[1:]
+        if not v or v.startswith(("javascript:", "mailto:", "data:")):
+            return ""
+        if v.startswith(("http://", "https://")):
+            return self._normalize(page_url, v)
+        return hash_route_target(page_url, v)
+
+
     def _mk_endpoint(self, url: str, source: DiscoverySource, params=None, method="GET",
                      flow_control=(), file_names=()) -> Endpoint:
         p = urllib.parse.urlsplit(url)
@@ -355,6 +466,9 @@ class DiscoveryEngine:
         page's endpoints remain reachable through the form-parse discovery."""
         seen_pages, endpoints, js_hits = set(), {}, []
         seed_host = urllib.parse.urlsplit(seed_url).netloc
+        # R19-1c: the crawl's seed-root — the second anchor for
+        # JSON-mined route candidates (menu directory vs app root)
+        self._seed_url = seed_url
         queue = list(extra_seeds or []) + [seed_url]
         # V411-EXC: full URLs exclude EXACTLY (normalized); bare substrings
         # (operator pinning, e.g. "/difficulty/") exclude every URL that
@@ -422,7 +536,48 @@ class DiscoveryEngine:
             resp = self.engine.send(self.engine.__class__ and _simple_get(norm))
             pages += 1
             if resp.error or not resp.body: continue
-            if not any(m in resp.headers.get("content-type", "") for m in ("text/html", "text/plain", "")): continue
+            # R19-1 (live-caught on WebGoat 2026.4): the SPA's ENTIRE
+            # navigation model — its 40-lesson curriculum tree — is served
+            # as JSON (service/lessonmenu.mvc), each node carrying a
+            # "#lesson/X.lesson" route. The old gate admitted only
+            # text/html / text/plain, so a JSON menu taught the crawler
+            # NOTHING: the route-bearing payload was fetched and discarded.
+            # JSON bodies are now mined for URL/route-shaped values (same
+            # plausible_js_url precision gate as JS extraction; routes map
+            # through _hash_route_target like HTML fragments). The JSON
+            # itself is not treated as an HTML page — only mined.
+            _ct = resp.headers.get("content-type", "")
+            if "application/json" in _ct:
+                # R19-1c: route-bearing JSON (a menu) can live on a
+                # DIFFERENT path depth than the resources its routes
+                # name (WebGoat: menu at /WebGoat/service/lessonmenu.mvc,
+                # lessons at /WebGoat/X.lesson — the app root). Resolving
+                # the leaf against the menu's directory alone yields
+                # /WebGoat/service/X.lesson = 404 (live-verified). Both
+                # anchors are offered — the menu's directory AND the
+                # crawl's seed-root — and the target that actually
+                # exists (a fetchable page) is the one that joins the
+                # map; the miss simply 404s and teaches nothing.
+                _seed_root = self._seed_url.rsplit("/", 1)[0] + "/"
+                for frag in _json_route_values(resp.body):
+                    target = self._route_from_value(norm, frag)
+                    alt = self._route_from_value(_seed_root, frag) \
+                        if _seed_root not in ("", "/") else ""
+                    for cand in (target, alt):
+                        if not cand:
+                            continue
+                        ok_rt, _ = self.engine._scope_ok(cand)
+                        if not ok_rt:
+                            continue
+                        e_rt = self._mk_endpoint(cand, DiscoverySource.JS_STATIC)
+                        if e_rt.id not in endpoints:
+                            e_rt.tags.append("spa_route:" + frag[:80])
+                            endpoints[e_rt.id] = e_rt
+                        if (cand not in seen_pages
+                                and not cand.lower().endswith(_SKIP_AS_PAGE)):
+                            queue.append(cand)
+                continue
+            if not any(m in _ct for m in ("text/html", "text/plain", "")): continue
             ep = self._mk_endpoint(norm, DiscoverySource.SEED)
             # OWSP-08 (OWASP campaign, live-caught on the OWASP Benchmark): the
             # page's links joined the QUEUED url — for a slashless target root
@@ -443,6 +598,26 @@ class DiscoveryEngine:
 
             # ---- HTML parsing
             hp = _LinkParser(); hp.feed(resp.body)
+            # R19-1: SPA hash-fragment routes on this page become
+            # PROBEABLE endpoints via the route-target mapping, and the
+            # mapped RESOURCE page (the lesson HTML with its forms) is
+            # queued for page-fetch — same budget gates as any link. A
+            # fragment is never fetched as itself (the server never sees
+            # it); the mapped target is.
+            for frag in hp.hash_routes:
+                target = self._hash_route_target(link_base, frag)
+                if not target:
+                    continue
+                ok_rt, _ = self.engine._scope_ok(target)
+                if not ok_rt:
+                    continue
+                e_rt = self._mk_endpoint(target, DiscoverySource.CRAWL_HTML)
+                if e_rt.id not in endpoints:
+                    e_rt.tags.append("spa_route:" + frag[:80])
+                    endpoints[e_rt.id] = e_rt
+                if (target not in seen_pages
+                        and not target.lower().endswith(_SKIP_AS_PAGE)):
+                    queue.append(target)
             for href in hp.links:
                 n = self._normalize(link_base, href)
                 if n and urllib.parse.urlsplit(n).netloc == seed_host:

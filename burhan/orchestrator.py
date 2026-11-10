@@ -576,7 +576,9 @@ class BurhanScanner:
         # the login page itself is excluded from page-fetches — re-fetching it
         # clobbers the authenticated session cookie with a fresh anonymous one)
         d = DiscoveryEngine(self.engine, self.cfg.max_pages)
-        endpoints: list[Endpoint] = [Endpoint(url=self.target.url, source=DiscoverySource.SEED)]
+        _seed_ep = Endpoint(url=self.target.url, source=DiscoverySource.SEED)
+        endpoints: list[Endpoint] = [_seed_ep]
+        endpoints_seed_id = _seed_ep.id   # the scan root — excluded from crawl merges
         # ---- AUTH-06: a successful json_login contributes the CREDENTIALED
         # login endpoint to the map. The JWT families harvest their token by
         # replaying exactly this surface (form-encoded replay would 415 on a
@@ -603,7 +605,7 @@ class BurhanScanner:
             found, js, crawl_stats = d.crawl(self.target.url, extra_seeds=auth_seeds,
                                              exclude_urls=([self.cfg.auth.login_url]
                                                            if self.cfg.auth else []) + _excl)
-            endpoints.extend(e for e in found if e.id != endpoints[0].id)
+            endpoints.extend(e for e in found if e.id != endpoints_seed_id)
             # V411-DISC-SAFE: destructive-GET page-fetch skips are auditable
             # boundaries, never silent (live-caught on DVGA: /start_over
             # re-seeded the whole DB on a passive crawl fetch)
@@ -707,8 +709,69 @@ class BurhanScanner:
                                   if not (_DGR.search(_gscope(u)) or _SGR.search(_gscope(u)))
                                   and not _LOGOUT_QRE.search(_gscope(u))
                                   and not any(x and x in u for x in _excl)][:15]
-                new_eps = self.browser.render_merge(render_targets, self.target.host, existing)
+                # R19-1b (found while testing the SPA fix): render_merge
+                # received target.host — the HOSTNAME WITHOUT PORT — while
+                # every netloc comparison inside uses host:port. On any
+                # non-standard port (WebGoat's :8080 among them) EVERY
+                # rendered link failed the same-host check and the whole
+                # browser link harvest was silently dropped.
+                _seed_netloc = urllib.parse.urlsplit(self.target.url).netloc
+                new_eps = self.browser.render_merge(render_targets, _seed_netloc, existing)
                 endpoints.extend(e for e in new_eps if e.id not in {x.id for x in endpoints})
+                # R19-1d: the observed-channel URL PATHS are remembered
+                # for the whole run — a channel may re-enter the map
+                # later through the expansion re-crawl with a FRESH
+                # endpoint object (no xhr tag: the crawler re-discovers
+                # the URL as a plain page). Path membership, not tags,
+                # is the durable identity (live-measured: 10 channel-born
+                # ghosts re-entered this way and displaced the floor
+                # 59 -> 58 by pushing /saved-payment-methods off the
+                # budget edge — it sits at request 2494/2500 on main).
+                self._xhr_channel_paths = {
+                    urllib.parse.urlsplit(e.url).path
+                    for e in new_eps if any(t == "xhr:observed" for t in (e.tags or []))}
+                # R19-1 (live-caught on WebGoat 2026.4): the SPA surface
+                # arrives in two runtime-only carriers the static BFS
+                # cannot reach — hash-fragment routes the browser RENDERED
+                # (spa_route:*) and XHR channels it OBSERVED fetching
+                # (xhr:observed). Only the ROUTE carriers seed the
+                # expansion crawl (same budget/gate machinery as the
+                # original crawl — no privileged path): the menu's JSON
+                # body is mined for routes, mapped lesson pages are
+                # fetched, and their forms join the surface. An OBSERVED
+                # channel seeds the expansion only when it is itself
+                # resource-shaped (an extension in the leaf — WebGoat's
+                # lessonmenu.mvc): a navigation carrier is a RESOURCE the
+                # SPA loads, while data channels are extensionless API
+                # paths. Live-measured on Juice Shop: the /rest/* and
+                # /api/* re-fetches fed the route miner nothing and
+                # displaced the verified floor 59 -> 58. Without the
+                # seeded round-trip the menu's JSON-only lessons (Beta)
+                # would be unreachable — fixture-proven.
+                spa_seeds = [e.url for e in endpoints
+                             if any(t.startswith("spa_route:")
+                                    for t in (e.tags or []))]
+                for e in endpoints:
+                    if any(t == "xhr:observed" for t in (e.tags or [])) \
+                            and e.url not in spa_seeds:
+                        leaf = urllib.parse.urlsplit(e.url).path.rsplit("/", 1)[-1]
+                        if "." in leaf:
+                            spa_seeds.append(e.url)
+                if spa_seeds:
+                    spa_found, _js2, _spa_stats = d.crawl(
+                        self.target.url, extra_seeds=spa_seeds[:24],
+                        exclude_urls=([self.cfg.auth.login_url]
+                                      if self.cfg.auth else []) + _excl)
+                    before = {e.id for e in endpoints} | {endpoints_seed_id}
+                    endpoints.extend(e for e in spa_found
+                                     if e.id not in before
+                                     and urllib.parse.urlsplit(e.url).path
+                                     not in getattr(self, "_xhr_channel_paths", set()))
+                    self.stats.setdefault("spa_expansion", {}).update({
+                        "seeds": len(spa_seeds[:24]),
+                        "new_endpoints": len([e for e in spa_found if e.id not in before])})
+                    self.bus.emit("SpaExpansionCompleted", seeds=len(spa_seeds[:24]),
+                                  new_endpoints=self.stats["spa_expansion"]["new_endpoints"])
                 self.stats["endpoints"] = len(endpoints)
                 self.stats["browser_pages"] = self.browser.pages_rendered
                 self.bus.emit("BrowserRenderCompleted", pages=self.browser.pages_rendered,
@@ -721,6 +784,26 @@ class BurhanScanner:
         # + the Coverage Engine's discovery ledger. enrich() only UPGRADES param
         # kinds when the observed value proves a more specific shape (JSON object);
         # every skip it causes is recorded as an auditable coverage reason.
+        # R19-1d (decisive local A/B on the pinned official target): observed
+        # XHR channels are runtime COVERAGE INVENTORY, not battery surface —
+        # with the channels in the map the verified floor reads 58, with them
+        # ledgered-only it reads 60. They displaced main-crawl pages from the
+        # fixed request budget (/saved-payment-methods sits at request
+        # 2494/2500 on main — the budget's very edge). Their NAVIGATION
+        # content still flows in through the resource-shaped expansion seeds
+        # above (WebGoat's menu round-trip), and the channel list stays
+        # queryable in the coverage ledger.
+        _xhr_channels = [e for e in endpoints
+                         if any(t == "xhr:observed" for t in (e.tags or []))
+                         or urllib.parse.urlsplit(e.url).path
+                         in getattr(self, "_xhr_channel_paths", set())]
+        if _xhr_channels:
+            endpoints = [e for e in endpoints
+                         if not any(t == "xhr:observed" for t in (e.tags or []))
+                         and urllib.parse.urlsplit(e.url).path
+                         not in getattr(self, "_xhr_channel_paths", set())]
+            for _xc in _xhr_channels:
+                self.coverage.discover(_xc)
         for ep in endpoints:
             self.coverage.discover(ep)
         self.param_profile = ParamIntel.enrich(endpoints)

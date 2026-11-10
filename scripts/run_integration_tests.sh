@@ -56,6 +56,19 @@ export BURHAN_DATA_DIR="${BURHAN_DATA_DIR:-/tmp/burhan-test-data}"
 # the test process to share the secret (positive controls send it as a
 # header; forgery tests omit it / send a wrong one)
 export TRUSTED_PROXY_SECRET="${TRUSTED_PROXY_SECRET:-integration-proxy-secret}"
+# R19-2b: the engine's scan path gates on the owner password BEFORE its
+# first request, and the demo route spawns `python -m burhan.cli scan` —
+# the dev server (and thus the spawn) inherits this environment. CI
+# automation carries its OWN throwaway gate store (random password,
+# /tmp); a production deployment sets its own BURHAN_OWNER_GATE +
+# BURHAN_OWNER_PASSWORD through the service unit instead.
+export BURHAN_OWNER_GATE="${BURHAN_OWNER_GATE:-/tmp/burhan-integration-gate.json}"
+if [ ! -f "${BURHAN_OWNER_GATE}" ]; then
+  export BURHAN_OWNER_PASSWORD="${BURHAN_OWNER_PASSWORD:-$(head -c 32 /dev/urandom | base64 | tr -d '=+/')}"
+  (cd "$(dirname "$0")/.." && \
+   python3 -m burhan.cli owner init --password "${BURHAN_OWNER_PASSWORD}") \
+    || { echo "FATAL: owner gate init failed"; exit 1; }
+fi
 
 # --- clean state -------------------------------------------------------------
 pkill -f "next dev -p ${PORT}" 2>/dev/null && sleep 1

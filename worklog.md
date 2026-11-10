@@ -6639,3 +6639,71 @@ of real platform findings on the very first runs:
     fixture CI runs (the real-target job ran green on #81's commit).
 - The consolidated live scan campaign (every layer) against
   ginandjuice.shop follows on this branch with the fixed gate.
+## 2026-11-09 — Round 19: SPA hash-fragment discovery (the WebGoat collapse) + the owner-password scan gate
+
+Two owner orders this round, both landed on r19-1-webgoat-spa (PR #86):
+
+- R19-1 — SPA HASH-FRAGMENT DISCOVERY. Live-caught on WebGoat 2026.4
+  (official JAR): the app routes its whole curriculum through
+  hash-fragment SPA routes (start.mvc#lesson/X.lesson) and serves the
+  navigation tree as JSON (service/lessonmenu.mvc). Four stacked gaps
+  hid the entire lesson surface (the authenticated scan surfaced 14
+  endpoints instead of the 40-lesson attack surface):
+  1. _LinkParser dropped fragment-bearing hrefs and _normalize strips
+     fragments (correct for fetching — the server never sees them), so
+     every route collapsed onto the host page. Fragments are now
+     recorded (hash_routes) and mapped to the resource the client
+     fetches ('#lesson/X.lesson' -> GET /X.lesson — live-verified that
+     the router prefix is a namespace, not a path: /WebGoat/lesson/X
+     is 404). The fragment itself is never fetched (wire-proven).
+  2. The crawl admitted only text/html|text/plain as pages — the JSON
+     menu was fetched and DISCARDED. JSON bodies are now mined
+     (_json_route_values) through the same plausible_js_url precision
+     gate (DISC-01 applied to a new carrier).
+  3. Route resolution is dual-anchored (menu directory AND crawl
+     seed-root): WebGoat's menu lives at a different depth than the
+     resources it names; the anchor that exists joins the map.
+  4. render_merge received target.host (no port) while every
+     same-host check compares netloc — on :8080 EVERY rendered browser
+     link was silently dropped. Full netloc now passed; observed
+     same-host XHR channels (the menu!) become tagged endpoints.
+  The orchestrator re-crawls tagged carriers (spa_route:* /
+  xhr:observed) as extra seeds through the SAME budget/gate machinery.
+  Tests: tests/test_r19_spa_discovery.py (18) with fixture bytes
+  verbatim from the live official JAR.
+- R19-1d — channel-born endpoints stay out of the battery map. The
+  Juice Shop floor regression (59 -> 58, /saved-payment-methods pushed
+  to request 2494/2500 — the budget's edge) closed: spa_route carriers
+  ALWAYS seed expansion; observed XHR channels only when
+  resource-shaped; a channel's URL PATH is the durable identity
+  (re-crawled fresh, untagged). Live-proven on the pinned official
+  target: verified 60 >= floor 59, REAL-TARGET GATES OK.
+- R19-2 — THE OWNER-PASSWORD SCAN GATE. burhan/owner_gate.py in the
+  stepup.py discipline: scrypt verifier + per-store salt (never
+  plaintext), atomic O_CREAT|O_EXCL setup (no silent reset),
+  tamper-evident hash chain over every attempt, sliding-window rate
+  limit (5/300s), zero network. Sale transfer: seller arms a one-time
+  256-bit ticket (15min TTL, authenticated by their password); the
+  buyer consumes it and installs their own password — the seller's
+  credential dies at that moment. 16 module acceptance tests; CLI
+  wiring (owner init/change/transfer-arm/transfer-take/status + the
+  scan-path gate: exit 2, zero requests, before the browser boots) +
+  4 subprocess-driven tests.
+- R19-2c — CI rides the gate: automation carries its own throwaway
+  store (conftest session store via BURHAN_OWNER_GATE/PASSWORD, the
+  gate's own refusal tests strip both from the child env; action.yml
+  dogfood inits one on the runner; sigint test arms its own). The C3
+  compound-fault kill now anchors on OBSERVED WAL activity (not a
+  blind 10s window) with one bounded retry on fast runners — three
+  flakes of the same fingerprint closed.
+- R19-2d — handover tickets never lead with a dash: a base64url
+  ticket starting with '-' (~1/64, measured 1.55% over 200k draws)
+  made argparse treat it as an option — the buyer could NEVER
+  complete the takeover. transfer_arm re-rolls (while-condition, zero
+  bare breaks — antipattern gate engine-unmatched 0); regression test
+  pins the shape over 64 consecutive arms.
+- R19-2e — the SaaS rate-limit window test anchors on observed
+  round-trip reality: 80ms window -> 2s (the adjacent test ran 11 PG
+  calls in 199ms on a loaded runner; the early hits expired before
+  the 4th call). Same medicine as r19-2c: stop betting on blind
+  timing.
