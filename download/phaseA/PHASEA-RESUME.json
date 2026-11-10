@@ -1,7 +1,7 @@
 {
- "date": "2026-11-10T23:20:00Z",
+ "date": "2026-11-10T23:59:00Z",
  "phase": "A (baseline & safety)",
- "overall": "PENDING — A.3b CI gate on PR #93 not yet green; everything else DONE",
+ "overall": "PENDING — A.3b merged (PR #93, 31/31, merge 45d2f4d2d8) but main CI on 45d2f4d2d8 not yet verified (cutoff); everything else DONE",
  "items": {
   "A.1_backup": {
    "status": "DONE",
@@ -16,20 +16,21 @@
    "evidence": "scripts/phaseA_secrets_scan.py over 628 commits (--all --reflog): 2415 raw hits, ALL dummy (jwt x2359 Juice-Shop/crAPI/DVGA demo tokens in evidence; AKIAUNITTESTKEY00001 x20; MIIE... truncated fixture headers x24; users.yml demo x12). Real-token patterns (ghp_/github_pat/xox/npm/gcp/bearer/aws_secret): ZERO. .env blob in 35 commits 2026-10-03..2026-10-17: DATABASE_URL=file:/home/z/my-project/db/custom.db (sqlite path, benign, worklog-verified twice). Full output: backups/phaseA-scan-results.txt. NO filter-repo needed."
   },
   "A.3b_guard": {
-   "status": "PENDING",
-   "evidence": "PR #93 (49b21af on phaseA/secrets-guard): gate DENY_RULES += credential artifacts (.secrets/, .env*, *.pat/*.pem/*.key, id_rsa/ed25519) + CREDENTIAL_ALLOWLIST(.env.example) + .gitignore lockstep + tests/test_phaseA_secrets_guard.py. RED on base: 4 failed/1 passed; GREEN: 5/5 + r16/r17 green + live gate rc=0; local suite 588 passed/1 skipped (494.90s); mutations M1-M5 all killed. AWAITING: CI 31/31 + merge."
+   "status": "DONE",
+   "evidence": "PR #93 merged as 45d2f4d2d8 after 31/31 green on head d02fa7e (incl. macOS x2, Tree hygiene job success x2). RED on base 025caa64bf: 4 failed/1 passed; GREEN 5/5 + r16/r17 + live gate rc=0; local suite 588 passed/1 skipped 494.90s; mutations M1-M5 killed."
   }
  },
  "ci_watch": {
   "pr": 93,
-  "head": "49b21af",
-  "checks_used": 0,
-  "cap": 3,
-  "note": "Rule 5: max 3 checks, different commands, save before each wait"
+  "merged": true,
+  "merge_commit": "45d2f4d2d8",
+  "main_check_pending": true,
+  "note": "next session: ONE check on 45d2f4d2d8 check-runs"
  },
  "next_steps_after_merge": [
-  "Phase A closes; write PHASEA-REPORT.md in download/phaseA/ (in-repo)",
-  "Wait for owner review before Phase B (inventoried from KNOWN_LIMITATIONS/COVERAGE_REPORT/worklog/SECURITY_AUDIT + TODO grep)"
+  "1. ONE check: GET /commits/45d2f4d2d8.../check-runs — expect ~20/20 done, no bad (macOS tail ~65 min from 23:57Z merge; #554/#559 pattern). If red: diagnose by job name, report, stop.",
+  "2. Phase A CLOSES with that check. Then WAIT FOR OWNER REVIEW before Phase B.",
+  "3. Phase B inventory (to prepare next session, read-only): KNOWN_LIMITATIONS.md + COVERAGE_REPORT.md (8 depth gaps) + worklog.md + SECURITY_AUDIT.md + TODO/FIXME/XXX grep -> item/severity/source/status table. SECURITY.md gets precise ENV-1 operator steps (live /app/Caddyfile replace + reload; repro in SECURITY_AUDIT §4)."
  ],
  "env_notes": {
   "stale_clone": "main worktree /home/z/my-project/burhan was stale (audit-r15-resilience @217ce0b, 580 mode-only dirt); phase work created in fresh worktree /home/z/my-project/burhan-phaseA from origin/main 025caa64bf",
