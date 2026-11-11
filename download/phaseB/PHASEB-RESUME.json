@@ -1,42 +1,218 @@
 {
  "phase": "B (quality gaps)",
- "date": "2026-11-11T06:20:00Z",
- "overall": "PENDING — PR #96 (B1+B3+B6, d271ac0) awaiting CI 31/31; then merge; then ONE main check closes the round",
- "owner_approval": "'اكمل' after the inventory presentation = approved proposed order B1->B6->B3 (B2 nonce-CSP deliberately NOT started: touches product code + no staging env to verify hydration; needs explicit owner approval)",
+ "date": "2026-11-11T19:30:00Z",
+ "overall": "Owner approved: d1a d2a d2b-a d2j-a-MODIFIED (FP on proof-verified vuln breaks; unverified warns), d3a, d3b b+c. START step zero — with 7 new binding rules. This round (ALL LOCAL, PUSH BLOCKED: GH_TOKEN absent from env, remote URL stripped of token, per owner rule): (1) secrets audit — PAT file entered my-project LOCAL history (3 commits touched, 6 trees contain; repo has NO remotes — never left the box); recommendation: rotate + optional filter-repo (owner decision). burhan history: only sentinel test tokens. (2) SPEC v2.2 written: d2j as modified, §5.1 seven binding rules (app-burning, seal-before-run, WackoPicko replaces DVJA, Shepherd count correction, BLOCKED protocol, GH_TOKEN-only push, network isolation). (3) Shepherd count CORRECTED: modules table (self-registry) = 82 modules (19 lessons + 63 challenges) − 24 Mobile (documented exclusion) − 2 closed XXE = 56 measurable web. XVWA corrected to 19 (index.php is a listing), WackoPicko verified 15 line-by-line. (4) SEAL generated: download/phaseC/seal/ 6 files, 111 labels (56+12+9+19+15), sha256 per reference + seal file. (5) Step-zero workflow + up-script written (dind pattern, internal network, probe from scan path, BLOCKED records). NOT DONE (blocked): seal commit + step-zero run — need GH_TOKEN in env.",
  "items": {
   "B1_time_flakiness_sweep": {
-   "status": "DONE (pending CI)",
-   "evidence": "35 sleeps + 10 timing asserts audited line-by-line; 33 safe-by-construction (sleep>window / bounded loops / sync send makes A6 sleep pure slack); 1 real fix: test_3b_flip_dns sleep(0.1)->flip_after=6 window + burn-to-flip loop; proofs: 8/8 runs, 3/3 under 4 CPU burners, file 22/22; rejected first attempt (readiness-poll + reverse count 3-dns.queries) documented in commit message as its own timing bet"
+   "status": "DONE + MERGED",
+   "evidence": "PR #96 / commit d271ac0: 35 sleeps + 10 timing asserts audited line-by-line; 33 safe-by-construction; 1 real fix (test_3b_flip_dns: sleep(0.1) -> flip_after=6 window + burn-to-flip loop); proofs 8/8 runs, 3/3 under 4 CPU burners, file 22/22; CI 31/31 green on 7c0acc2 incl. macOS"
   },
   "B3_scan_cancel_contract": {
-   "status": "DONE (pending CI)",
-   "evidence": "RED fact: grep scan.cancelled on main tests = 0 hits (no contract test existed). GREEN: response {ok,cancelled}+200, DB row CANCELLED+finishedAt, audit scan.cancelled row asserted; full 8-file integration suite 0 fails on real pgserver PG; test 1178ms"
+   "status": "DONE + MERGED",
+   "evidence": "PR #96: RED fact grep scan.cancelled on main tests = 0; GREEN assertions {ok,cancelled}+200, DB CANCELLED+finishedAt, audit row; full 8-file integration suite 0 fails on real PG"
   },
   "B6_docs_refresh": {
-   "status": "DONE (pending CI)",
-   "evidence": "KNOWN_LIMITATIONS + COVERAGE_REPORT updated from b31dd30-stale to 6df242c-verified: CI RUN (20/20), rate-limiter CLOSED (PG shared store), depth gaps [mid]/coverage/DELETE/E9/multi-process CLOSED with file:line pointers, open gaps honestly kept (twin B5, remediation B4, HTTPS B9, Docker B7); endpoints ~16/24 -> ~19/24"
+   "status": "DONE + MERGED",
+   "evidence": "PR #96: KNOWN_LIMITATIONS + COVERAGE_REPORT b31dd30-stale -> 6df242c-verified (CI RUN 20/20, rate-limiter CLOSED by PG migration, 5 depth gaps closed w/ file:line, endpoints ~16/24 -> ~19/24)"
   },
   "B2_csp_nonce": {
-   "status": "NOT STARTED — needs explicit owner approval (product code + hydration risk unverifiable without staging)"
+   "status": "NOT STARTED — awaiting owner (product code + hydration risk, no staging to verify)"
   },
   "B4_remediation_quality": {
-   "status": "NOT STARTED — needs design decision from owner (what is testable 'quality')"
+   "status": "NOT STARTED — awaiting owner design decision"
   },
   "B5_twin_saas": {
    "status": "NOT STARTED"
   }
  },
- "pr": {
-  "number": 96,
-  "head": "d271ac062d6843a31487d4aebeec85544254fe89",
-  "branch": "phaseB/time-flakiness-sweep",
-  "ci": "awaiting; watch cap 3 checks, save before each wait"
+ "waiting_on_owner": [
+  "Phase C layer 1: review download/phaseC/PHASEC-L1-SPEC.md (spec + 3 designs + pre-mortem) and decide د1–د3ب before any code"
+ ],
+ "round_ledger": {
+  "checks_used": "3/3 on PR head (27/31 -> 29/31 -> 4 workflows all success) + 2 post-merge (19/20 -> 20/20)",
+  "main": "87575117da = 20/20 done, bad: none",
+  "recoveries_this_round": "sandbox recycled twice; PAT recovered from 9114c4a^ both times; deliverables re-pulled from origin/phaseB/inventory-read-only"
  },
- "local_env_notes": "pgserver installed via pip; saas-data/ must exist before scripts/run_integration_tests.sh (mkdir -p saas-data); rm /tmp/burhan-integration-gate.json before each local integration run (stale gate breaks demo tests); bun install --frozen-lockfile needed after worktree creation",
- "next_after_merge": [
-  "1. ONE check: new merge commit check-runs — expect 20/20 done, bad: none",
-  "2. Update PHASEB-INVENTORY.md statuses (B1/B3/B6 -> DONE+merged) on the inventory branch, push",
-  "3. Save resume v2 (round CLOSED) + copy deliverables to /home/z/my-project/download/phaseB/",
-  "4. STOP for owner: B2/B4/B5 decision + ENV-1 operator action reminder"
- ]
+ "owner_followup_2026_11_11": {
+  "commit_lineage_clarified": "d271ac0 = كوميت العمل (تغييرات B1+B3+B6) | 7c0acc2 = رأس الفرع الذي شغّل عليه CI الـ31 (كوميت resume-v1 على نفس الفرع) | 87575117da = كوميت الدمج على main (أبواه 6df242c0ae + 7c0acc2)",
+  "wording_correction": "خلاصة الجولة السابقة قالت خطأً 'مدموج (d271ac0)' — الصحيح: PR حمل كوميت العمل d271ac0 ورأسه عند الدمج 7c0acc2 ودمج بكوميت 87575117da",
+  "b3_mutation_proof": {
+   "asked": "owner 2026-11-11: 'لم يعرض لي دليل الطفرات (أن توكيدات B3 تفشل حين يُفسد الكود)'",
+   "method": "worktree على main المدموج 87575117da؛ ثلاث مسارات؛ كل طفرة تُعكس بعد مسارها (git diff --stat نظيف بعد كل عكس)",
+   "passes": {
+    "GREEN": {
+     "mutation": "لا شيء — الكود المدموج كما هو",
+     "result": "rc=0 | الاختبار يمر (1274ms) | البطارية 0 فشل"
+    },
+    "MUT-A": {
+     "mutation": "src/lib/engine.ts: engineCancelScan يكتب حالة وهمية 'CANCELLED-MUTATION-NOT-A-REAL-STATUS' بدل CANCELLED",
+     "result": "rc=1 | الاختبار يفشل: Expected \"CANCELLED\" / Received \"CANCELLED-MUTATION-NOT-A-REAL-STATUS\" (api.integration.test.ts:359)"
+    },
+    "MUT-B": {
+     "mutation": "src/app/api/scans/[id]/route.ts: DELETE يرد {ok:true,cancelled:true} دون استدعاء engineCancelScan إطلاقاً",
+     "result": "rc=1 | الاختبار يفشل: Expected \"CANCELLED\" / Received \"RUNNING\" (api.integration.test.ts:359) — الصف بقي جارياً"
+    }
+   },
+   "verdict": "الطفرتان قُتلتا بتوكيد حالة الصف (359). التوكيدات الثلاثة الأخرى (الاستجابة ok/cancelled، finishedAt، سجل التدقيق) لم تكن نقطة القتل في هاتين الطفرتين الموجهتين على مسار الحالة — وهذا متسق مع تصميمها كأطراف مستقلة للعقد",
+   "script": "scripts/b3_mutation_proof.sh (محفوظ)",
+   "note": "المحاولة الأولى فشلت بيئياً (DATABASE_URL موروث حوّل المشغل لوضع CI بلا عنقود — P1001)؛ أُصلحت بـ env -u وأعيد التشغيل"
+  }
+ },
+ "owner_decisions_2026_11_11": {
+  "date": "2026-11-11",
+  "decisions": {
+   "B2_csp_nonce": "DEFERRED by owner — no product-code CSP change for now (hydration risk with no staging to verify it)",
+   "B4_remediation_quality": "DEFERRED by owner — no testable 'quality' definition adopted for now",
+   "B5_twin_saas": "DEFERRED by owner — no SaaS-level twin equivalence work for now",
+   "ENV-1": "Documented as NOT APPLICABLE to self-hosted operation (المشغل: «لا يخص التشغيل المستضاف ذاتياً»). NOT claimed closed — the live-pod :81 exposure note stays as written for that deployment; repo code remains fixed and verified"
+  }
+ },
+ "b3_mutation_proof_part2": {
+  "branch": "phaseB/b3-mutation-proof-part2",
+  "commit": "f270aa5",
+  "pr": 97,
+  "mutC": "killed at api.integration.test.ts:369 (audit hit assertion, Expected true / Received false)",
+  "mutD": "killed at api.integration.test.ts:356 (body.ok assertion, Expected true / Received undefined)",
+  "green": "rc=0, 0 fails, 1457.88ms",
+  "merged": "30b4c32936 (merge commit on main; CI 31/31 green on f270aa5)"
+ },
+ "phaseC_layer1": {
+  "status": "SPEC AWAITING OWNER REVIEW — NO CODE WRITTEN (as ordered)",
+  "document": "download/phaseC/PHASEC-L1-SPEC.md (also on inventory branch)",
+  "content": "spec (definitions, Juice Shop labeled path, generator/oracle/floor contracts, verification contract) + 3 designs (A tool-generated from official challenge list [recommended]; B engine-derived [rejected: reference independence]; C third-party copied [rejected: hand-insertion]) + pre-mortem (9 assumptions with mitigations)",
+  "owner_decisions_needed": [
+   "د1 target",
+   "د2 honest-labeling principle",
+   "د2ب unauthenticated scope",
+   "د2ج break policy",
+   "د3 budget",
+   "د3ب CI placement"
+  ]
+ },
+ "next_session_steps": [
+  "1. OWNER ACTION: provide GH_TOKEN in the environment (and decide: rotate the PAT; optional git filter-repo on my-project local history).",
+  "2. With GH_TOKEN: commit+push the seal as an INDEPENDENT commit (seal/ 6 files), print ls-remote hash.",
+  "3. Then run phasec-step-zero workflow (manual dispatch), collect evidence + BLOCKED records, push with ls-remote hash.",
+  "4. Worktrees: /tmp/wt-inv may need re-creation after recycle (verified-push pattern script: scripts/phasec_feasibility_push.py).",
+  "5. Burn rule active from first run: any tool change from an isolated result -> app moves to dev set, documented in burn log."
+ ],
+ "main_after_pr97": {
+  "commit": "30b4c32936",
+  "check": "20/20 — 17 success + 3 skipped (dogfood/SBOM/dependency-review: release/PR-event jobs), 0 failure; macOS completed ~13:15Z"
+ },
+ "isolation_audit_2026_11_11": {
+  "command": "bash scripts/phasec_isolation_audit.sh (git grep -i -F over the FULL tracked tree of origin/main)",
+  "contaminated_dev_set": {
+   "juice-shop": 7938,
+   "webgoat": 2035,
+   "crapi": 1477,
+   "testfire-altoro": 82,
+   "vulnweb-x3": 90,
+   "dvwa": 73,
+   "wrongsecrets": 21,
+   "benchmarkjava": 11
+  },
+  "grey_mentioned_never_scanned_banned_from_isolated": {
+   "mutillidae": 34,
+   "nodegoat": 35,
+   "dvga": 185,
+   "dvws": 44
+  },
+  "clean_zero_mentions": [
+   "bWAPP",
+   "RailGoat",
+   "Security Shepherd",
+   "VAMPI",
+   "DVJA",
+   "XVWA"
+  ],
+  "clean_reserve_also_zero": [
+   "DVNA",
+   "sqli-labs",
+   "xss-game",
+   "owasp-skf",
+   "rest-api-labs",
+   "WackoPicko"
+  ]
+ },
+ "honest_ledger_corrections": [
+  "2026-11-11: the three earlier 'pushed' commits on phaseB/inventory-read-only (91c321f..16ece26 as reported) were NOT on the remote — the /tmp worktree was detached-HEAD, so 'git push origin phaseB/inventory-read-only' pushed the STALE local branch (1444887) as a no-op. Discovered via ls-remote after a sandbox recycle; fixed by pushing 16ece26 with an ancestry check (1444887 is its ancestor, clean fast-forward). All five commits were intact in the shared object store; nothing was lost, but every earlier 'pushed: <sha>' printout overstated the remote state."
+ ],
+ "feasibility_research_2026_11_11": {
+  "correction": "spec v2.1: 'no root/docker' was an r19 LOCAL-sandbox constraint, not a runner constraint — ci.yml runs Juice Shop container + postgres service; live-validation.yml runs crAPI via docker:27-dind --privileged + official compose",
+  "isolated_ranked": [
+   {
+    "app": "Security Shepherd",
+    "origin": "OWASP/SecurityShepherd@dev 14c195a (alive, pushed 2026-11-11)",
+    "stack": "Java/Tomcat+MariaDB+Mongo",
+    "reference": "12 lessons in Java source + moduleSchemas.sql (12 per-lesson schemas)",
+    "deploy": "official docker-compose up -d --build",
+    "license": "GPLv3"
+   },
+   {
+    "app": "RailsGoat",
+    "origin": "smDahlgren/RailGoat@master f1de24f (MOVED from OWASP — 404 there)",
+    "stack": "Rails 3-5 + SQLite/MySQL",
+    "reference": "12 official Capybara vulnerability specs in spec/vulnerabilities/",
+    "deploy": "official Dockerfile + docker-compose (port 3000)",
+    "license": "MIT"
+   },
+   {
+    "app": "VAmPI",
+    "origin": "erev0s/VAmPI@master f16052d (1352 stars, alive)",
+    "stack": "Flask API only",
+    "reference": "9 vulns in README + OpenAPI 3 specs in-repo",
+    "deploy": "official Docker Hub image + compose with SECURE twin :5001 and INSECURE :5002 (native FP measurement)",
+    "license": "MIT"
+   },
+   {
+    "app": "XVWA",
+    "origin": "s4n7h0/xvwa@master fb30fa5 (2020)",
+    "stack": "PHP/MySQL",
+    "reference": "20 vulnerability modules in vulnerabilities/ dir",
+    "deploy": "NO official Dockerfile (community containers only) — needs our own LAMP container (DVWA static-php precedent)",
+    "license": "GPLv3",
+    "creds": "admin:admin documented"
+   },
+   {
+    "app": "DVJA",
+    "origin": "appsecco/dvja@master 597ece1",
+    "stack": "Java/Struts2+MySQL",
+    "reference": "THIN: 3 assessment docs, a1-injection.md EMPTY (0 lines) — derived-from-code reference or replace (DVNA then owasp-skf)",
+    "deploy": "official Dockerfile + compose (port 8080)",
+    "license": "MIT"
+   }
+  ],
+  "bwapp_dropped": "no official GitHub repo (only community mirrors raesene/bWAPP etc.), official site itsecgames.com unreachable from this box, SourceForge responds — distribution channel not pinnable for automated verification",
+  "new_identifiers_reaudit": {
+   "erev0s": 0,
+   "VAmPI": 0,
+   "smDahlgren": 0,
+   "appsecco": 0,
+   "s4n7h0": 0,
+   "itsecgames": 0
+  },
+  "dev_set_ci_feasible": [
+   "Juice Shop (existing container in ci.yml)",
+   "crAPI (existing dind compose in live-validation.yml)",
+   "WebGoat (official pinned image, easy)",
+   "DVWA (official image, easy)"
+  ],
+  "dev_set_historical_only": [
+   "testfire/Altoro (live external)",
+   "vulnweb x3 (live external)",
+   "BenchmarkJava (JDK/Maven/Tomcat chain impossible on free runners — r19 constraint)"
+  ],
+  "aggregate_isolated_labels": ">=56 (12+12+9+20+3) before measurable/out-of-scope classification"
+ },
+ "v2_2_rules_2026_11_11": {
+  "d2j_modified": "FP on proof-verified vuln breaks the build; FP on unverified warns only",
+  "app_burning": "any tool change caused by an isolated-set result burns that app to the dev set immediately, documented; isolated results reviewed at milestones only",
+  "seal_before_run": "isolated set + references sealed by sha256 in an independent commit BEFORE any run",
+  "dvja_replaced_by": "WackoPicko (adamdoupe/WackoPicko@cabc1b3) — 15 README-documented vulns",
+  "shepherd_reference": "modules table in coreSchema.sql: 82 = 19 lessons + 63 challenges; measurable web = 56 (24 Mobile excluded documented, 2 closed XXE)",
+  "blocked_protocol": "failed candidate -> BLOCKED-<name>.md (command+output+reason) -> replacement sqli-labs then owasp-skf via new seal commit",
+  "push_security": "GH_TOKEN from env only; absent -> stop and report; print ls-remote hash after every push; token never recovered from any source",
+  "network_isolation": "no cloned code executes outside a container; target containers on internal:true network after pull/build"
+ }
 }
