@@ -1,7 +1,7 @@
 {
  "phase": "B (quality gaps)",
- "date": "2026-11-11T12:45:00Z",
- "overall": "Follow-up round COMPLETE except CI watch on PR #97: decisions recorded (91c321f), mutation part 2 done + PR #97 opened (f270aa5) — at last check 25 success / 4 skipped / 2 macOS in_progress (3/3 checks used, per rules); Phase C L1 spec+designs+pre-mortem STOPPED for owner review (f9a6a98)",
+ "date": "2026-11-11T13:35:00Z",
+ "overall": "FOLLOW-UP ROUND FULLY CLOSED: owner decisions recorded (91c321f); B3 mutation proof part 2 done — MUT-C killed at :369 (audit), MUT-D killed at :356 (response shape); PR #97 green 31/31 (27 success + 4 legit skipped) and MERGED as 30b4c32936; Phase C L1 spec+3 designs+pre-mortem STOPPED for owner review (download/phaseC/PHASEC-L1-SPEC.md)",
  "items": {
   "B1_time_flakiness_sweep": {
    "status": "DONE + MERGED",
@@ -73,7 +73,8 @@
   "pr": 97,
   "mutC": "killed at api.integration.test.ts:369 (audit hit assertion, Expected true / Received false)",
   "mutD": "killed at api.integration.test.ts:356 (body.ok assertion, Expected true / Received undefined)",
-  "green": "rc=0, 0 fails, 1457.88ms"
+  "green": "rc=0, 0 fails, 1457.88ms",
+  "merged": "30b4c32936 (merge commit on main; CI 31/31 green on f270aa5)"
  },
  "phaseC_layer1": {
   "status": "SPEC AWAITING OWNER REVIEW — NO CODE WRITTEN (as ordered)",
@@ -89,8 +90,8 @@
   ]
  },
  "next_session_steps": [
-  "1. [PR #97 f270aa5] ONE check: commits/f270aa5/check-runs — expect all completed/success (only macOS x2 were running). If green: merge via the usual flow (scripts/run_merge_to_main.sh or merge PR), then ONE post-merge check on the new main head. If red: read the failing job's log, report, stop.",
-  "2. [Phase C L1] AWAITING OWNER: download/phaseC/PHASEC-L1-SPEC.md needs owner decisions د1, د2, د2ب, د2ج, د3, د3ب before ANY code (owner order: stop at spec/designs/pre-mortem for review).",
-  "3. Worktrees: /tmp/wt-inv (inventory branch, f9a6a98) and /tmp/wt-pr (PR #97 branch, f270aa5) — recreate from origin if recycled: git worktree add /tmp/wt-inv origin/phaseB/inventory-read-only (detached — then check out the branch), git worktree add /tmp/wt-pr origin/phaseB/b3-mutation-proof-part2"
+  "1. [Phase C L1] AWAITING OWNER DECISIONS د1/د2/د2ب/د2ج/د3/د3ب on download/phaseC/PHASEC-L1-SPEC.md — spec + 3 designs + pre-mortem; NO code until approved (owner order).",
+  "2. [optional] post-merge main check: ONE check-runs call on 30b4c32936 expected all green (was green on the PR head).",
+  "3. Worktrees if recycled: /tmp/wt-inv (inventory branch), /tmp/wt-pr (PR branch, now merged)."
  ]
 }
