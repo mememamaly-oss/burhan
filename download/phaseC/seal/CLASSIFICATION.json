@@ -1,0 +1,919 @@
+{
+ "date": "2026-11-11",
+ "purpose": "classification criteria + per-label split, added to the seal BEFORE any run (owner rule 2026-11-11 #2)",
+ "criteria": {
+  "measurable": "label is on a URL reachable by an UNAUTHENTICATED crawl and matches an engine battery class, so an engine finding could in principle be matched to it",
+  "out_of_scope": "label needs authenticated session flows, client-side (JS/Flash) rendering, multi-step attacker actions, mobile app, TLS layer, DoS class, or is not an HTTP-response-observable class",
+  "engine_taxonomy_grounded_in": "evidence/full-reverify/fixtures-vulnapp/scan.json (19 observed types) + evidence/real-targets/juice-shop/floor.json observed_types",
+  "engine_types": [
+   "sql_injection",
+   "ssti",
+   "command_injection",
+   "nosql_injection",
+   "xxe",
+   "vertical_privilege_escalation",
+   "credential_exposure",
+   "idor_bola",
+   "xss_reflected",
+   "path_traversal",
+   "ssrf",
+   "xss_dom",
+   "cors_misconfig",
+   "http_response_header_injection",
+   "host_header_injection",
+   "csrf",
+   "jwt_security",
+   "open_redirect",
+   "missing_security_headers"
+  ],
+  "review_rule": "owner reviews classification before step-zero scoring (spec v2.2 §8 step 1); reclassification = new seal commit with documented reason"
+ },
+ "per_app": {
+  "security-shepherd": {
+   "measurable": 41,
+   "out_of_scope": 15,
+   "labels": [
+    {
+     "label": "Insecure Direct Object References",
+     "classification": "measurable",
+     "engine_types": [
+      "idor_bola"
+     ],
+     "reason": "IDOR endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Poor Data Validation",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "path_traversal"
+     ],
+     "reason": "input-validation endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Security Misconfiguration",
+     "classification": "measurable",
+     "engine_types": [
+      "missing_security_headers",
+      "cors_misconfig"
+     ],
+     "reason": "header/config classes on unauthenticated GETs"
+    },
+    {
+     "label": "Broken Session Management",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "requires authenticated session lifecycle (login/change-password flows)"
+    },
+    {
+     "label": "Failure to Restrict URL Access",
+     "classification": "measurable",
+     "engine_types": [
+      "vertical_privilege_escalation"
+     ],
+     "reason": "admin-vs-user URL access: engine probes unauthenticated/admin-path reachability"
+    },
+    {
+     "label": "Cross Site Scripting",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "xss_dom"
+     ],
+     "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Cross Site Scripting 1",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "xss_dom"
+     ],
+     "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Insecure Cryptographic Storage",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+    },
+    {
+     "label": "SQL Injection",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Insecure Cryptographic Storage Challenge 1",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+    },
+    {
+     "label": "Insecure Direct Object Reference Challenge 1",
+     "classification": "measurable",
+     "engine_types": [
+      "idor_bola"
+     ],
+     "reason": "IDOR endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Poor Data Validation 1",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "path_traversal"
+     ],
+     "reason": "input-validation endpoints reachable unauthenticated"
+    },
+    {
+     "label": "SQL Injection 1",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Session Management Challenge 1",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "authenticated session flows (challenges 1-8)"
+    },
+    {
+     "label": "Failure to Restrict URL Access 1",
+     "classification": "measurable",
+     "engine_types": [
+      "vertical_privilege_escalation"
+     ],
+     "reason": "admin-vs-user URL access: engine probes unauthenticated/admin-path reachability"
+    },
+    {
+     "label": "Cross Site Request Forgery",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "CSRF lesson (the app spells it out; no hyphen) reachable unauthenticated"
+    },
+    {
+     "label": "Unvalidated Redirects and Forwards",
+     "classification": "measurable",
+     "engine_types": [
+      "open_redirect"
+     ],
+     "reason": "redirect parameter on unauthenticated URL"
+    },
+    {
+     "label": "SQL Injection 2",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "NoSQL Injection One",
+     "classification": "measurable",
+     "engine_types": [
+      "nosql_injection"
+     ],
+     "reason": "NoSQLi challenge reachable unauthenticated"
+    },
+    {
+     "label": "SQL Injection Escaping",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Session Management Challenge 2",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "authenticated session flows (challenges 1-8)"
+    },
+    {
+     "label": "CSRF 1",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Session Management Challenge 3",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "authenticated session flows (challenges 1-8)"
+    },
+    {
+     "label": "Cross Site Scripting 2",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "xss_dom"
+     ],
+     "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Insecure Cryptographic Storage Challenge 2",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+    },
+    {
+     "label": "Insecure Direct Object Reference Challenge 2",
+     "classification": "measurable",
+     "engine_types": [
+      "idor_bola"
+     ],
+     "reason": "IDOR endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Cross Site Scripting 3",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "xss_dom"
+     ],
+     "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Insecure Direct Object Reference Bank",
+     "classification": "measurable",
+     "engine_types": [
+      "idor_bola"
+     ],
+     "reason": "IDOR endpoints reachable unauthenticated"
+    },
+    {
+     "label": "SQL Injection 3",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "CSRF 2",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "CSRF 3",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "CSRF 4",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "CSRF JSON",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Session Management Challenge 4",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "authenticated session flows (challenges 1-8)"
+    },
+    {
+     "label": "Cross Site Scripting 4",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "xss_dom"
+     ],
+     "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+    },
+    {
+     "label": "SQL Injection 4",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Insecure Cryptographic Storage Challenge 3",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+    },
+    {
+     "label": "CSRF 5",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Poor Data Validation 2",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "path_traversal"
+     ],
+     "reason": "input-validation endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Failure to Restrict URL Access 2",
+     "classification": "measurable",
+     "engine_types": [
+      "vertical_privilege_escalation"
+     ],
+     "reason": "admin-vs-user URL access: engine probes unauthenticated/admin-path reachability"
+    },
+    {
+     "label": "Cross Site Scripting 5",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "xss_dom"
+     ],
+     "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+    },
+    {
+     "label": "SQL Injection 5",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "CSRF 6",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "SQL Injection Stored Procedure",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Cross Site Scripting 6",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected",
+      "xss_dom"
+     ],
+     "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+    },
+    {
+     "label": "SQL Injection 6",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Session Management Challenge 5",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "authenticated session flows (challenges 1-8)"
+    },
+    {
+     "label": "Failure to Restrict URL Access 3",
+     "classification": "measurable",
+     "engine_types": [
+      "vertical_privilege_escalation"
+     ],
+     "reason": "admin-vs-user URL access: engine probes unauthenticated/admin-path reachability"
+    },
+    {
+     "label": "Session Management Challenge 6",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "authenticated session flows (challenges 1-8)"
+    },
+    {
+     "label": "Security Misconfig Cookie Flag",
+     "classification": "measurable",
+     "engine_types": [
+      "missing_security_headers"
+     ],
+     "reason": "cookie-flag detection on unauthenticated responses"
+    },
+    {
+     "label": "Session Management Challenge 7",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "authenticated session flows (challenges 1-8)"
+    },
+    {
+     "label": "SQL Injection 7",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Insecure Cryptographic Storage Challenge 4",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+    },
+    {
+     "label": "Session Management Challenge 8",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "authenticated session flows (challenges 1-8)"
+    },
+    {
+     "label": "CSRF 7",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+    },
+    {
+     "label": "Insecure Cryptographic Storage Home Made Key",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+    }
+   ]
+  },
+  "railsgoat": {
+   "measurable": 9,
+   "out_of_scope": 3,
+   "labels": [
+    {
+     "label": "broken_auth_spec.rb",
+     "classification": "measurable",
+     "engine_types": [
+      "credential_exposure"
+     ],
+     "reason": "credential guessing/bypass on unauthenticated login"
+    },
+    {
+     "label": "command_injection_spec.rb",
+     "classification": "measurable",
+     "engine_types": [
+      "command_injection"
+     ],
+     "reason": "command injection on unauthenticated reachable input"
+    },
+    {
+     "label": "csrf_spec.rb",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "CSRF spec drives an authenticated victim session"
+    },
+    {
+     "label": "insecure_dor_spec.rb",
+     "classification": "measurable",
+     "engine_types": [
+      "idor_bola"
+     ],
+     "reason": "insecure direct object reference on unauthenticated reachable routes"
+    },
+    {
+     "label": "mass_assignment_spec.rb",
+     "classification": "measurable",
+     "engine_types": [
+      "vertical_privilege_escalation"
+     ],
+     "reason": "role escalation via extra fields on unauthenticated POST"
+    },
+    {
+     "label": "password_complexity_spec.rb",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "policy weakness, not an HTTP-response-observable class"
+    },
+    {
+     "label": "password_hashing_spec.rb",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "weak hashing in DB — not an HTTP response class"
+    },
+    {
+     "label": "sensitive_data_exposure.rb",
+     "classification": "measurable",
+     "engine_types": [
+      "credential_exposure"
+     ],
+     "reason": "secrets in served responses — unauthenticated GET"
+    },
+    {
+     "label": "sql_injection_spec.rb",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "login-form SQLi — unauthenticated POST"
+    },
+    {
+     "label": "unvalidated_redirects_spec.rb",
+     "classification": "measurable",
+     "engine_types": [
+      "open_redirect"
+     ],
+     "reason": "redirect parameter reachable unauthenticated"
+    },
+    {
+     "label": "url_access_spec.rb",
+     "classification": "measurable",
+     "engine_types": [
+      "vertical_privilege_escalation"
+     ],
+     "reason": "unauthenticated access to admin-adjacent URL — engine probes it"
+    },
+    {
+     "label": "xss_spec.rb",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected"
+     ],
+     "reason": "XSS via unauthenticated forms"
+    }
+   ]
+  },
+  "vampi": {
+   "measurable": 6,
+   "out_of_scope": 3,
+   "labels": [
+    {
+     "label": "SQLi Injection",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "REST endpoint SQLi unauthenticated"
+    },
+    {
+     "label": "Unauthorized Password Change",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "requires authenticated account context"
+    },
+    {
+     "label": "Broken Object Level Authorization",
+     "classification": "measurable",
+     "engine_types": [
+      "idor_bola"
+     ],
+     "reason": "BOLA on REST object IDs unauthenticated"
+    },
+    {
+     "label": "Mass Assignment",
+     "classification": "measurable",
+     "engine_types": [
+      "idor_bola",
+      "vertical_privilege_escalation"
+     ],
+     "reason": "role escalation via extra fields on unauthenticated POST"
+    },
+    {
+     "label": "Excessive Data Exposure through debug endpoint",
+     "classification": "measurable",
+     "engine_types": [
+      "credential_exposure"
+     ],
+     "reason": "debug endpoint leaks data on unauthenticated GET"
+    },
+    {
+     "label": "User and Password Enumeration",
+     "classification": "measurable",
+     "engine_types": [
+      "credential_exposure"
+     ],
+     "reason": "differential responses on unauthenticated login attempts"
+    },
+    {
+     "label": "RegexDOS (Denial of Service)",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "DoS out of scope by policy"
+    },
+    {
+     "label": "Lack of Resources & Rate Limiting",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "resource-exhaustion behavior — DoS class, out of scope"
+    },
+    {
+     "label": "JWT authentication bypass via weak signing key",
+     "classification": "measurable",
+     "engine_types": [
+      "jwt_security"
+     ],
+     "reason": "engine JWT battery probes weak/unsigned tokens unauthenticated"
+    }
+   ]
+  },
+  "xvwa": {
+   "measurable": 15,
+   "out_of_scope": 4,
+   "labels": [
+    {
+     "label": "cmdi",
+     "classification": "measurable",
+     "engine_types": [
+      "command_injection"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "crypto",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "crypto module — not an HTTP response class"
+    },
+    {
+     "label": "csrf",
+     "classification": "measurable",
+     "engine_types": [
+      "csrf"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "dom_xss",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_dom"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "fi",
+     "classification": "measurable",
+     "engine_types": [
+      "path_traversal"
+     ],
+     "reason": "file inclusion = path traversal family"
+    },
+    {
+     "label": "fileupload",
+     "classification": "measurable",
+     "engine_types": [
+      "path_traversal"
+     ],
+     "reason": "file inclusion = path traversal family"
+    },
+    {
+     "label": "formula_injection",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "CSV/formula effect lands in spreadsheet apps, not HTTP response class"
+    },
+    {
+     "label": "idor",
+     "classification": "measurable",
+     "engine_types": [
+      "idor_bola"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "missfunc",
+     "classification": "measurable",
+     "engine_types": [
+      "missing_security_headers"
+     ],
+     "reason": "missing function-level access control maps to unauth reachability/header probes"
+    },
+    {
+     "label": "php_object_injection",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "deserialization payload effect not observable in response class"
+    },
+    {
+     "label": "redirect",
+     "classification": "measurable",
+     "engine_types": [
+      "open_redirect"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "reflected_xss",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "sessionflaws",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "session-layer flaws need session flows"
+    },
+    {
+     "label": "sqli",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "sqli_blind",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "ssrf_xspa",
+     "classification": "measurable",
+     "engine_types": [
+      "ssrf"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "ssti",
+     "classification": "measurable",
+     "engine_types": [
+      "ssti"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "stored_xss",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected"
+     ],
+     "reason": "stored via unauthenticated POST+GET pair"
+    },
+    {
+     "label": "xpath",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "XPath injection — injection-family oracle by differential response"
+    }
+   ]
+  },
+  "wackopicko": {
+   "measurable": 10,
+   "out_of_scope": 5,
+   "labels": [
+    {
+     "label": "Reflected XSS",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "Stored XSS",
+     "classification": "measurable",
+     "engine_types": [
+      "xss_reflected"
+     ],
+     "reason": "stored via unauthenticated guestbook/comment POST"
+    },
+    {
+     "label": "SessionID vulnerability",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "predictable session values need session lifecycle"
+    },
+    {
+     "label": "Stored SQL Injection",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "register form SQLi — unauthenticated POST"
+    },
+    {
+     "label": "Reflected SQL Injection",
+     "classification": "measurable",
+     "engine_types": [
+      "sql_injection"
+     ],
+     "reason": "login form SQLi — unauthenticated POST"
+    },
+    {
+     "label": "Directory Traversal",
+     "classification": "measurable",
+     "engine_types": [
+      "path_traversal"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "Multi-Step Stored XSS",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "requires a preview flow (multi-step browser state) beyond crawl budget"
+    },
+    {
+     "label": "Forceful Browsing",
+     "classification": "measurable",
+     "engine_types": [
+      "vertical_privilege_escalation"
+     ],
+     "reason": "unauthenticated access to protected URL"
+    },
+    {
+     "label": "Command-line Injection",
+     "classification": "measurable",
+     "engine_types": [
+      "command_injection"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "File Inclusion",
+     "classification": "measurable",
+     "engine_types": [
+      "path_traversal"
+     ],
+     "reason": "unauthenticated reachable; engine battery class present"
+    },
+    {
+     "label": "Parameter Manipulation",
+     "classification": "measurable",
+     "engine_types": [
+      "idor_bola"
+     ],
+     "reason": "userid manipulation on unauthenticated URL"
+    },
+    {
+     "label": "Reflected XSS Behind JavaScript",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "payload lands only after client-side JS execution — engine JS execution is not in this layer"
+    },
+    {
+     "label": "Logic Flaw",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "multi-step business logic (coupon reapplication) — attacker-action class"
+    },
+    {
+     "label": "Reflected XSS Behind a Flash Form",
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "Flash client rendering — no engine battery class"
+    },
+    {
+     "label": "Weak username/password",
+     "classification": "measurable",
+     "engine_types": [
+      "credential_exposure"
+     ],
+     "reason": "default creds listed in docs; login differential is measurable"
+    }
+   ]
+  }
+ },
+ "totals": {
+  "labels": 111,
+  "measurable": 81,
+  "out_of_scope": 30
+ },
+ "pinned_commits_full": {
+  "security-shepherd": "14c195a0b83e84997f57a54d17d749fa33a6f002",
+  "railsgoat": "f1de24f380646b847dd6478583d8b5f9bc1f7180",
+  "vampi": "f16052dce83f05847133ec98f01c5193a41de7d8",
+  "xvwa": "fb30fa517d288e618b521d252f61107ef6a24797",
+  "wackopicko": "cabc1b3a06beda7df98e839fa2d84db9a4bdfee7"
+ },
+ "image_pins": {
+  "vampi": "erev0s/vampi@sha256:0a5a224b6e14ae7da6a6ea265178ff71286ff903aec74adee98f660bb0e4ca12 (env: vulnerable=1 unsafe / vulnerable=0 safe twin; single port 5000; /ui swagger)",
+  "wackopicko": "adamdoupe/wackopicko@sha256:76d1a9ad02ad7fb6bbc000eb12956f457087a0f5883bd23b6cc49d3051feae02 (port 80; php5-era tutum/lamp base — built by official Dockerfile at cabc1b3)"
+ }
+}

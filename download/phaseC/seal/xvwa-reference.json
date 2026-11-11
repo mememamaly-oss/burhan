@@ -1,0 +1,222 @@
+{
+ "app": "XVWA",
+ "origin": "s4n7h0/xvwa",
+ "pinned_commit": "fb30fa517d288e618b521d252f61107ef6a24797",
+ "sealed": "2026-11-11",
+ "reference_source": "vulnerabilities/ subdirectories (one per vulnerability class) + /setup/ official DB init",
+ "label_count": 19,
+ "labels": [
+  {
+   "module": "cmdi"
+  },
+  {
+   "module": "crypto"
+  },
+  {
+   "module": "csrf"
+  },
+  {
+   "module": "dom_xss"
+  },
+  {
+   "module": "fi"
+  },
+  {
+   "module": "fileupload"
+  },
+  {
+   "module": "formula_injection"
+  },
+  {
+   "module": "idor"
+  },
+  {
+   "module": "missfunc"
+  },
+  {
+   "module": "php_object_injection"
+  },
+  {
+   "module": "redirect"
+  },
+  {
+   "module": "reflected_xss"
+  },
+  {
+   "module": "sessionflaws"
+  },
+  {
+   "module": "sqli"
+  },
+  {
+   "module": "sqli_blind"
+  },
+  {
+   "module": "ssrf_xspa"
+  },
+  {
+   "module": "ssti"
+  },
+  {
+   "module": "stored_xss"
+  },
+  {
+   "module": "xpath"
+  }
+ ],
+ "notes": [
+  "NO official Dockerfile — our own LAMP container needed (DVWA static-php precedent)",
+  "documented creds: admin:admin / xvwa:xvwa / user:vulnerable",
+  "GPLv3"
+ ],
+ "classification": [
+  {
+   "label": "cmdi",
+   "classification": "measurable",
+   "engine_types": [
+    "command_injection"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "crypto",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "crypto module — not an HTTP response class"
+  },
+  {
+   "label": "csrf",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "dom_xss",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_dom"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "fi",
+   "classification": "measurable",
+   "engine_types": [
+    "path_traversal"
+   ],
+   "reason": "file inclusion = path traversal family"
+  },
+  {
+   "label": "fileupload",
+   "classification": "measurable",
+   "engine_types": [
+    "path_traversal"
+   ],
+   "reason": "file inclusion = path traversal family"
+  },
+  {
+   "label": "formula_injection",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "CSV/formula effect lands in spreadsheet apps, not HTTP response class"
+  },
+  {
+   "label": "idor",
+   "classification": "measurable",
+   "engine_types": [
+    "idor_bola"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "missfunc",
+   "classification": "measurable",
+   "engine_types": [
+    "missing_security_headers"
+   ],
+   "reason": "missing function-level access control maps to unauth reachability/header probes"
+  },
+  {
+   "label": "php_object_injection",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "deserialization payload effect not observable in response class"
+  },
+  {
+   "label": "redirect",
+   "classification": "measurable",
+   "engine_types": [
+    "open_redirect"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "reflected_xss",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "sessionflaws",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "session-layer flaws need session flows"
+  },
+  {
+   "label": "sqli",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "sqli_blind",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "ssrf_xspa",
+   "classification": "measurable",
+   "engine_types": [
+    "ssrf"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "ssti",
+   "classification": "measurable",
+   "engine_types": [
+    "ssti"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "stored_xss",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected"
+   ],
+   "reason": "stored via unauthenticated POST+GET pair"
+  },
+  {
+   "label": "xpath",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "XPath injection — injection-family oracle by differential response"
+  }
+ ],
+ "classification_counts": {
+  "measurable": 15,
+  "out_of_scope": 4
+ }
+}

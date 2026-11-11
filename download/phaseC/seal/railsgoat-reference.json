@@ -1,0 +1,147 @@
+{
+ "app": "RailsGoat",
+ "origin": "smDahlgren/RailGoat (moved from OWASP/RailGoat — 404 there)",
+ "pinned_commit": "f1de24f380646b847dd6478583d8b5f9bc1f7180",
+ "sealed": "2026-11-11",
+ "reference_source": "spec/vulnerabilities/*.rb — one official failing Capybara spec per vulnerability",
+ "label_count": 12,
+ "labels": [
+  {
+   "spec": "broken_auth_spec.rb"
+  },
+  {
+   "spec": "command_injection_spec.rb"
+  },
+  {
+   "spec": "csrf_spec.rb"
+  },
+  {
+   "spec": "insecure_dor_spec.rb"
+  },
+  {
+   "spec": "mass_assignment_spec.rb"
+  },
+  {
+   "spec": "password_complexity_spec.rb"
+  },
+  {
+   "spec": "password_hashing_spec.rb"
+  },
+  {
+   "spec": "sensitive_data_exposure.rb"
+  },
+  {
+   "spec": "sql_injection_spec.rb"
+  },
+  {
+   "spec": "unvalidated_redirects_spec.rb"
+  },
+  {
+   "spec": "url_access_spec.rb"
+  },
+  {
+   "spec": "xss_spec.rb"
+  }
+ ],
+ "notes": [
+  "each spec names its tutorial wiki page (e.g. R5-A1-SQL-Injection-Concatenation)",
+  "DB: SQLite in dev; MySQL env required for some SQLi vulns (README 'MySQL Environment')",
+  "official Dockerfile + docker-compose at repo root (port 3000)"
+ ],
+ "classification": [
+  {
+   "label": "broken_auth_spec.rb",
+   "classification": "measurable",
+   "engine_types": [
+    "credential_exposure"
+   ],
+   "reason": "credential guessing/bypass on unauthenticated login"
+  },
+  {
+   "label": "command_injection_spec.rb",
+   "classification": "measurable",
+   "engine_types": [
+    "command_injection"
+   ],
+   "reason": "command injection on unauthenticated reachable input"
+  },
+  {
+   "label": "csrf_spec.rb",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "CSRF spec drives an authenticated victim session"
+  },
+  {
+   "label": "insecure_dor_spec.rb",
+   "classification": "measurable",
+   "engine_types": [
+    "idor_bola"
+   ],
+   "reason": "insecure direct object reference on unauthenticated reachable routes"
+  },
+  {
+   "label": "mass_assignment_spec.rb",
+   "classification": "measurable",
+   "engine_types": [
+    "vertical_privilege_escalation"
+   ],
+   "reason": "role escalation via extra fields on unauthenticated POST"
+  },
+  {
+   "label": "password_complexity_spec.rb",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "policy weakness, not an HTTP-response-observable class"
+  },
+  {
+   "label": "password_hashing_spec.rb",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "weak hashing in DB — not an HTTP response class"
+  },
+  {
+   "label": "sensitive_data_exposure.rb",
+   "classification": "measurable",
+   "engine_types": [
+    "credential_exposure"
+   ],
+   "reason": "secrets in served responses — unauthenticated GET"
+  },
+  {
+   "label": "sql_injection_spec.rb",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "login-form SQLi — unauthenticated POST"
+  },
+  {
+   "label": "unvalidated_redirects_spec.rb",
+   "classification": "measurable",
+   "engine_types": [
+    "open_redirect"
+   ],
+   "reason": "redirect parameter reachable unauthenticated"
+  },
+  {
+   "label": "url_access_spec.rb",
+   "classification": "measurable",
+   "engine_types": [
+    "vertical_privilege_escalation"
+   ],
+   "reason": "unauthenticated access to admin-adjacent URL — engine probes it"
+  },
+  {
+   "label": "xss_spec.rb",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected"
+   ],
+   "reason": "XSS via unauthenticated forms"
+  }
+ ],
+ "classification_counts": {
+  "measurable": 9,
+  "out_of_scope": 3
+ }
+}
