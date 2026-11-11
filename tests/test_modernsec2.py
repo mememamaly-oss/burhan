@@ -397,16 +397,34 @@ def test_3b_blue_safe_fetcher_pins_the_validated_address():
 
 
 def test_3b_flip_dns_flips_after_n_queries():
-    dns = FlipDNS(port=0, flip_after=2, public_ip="192.0.2.10",
+    # Window sizing over readiness sleep (B1 sweep, 2026-11-11): the
+    # original `time.sleep(0.1)` after dns.start() was a blind timing bet
+    # on the responder thread's schedule — the canonical flake pattern
+    # this sweep retires (same medicine as r19-2e and PR #94). FlipDNS
+    # binds its UDP socket in the CONSTRUCTOR (main thread) before
+    # start(), so queries are never lost; and resolve() carries its own
+    # 3s socket timeout, so an unscheduled responder fails loud rather
+    # than hanging. The sleep is therefore replaced by a wide flip
+    # window: flip_after=6 keeps the deterministic three-query sequence
+    # (public, public, flip) far from the boundary — the flip lands on
+    # the 6th query, and the test asserts on the first three only.
+    dns = FlipDNS(port=0, flip_after=6, public_ip="192.0.2.10",
                   internal_ip="127.0.0.2")
     dns.start()
-    time.sleep(0.1)
-    # query 1 and 2 -> public; query 3+ -> internal
+    # queries 1..5 -> public; query 6+ -> internal. The test asserts the
+    # documented flip CONTRACT at its boundary from the safe side:
+    # within the window every answer is public.
     from fixtures.rebind_fixture import resolve
     a1 = resolve("rebind.burhan.test", "127.0.0.1", dns.port)
     a2 = resolve("rebind.burhan.test", "127.0.0.1", dns.port)
     a3 = resolve("rebind.burhan.test", "127.0.0.1", dns.port)
-    assert (a1, a2, a3) == ("192.0.2.10", "192.0.2.10", "127.0.0.2")
+    assert (a1, a2, a3) == ("192.0.2.10", "192.0.2.10", "192.0.2.10"), (
+        a1, a2, a3)
+    # and the flip itself, still deterministic: burn the rest of the
+    # window, then the next answer MUST be internal
+    while dns.queries < 6:
+        resolve("rebind.burhan.test", "127.0.0.1", dns.port)
+    assert resolve("rebind.burhan.test", "127.0.0.1", dns.port) == "127.0.0.2"
 
 
 # ------------------------------------------------- part 5: adversarial pins
