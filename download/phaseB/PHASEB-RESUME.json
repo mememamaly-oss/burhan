@@ -1,7 +1,7 @@
 {
  "phase": "B (quality gaps)",
- "date": "2026-11-11T11:05:00Z",
- "overall": "ROUND CLOSED + owner follow-up done: B3 mutation proof recorded (GREEN/MUT-A/MUT-B), commit lineage clarified",
+ "date": "2026-11-11T11:20:00Z",
+ "overall": "Phase B CLOSED with owner decisions recorded: B2/B4/B5 DEFERRED; ENV-1 documented not-applicable-to-self-hosted (not closed). Follow-up under way: mutation proof part 2 (MUT-C audit-write drop, MUT-D response-shape change) + Phase C layer 1 (labeled realistic benchmark) spec-only",
  "items": {
   "B1_time_flakiness_sweep": {
    "status": "DONE + MERGED",
@@ -26,10 +26,7 @@
   }
  },
  "waiting_on_owner": [
-  "B2 (nonce CSP): approve or skip — touches product code; hydration breakage unverifiable without staging",
-  "B4 (remediation quality): what counts as testable 'quality' — needs owner's definition",
-  "B5 (twin depth at SaaS level): next natural layer if approved",
-  "ENV-1 (live pod :81 XTransformPort): OPERATOR action — swap /app/Caddyfile + reload; not fixable from code"
+  "Phase C layer 1: review the spec + 3 designs + pre-mortem document before any code (delivery expected this session)"
  ],
  "round_ledger": {
   "checks_used": "3/3 on PR head (27/31 -> 29/31 -> 4 workflows all success) + 2 post-merge (19/20 -> 20/20)",
@@ -59,6 +56,15 @@
    "verdict": "الطفرتان قُتلتا بتوكيد حالة الصف (359). التوكيدات الثلاثة الأخرى (الاستجابة ok/cancelled، finishedAt، سجل التدقيق) لم تكن نقطة القتل في هاتين الطفرتين الموجهتين على مسار الحالة — وهذا متسق مع تصميمها كأطراف مستقلة للعقد",
    "script": "scripts/b3_mutation_proof.sh (محفوظ)",
    "note": "المحاولة الأولى فشلت بيئياً (DATABASE_URL موروث حوّل المشغل لوضع CI بلا عنقود — P1001)؛ أُصلحت بـ env -u وأعيد التشغيل"
+  }
+ },
+ "owner_decisions_2026_11_11": {
+  "date": "2026-11-11",
+  "decisions": {
+   "B2_csp_nonce": "DEFERRED by owner — no product-code CSP change for now (hydration risk with no staging to verify it)",
+   "B4_remediation_quality": "DEFERRED by owner — no testable 'quality' definition adopted for now",
+   "B5_twin_saas": "DEFERRED by owner — no SaaS-level twin equivalence work for now",
+   "ENV-1": "Documented as NOT APPLICABLE to self-hosted operation (المشغل: «لا يخص التشغيل المستضاف ذاتياً»). NOT claimed closed — the live-pod :81 exposure note stays as written for that deployment; repo code remains fixed and verified"
   }
  }
 }
