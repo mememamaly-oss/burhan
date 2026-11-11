@@ -1,7 +1,7 @@
 {
  "phase": "B (quality gaps)",
- "date": "2026-11-11T12:10:00Z",
- "overall": "Owner decisions recorded (B2/B4/B5 deferred, ENV-1 documented not-closed) + mutation proof part 2 DONE (MUT-C killed at :369 audit assertion, MUT-D killed at :356 response-shape assertion; PR #97 f270aa5 carrying harness+evidence, CI watch in progress) + Phase C layer-1 spec+3 designs+pre-mortem written — STOPPED for owner review before any code, as ordered",
+ "date": "2026-11-11T12:45:00Z",
+ "overall": "Follow-up round COMPLETE except CI watch on PR #97: decisions recorded (91c321f), mutation part 2 done + PR #97 opened (f270aa5) — at last check 25 success / 4 skipped / 2 macOS in_progress (3/3 checks used, per rules); Phase C L1 spec+designs+pre-mortem STOPPED for owner review (f9a6a98)",
  "items": {
   "B1_time_flakiness_sweep": {
    "status": "DONE + MERGED",
@@ -87,5 +87,10 @@
    "د3 budget",
    "د3ب CI placement"
   ]
- }
+ },
+ "next_session_steps": [
+  "1. [PR #97 f270aa5] ONE check: commits/f270aa5/check-runs — expect all completed/success (only macOS x2 were running). If green: merge via the usual flow (scripts/run_merge_to_main.sh or merge PR), then ONE post-merge check on the new main head. If red: read the failing job's log, report, stop.",
+  "2. [Phase C L1] AWAITING OWNER: download/phaseC/PHASEC-L1-SPEC.md needs owner decisions د1, د2, د2ب, د2ج, د3, د3ب before ANY code (owner order: stop at spec/designs/pre-mortem for review).",
+  "3. Worktrees: /tmp/wt-inv (inventory branch, f9a6a98) and /tmp/wt-pr (PR #97 branch, f270aa5) — recreate from origin if recycled: git worktree add /tmp/wt-inv origin/phaseB/inventory-read-only (detached — then check out the branch), git worktree add /tmp/wt-pr origin/phaseB/b3-mutation-proof-part2"
+ ]
 }
