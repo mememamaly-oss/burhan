@@ -1,7 +1,7 @@
 {
- "date": "2026-11-11T01:05:00Z",
+ "date": "2026-11-11T02:55:00Z",
  "phase": "A (baseline & safety)",
- "overall": "PENDING — main red (flake) fixed by PR #94 awaiting CI 31/31 + merge + main-green check",
+ "overall": "PENDING — Phase A substantively complete; ONLY the macOS tail of main CI on 6df242c0ae still running at cutoff (19/20 done, no bad). Next session: ONE completion check closes Phase A.",
  "items": {
   "A.1_backup": {
    "status": "DONE",
@@ -20,8 +20,8 @@
    "evidence": "PR #93 merged as 45d2f4d2d8 after 31/31 on head d02fa7e (incl. macOS x2, Tree hygiene success x2)"
   },
   "A.closeout_flake_fix": {
-   "status": "PENDING",
-   "evidence": "PR #94 (a6565ac on fix/ratelimit-test-window-flake): window 120->1500ms, sleep 180->1600ms, assertions unchanged. RED = main run 42925172174 job 130209720194 (log: 4th hit allowed, Expected false/Received true at :92; tree byte-identical to green d02fa7e => test clock-budget race, limiter correct). GREEN-local = full 8-file integration suite 0 fails on real pgserver PG with fresh owner gate; fixed test 1624ms. Original variant stayed green 7x on idle machine (race needs loaded runner) — documented honestly in PR body. AWAITING: CI 31/31 + merge + ONE main check."
+   "status": "DONE",
+   "evidence": "PR #94 (head 19af0f1 = a6565ac fix + 19af0f1 resume) CI 31/31 green incl. macOS x2 and SaaS-PG success x2 (the flaky member); merged as 6df242c0ae. On main 6df242c0ae: SaaS-PG success (early check 02:35Z), 19/20 done no bad at 02:50Z, only 'Engine macOS' tail running at session cutoff — same job already green on the identical PR head, so this is a completion formality, next session verifies with ONE check."
   }
  },
  "ci_watch": {
@@ -40,8 +40,9 @@
   "local_int_env": "pgserver PG on 127.0.0.1:55432; bun install --frozen-lockfile; prisma 6.19.3 pinned via node_modules; saas-data/ untracked local cluster; STALE /tmp/burhan-integration-gate.json from earlier runs breaks demo tests — rm before each local integration run"
  },
  "post_merge": [
-  "ONE check on new merge commit check-runs (expect all done, no bad)",
-  "Phase A CLOSED; update PHASEA-REPORT.md + this resume (v4) on phaseA/secrets-guard branch, push",
-  "Present Phase B inventory (read-only: KNOWN_LIMITATIONS/COVERAGE_REPORT/worklog/SECURITY_AUDIT/TODO-grep) and STOP for owner review"
+  "1. ONE check: GET /commits/6df242c0ae.../check-runs — expect 20/20 done, bad: none. Phase A CLOSED.",
+  "2. Update PHASEA-REPORT.md final status + this resume (v5) on fix branch, push.",
+  "3. Phase B inventory (READ-ONLY, no fixes without owner approval): parse KNOWN_LIMITATIONS.md + COVERAGE_REPORT.md (8 depth gaps) + SECURITY_AUDIT.md (ENV-1 operator steps) + worklog.md open items + grep -rn 'TODO|FIXME|XXX' on src/ burhan/ scripts/ -> table (item/severity/source/status) saved to download/phaseB/PHASEB-INVENTORY.md for owner review.",
+  "4. STOP and wait for owner review before any Phase B fix work."
  ]
 }
