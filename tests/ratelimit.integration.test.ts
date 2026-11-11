@@ -81,18 +81,26 @@ describe("the login rate limit is enforced ACROSS PROCESSES (shared PG store)", 
     expect(allowed).toBeGreaterThanOrEqual(9); // sanity: not a total outage
   });
 
+  // Window sizing (main-build flake, 2026-11-10, run 42925172174): the
+  // original 120ms window assumed 4 sequential PG transactions complete
+  // inside 120ms. On a loaded CI runner the 4th call's `now` can land
+  // past hits[0]+120ms, the sliding window legitimately forgets the
+  // oldest hit, and the 4th hit is ALLOWED — a race in the TEST's clock
+  // budget, not in the limiter. 1500ms gives the same semantics ~12x the
+  // headroom while keeping every assertion's strength unchanged (block
+  // at 4th hit, retryAfter > 0, recovery after the window passes).
   test("sliding window + blockedUntil semantics survive the move to PG", async () => {
     await resetRateLimits();
     const key = `slide-${Date.now()}`;
     for (let i = 0; i < 3; i++) {
-      const v = await rateLimit(key, 3, 120);
+      const v = await rateLimit(key, 3, 1_500);
       expect(v.allowed).toBe(true);
     }
-    const blocked = await rateLimit(key, 3, 120);
+    const blocked = await rateLimit(key, 3, 1_500);
     expect(blocked.allowed).toBe(false);
     expect(blocked.retryAfterSec).toBeGreaterThan(0);
-    await new Promise((r) => setTimeout(r, 180));
-    const later = await rateLimit(key, 3, 120);
+    await new Promise((r) => setTimeout(r, 1_600));
+    const later = await rateLimit(key, 3, 1_500);
     expect(later.allowed).toBe(true);
   });
 
