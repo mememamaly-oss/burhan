@@ -470,6 +470,12 @@ def main():
                         "them exactly (stdlib only), and send the COMPUTED values "
                         "as bounded verification payloads; destructive solutions "
                         "are blocked before any request is sent")
+    s.add_argument("--spa-query", action="store_true",
+                   help="Probe query parameters recovered from SPA template "
+                        "literals (`/rest/products/search?q=${criteria}` and "
+                        "'?q=' + value). Default off: the parameters are still "
+                        "recorded, but they do not enter the request budget, "
+                        "so the published Juice Shop floor stays stable")
     b = sub.add_parser("benchmark"); b.add_argument("--url", default="http://127.0.0.1:8777")
     b.add_argument("--out", default="results/benchmark.json"); b.add_argument("--strategy-path"); b.add_argument("--timeout", type=float, default=12.0)
     # ORD-002-WIRE: the benchmark can also exercise the race battery (--race).
@@ -798,6 +804,7 @@ def main():
                          exclude_urls=a.exclude_url,
                          race=a.race, race_parallel=a.race_parallel,
                          race_variance=a.race_variance, symbolic=a.symbolic,
+                         spa_query=a.spa_query,
                          modern_v2=a.modern_v2,
                          prioritize_store=a.prioritize_store or None)
         # AXIS-18: computed payloads are SENT to validation endpoints — a
@@ -808,6 +815,10 @@ def main():
                   "solved exactly and the COMPUTED values sent as bounded "
                   "verification payloads (destructive solutions are blocked "
                   "before any request).", flush=True)
+        if a.spa_query:
+            print("[i] --spa-query: SPA template query parameters are IN the "
+                  "battery. Default scans keep them out of the request budget.",
+                  flush=True)
         # Phase 58: the attack battery changes application state — a loud,
         # explicit warning before a single probe leaves the engine.
         if a.logic_active:
