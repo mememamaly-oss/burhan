@@ -341,9 +341,32 @@ describe("bootstrap atomicity + auth + RBAC over the wire", () => {
     // or be blocked — that's the engine's business; authorization is what we test)
     expect([200, 409].includes(scan.status)).toBe(true);
     if (scan.status === 200) {
-      // cancel it immediately to not leave a zombie engine process
       const { id } = (await scan.json()) as { id: string };
-      await api(adminJar, "DELETE", `/api/scans/${id}?orgId=${orgId}`);
+      // cancel it immediately to not leave a zombie engine process —
+      // AND assert the cancel contract (B3, 2026-11-11: this call was
+      // previously a silent cleanup with zero assertions — the DELETE
+      // endpoint's own contract was never tested anywhere; COVERAGE
+      // REPORT §3.3 gap). The contract under test: an ADMIN cancels a
+      // RUNNING/QUEUED scan -> response {ok: true, cancelled: true},
+      // the DB row transitions to CANCELLED, and the action lands in
+      // the audit log (item 1.3 fail-closed pair).
+      const del = await api(adminJar, "DELETE", `/api/scans/${id}?orgId=${orgId}`);
+      expect(del.status).toBe(200);
+      const body = (await del.json()) as { ok?: boolean; cancelled?: boolean };
+      expect(body.ok).toBe(true);
+      expect(body.cancelled).toBe(true);
+      const row = await db.scan.findUnique({ where: { id } });
+      expect(row?.status).toBe("CANCELLED");
+      expect(row?.finishedAt).toBeTruthy();
+      const auditRows = await db.auditLog.findMany({
+        where: { action: "scan.cancelled", orgId },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      });
+      const hit = auditRows.some(
+        (r) => (r.detail ?? "").includes(`"scanId":"${id}"`) || (r.detail ?? "").includes(`"scanId": "${id}"`)
+      );
+      expect(hit).toBe(true);
     }
   });
 
