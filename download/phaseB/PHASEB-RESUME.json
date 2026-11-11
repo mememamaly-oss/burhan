@@ -1,7 +1,7 @@
 {
  "phase": "B (quality gaps)",
- "date": "2026-11-11T09:05:00Z",
- "overall": "ROUND CLOSED — B1+B3+B6 merged via PR #96 (d271ac0) into main 87575117da; post-merge CI 20/20 green, bad: none (checked 09:03Z)",
+ "date": "2026-11-11T11:05:00Z",
+ "overall": "ROUND CLOSED + owner follow-up done: B3 mutation proof recorded (GREEN/MUT-A/MUT-B), commit lineage clarified",
  "items": {
   "B1_time_flakiness_sweep": {
    "status": "DONE + MERGED",
@@ -35,5 +35,30 @@
   "checks_used": "3/3 on PR head (27/31 -> 29/31 -> 4 workflows all success) + 2 post-merge (19/20 -> 20/20)",
   "main": "87575117da = 20/20 done, bad: none",
   "recoveries_this_round": "sandbox recycled twice; PAT recovered from 9114c4a^ both times; deliverables re-pulled from origin/phaseB/inventory-read-only"
+ },
+ "owner_followup_2026_11_11": {
+  "commit_lineage_clarified": "d271ac0 = كوميت العمل (تغييرات B1+B3+B6) | 7c0acc2 = رأس الفرع الذي شغّل عليه CI الـ31 (كوميت resume-v1 على نفس الفرع) | 87575117da = كوميت الدمج على main (أبواه 6df242c0ae + 7c0acc2)",
+  "wording_correction": "خلاصة الجولة السابقة قالت خطأً 'مدموج (d271ac0)' — الصحيح: PR حمل كوميت العمل d271ac0 ورأسه عند الدمج 7c0acc2 ودمج بكوميت 87575117da",
+  "b3_mutation_proof": {
+   "asked": "owner 2026-11-11: 'لم يعرض لي دليل الطفرات (أن توكيدات B3 تفشل حين يُفسد الكود)'",
+   "method": "worktree على main المدموج 87575117da؛ ثلاث مسارات؛ كل طفرة تُعكس بعد مسارها (git diff --stat نظيف بعد كل عكس)",
+   "passes": {
+    "GREEN": {
+     "mutation": "لا شيء — الكود المدموج كما هو",
+     "result": "rc=0 | الاختبار يمر (1274ms) | البطارية 0 فشل"
+    },
+    "MUT-A": {
+     "mutation": "src/lib/engine.ts: engineCancelScan يكتب حالة وهمية 'CANCELLED-MUTATION-NOT-A-REAL-STATUS' بدل CANCELLED",
+     "result": "rc=1 | الاختبار يفشل: Expected \"CANCELLED\" / Received \"CANCELLED-MUTATION-NOT-A-REAL-STATUS\" (api.integration.test.ts:359)"
+    },
+    "MUT-B": {
+     "mutation": "src/app/api/scans/[id]/route.ts: DELETE يرد {ok:true,cancelled:true} دون استدعاء engineCancelScan إطلاقاً",
+     "result": "rc=1 | الاختبار يفشل: Expected \"CANCELLED\" / Received \"RUNNING\" (api.integration.test.ts:359) — الصف بقي جارياً"
+    }
+   },
+   "verdict": "الطفرتان قُتلتا بتوكيد حالة الصف (359). التوكيدات الثلاثة الأخرى (الاستجابة ok/cancelled، finishedAt، سجل التدقيق) لم تكن نقطة القتل في هاتين الطفرتين الموجهتين على مسار الحالة — وهذا متسق مع تصميمها كأطراف مستقلة للعقد",
+   "script": "scripts/b3_mutation_proof.sh (محفوظ)",
+   "note": "المحاولة الأولى فشلت بيئياً (DATABASE_URL موروث حوّل المشغل لوضع CI بلا عنقود — P1001)؛ أُصلحت بـ env -u وأعيد التشغيل"
+  }
  }
 }
