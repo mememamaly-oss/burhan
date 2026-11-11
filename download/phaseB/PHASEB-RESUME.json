@@ -1,7 +1,7 @@
 {
  "phase": "B (quality gaps)",
- "date": "2026-11-11T11:20:00Z",
- "overall": "Phase B CLOSED with owner decisions recorded: B2/B4/B5 DEFERRED; ENV-1 documented not-applicable-to-self-hosted (not closed). Follow-up under way: mutation proof part 2 (MUT-C audit-write drop, MUT-D response-shape change) + Phase C layer 1 (labeled realistic benchmark) spec-only",
+ "date": "2026-11-11T12:10:00Z",
+ "overall": "Owner decisions recorded (B2/B4/B5 deferred, ENV-1 documented not-closed) + mutation proof part 2 DONE (MUT-C killed at :369 audit assertion, MUT-D killed at :356 response-shape assertion; PR #97 f270aa5 carrying harness+evidence, CI watch in progress) + Phase C layer-1 spec+3 designs+pre-mortem written — STOPPED for owner review before any code, as ordered",
  "items": {
   "B1_time_flakiness_sweep": {
    "status": "DONE + MERGED",
@@ -26,7 +26,7 @@
   }
  },
  "waiting_on_owner": [
-  "Phase C layer 1: review the spec + 3 designs + pre-mortem document before any code (delivery expected this session)"
+  "Phase C layer 1: review download/phaseC/PHASEC-L1-SPEC.md (spec + 3 designs + pre-mortem) and decide د1–د3ب before any code"
  ],
  "round_ledger": {
   "checks_used": "3/3 on PR head (27/31 -> 29/31 -> 4 workflows all success) + 2 post-merge (19/20 -> 20/20)",
@@ -66,5 +66,26 @@
    "B5_twin_saas": "DEFERRED by owner — no SaaS-level twin equivalence work for now",
    "ENV-1": "Documented as NOT APPLICABLE to self-hosted operation (المشغل: «لا يخص التشغيل المستضاف ذاتياً»). NOT claimed closed — the live-pod :81 exposure note stays as written for that deployment; repo code remains fixed and verified"
   }
+ },
+ "b3_mutation_proof_part2": {
+  "branch": "phaseB/b3-mutation-proof-part2",
+  "commit": "f270aa5",
+  "pr": 97,
+  "mutC": "killed at api.integration.test.ts:369 (audit hit assertion, Expected true / Received false)",
+  "mutD": "killed at api.integration.test.ts:356 (body.ok assertion, Expected true / Received undefined)",
+  "green": "rc=0, 0 fails, 1457.88ms"
+ },
+ "phaseC_layer1": {
+  "status": "SPEC AWAITING OWNER REVIEW — NO CODE WRITTEN (as ordered)",
+  "document": "download/phaseC/PHASEC-L1-SPEC.md (also on inventory branch)",
+  "content": "spec (definitions, Juice Shop labeled path, generator/oracle/floor contracts, verification contract) + 3 designs (A tool-generated from official challenge list [recommended]; B engine-derived [rejected: reference independence]; C third-party copied [rejected: hand-insertion]) + pre-mortem (9 assumptions with mitigations)",
+  "owner_decisions_needed": [
+   "د1 target",
+   "د2 honest-labeling principle",
+   "د2ب unauthenticated scope",
+   "د2ج break policy",
+   "د3 budget",
+   "د3ب CI placement"
+  ]
  }
 }
