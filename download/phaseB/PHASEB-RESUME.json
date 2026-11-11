@@ -1,0 +1,39 @@
+{
+ "phase": "B (quality gaps)",
+ "date": "2026-11-11T09:05:00Z",
+ "overall": "ROUND CLOSED — B1+B3+B6 merged via PR #96 (d271ac0) into main 87575117da; post-merge CI 20/20 green, bad: none (checked 09:03Z)",
+ "items": {
+  "B1_time_flakiness_sweep": {
+   "status": "DONE + MERGED",
+   "evidence": "PR #96 / commit d271ac0: 35 sleeps + 10 timing asserts audited line-by-line; 33 safe-by-construction; 1 real fix (test_3b_flip_dns: sleep(0.1) -> flip_after=6 window + burn-to-flip loop); proofs 8/8 runs, 3/3 under 4 CPU burners, file 22/22; CI 31/31 green on 7c0acc2 incl. macOS"
+  },
+  "B3_scan_cancel_contract": {
+   "status": "DONE + MERGED",
+   "evidence": "PR #96: RED fact grep scan.cancelled on main tests = 0; GREEN assertions {ok,cancelled}+200, DB CANCELLED+finishedAt, audit row; full 8-file integration suite 0 fails on real PG"
+  },
+  "B6_docs_refresh": {
+   "status": "DONE + MERGED",
+   "evidence": "PR #96: KNOWN_LIMITATIONS + COVERAGE_REPORT b31dd30-stale -> 6df242c-verified (CI RUN 20/20, rate-limiter CLOSED by PG migration, 5 depth gaps closed w/ file:line, endpoints ~16/24 -> ~19/24)"
+  },
+  "B2_csp_nonce": {
+   "status": "NOT STARTED — awaiting owner (product code + hydration risk, no staging to verify)"
+  },
+  "B4_remediation_quality": {
+   "status": "NOT STARTED — awaiting owner design decision"
+  },
+  "B5_twin_saas": {
+   "status": "NOT STARTED"
+  }
+ },
+ "waiting_on_owner": [
+  "B2 (nonce CSP): approve or skip — touches product code; hydration breakage unverifiable without staging",
+  "B4 (remediation quality): what counts as testable 'quality' — needs owner's definition",
+  "B5 (twin depth at SaaS level): next natural layer if approved",
+  "ENV-1 (live pod :81 XTransformPort): OPERATOR action — swap /app/Caddyfile + reload; not fixable from code"
+ ],
+ "round_ledger": {
+  "checks_used": "3/3 on PR head (27/31 -> 29/31 -> 4 workflows all success) + 2 post-merge (19/20 -> 20/20)",
+  "main": "87575117da = 20/20 done, bad: none",
+  "recoveries_this_round": "sandbox recycled twice; PAT recovered from 9114c4a^ both times; deliverables re-pulled from origin/phaseB/inventory-read-only"
+ }
+}
