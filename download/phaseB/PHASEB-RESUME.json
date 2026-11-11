@@ -1,7 +1,7 @@
 {
  "phase": "B (quality gaps)",
- "date": "2026-11-11T13:35:00Z",
- "overall": "FOLLOW-UP ROUND FULLY CLOSED: owner decisions recorded (91c321f); B3 mutation proof part 2 done — MUT-C killed at :369 (audit), MUT-D killed at :356 (response shape); PR #97 green 31/31 (27 success + 4 legit skipped) and MERGED as 30b4c32936; Phase C L1 spec+3 designs+pre-mortem STOPPED for owner review (download/phaseC/PHASEC-L1-SPEC.md)",
+ "date": "2026-11-11T13:30:00Z",
+ "overall": "Owner follow-up answered: main post-merge #97 = 20/20 (17 success + 3 legit skipped); spec §2 rewritten per owner review — two-set design (dev: Juice Shop + previously-scanned; isolated: 5 from audited-clean candidates, generalization verdict from isolated set only); isolation audit committed (scripts/phasec_isolation_audit.sh). STILL NO CODE — awaiting د1–د3ب.",
  "items": {
   "B1_time_flakiness_sweep": {
    "status": "DONE + MERGED",
@@ -90,8 +90,49 @@
   ]
  },
  "next_session_steps": [
-  "1. [Phase C L1] AWAITING OWNER DECISIONS د1/د2/د2ب/د2ج/د3/د3ب on download/phaseC/PHASEC-L1-SPEC.md — spec + 3 designs + pre-mortem; NO code until approved (owner order).",
-  "2. [optional] post-merge main check: ONE check-runs call on 30b4c32936 expected all green (was green on the PR head).",
-  "3. Worktrees if recycled: /tmp/wt-inv (inventory branch), /tmp/wt-pr (PR branch, now merged)."
+  "1. AWAITING OWNER: decisions د1/د2/د2ب/د2ج/د3/د3ب on the UPDATED spec (two-set design) — download/phaseC/PHASEC-L1-SPEC.md on the inventory branch.",
+  "2. Worktrees after recycle: /tmp/wt-inv (inventory branch — use the ancestry-checked push pattern in this script, NEVER push from a detached worktree), /tmp/wt-pr (PR branch, merged)."
+ ],
+ "main_after_pr97": {
+  "commit": "30b4c32936",
+  "check": "20/20 — 17 success + 3 skipped (dogfood/SBOM/dependency-review: release/PR-event jobs), 0 failure; macOS completed ~13:15Z"
+ },
+ "isolation_audit_2026_11_11": {
+  "command": "bash scripts/phasec_isolation_audit.sh (git grep -i -F over the FULL tracked tree of origin/main)",
+  "contaminated_dev_set": {
+   "juice-shop": 7938,
+   "webgoat": 2035,
+   "crapi": 1477,
+   "testfire-altoro": 82,
+   "vulnweb-x3": 90,
+   "dvwa": 73,
+   "wrongsecrets": 21,
+   "benchmarkjava": 11
+  },
+  "grey_mentioned_never_scanned_banned_from_isolated": {
+   "mutillidae": 34,
+   "nodegoat": 35,
+   "dvga": 185,
+   "dvws": 44
+  },
+  "clean_zero_mentions": [
+   "bWAPP",
+   "RailGoat",
+   "Security Shepherd",
+   "VAMPI",
+   "DVJA",
+   "XVWA"
+  ],
+  "clean_reserve_also_zero": [
+   "DVNA",
+   "sqli-labs",
+   "xss-game",
+   "owasp-skf",
+   "rest-api-labs",
+   "WackoPicko"
+  ]
+ },
+ "honest_ledger_corrections": [
+  "2026-11-11: the three earlier 'pushed' commits on phaseB/inventory-read-only (91c321f..16ece26 as reported) were NOT on the remote — the /tmp worktree was detached-HEAD, so 'git push origin phaseB/inventory-read-only' pushed the STALE local branch (1444887) as a no-op. Discovered via ls-remote after a sandbox recycle; fixed by pushing 16ece26 with an ancestry check (1444887 is its ancestor, clean fast-forward). All five commits were intact in the shared object store; nothing was lost, but every earlier 'pushed: <sha>' printout overstated the remote state."
  ]
 }
