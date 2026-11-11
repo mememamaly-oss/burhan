@@ -1,0 +1,42 @@
+{
+ "phase": "B (quality gaps)",
+ "date": "2026-11-11T06:20:00Z",
+ "overall": "PENDING — PR #96 (B1+B3+B6, d271ac0) awaiting CI 31/31; then merge; then ONE main check closes the round",
+ "owner_approval": "'اكمل' after the inventory presentation = approved proposed order B1->B6->B3 (B2 nonce-CSP deliberately NOT started: touches product code + no staging env to verify hydration; needs explicit owner approval)",
+ "items": {
+  "B1_time_flakiness_sweep": {
+   "status": "DONE (pending CI)",
+   "evidence": "35 sleeps + 10 timing asserts audited line-by-line; 33 safe-by-construction (sleep>window / bounded loops / sync send makes A6 sleep pure slack); 1 real fix: test_3b_flip_dns sleep(0.1)->flip_after=6 window + burn-to-flip loop; proofs: 8/8 runs, 3/3 under 4 CPU burners, file 22/22; rejected first attempt (readiness-poll + reverse count 3-dns.queries) documented in commit message as its own timing bet"
+  },
+  "B3_scan_cancel_contract": {
+   "status": "DONE (pending CI)",
+   "evidence": "RED fact: grep scan.cancelled on main tests = 0 hits (no contract test existed). GREEN: response {ok,cancelled}+200, DB row CANCELLED+finishedAt, audit scan.cancelled row asserted; full 8-file integration suite 0 fails on real pgserver PG; test 1178ms"
+  },
+  "B6_docs_refresh": {
+   "status": "DONE (pending CI)",
+   "evidence": "KNOWN_LIMITATIONS + COVERAGE_REPORT updated from b31dd30-stale to 6df242c-verified: CI RUN (20/20), rate-limiter CLOSED (PG shared store), depth gaps [mid]/coverage/DELETE/E9/multi-process CLOSED with file:line pointers, open gaps honestly kept (twin B5, remediation B4, HTTPS B9, Docker B7); endpoints ~16/24 -> ~19/24"
+  },
+  "B2_csp_nonce": {
+   "status": "NOT STARTED — needs explicit owner approval (product code + hydration risk unverifiable without staging)"
+  },
+  "B4_remediation_quality": {
+   "status": "NOT STARTED — needs design decision from owner (what is testable 'quality')"
+  },
+  "B5_twin_saas": {
+   "status": "NOT STARTED"
+  }
+ },
+ "pr": {
+  "number": 96,
+  "head": "d271ac062d6843a31487d4aebeec85544254fe89",
+  "branch": "phaseB/time-flakiness-sweep",
+  "ci": "awaiting; watch cap 3 checks, save before each wait"
+ },
+ "local_env_notes": "pgserver installed via pip; saas-data/ must exist before scripts/run_integration_tests.sh (mkdir -p saas-data); rm /tmp/burhan-integration-gate.json before each local integration run (stale gate breaks demo tests); bun install --frozen-lockfile needed after worktree creation",
+ "next_after_merge": [
+  "1. ONE check: new merge commit check-runs — expect 20/20 done, bad: none",
+  "2. Update PHASEB-INVENTORY.md statuses (B1/B3/B6 -> DONE+merged) on the inventory branch, push",
+  "3. Save resume v2 (round CLOSED) + copy deliverables to /home/z/my-project/download/phaseB/",
+  "4. STOP for owner: B2/B4/B5 decision + ENV-1 operator action reminder"
+ ]
+}
