@@ -1,7 +1,7 @@
 {
  "phase": "B (quality gaps)",
- "date": "2026-11-11T13:30:00Z",
- "overall": "Owner follow-up answered: main post-merge #97 = 20/20 (17 success + 3 legit skipped); spec §2 rewritten per owner review — two-set design (dev: Juice Shop + previously-scanned; isolated: 5 from audited-clean candidates, generalization verdict from isolated set only); isolation audit committed (scripts/phasec_isolation_audit.sh). STILL NO CODE — awaiting د1–د3ب.",
+ "date": "2026-11-11T14:20:00Z",
+ "overall": "Owner said 'continue' -> interpreted as preparation only, NO product code (decisions د1–د3ب still pending). This round: (1) docker IS available on runners (dind+compose proven in live-validation.yml) — spec §2.1 constraint corrected; (2) isolation-candidate feasibility research from primary sources: RailGoat moved OWASP->smDahlgren (12 official Capybara specs), VAmPI=erev0s (9 vulns + secure/insecure twin), Shepherd alive (12 lessons), XVWA 20 modules, DVJA thin reference (replacement first: DVNA/owasp-skf), bWAPP dropped (no pinnable official channel); (3) new identifiers re-audited: zero mentions; (4) dossier written: download/phaseC/PHASEC-L1-FEASIBILITY.md. STILL NO CODE.",
  "items": {
   "B1_time_flakiness_sweep": {
    "status": "DONE + MERGED",
@@ -90,8 +90,9 @@
   ]
  },
  "next_session_steps": [
-  "1. AWAITING OWNER: decisions د1/د2/د2ب/د2ج/د3/د3ب on the UPDATED spec (two-set design) — download/phaseC/PHASEC-L1-SPEC.md on the inventory branch.",
-  "2. Worktrees after recycle: /tmp/wt-inv (inventory branch — use the ancestry-checked push pattern in this script, NEVER push from a detached worktree), /tmp/wt-pr (PR branch, merged)."
+  "1. AWAITING OWNER: decisions د1/د2/د2ب/د2ج/د3/د3ب — spec v2.1 + feasibility dossier on the inventory branch.",
+  "2. On approval of د1(أ): step zero = bring up the 5 isolated candidates in order Shepherd->RailsGoat->VAmPI->XVWA->DVJA on runners (dind pattern), pin commit+digest, replace failures from reserve (DVNA, owasp-skf) after re-audit.",
+  "3. Worktrees after recycle: /tmp/wt-inv (inventory — verified-push pattern in scripts/phasec_spec_v2_push.py), /tmp/feascand (research clones, NOT committed)."
  ],
  "main_after_pr97": {
   "commit": "30b4c32936",
@@ -134,5 +135,72 @@
  },
  "honest_ledger_corrections": [
   "2026-11-11: the three earlier 'pushed' commits on phaseB/inventory-read-only (91c321f..16ece26 as reported) were NOT on the remote — the /tmp worktree was detached-HEAD, so 'git push origin phaseB/inventory-read-only' pushed the STALE local branch (1444887) as a no-op. Discovered via ls-remote after a sandbox recycle; fixed by pushing 16ece26 with an ancestry check (1444887 is its ancestor, clean fast-forward). All five commits were intact in the shared object store; nothing was lost, but every earlier 'pushed: <sha>' printout overstated the remote state."
- ]
+ ],
+ "feasibility_research_2026_11_11": {
+  "correction": "spec v2.1: 'no root/docker' was an r19 LOCAL-sandbox constraint, not a runner constraint — ci.yml runs Juice Shop container + postgres service; live-validation.yml runs crAPI via docker:27-dind --privileged + official compose",
+  "isolated_ranked": [
+   {
+    "app": "Security Shepherd",
+    "origin": "OWASP/SecurityShepherd@dev 14c195a (alive, pushed 2026-11-11)",
+    "stack": "Java/Tomcat+MariaDB+Mongo",
+    "reference": "12 lessons in Java source + moduleSchemas.sql (12 per-lesson schemas)",
+    "deploy": "official docker-compose up -d --build",
+    "license": "GPLv3"
+   },
+   {
+    "app": "RailsGoat",
+    "origin": "smDahlgren/RailGoat@master f1de24f (MOVED from OWASP — 404 there)",
+    "stack": "Rails 3-5 + SQLite/MySQL",
+    "reference": "12 official Capybara vulnerability specs in spec/vulnerabilities/",
+    "deploy": "official Dockerfile + docker-compose (port 3000)",
+    "license": "MIT"
+   },
+   {
+    "app": "VAmPI",
+    "origin": "erev0s/VAmPI@master f16052d (1352 stars, alive)",
+    "stack": "Flask API only",
+    "reference": "9 vulns in README + OpenAPI 3 specs in-repo",
+    "deploy": "official Docker Hub image + compose with SECURE twin :5001 and INSECURE :5002 (native FP measurement)",
+    "license": "MIT"
+   },
+   {
+    "app": "XVWA",
+    "origin": "s4n7h0/xvwa@master fb30fa5 (2020)",
+    "stack": "PHP/MySQL",
+    "reference": "20 vulnerability modules in vulnerabilities/ dir",
+    "deploy": "NO official Dockerfile (community containers only) — needs our own LAMP container (DVWA static-php precedent)",
+    "license": "GPLv3",
+    "creds": "admin:admin documented"
+   },
+   {
+    "app": "DVJA",
+    "origin": "appsecco/dvja@master 597ece1",
+    "stack": "Java/Struts2+MySQL",
+    "reference": "THIN: 3 assessment docs, a1-injection.md EMPTY (0 lines) — derived-from-code reference or replace (DVNA then owasp-skf)",
+    "deploy": "official Dockerfile + compose (port 8080)",
+    "license": "MIT"
+   }
+  ],
+  "bwapp_dropped": "no official GitHub repo (only community mirrors raesene/bWAPP etc.), official site itsecgames.com unreachable from this box, SourceForge responds — distribution channel not pinnable for automated verification",
+  "new_identifiers_reaudit": {
+   "erev0s": 0,
+   "VAmPI": 0,
+   "smDahlgren": 0,
+   "appsecco": 0,
+   "s4n7h0": 0,
+   "itsecgames": 0
+  },
+  "dev_set_ci_feasible": [
+   "Juice Shop (existing container in ci.yml)",
+   "crAPI (existing dind compose in live-validation.yml)",
+   "WebGoat (official pinned image, easy)",
+   "DVWA (official image, easy)"
+  ],
+  "dev_set_historical_only": [
+   "testfire/Altoro (live external)",
+   "vulnweb x3 (live external)",
+   "BenchmarkJava (JDK/Maven/Tomcat chain impossible on free runners — r19 constraint)"
+  ],
+  "aggregate_isolated_labels": ">=56 (12+12+9+20+3) before measurable/out-of-scope classification"
+ }
 }
