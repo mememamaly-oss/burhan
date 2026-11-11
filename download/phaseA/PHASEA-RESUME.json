@@ -1,48 +1,20 @@
 {
- "date": "2026-11-11T02:55:00Z",
  "phase": "A (baseline & safety)",
- "overall": "PENDING — Phase A substantively complete; ONLY the macOS tail of main CI on 6df242c0ae still running at cutoff (19/20 done, no bad). Next session: ONE completion check closes Phase A.",
+ "status": "CLOSED — 2026-11-11T02:54Z",
+ "date": "2026-11-11T02:55:00Z",
+ "final_state": "main 6df242c0ae: 20/20 check-runs done, ZERO bad (incl. Engine macOS, completed ~02:51Z after 65min as usual). PR #93 (45d2f4d2d8) + flake fix PR #94 (6df242c0ae) both merged green.",
  "items": {
-  "A.1_backup": {
-   "status": "DONE",
-   "evidence": "/home/z/my-project/backups/burhan-phaseA-2026-11-10T22-03.bundle (442MB, --all) + sha256 cb0ab9a4…e1c676ba; verify: complete history"
-  },
-  "A.2_baseline": {
-   "status": "DONE",
-   "evidence": "761 tracked files; 458 test fns; 45 root items; pack 423.15MiB; top-20 listed; CI #554 success on 025caa64bf"
-  },
-  "A.3a_secrets_scan": {
-   "status": "DONE",
-   "evidence": "628 commits scanned; 2415 raw hits ALL dummy (jwt demo x2359, AKIAUNITTESTKEY00001 x20, MIIE... x24, users.yml x12); real-token patterns ZERO; .env in history = sqlite path only; NO filter-repo"
-  },
-  "A.3b_guard": {
-   "status": "DONE",
-   "evidence": "PR #93 merged as 45d2f4d2d8 after 31/31 on head d02fa7e (incl. macOS x2, Tree hygiene success x2)"
-  },
-  "A.closeout_flake_fix": {
-   "status": "DONE",
-   "evidence": "PR #94 (head 19af0f1 = a6565ac fix + 19af0f1 resume) CI 31/31 green incl. macOS x2 and SaaS-PG success x2 (the flaky member); merged as 6df242c0ae. On main 6df242c0ae: SaaS-PG success (early check 02:35Z), 19/20 done no bad at 02:50Z, only 'Engine macOS' tail running at session cutoff — same job already green on the identical PR head, so this is a completion formality, next session verifies with ONE check."
-  }
+  "A.1_backup": "DONE — /home/z/my-project/backups/burhan-phaseA-2026-11-10T22-03.bundle (442MB, --all, sha256 cb0ab9a4…e1c676ba)",
+  "A.2_baseline": "DONE — 761 files; 458 test fns; pack 423.15MiB; top-20; CI #554 green on 025caa64bf",
+  "A.3a_secrets_scan": "DONE — 628 commits, 2415 raw hits ALL dummy, real-token patterns ZERO, NO filter-repo needed",
+  "A.3b_guard": "DONE — PR #93 merged 45d2f4d2d8 (31/31 on head d02fa7e)",
+  "A.closeout_flake_fix": "DONE — PR #94 (head 19af0f1): window 120->1500ms, assertions unchanged; 31/31 green; merged 6df242c0ae; main 20/20 no bad = Phase A CLOSED"
  },
- "ci_watch": {
-  "pr": 94,
-  "head": "a6565ac",
-  "checks_used": 0,
-  "cap": 3,
-  "note": "save before each wait; different command each check"
+ "phaseB": {
+  "status": "INVENTORY SAVED — AWAITING OWNER REVIEW (read-only, no fixes without approval)",
+  "file": "download/phaseB/PHASEB-INVENTORY.md (branch phaseB/inventory-read-only, commit afbbda4, pushed)",
+  "summary": "23 items cross-checked vs CURRENT code (docs were b31dd30-stale): 7 closed by later work (PG rate-limit shared store, CI-on-GitHub, real migrations, [mid] role tests, coverage endpoint tests, E9 CLI battery, working PAT), 1 critical operator action (ENV-1 live pod :81 relay), 9 open (B1 time-flakiness class NEW finding, B2 CSP nonce work, B3 DELETE-scan assert, B4 G-quality, B5 twin SaaS, B6 docs refresh, B7-B10 environment-blocked/out-of-scope), 4 accepted-with-awareness",
+  "proposed_order": "B1 -> B6 -> B3 -> B2 (bigger, separate) -> B4/B5 optional -> B7-B10 per environment"
  },
- "next_steps_after_merge": [
-  "Phase A closes; write PHASEA-REPORT.md in download/phaseA/ (in-repo)",
-  "Wait for owner review before Phase B (inventoried from KNOWN_LIMITATIONS/COVERAGE_REPORT/worklog/SECURITY_AUDIT + TODO grep)"
- ],
- "env_notes": {
-  "worktrees": "/home/z/my-project/burhan (stale r15, untouched), /home/z/my-project/burhan-fix (fix branch, pushed)",
-  "local_int_env": "pgserver PG on 127.0.0.1:55432; bun install --frozen-lockfile; prisma 6.19.3 pinned via node_modules; saas-data/ untracked local cluster; STALE /tmp/burhan-integration-gate.json from earlier runs breaks demo tests — rm before each local integration run"
- },
- "post_merge": [
-  "1. ONE check: GET /commits/6df242c0ae.../check-runs — expect 20/20 done, bad: none. Phase A CLOSED.",
-  "2. Update PHASEA-REPORT.md final status + this resume (v5) on fix branch, push.",
-  "3. Phase B inventory (READ-ONLY, no fixes without owner approval): parse KNOWN_LIMITATIONS.md + COVERAGE_REPORT.md (8 depth gaps) + SECURITY_AUDIT.md (ENV-1 operator steps) + worklog.md open items + grep -rn 'TODO|FIXME|XXX' on src/ burhan/ scripts/ -> table (item/severity/source/status) saved to download/phaseB/PHASEB-INVENTORY.md for owner review.",
-  "4. STOP and wait for owner review before any Phase B fix work."
- ]
+ "next_session_entry": "Owner reviews download/phaseB/PHASEB-INVENTORY.md and picks items; NOTHING in Phase B starts without explicit approval. If owner says 'اكمل' with no selection, ASK which items — do not start B work."
 }
