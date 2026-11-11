@@ -1,0 +1,106 @@
+name: phasec-step-zero
+
+# PHASEC L1 step 0b (spec v2.2 §8): bring up each SEALED isolated-set
+# candidate (seal: download/phaseC/seal/ISOLATED-SEAL.json + CLASSIFICATION.json
+# — committed BEFORE this workflow may run, per owner rule 2026-11-11) and
+# prove readiness from the SAME network path a scan would use.
+#
+# Owner rule #3 (2026-11-11): workflow_dispatch + schedule ONLY.
+# NEVER runs on pull_request — an isolated-set run must never be triggerable
+# by an untrusted fork PR.
+#
+# Pattern: existing live-validation.yml dind pattern (docker:27-dind
+# service, DOCKER_HOST socket, readiness probed from a container INSIDE the
+# dind on the target network — run-41286864928 lesson).
+#
+# Network isolation (owner rule §5.1/7): each target's containers, after
+# image pull + build completes, run on an INTERNAL docker network
+# (--internal: no outside egress). Only the probe container joins it
+# transiently. No cloned app code runs outside a container.
+#
+# All sources pinned to FULL 40-char commits (seal manifests) and official
+# images pinned by digest (vampi, wackopicko).
+#
+# BLOCKED protocol (owner rule §5.1/5): a candidate that fails to come up
+# is logged (command + output + reason) to phasec-step-zero/BLOCKED-*.md
+# and is non-blocking for the rest of the matrix — replacement
+# (sqli-labs -> owasp-skf) is a separate decision with a new seal commit.
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidates:
+        description: "Space-separated candidates (default: all five sealed)"
+        default: "shepherd railsgoat vampi xvwa wackopicko"
+        required: false
+  schedule:
+    # weekly, off-peak UTC — a drift canary, not a CI gate
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  step-zero:
+    name: Isolated candidates step-zero (sealed set)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      docker:
+        image: docker:27-dind
+        options: >-
+          --privileged
+    env:
+      DOCKER_HOST: unix:///var/run/docker.sock
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify the seal AND classification are intact (prerequisite — no run without them)
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib, sys
+          seal_dir = pathlib.Path("download/phaseC/seal")
+          seal = json.loads((seal_dir / "ISOLATED-SEAL.json").read_text())
+          bad = []
+          for r in seal["isolated_set"]:
+              f = seal_dir / r["file"]
+              if not f.exists():
+                  bad.append(f"{r['file']}: MISSING"); continue
+              got = hashlib.sha256(f.read_bytes()).hexdigest()
+              if got != r["sha256"]:
+                  bad.append(f"{r['file']}: sha256 drift {r['sha256'][:8]}… != {got[:8]}…")
+              c = r["pinned_commit"]
+              if len(c) != 40 or not all(x in "0123456789abcdef" for x in c):
+                  bad.append(f"{r['file']}: pinned commit not full 40-hex: {c[:20]}…")
+          clf = seal.get("classification", {})
+          cf = seal_dir / clf.get("file", "")
+          if not cf.exists():
+              bad.append("CLASSIFICATION.json: MISSING")
+          else:
+              got = hashlib.sha256(cf.read_bytes()).hexdigest()
+              if got != clf.get("sha256"):
+                  bad.append("CLASSIFICATION.json: sha256 drift")
+          if bad:
+              print("SEAL VERIFICATION FAILED:"); [print(" ", b) for b in bad]; sys.exit(1)
+          t = clf.get("totals", {})
+          print(f"seal intact: {len(seal['isolated_set'])} members, "
+                f"{t.get('labels')} labels "
+                f"({t.get('measurable')} measurable / {t.get('out_of_scope')} out_of_scope)")
+          PY
+
+      - name: Bring up each sealed candidate (isolated network) + prove readiness
+        run: |
+          bash scripts/phasec_step_zero_up.sh ${{ inputs.candidates || 'shepherd railsgoat vampi xvwa wackopicko' }}
+
+      - name: Upload step-zero evidence (logs + probes + BLOCKED records, if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phasec-step-zero-evidence
+          path: |
+            phasec-step-zero/
+          if-no-files-found: error
