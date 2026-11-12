@@ -1,0 +1,34 @@
+{
+ "suspended": [
+  {
+   "app": "railsgoat",
+   "decision": "BLOCKED (suspended)",
+   "decided_by": "owner",
+   "date": "2026-11-12",
+   "order": "owner decision (ج): proceed with the remaining four isolated candidates; railsgoat stays BLOCKED, documented here — NO new seal commit at this time",
+   "ground_truth_evidence": {
+    "pinned_commit": "f1de24f380646b847dd6478583d8b5f9bc1f7180",
+    "syntax_broken": "app/controllers/sessions_controller.rb:44 syntax error (orphaned if-block lines 26-37 outside any method + extra end) — app cannot boot; root route is sessions#new",
+    "evidence_runs": [
+     "43233698532 (container log: repeated 500 + SyntaxError)",
+     "43230711661 (image built, Bundle complete! 136 gems, probe window expired silently)"
+    ],
+    "training_commit": "f1de24f 'Worked through Lab 4' also FIXES sealed measurable vulns (broken_auth, sensitive_data_exposure, url_access/mass_assignment) — any patch either restores vulnerable code (touches labels) or keeps fixes (labels lie)"
+   },
+   "origin_audit": {
+    "sealed_repo": "smDahlgren/RailGoat",
+    "official_owasp_repo": "404 (github.com/OWASP/RailGoat gone)",
+    "fork_flag": false,
+    "repo_created": "2018-03-22T13:34:17Z (6 days before the pinned commit)",
+    "history": "1430 commits, first 2013-03-19 by Ken Johnson (OWASP project lead); last official OWASP merge 2988d61 (PR #343, 2018-03-16); repo carries the FULL official history — a relocated mirror + one training commit, not an unrelated fork",
+    "seal_note": "origin field in railsgoat-reference.json: 'smDahlgren/RailGoat (moved from OWASP/RailGoat — 404 there)'"
+   },
+   "effect_on_seal": {
+    "membership": "railsgoat REMAINS a seal member (suspended) — ISOLATED-SEAL.json and the reference manifests are NOT modified (no new seal commit per owner order)",
+    "numbers": "isolated-set ACTIVE numbers are now computed EXCLUDING railsgoat: see download/phaseC/PHASEC-L1-ACTIVE-NUMBERS.md (replacing the previous all-5 figures; the old figures are retracted from use, not re-published)",
+    "step_zero": "scripts/phasec_step_zero_up.sh and .github/workflows/phasec-step-zero.yml now SKIP railsgoat by default with an explicit SUSPENDED log line (running it on demand remains possible for the record)"
+   }
+  }
+ ],
+ "note": "This file is a DECISION RECORD beside the seal. It deliberately does not alter any sealed hash: suspending a member's ACTIVE status by owner order is a documented decision, and any future re-pin (e.g. to 2988d61) or replacement (sqli-labs / owasp-skf) will be a NEW seal commit per protocol §5.1/5."
+}

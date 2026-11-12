@@ -6785,3 +6785,43 @@ Two owner orders this round, both landed on r19-1-webgoat-spa (PR #86):
   parser 2.5.0.4->2.5.0.5 lock bump remain required either way — verified:
   parent pins the same yanked parser), replacement candidate, or keep
   BLOCKED. No scan of any candidate before owner approval (gate C).
+
+- phaseC owner order 2026-11-12 executed (decision ج + six tasks):
+  (1) railsgoat SUSPENDED — decision record download/phaseC/seal/
+  SUSPENDED.json (a NEW file beside the seal; sealed hashes untouched,
+  no new seal commit per the owner's order). Step-zero script + workflow
+  skip it by default; running it alone remains possible for the record.
+  (2) origin audit (task 1): sealed repo smDahlgren/RailGoat is NOT a
+  GitHub fork (fork:false, created 2018-03-22 — 6 days before the pinned
+  commit); OWASP/RailGoat is 404; the repo carries the FULL official
+  history (1430 commits, first 2013-03-19 by Ken Johnson, last official
+  OWASP merge 2988d61 / PR #343). It was sealed as "moved from
+  OWASP/RailGoat — 404 there": a relocated mirror + the maintainer's
+  training commit on top — the fatal flaw is that ONE commit, not the
+  origin.
+  (3) bring-up patches table (task 2): download/phaseC/PHASEC-L1-
+  BRINGUP-PATCHES.md — all seven patches are environment/build-layer
+  only (maven build step from the project's own README, apt archive
+  redirect, yanked parser gem availability bump, xvwa db host, compose
+  network bridge, digest-pinned official images); none touches a label,
+  a route, or app code.
+  (4) active numbers (task 3): download/phaseC/PHASEC-L1-ACTIVE-
+  NUMBERS.md — the four active isolated candidates are 72 measurable /
+  99 total labels / 27 out-of-scope, computed by code from the sealed
+  CLASSIFICATION.json with a cross-check (72+9=81, 99+12=111, 27+3=30 =
+  sealed totals — consistent, seal file untouched). The old all-5
+  figures are retracted from use, not re-published.
+  (5) network_egress de-flaked (task 5): multi-host probe
+  (scanme:443, scanme:80, github:443) + all-unreachable downgrades to
+  WARN per the OAST providers' contract — a third-party host outage
+  (scanme dark 08:50–14:30Z today) can no longer redden Engine jobs.
+  New tests: tests/test_phasec_doctor_egress.py (both contracts), 2/2
+  pass locally.
+  (6) dev-set calibration workflow (task 6, awaiting dispatch after
+  merge): .github/workflows/phasec-dev-calibration.yml — workflow_dispatch
+  ONLY, four dev targets (Juice Shop v20.3.0 digest-pinned, WebGoat
+  v2023.8 digest-pinned, DVWA 1.9 tag-pinned + db init, crAPI v1.1.5
+  official compose), unauth seeded scans via the existing ci_real_target_
+  scan.py, OBSERVATION ONLY (no floors, no gates beyond the baseline
+  contract), isolated set untouched. One round then STOP for owner
+  review.

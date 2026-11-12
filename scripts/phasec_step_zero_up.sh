@@ -241,6 +241,18 @@ main() {
   local wanted="${*:-shepherd railsgoat vampi xvwa wackopicko}"
   local overall=0 name rc
   : > "$OUT/summary.txt"
+  # owner decision (ج) 2026-11-12: railsgoat is SUSPENDED (BLOCKED) —
+  # skip it unless explicitly requested for the record. Decision record:
+  # download/phaseC/seal/SUSPENDED.json (a NEW file beside the seal; the
+  # sealed hashes are untouched per the owner's no-new-seal order).
+  case " $wanted " in
+    *" railsgoat "*)
+      if [ -f "$SEAL_DIR/SUSPENDED.json" ] && [ "$wanted" != "railsgoat" ]; then
+        log "railsgoat: SUSPENDED (owner decision 2026-11-12) — skipped; run with the single argument 'railsgoat' to force it for the record"
+        wanted=$(printf '%s' "$wanted" | sed 's/\<railsgoat\>//; s/  */ /g; s/^ //; s/ $//')
+        echo "SUSPENDED railsgoat (skipped — owner decision 2026-11-12, see seal/SUSPENDED.json)" >> "$OUT/summary.txt"
+      fi ;;
+  esac
   for name in $wanted; do
     case "$name" in
       shepherd)    up_shepherd ;;
