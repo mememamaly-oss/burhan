@@ -255,7 +255,16 @@ main() {
       log "READY: $name (probe HTTP $(cat "$OUT/$name.probe" 2>/dev/null))"
       echo "READY $name" >> "$OUT/summary.txt"
     else
-      record_blocked "$name" "$rc" "probe or compose failed — see $name.up.log"
+      # capture container logs BEFORE the teardown wipes them — the
+      # railsgoat trail (runs 43188415114..43230711661) showed a started
+      # container that never answered, and the up.log ends at "Started"
+      # with zero evidence of what the app itself said.
+      case "$name" in
+        railsgoat)  docker logs railsgoat-web-1 > "$OUT/$name.container.log" 2>&1 ;;
+        shepherd)   docker logs secshep_tomcat  > "$OUT/$name.container.log" 2>&1 ;;
+        *)          : ;;
+      esac
+      record_blocked "$name" "$rc" "probe or compose failed — see $name.up.log + $name.container.log"
       echo "BLOCKED $name" >> "$OUT/summary.txt"
       overall=1
     fi
