@@ -6747,3 +6747,19 @@ Two owner orders this round, both landed on r19-1-webgoat-spa (PR #86):
   open pending either scanme recovery or an owner decision (multi-host
   probe fallback vs one-time bypass). Step-zero round 2 dispatched from the
   branch ref instead (same seal, gate re-verified at run start).
+
+- railsgoat bring-up trail (2026-11-12, runs 43188415114 → 43189495319 →
+  43190355488, each failure root-caused and fixed, never rerun-to-green):
+  (a) patch(1) invocation used -p0 with a/ b/ headers -> "archive patch
+  failed" (fixed: fail-closed python heredoc, grep-guard + count==1 +
+  post-check, simulated green against the pinned tree before push);
+  (b) archive.debian.org serves EOL suites unsigned -> apt refused
+  unauthenticated installs (fixed: --allow-unauthenticated +
+  Check-Valid-Until on both installs; documented archive property; the
+  base build tools already ship in the official ruby image);
+  (c) parser 2.5.0.4 yanked from rubygems — audited ALL 134 locked gems,
+  exactly one unavailable (fixed: lock bumped to 2.5.0.5; adjacent release
+  on the 2.5.0 branch, same ast ~> 2.4.0 dep, sole dependent rubocop
+  requires parser >= 2.5 — satisfied).
+  Shepherd confirmed READY in 43188415114 (probe 302 via the sealed maven
+  pre-build fix). vampi/xvwa/wackopicko READY (200) since run 43128061378.

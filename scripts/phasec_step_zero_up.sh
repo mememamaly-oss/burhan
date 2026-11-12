@@ -26,7 +26,10 @@
 #               against the stretch CA store (GlobalSign Root R3 present,
 #               openssl verify OK 2026-11-12) so `bundle install` works;
 #               ca-certificates refresh from the archive kept as belt-and-
-#               braces because that root is near its 2028 expiry.
+#               braces because that root is near its 2028 expiry. Also:
+#               parser 2.5.0.4 was yanked from rubygems (the only yanked
+#               gem of the 134 pinned) — the lock is bumped to 2.5.0.5
+#               (same branch, same ast ~> 2.4.0 dep) at bring-up time.
 #   vampi       official image erev0s/vampi; env var is "vulnerable"
 #               (0/1) per README docker-run example; SINGLE port 5000 for
 #               BOTH twins (safe/unsafe run as two containers); swagger /ui.
@@ -160,7 +163,22 @@ if t.count(OLD) != 1:
 f.write_text(t.replace(OLD, NEW))
 if "archive.debian.org" not in f.read_text():
     raise SystemExit("post-patch check failed: archive line absent")
-print("Dockerfile patched: stretch -> archive.debian.org")
+# parser 2.5.0.4 was yanked from rubygems.org (run-43190355488: "that
+# version could not be found in any of the sources" — the ONLY yanked gem
+# of the 134 pinned; verified 2026-11-12). Bump the lock to 2.5.0.5, the
+# adjacent release on the same 2.5.0 branch: same single runtime dep
+# (ast ~> 2.4.0, lock has ast 2.4.0) and the only dependent in the lock
+# (rubocop via parser >= 2.5) is still satisfied.
+lf = pathlib.Path("Gemfile.lock")
+lt = lf.read_text()
+OLDG = "    parser (2.5.0.4)"
+NEWG = "    parser (2.5.0.5)"
+if lt.count(OLDG) != 1:
+    raise SystemExit(f"Gemfile.lock parser pin count != 1 (got {lt.count(OLDG)})")
+lf.write_text(lt.replace(OLDG, NEWG))
+if "parser (2.5.0.5)" not in lf.read_text():
+    raise SystemExit("post-patch check failed: parser pin not bumped")
+print("Dockerfile patched: stretch -> archive.debian.org; Gemfile.lock parser 2.5.0.4 -> 2.5.0.5 (yanked upstream)")
 PY
   cat > docker-compose.override.yml <<'YAML'
 networks:
