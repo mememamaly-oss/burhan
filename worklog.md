@@ -6732,3 +6732,18 @@ Two owner orders this round, both landed on r19-1-webgoat-spa (PR #86):
   already merged in 9c5e1c23 (two-number rule §3.2.1 + 4bis gate, B1-2
   fragility register, token-print rule §5.1.6). No tool scan until explicit
   owner approval (gate C).
+
+- CI blockage on PR #100 (2026-11-12, ~08:50Z onward): the Engine doctor's
+  network_egress check probes a SINGLE third-party host (scanme.nmap.org /
+  45.33.32.156). It passed at 00:32/00:47/00:56Z (port 80) on the same
+  runners, then started failing with errno 101 on BOTH ports from BOTH the
+  Linux and macOS Engine jobs — and direct checks show the host itself is
+  unreachable/refusing (443 RST, 80 timeout). Three rerun attempts all
+  failed identically. The PR diff (a bring-up script CI never executes +
+  three markdown files) cannot cause this; it is an external-host outage.
+  Registered as external-dependency fragility: a doctor check whose
+  pass/fail depends on one outside host makes CI availability hostage to
+  third-party infrastructure. NOT bypassed, NOT admin-merged — the PR stays
+  open pending either scanme recovery or an owner decision (multi-host
+  probe fallback vs one-time bypass). Step-zero round 2 dispatched from the
+  branch ref instead (same seal, gate re-verified at run start).
