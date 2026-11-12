@@ -21,7 +21,8 @@
     "fork_flag": false,
     "repo_created": "2018-03-22T13:34:17Z (6 days before the pinned commit)",
     "history": "1430 commits, first 2013-03-19 by Ken Johnson (OWASP project lead); last official OWASP merge 2988d61 (PR #343, 2018-03-16); repo carries the FULL official history — a relocated mirror + one training commit, not an unrelated fork",
-    "seal_note": "origin field in railsgoat-reference.json: 'smDahlgren/RailGoat (moved from OWASP/RailGoat — 404 there)'"
+    "seal_note": "origin field in railsgoat-reference.json: 'smDahlgren/RailGoat (moved from OWASP/RailGoat — 404 there)'",
+    "correction_2026_11_12": "CORRECTED by owner order 2026-11-12: the official repo IS ALIVE under the case-sensitive name OWASP/railsgoat (lowercase; queried wrongly before as OWASP/RailGoat -> 404). Default branch main, last push 2026-09-08, HEAD f5951f13089d85c979de09e7da3c8c0fb982f94a ('Merge pull request #510'), Rails 8.0.4 / Ruby 3.4.1, boots clean from ruby:3.4.1 with ZERO bring-up patches; the training commit f1de24f does NOT exist in the official history at all; all 12 sealed spec files exist on official main with the five measurable vuln patterns (fixed only in f1de24f) still UNPATCHED there. A NEW SEAL from f5951f1 is proposed to the owner as an independent decision (PROPOSED-NEW-SEAL-railsgoat.md) — not executed before approval; this seal remains unchanged and the suspension stands until that decision."
    },
    "effect_on_seal": {
     "membership": "railsgoat REMAINS a seal member (suspended) — ISOLATED-SEAL.json and the reference manifests are NOT modified (no new seal commit per owner order)",
