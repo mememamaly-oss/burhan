@@ -1,0 +1,31 @@
+Unable to find image 'erev0s/vampi@sha256:0a5a224b6e14ae7da6a6ea265178ff71286ff903aec74adee98f660bb0e4ca12' locally
+docker.io/erev0s/vampi@sha256:0a5a224b6e14ae7da6a6ea265178ff71286ff903aec74adee98f660bb0e4ca12: Pulling from erev0s/vampi
+589002ba0eae: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+2ea2995a6afa: Pulling fs layer
+8d1e490ed26d: Pulling fs layer
+0b03716e5e03: Pulling fs layer
+811797f98545: Pulling fs layer
+2bc1971748dc: Pulling fs layer
+eacaf042513e: Pulling fs layer
+4f4fb700ef54: Already exists
+2ea2995a6afa: Download complete
+eacaf042513e: Download complete
+589002ba0eae: Download complete
+811797f98545: Download complete
+0b03716e5e03: Download complete
+8cb6572ef408: Download complete
+8d1e490ed26d: Download complete
+2bc1971748dc: Download complete
+589002ba0eae: Pull complete
+811797f98545: Pull complete
+4f4fb700ef54: Pull complete
+eacaf042513e: Pull complete
+0b03716e5e03: Pull complete
+8d1e490ed26d: Pull complete
+2ea2995a6afa: Pull complete
+2bc1971748dc: Pull complete
+Digest: sha256:0a5a224b6e14ae7da6a6ea265178ff71286ff903aec74adee98f660bb0e4ca12
+Status: Downloaded newer image for erev0s/vampi@sha256:0a5a224b6e14ae7da6a6ea265178ff71286ff903aec74adee98f660bb0e4ca12
+8f1e0239ec27374a8c1cf11db1378f60b07dc8337ce14c55c6fd325d79777320
+442a592be2af35c919bcf822c209ecb88183701a873ed8079730797bd6d83603

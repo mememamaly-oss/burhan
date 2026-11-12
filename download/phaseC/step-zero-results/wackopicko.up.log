@@ -1,0 +1,102 @@
+Unable to find image 'adamdoupe/wackopicko@sha256:76d1a9ad02ad7fb6bbc000eb12956f457087a0f5883bd23b6cc49d3051feae02' locally
+docker.io/adamdoupe/wackopicko@sha256:76d1a9ad02ad7fb6bbc000eb12956f457087a0f5883bd23b6cc49d3051feae02: Pulling from adamdoupe/wackopicko
+11f87572ad81: Pulling fs layer
+709079cecfb8: Pulling fs layer
+e364b4a36ec1: Pulling fs layer
+55bf9bbb788a: Pulling fs layer
+b41f3cfd3d47: Pulling fs layer
+8387d9ff0016: Pulling fs layer
+70789ae370c5: Pulling fs layer
+3b52deaaf0ed: Pulling fs layer
+43f2fd9a6779: Pulling fs layer
+4bd501fad6de: Pulling fs layer
+934438c9af31: Pulling fs layer
+a3ed95caeb02: Pulling fs layer
+1cfba20318ab: Pulling fs layer
+a3ed95caeb02: Pulling fs layer
+de7f3e54c21c: Pulling fs layer
+a3ed95caeb02: Pulling fs layer
+790f0e8363b9: Pulling fs layer
+596da16c3b16: Pulling fs layer
+341e06373981: Pulling fs layer
+e94007c4319f: Pulling fs layer
+6a0b3a1558bd: Pulling fs layer
+3c013e645156: Pulling fs layer
+4f7bfd80916e: Pulling fs layer
+8fdd979bdd12: Pulling fs layer
+a3ed95caeb02: Pulling fs layer
+a3ed95caeb02: Pulling fs layer
+b2ebf6174a7a: Pulling fs layer
+a3ed95caeb02: Pulling fs layer
+4ae213efa8b6: Pulling fs layer
+a3ed95caeb02: Pulling fs layer
+060ba6ce628c: Pulling fs layer
+1a16439fb83f: Pulling fs layer
+a18d9992c758: Pulling fs layer
+60ab1a2ba3ab: Pulling fs layer
+aaad5f7e1490: Pulling fs layer
+a3ed95caeb02: Pulling fs layer
+deb74d3f04d2: Pulling fs layer
+709079cecfb8: Download complete
+aaad5f7e1490: Download complete
+43f2fd9a6779: Download complete
+de7f3e54c21c: Download complete
+1cfba20318ab: Download complete
+55bf9bbb788a: Download complete
+1a16439fb83f: Download complete
+341e06373981: Download complete
+b41f3cfd3d47: Download complete
+70789ae370c5: Download complete
+4bd501fad6de: Download complete
+a3ed95caeb02: Download complete
+596da16c3b16: Download complete
+6a0b3a1558bd: Download complete
+11f87572ad81: Download complete
+e94007c4319f: Download complete
+3c013e645156: Download complete
+3b52deaaf0ed: Download complete
+934438c9af31: Download complete
+8fdd979bdd12: Download complete
+4ae213efa8b6: Download complete
+e364b4a36ec1: Download complete
+b2ebf6174a7a: Download complete
+060ba6ce628c: Download complete
+a18d9992c758: Download complete
+4f7bfd80916e: Download complete
+60ab1a2ba3ab: Download complete
+8387d9ff0016: Download complete
+790f0e8363b9: Download complete
+deb74d3f04d2: Download complete
+4bd501fad6de: Pull complete
+a3ed95caeb02: Pull complete
+3b52deaaf0ed: Pull complete
+8387d9ff0016: Pull complete
+709079cecfb8: Pull complete
+43f2fd9a6779: Pull complete
+de7f3e54c21c: Pull complete
+1cfba20318ab: Pull complete
+55bf9bbb788a: Pull complete
+341e06373981: Pull complete
+b41f3cfd3d47: Pull complete
+70789ae370c5: Pull complete
+596da16c3b16: Pull complete
+6a0b3a1558bd: Pull complete
+11f87572ad81: Pull complete
+934438c9af31: Pull complete
+790f0e8363b9: Pull complete
+e94007c4319f: Pull complete
+3c013e645156: Pull complete
+1a16439fb83f: Pull complete
+deb74d3f04d2: Pull complete
+aaad5f7e1490: Pull complete
+8fdd979bdd12: Pull complete
+4ae213efa8b6: Pull complete
+e364b4a36ec1: Pull complete
+b2ebf6174a7a: Pull complete
+060ba6ce628c: Pull complete
+a18d9992c758: Pull complete
+4f7bfd80916e: Pull complete
+60ab1a2ba3ab: Pull complete
+Digest: sha256:76d1a9ad02ad7fb6bbc000eb12956f457087a0f5883bd23b6cc49d3051feae02
+Status: Downloaded newer image for adamdoupe/wackopicko@sha256:76d1a9ad02ad7fb6bbc000eb12956f457087a0f5883bd23b6cc49d3051feae02
+423fd161a687c5d8d2cca7657f6bfce087d92cd2c475a229b0f1e8c6e7f15cb5

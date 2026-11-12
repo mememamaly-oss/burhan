@@ -1,0 +1,5 @@
+BLOCKED shepherd
+BLOCKED railsgoat
+READY vampi
+READY xvwa
+READY wackopicko

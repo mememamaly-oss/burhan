@@ -1,0 +1,136 @@
+time="2026-11-12T00:33:02Z" level=warning msg="/tmp/shepherd/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image owasp/security-shepherd_mongo Building 
+ Image owasp/security-shepherd Building 
+ Image owasp/security-shepherd_mariadb Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 2.01kB done
+#1 DONE 0.0s
+
+#2 [db internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.17kB done
+#2 WARN: InvalidDefaultArgInFrom: Default value for ARG mariadb:${DB_VERSION} results in empty or invalid base image name (line 21)
+#2 DONE 0.0s
+
+#3 [web internal] load build definition from Dockerfile
+#3 transferring dockerfile: 2.64kB done
+#3 WARN: InvalidDefaultArgInFrom: Default value for ARG tomcat:${TOMCAT_DOCKER_VERSION} results in empty or invalid base image name (line 26)
+#3 DONE 0.0s
+
+#4 [mongo internal] load build definition from Dockerfile
+#4 transferring dockerfile: 1.22kB done
+#4 WARN: InvalidDefaultArgInFrom: Default value for ARG mongo:${MONGODB_VERSION} results in empty or invalid base image name (line 27)
+#4 DONE 0.0s
+
+#5 [auth] library/docker:pull token for registry-1.docker.io
+#5 DONE 0.0s
+
+#6 [auth] library/tomcat:pull token for registry-1.docker.io
+#6 DONE 0.0s
+
+#7 [auth] library/mongo:pull token for registry-1.docker.io
+#7 DONE 0.0s
+
+#8 [auth] library/mariadb:pull token for registry-1.docker.io
+#8 DONE 0.0s
+
+#9 [mongo internal] load metadata for docker.io/library/docker:latest
+#9 DONE 0.5s
+
+#10 [web internal] load metadata for docker.io/library/tomcat:11.0-jre17-temurin
+#10 DONE 0.6s
+
+#11 [web internal] load .dockerignore
+#11 transferring context: 2B done
+#11 DONE 0.0s
+
+#12 [mongo internal] load metadata for docker.io/library/mongo:4.1.13
+#12 DONE 0.6s
+
+#13 [db internal] load metadata for docker.io/library/mariadb:12.3
+#13 DONE 0.6s
+
+#14 [mongo internal] load .dockerignore
+#14 transferring context: 2B done
+#14 DONE 0.0s
+
+#15 [db internal] load .dockerignore
+#15 transferring context: 2B done
+#15 DONE 0.0s
+
+#16 [web internal] load build context
+#16 transferring context: 4.36kB done
+#16 DONE 0.0s
+
+#17 [web builder 3/7] COPY target/owaspSecurityShepherd.war ROOT.war
+#17 ERROR: failed to calculate checksum of ref gafglobpd2miy6r5kuupfmeod::kry0e7tj44u87ix7gj1cti50s: "/target/owaspSecurityShepherd.war": not found
+
+#18 [web stage-1  1/14] FROM docker.io/library/tomcat:11.0-jre17-temurin@sha256:5da936713b5afc12b71237ac9b44af10efeab2fe17f52e3bb95724b0e061211c
+#18 resolve docker.io/library/tomcat:11.0-jre17-temurin@sha256:5da936713b5afc12b71237ac9b44af10efeab2fe17f52e3bb95724b0e061211c 0.0s done
+#18 CANCELED
+
+#19 [mongo internal] load build context
+#19 transferring context: 2B done
+#19 DONE 0.0s
+
+#20 [mongo builder 3/4] COPY target/moduleSchemas.js moduleSchemas.js
+#20 ERROR: failed to calculate checksum of ref gafglobpd2miy6r5kuupfmeod::2ebj7s15672jafo5r5ty7guia: "/target/moduleSchemas.js": not found
+
+#21 [mongo stage-1 1/6] FROM docker.io/library/mongo:4.1.13@sha256:8005da1dcf3d2ff800f9ccb339012522e3c93c12e1394edab54336991ddc8a1a
+#21 resolve docker.io/library/mongo:4.1.13@sha256:8005da1dcf3d2ff800f9ccb339012522e3c93c12e1394edab54336991ddc8a1a done
+#21 CANCELED
+
+#22 [db internal] load build context
+#22 transferring context: 2B done
+#22 DONE 0.0s
+
+#23 [db builder 3/5] COPY target/coreSchema.sql coreSchema.sql
+#23 CACHED
+
+#24 [db builder 2/7] WORKDIR /workdir
+#24 CACHED
+
+#25 [db builder 4/5] COPY target/moduleSchemas.sql moduleSchemas.sql
+#25 ERROR: failed to calculate checksum of ref gafglobpd2miy6r5kuupfmeod::q63ufyu9etqh6y3xoiybeulm3: "/target/moduleSchemas.sql": not found
+
+#26 [db builder 1/7] FROM docker.io/library/docker:latest@sha256:08a98015fce594af7c382883bea080ea206de74402a95da9dc52b6428c8cd121
+#26 resolve docker.io/library/docker:latest@sha256:08a98015fce594af7c382883bea080ea206de74402a95da9dc52b6428c8cd121 0.0s done
+#26 ...
+
+#23 [db builder 3/5] COPY target/coreSchema.sql coreSchema.sql
+#23 ERROR: failed to calculate checksum of ref gafglobpd2miy6r5kuupfmeod::q63ufyu9etqh6y3xoiybeulm3: "/target/coreSchema.sql": not found
+
+#27 [db stage-1 1/8] FROM docker.io/library/mariadb:12.3@sha256:d46e102fa8b9b72bfcdeb56f9dd538742092119dc8b11f31fe662605cd234cd9
+#27 resolve docker.io/library/mariadb:12.3@sha256:d46e102fa8b9b72bfcdeb56f9dd538742092119dc8b11f31fe662605cd234cd9 0.0s done
+#27 CANCELED
+
+#26 [db builder 1/7] FROM docker.io/library/docker:latest@sha256:08a98015fce594af7c382883bea080ea206de74402a95da9dc52b6428c8cd121
+------
+ > [web builder 3/7] COPY target/owaspSecurityShepherd.war ROOT.war:
+------
+------
+ > [mongo builder 3/4] COPY target/moduleSchemas.js moduleSchemas.js:
+------
+------
+ > [db builder 3/5] COPY target/coreSchema.sql coreSchema.sql:
+------
+------
+ > [db builder 4/5] COPY target/moduleSchemas.sql moduleSchemas.sql:
+------
+Dockerfile:19
+
+--------------------
+
+  17 |     WORKDIR /workdir
+
+  18 |     
+
+  19 | >>> COPY target/owaspSecurityShepherd.war ROOT.war
+
+  20 |     COPY docker/tomcat/serverxml.patch serverxml.patch
+
+  21 |     COPY docker/tomcat/webxml.patch webxml.patch
+
+--------------------
+
+target web: failed to solve: failed to compute cache key: failed to calculate checksum of ref gafglobpd2miy6r5kuupfmeod::kry0e7tj44u87ix7gj1cti50s: "/target/owaspSecurityShepherd.war": not found
+

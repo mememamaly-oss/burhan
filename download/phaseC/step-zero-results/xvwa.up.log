@@ -1,0 +1,92 @@
+Unable to find image 'mysql:5.7' locally
+5.7: Pulling from library/mysql
+df9a4d85569b: Pulling fs layer
+6b95a940e7b6: Pulling fs layer
+90986bb8de6e: Pulling fs layer
+20e4dcae4c69: Pulling fs layer
+ae71319cb779: Pulling fs layer
+43d05e938198: Pulling fs layer
+e9f03a1c24ce: Pulling fs layer
+064b2d298fba: Pulling fs layer
+ffc89e9dfd88: Pulling fs layer
+68c3898c2015: Pulling fs layer
+1c56c3d4ce74: Pulling fs layer
+1c56c3d4ce74: Download complete
+90986bb8de6e: Download complete
+064b2d298fba: Download complete
+ffc89e9dfd88: Download complete
+df9a4d85569b: Download complete
+6b95a940e7b6: Download complete
+ae71319cb779: Download complete
+e9f03a1c24ce: Download complete
+68c3898c2015: Download complete
+96889c47a44a: Download complete
+43d05e938198: Download complete
+9eb6a52b8441: Download complete
+20e4dcae4c69: Download complete
+20e4dcae4c69: Pull complete
+1c56c3d4ce74: Pull complete
+90986bb8de6e: Pull complete
+6b95a940e7b6: Pull complete
+e9f03a1c24ce: Pull complete
+68c3898c2015: Pull complete
+ffc89e9dfd88: Pull complete
+ae71319cb779: Pull complete
+064b2d298fba: Pull complete
+df9a4d85569b: Pull complete
+43d05e938198: Pull complete
+Digest: sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb
+Status: Downloaded newer image for mysql:5.7
+f7032514f89714ddb817276541a8005a94e7b19cab46cab88dd023860d3183d6
+Unable to find image 'php:8.1-apache' locally
+8.1-apache: Pulling from library/php
+4f4fb700ef54: Pulling fs layer
+02d7611c4eae: Pulling fs layer
+c366543af204: Pulling fs layer
+346a92d0401b: Pulling fs layer
+630ea4d355f4: Pulling fs layer
+55210fb52b95: Pulling fs layer
+5d37d3ca9a7a: Pulling fs layer
+10664995efdc: Pulling fs layer
+1174c0d265d7: Pulling fs layer
+10063a64476e: Pulling fs layer
+74f155a9831f: Pulling fs layer
+cc518bdf13ea: Pulling fs layer
+3c5f005f4e3a: Pulling fs layer
+f7f1a062df34: Pulling fs layer
+4932b72e0c7a: Pulling fs layer
+4f4fb700ef54: Already exists
+c366543af204: Download complete
+10664995efdc: Download complete
+5d37d3ca9a7a: Download complete
+10063a64476e: Download complete
+3c5f005f4e3a: Download complete
+1174c0d265d7: Download complete
+74f155a9831f: Download complete
+cc518bdf13ea: Download complete
+630ea4d355f4: Download complete
+55210fb52b95: Download complete
+f7f1a062df34: Download complete
+4932b72e0c7a: Download complete
+02d7611c4eae: Download complete
+b5a0898c5583: Download complete
+7860f4f9e96d: Download complete
+346a92d0401b: Download complete
+c366543af204: Pull complete
+02d7611c4eae: Pull complete
+630ea4d355f4: Pull complete
+346a92d0401b: Pull complete
+10664995efdc: Pull complete
+5d37d3ca9a7a: Pull complete
+74f155a9831f: Pull complete
+55210fb52b95: Pull complete
+f7f1a062df34: Pull complete
+4f4fb700ef54: Pull complete
+10063a64476e: Pull complete
+3c5f005f4e3a: Pull complete
+1174c0d265d7: Pull complete
+cc518bdf13ea: Pull complete
+4932b72e0c7a: Pull complete
+Digest: sha256:72f0c0134922985022d55a39b0390d35dc7a10e961aa6c44fa35b4c3102f4268
+Status: Downloaded newer image for php:8.1-apache
+fdeb884ed1324eee750a0df6f2a190f577b3649dc8b164170401e8140d227281
