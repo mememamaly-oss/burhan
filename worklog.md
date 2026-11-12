@@ -6707,3 +6707,81 @@ Two owner orders this round, both landed on r19-1-webgoat-spa (PR #86):
   calls in 199ms on a loaded runner; the early hits expired before
   the 4th call). Same medicine as r19-2c: stop betting on blind
   timing.
+
+- phaseC step-zero round 2 prep (2026-11-12) — two runner-side fixes after the
+  first run's BLOCKED records (run 43128061378 @ main ce77ada8; READY was
+  vampi/xvwa/wackopicko, BLOCKED shepherd+railsgoat):
+  (1) Shepherd: the up-script skipped the project's OWN documented build step
+  (README:19 `mvn -Pdocker clean package -DskipTests`) whose outputs the
+  compose Dockerfiles COPY (target/owaspSecurityShepherd.war,
+  docker/mariadb/target/{coreSchema,moduleSchemas}.sql,
+  docker/mongo/target/moduleSchemas.js). Fixed: run the build inside
+  digest-pinned maven (sha256:1a3524…8584, Java 17 = pom release 17), verify
+  all three artifacts exist, then compose up. .env IS tracked at the pinned
+  commit (build args TOMCAT_DOCKER_VERSION=11.0-jre17-temurin, DB 12.3,
+  MONGO 4.1.13 — registry HEAD 200 for all three, incl. mongo:4.1.13).
+  (2) RailGoat: ruby:2.5.0's apt hits EOL debian stretch -> 404. Fixed: diff-
+  generated Dockerfile patch (dry-run verified against the pinned tree)
+  redirecting sources.list to archive.debian.org with
+  Acquire::Check-Valid-Until=false + ca-certificates install; TLS to
+  rubygems.org pre-verified OK against the stretch CA store (GlobalSign Root
+  R3 present — openssl verify OK), so `bundle install` should proceed.
+  Both are RUNNER-SIDE (clone copies inside the job): the sealed trees,
+  membership, labels and pinned commits are untouched — seal verification
+  gate in the workflow re-checks hashes on every run. Owner orders 2026-11-12
+  already merged in 9c5e1c23 (two-number rule §3.2.1 + 4bis gate, B1-2
+  fragility register, token-print rule §5.1.6). No tool scan until explicit
+  owner approval (gate C).
+
+- CI blockage on PR #100 (2026-11-12, ~08:50Z onward): the Engine doctor's
+  network_egress check probes a SINGLE third-party host (scanme.nmap.org /
+  45.33.32.156). It passed at 00:32/00:47/00:56Z (port 80) on the same
+  runners, then started failing with errno 101 on BOTH ports from BOTH the
+  Linux and macOS Engine jobs — and direct checks show the host itself is
+  unreachable/refusing (443 RST, 80 timeout). Three rerun attempts all
+  failed identically. The PR diff (a bring-up script CI never executes +
+  three markdown files) cannot cause this; it is an external-host outage.
+  Registered as external-dependency fragility: a doctor check whose
+  pass/fail depends on one outside host makes CI availability hostage to
+  third-party infrastructure. NOT bypassed, NOT admin-merged — the PR stays
+  open pending either scanme recovery or an owner decision (multi-host
+  probe fallback vs one-time bypass). Step-zero round 2 dispatched from the
+  branch ref instead (same seal, gate re-verified at run start).
+
+- railsgoat bring-up trail (2026-11-12, runs 43188415114 → 43189495319 →
+  43190355488, each failure root-caused and fixed, never rerun-to-green):
+  (a) patch(1) invocation used -p0 with a/ b/ headers -> "archive patch
+  failed" (fixed: fail-closed python heredoc, grep-guard + count==1 +
+  post-check, simulated green against the pinned tree before push);
+  (b) archive.debian.org serves EOL suites unsigned -> apt refused
+  unauthenticated installs (fixed: --allow-unauthenticated +
+  Check-Valid-Until on both installs; documented archive property; the
+  base build tools already ship in the official ruby image);
+  (c) parser 2.5.0.4 yanked from rubygems — audited ALL 134 locked gems,
+  exactly one unavailable (fixed: lock bumped to 2.5.0.5; adjacent release
+  on the 2.5.0 branch, same ast ~> 2.4.0 dep, sole dependent rubocop
+  requires parser >= 2.5 — satisfied).
+  Shepherd confirmed READY in 43188415114 (probe 302 via the sealed maven
+  pre-build fix). vampi/xvwa/wackopicko READY (200) since run 43128061378.
+
+- railsgoat DECISIVE finding (2026-11-12, runs 43230711661 + 43233698532
+  with the new container-log capture): the container RUNS but the app cannot
+  boot — sessions_controller.rb at the pinned commit f1de24f is
+  syntactically broken (orphaned duplicate `if user` block at lines 26-37
+  outside any method, extra `end` at 44; root route is sessions#new).
+  Root cause: f1de24f ("Worked through Lab 4") is the branch owner's
+  TRAINING-EXERCISE commit — exactly one commit ahead of 2988d61 (the last
+  official OWASP merge). Beyond the syntax break, that same commit ALSO
+  FIXES sealed measurable vulnerabilities: broken_auth/credential
+  enumeration (unified error message + Rack::Utils.secure_compare),
+  sensitive_data_exposure (encrypt_ssn enabled, key_management hardened),
+  url_access/mass_assignment (before_filter :administrative on ALL admin
+  actions), password_hashing (bcrypt via password_hash+salt migrations).
+  => NO legitimate runner-side patch exists: any fix either (a) restores
+  the vulnerable (parent) code paths the seal classifies as measurable, or
+  (b) keeps the fixed code and the sealed labels lie. This is an OWNER
+  DECISION per the BLOCKED protocol (§5.1/5): re-pin to parent 2988d61
+  with a NEW seal commit (bring-up patches: archive.debian.org apt +
+  parser 2.5.0.4->2.5.0.5 lock bump remain required either way — verified:
+  parent pins the same yanked parser), replacement candidate, or keep
+  BLOCKED. No scan of any candidate before owner approval (gate C).
