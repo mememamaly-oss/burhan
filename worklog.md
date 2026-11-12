@@ -6763,3 +6763,25 @@ Two owner orders this round, both landed on r19-1-webgoat-spa (PR #86):
   requires parser >= 2.5 — satisfied).
   Shepherd confirmed READY in 43188415114 (probe 302 via the sealed maven
   pre-build fix). vampi/xvwa/wackopicko READY (200) since run 43128061378.
+
+- railsgoat DECISIVE finding (2026-11-12, runs 43230711661 + 43233698532
+  with the new container-log capture): the container RUNS but the app cannot
+  boot — sessions_controller.rb at the pinned commit f1de24f is
+  syntactically broken (orphaned duplicate `if user` block at lines 26-37
+  outside any method, extra `end` at 44; root route is sessions#new).
+  Root cause: f1de24f ("Worked through Lab 4") is the branch owner's
+  TRAINING-EXERCISE commit — exactly one commit ahead of 2988d61 (the last
+  official OWASP merge). Beyond the syntax break, that same commit ALSO
+  FIXES sealed measurable vulnerabilities: broken_auth/credential
+  enumeration (unified error message + Rack::Utils.secure_compare),
+  sensitive_data_exposure (encrypt_ssn enabled, key_management hardened),
+  url_access/mass_assignment (before_filter :administrative on ALL admin
+  actions), password_hashing (bcrypt via password_hash+salt migrations).
+  => NO legitimate runner-side patch exists: any fix either (a) restores
+  the vulnerable (parent) code paths the seal classifies as measurable, or
+  (b) keeps the fixed code and the sealed labels lie. This is an OWNER
+  DECISION per the BLOCKED protocol (§5.1/5): re-pin to parent 2988d61
+  with a NEW seal commit (bring-up patches: archive.debian.org apt +
+  parser 2.5.0.4->2.5.0.5 lock bump remain required either way — verified:
+  parent pins the same yanked parser), replacement candidate, or keep
+  BLOCKED. No scan of any candidate before owner approval (gate C).
