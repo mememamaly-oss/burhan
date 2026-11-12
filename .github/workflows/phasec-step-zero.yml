@@ -30,7 +30,7 @@ on:
   workflow_dispatch:
     inputs:
       candidates:
-        description: "Space-separated candidates (default: all five sealed)"
+        description: "Space-separated candidates (default: the four ACTIVE sealed members — railsgoat is SUSPENDED per owner decision 2026-11-12 and is skipped automatically; pass the single word 'railsgoat' to run it for the record)"
         default: "shepherd railsgoat vampi xvwa wackopicko"
         required: false
   schedule:
@@ -95,6 +95,8 @@ jobs:
       - name: Bring up each sealed candidate (isolated network) + prove readiness
         run: |
           bash scripts/phasec_step_zero_up.sh ${{ inputs.candidates || 'shepherd railsgoat vampi xvwa wackopicko' }}
+          # railsgoat (SUSPENDED, owner decision 2026-11-12 — seal/SUSPENDED.json)
+          # is skipped inside the script unless requested alone for the record.
 
       - name: Upload step-zero evidence (logs + probes + BLOCKED records, if any)
         if: always()

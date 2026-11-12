@@ -2279,30 +2279,46 @@ def doctor(allow_private=False) -> dict:
         add("dns_resolution", True, "resolved scanme.nmap.org")
     except Exception as e:
         add("dns_resolution", False, str(e)[:80], "check /etc/resolv.conf")
-    # outbound TCP (r18-12): scanme.nmap.org serves both 80 and 443;
-    # the Linux Engine job's network policy passes DNS and 443 but
-    # blocks port 80 outright ("Network is unreachable", errno 101 —
-    # not a transient blip; r18-11's retries can't help a hard block).
-    # So: try 443 FIRST (works in both open and CI-restricted
-    # environments), fall back to 80, bounded 2 attempts each.
+    # outbound TCP (r18-12 → phaseC 2026-11-12): a doctor check whose
+    # pass/fail depends on ONE third-party host makes CI availability
+    # hostage to that host's uptime — observed live: scanme.nmap.org
+    # (45.33.32.156) went dark world-wide for ~5.5h (08:50–14:30Z,
+    # 2026-11-12), failing every Engine job (Linux + macOS) on a
+    # docs-only PR. Two-part fix, mirroring the OAST providers' contract
+    # (network-dependent → WARN, not FAIL):
+    #   (1) multi-target probe: scanme.nmap.org then github.com — ANY
+    #       reachable host proves egress; one dead host no longer fails
+    #       the check.
+    #   (2) all-unreachable downgrades to WARN (degraded egress, local
+    #       scanning unaffected), not FAIL — the engine's core loop does
+    #       not require outbound internet. FAIL is reserved for broken
+    #       engine machinery, not broken third parties.
+    # Port order per r18-12: 443 first (passes both open and
+    # CI-restricted policies), then 80, bounded 2 attempts each.
     egress_err = ""
     egress_done = False
-    for port in (443, 80):
+    egress_target = ""
+    for host, port in (("scanme.nmap.org", 443), ("scanme.nmap.org", 80),
+                       ("github.com", 443)):
         for attempt in range(2):
             try:
-                s = socket.create_connection(("scanme.nmap.org", port), timeout=8); s.close()
+                s = socket.create_connection((host, port), timeout=8); s.close()
                 add("network_egress", True,
-                    f"TCP connect scanme.nmap.org:{port} OK (attempt {attempt + 1}/2)")
+                    f"TCP connect {host}:{port} OK (attempt {attempt + 1}/2)")
                 egress_done = True
+                egress_target = f"{host}:{port}"
                 break
             except Exception as e:  # safe: network error — recorded into egress_err, retried, surfaced in the check detail (not swallowed)
-                egress_err = f"port {port} attempt {attempt + 1}/2: {str(e)[:55]}"
+                egress_err = f"{host}:{port} attempt {attempt + 1}/2: {str(e)[:55]}"
                 if attempt < 1:
                     time.sleep(2)
         if egress_done:
             break
     if not egress_done:
-        add("network_egress", False, egress_err, "check outbound firewall/proxy rules (443 and 80 both blocked)")
+        add("network_egress", False,
+            f"warn: no probe host reachable ({egress_err}) — outbound egress "
+            f"degraded; local/private-target scanning is unaffected",
+            "check outbound firewall/proxy rules (443 and 80 blocked)")
     # TLS
     try:
         ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE

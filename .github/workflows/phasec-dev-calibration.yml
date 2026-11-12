@@ -1,0 +1,220 @@
+name: phasec-dev-calibration
+
+# PHASEC L1 dev-set calibration round (owner order 2026-11-12, task 6):
+# ONE calibration run of the tool on the DEVELOPMENT SET ONLY —
+# OWASP Juice Shop v20.3.0, WebGoat v2023.8, DVWA v1.9 (image digests
+# pinned), crAPI v1.1.5 (official deploy compose, tag-pinned as in
+# live-validation.yml — Docker Hub publishes crAPI as :latest only).
+#
+# OWNER RULES THIS WORKFLOW OBEYS:
+#   * The ISOLATED SET IS NOT TOUCHED. No sealed candidate is scanned,
+#     started, or referenced here. Isolated-set scans happen only after
+#     the owner's explicit gate-C approval (order 2026-11-12).
+#   * One round, then STOP at the results for owner review — no floors
+#     are committed by this run, no gates hard-fail on observed numbers.
+#     This is a calibration observation, not a CI gate (that is step 4
+#     of the spec, run after this round is reviewed).
+#   * workflow_dispatch ONLY (never pull_request — same isolation rule
+#     as phasec-step-zero.yml).
+#   * Authorization: all four targets are self-hosted fixtures on the
+#     runner's own loopback (registry entry "self-hosted-fixtures",
+#     authorized-targets.json — authorization is ownership).
+#
+# Why these four: spec §2 table — the dev set is where the engine was
+# already run/tuned (Juice Shop 7938 mentions, WebGoat 2035, crAPI 1477,
+# DVWA 73 in the tree). Dev-set results can NEVER be cited as evidence
+# of generalization (spec §2 "limits declared"); they calibrate floors.
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: "Space-separated dev targets (default: all four)"
+        default: "juiceshop webgoat dvwa crapi"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  dev-calibration:
+    name: Dev-set calibration round (Juice Shop + WebGoat + DVWA + crAPI)
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      DOCKER_HOST: unix:///var/run/docker.sock
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install engine dependencies (+ playwright for client-rendered targets)
+        run: |
+          pip install -r requirements.txt playwright
+          python3 -m playwright install --with-deps chromium
+
+      # ------------------------------------------------------------------
+      # Target 1: OWASP Juice Shop v20.3.0 (digest-pinned; same image as
+      # the existing real-target CI job — the floor's own image)
+      # ------------------------------------------------------------------
+      - name: Start Juice Shop v20.3.0 (digest-pinned)
+        if: contains(inputs.targets, 'juiceshop')
+        run: |
+          docker run -d --name juice -p 127.0.0.1:3000:3000 \
+            bkimminich/juice-shop@sha256:cea5a4af4aacee498c491491af0408934ec81d004035c0a02ef3e54395e3bf27
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:3000/ > /dev/null && { echo "juice up (attempt $i)"; exit 0; }
+            sleep 2
+          done
+          echo "::error::juice-shop did not come up"; docker logs juice | tail -30; exit 1
+
+      # ------------------------------------------------------------------
+      # Target 2: WebGoat v2023.8 (digest-pinned; the last 2023-era
+      # release line — matches the engine's existing WebGoat exposure)
+      # ------------------------------------------------------------------
+      - name: Start WebGoat v2023.8 (digest-pinned)
+        if: contains(inputs.targets, 'webgoat')
+        run: |
+          docker run -d --name webgoat -p 127.0.0.1:8080:8080 -p 127.0.0.1:9090:9090 \
+            webgoat/webgoat@sha256:01672eb9aeba60d042ae1131d6de683b98fa64e9da60fa5d3daad2642a6795dd
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8080/WebGoat/login > /dev/null 2>&1 \
+              || curl -sf http://127.0.0.1:8080/WebGoat/ > /dev/null 2>&1 \
+              && { echo "webgoat up (attempt $i)"; exit 0; }
+            sleep 2
+          done
+          echo "::error::webgoat did not come up"; docker logs webgoat | tail -30; exit 1
+
+      # ------------------------------------------------------------------
+      # Target 3: DVWA v1.9 (digest-pinned via the :1.9 tag — prefer a
+      # versioned tag over :latest even though both exist)
+      # ------------------------------------------------------------------
+      - name: Start DVWA v1.9 (tag-pinned) + initialize its database
+        if: contains(inputs.targets, 'dvwa')
+        run: |
+          docker run -d --name dvwa -p 127.0.0.1:4280:80 vulnerables/web-dvwa:1.9
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:4280/login.php > /dev/null && { echo "dvwa up (attempt $i)"; break; }
+            sleep 2
+          done
+          # DVWA ships unconfigured: create/reset the DB via the setup
+          # button (same sequence as scripts/independent-verification/
+          # vps_independent_verification.sh lines 65-73)
+          curl -s -c /tmp/dvwa.jar "http://127.0.0.1:4280/login.php" -o /dev/null
+          curl -s -b /tmp/dvwa.jar -c /tmp/dvwa.jar \
+            -d "create_db=Create / Reset Database" \
+            "http://127.0.0.1:4280/setup.php" -o /dev/null
+          curl -sf -b /tmp/dvwa.jar -L "http://127.0.0.1:4280/setup.php" | grep -q "Database has been created" \
+            && echo "dvwa db initialized" \
+            || { echo "::warning::dvwa db init not confirmed — scanning anyway (unauthenticated surface)"; }
+
+      # ------------------------------------------------------------------
+      # Target 4: crAPI v1.1.5 (official deploy compose; the ONLY image
+      # pin available is the compose tag itself — Docker Hub publishes
+      # crAPI images as :latest only, documented in live-validation.yml)
+      # ------------------------------------------------------------------
+      - name: Start crAPI v1.1.5 (official compose + bridge vars)
+        if: contains(inputs.targets, 'crapi')
+        run: |
+          curl -sL -o /tmp/crapi.zip https://github.com/OWASP/crAPI/archive/refs/tags/v1.1.5.zip
+          unzip -q /tmp/crapi.zip -d /tmp
+          cd /tmp/crAPI-1.1.5/deploy/docker
+          # bridge vars (run-2 finding 41282389250, same as live-validation)
+          cat > docker-compose.override.yml <<'YAML'
+          services:
+            crapi-web:
+              environment:
+                - CHATBOT_SERVICE=crapi-workshop:8000
+                - MAILHOG_WEB_SERVICE=mailhog:8025
+          YAML
+          sed -i 's|^LISTEN_IP=.*|LISTEN_IP=0.0.0.0|' .env
+          docker compose -f docker-compose.yml -f docker-compose.override.yml pull
+          docker compose -f docker-compose.yml -f docker-compose.override.yml --compatibility up -d
+          # readiness from the runner: compose publishes on 0.0.0.0 of the runner
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8888/ > /dev/null && { echo "crapi up (attempt $i)"; exit 0; }
+            sleep 2
+          done
+          echo "::warning::crapi not confirmed up in 120s — the scan step will retry via its own probe"
+
+      # ------------------------------------------------------------------
+      # The calibration scans: UNAUTHENTICATED, seeded, same core axes as
+      # the Juice Shop floor run (workflow + logic_active; no race/
+      # symbolic — matching the floor's axis config for comparability).
+      # NO floor enforcement here: this round OBSERVES. Hard gates:
+      # scan completes + >= 1 verified finding + compliance mapping —
+      # the same BASELINE contract the first Juice Shop run used.
+      # ------------------------------------------------------------------
+      - name: Calibration scan — Juice Shop (unauth, seeded)
+        if: always() && contains(inputs.targets, 'juiceshop')
+        run: |
+          python3 scripts/ci_real_target_scan.py --base http://127.0.0.1:3000 \
+            --out-dir "$RUNNER_TEMP/calib/juiceshop"
+
+      - name: Calibration scan — WebGoat (unauth, seeded)
+        if: always() && contains(inputs.targets, 'webgoat')
+        run: |
+          python3 scripts/ci_real_target_scan.py --base http://127.0.0.1:8080/WebGoat \
+            --out-dir "$RUNNER_TEMP/calib/webgoat"
+
+      - name: Calibration scan — DVWA (unauth, seeded)
+        if: always() && contains(inputs.targets, 'dvwa')
+        run: |
+          python3 scripts/ci_real_target_scan.py --base http://127.0.0.1:4280 \
+            --out-dir "$RUNNER_TEMP/calib/dvwa"
+
+      - name: Calibration scan — crAPI (unauth, seeded)
+        if: always() && contains(inputs.targets, 'crapi')
+        run: |
+          python3 scripts/ci_real_target_scan.py --base http://127.0.0.1:8888 \
+            --out-dir "$RUNNER_TEMP/calib/crapi"
+
+      - name: Collect the round summary (per-target observed numbers, NO gates)
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, sys
+          base = pathlib.Path(__import__("os").environ["RUNNER_TEMP"]) / "calib"
+          rows = []
+          for tgt in ("juiceshop", "webgoat", "dvwa", "crapi"):
+              d = base / tgt
+              if not (d / "summary.json").exists():
+                  rows.append({"target": tgt, "status": "NOT RUN"}); continue
+              s = json.loads((d / "summary.json").read_text())
+              rows.append({
+                  "target": tgt,
+                  "status": "OK",
+                  "findings": s.get("findings"),
+                  "verified": s.get("findings_verified"),
+                  "distinct_types": s.get("distinct_verified_types"),
+                  "requests": s.get("requests"),
+                  "wall_seconds": round(s.get("wall_seconds", 0), 1),
+              })
+          out = base / "calibration-round-summary.json"
+          out.write_text(json.dumps({
+              "round": "dev-set calibration (owner order 2026-11-12 task 6)",
+              "note": "OBSERVATION ONLY — no floors committed, no isolated-set target touched; results stop here for owner review",
+              "targets": rows,
+          }, indent=1))
+          print(out.read_text())
+          PY
+
+      - name: Upload calibration artifacts (results for owner review)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phasec-dev-calibration
+          path: |
+            ${{ runner.temp }}/calib/*/summary.json
+            ${{ runner.temp }}/calib/*/scan.json
+            ${{ runner.temp }}/calib/calibration-round-summary.json
+          if-no-files-found: warn
+
+      - name: Teardown (every container this job started)
+        if: always()
+        run: |
+          docker rm -f juice webgoat dvwa >/dev/null 2>&1 || true
+          cd /tmp/crAPI-1.1.5/deploy/docker 2>/dev/null \
+            && docker compose -f docker-compose.yml -f docker-compose.override.yml down -v >/dev/null 2>&1 || true
