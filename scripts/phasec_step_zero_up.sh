@@ -11,8 +11,22 @@
 #
 # Sources verified from the pinned clones (docs-first, 2026-11-11):
 #   shepherd    docker-compose.yml services: web/db/mongo; .env IS tracked
-#               at the pinned commit; probe the service name "web".
+#               at the pinned commit; probe the service name "web" (tomcat,
+#               port 8080 — HTTP_PORT maps 80:8080 host-side only).
+#               The compose build COPIES maven outputs (target/*.war +
+#               docker/*/target/*.sql|js — README:19 "mvn -Pdocker clean
+#               package -DskipTests"); run that build FIRST inside a
+#               digest-pinned maven container (fix 2026-11-12, run
+#               43128061378 BLOCKED: COPY target/*.war failed).
 #   railsgoat   docker-compose.yml: single service "web", port 3000.
+#               Base ruby:2.5.0 apt's against EOL debian stretch -> 404
+#               (run 43128061378 BLOCKED); patched to archive.debian.org
+#               pre-build (fix 2026-11-12) — same minimal-patch style as
+#               the XVWA config.php patch. TLS to rubygems.org verified OK
+#               against the stretch CA store (GlobalSign Root R3 present,
+#               openssl verify OK 2026-11-12) so `bundle install` works;
+#               ca-certificates refresh from the archive kept as belt-and-
+#               braces because that root is near its 2028 expiry.
 #   vampi       official image erev0s/vampi; env var is "vulnerable"
 #               (0/1) per README docker-run example; SINGLE port 5000 for
 #               BOTH twins (safe/unsafe run as two containers); swagger /ui.
@@ -84,6 +98,20 @@ up_shepherd() {
   cd /tmp/shepherd || return 1
   # .env is tracked at the pinned commit (verified 2026-11-11).
   [ -f .env ] || { echo "no .env at pinned commit" > "$OUT/shepherd.up.log"; return 1; }
+  # Build the maven outputs the compose Dockerfiles COPY (README:19).
+  # Digest-pinned maven (matches the release=17 compiler in pom.xml);
+  # -o would break on a cold cache, full download it is. .mvn/maven.config
+  # and mvnw are tracked at the pinned commit — use the wrapper's settings.
+  docker run --rm --network host -v "$PWD":/src -w /src \
+    maven@sha256:1a352420f7aba21f5ad08df31bab55f74c013fb491f1ae8ab1dd7ff9ed698584 \
+    mvn -Pdocker clean package -DskipTests -q \
+    >> "$OUT/shepherd.up.log" 2>&1 \
+    || { echo "maven build failed" >> "$OUT/shepherd.up.log"; return 1; }
+  # the three artifacts the Dockerfiles expect
+  { [ -f target/owaspSecurityShepherd.war ] \
+    && [ -f docker/mariadb/target/coreSchema.sql ] \
+    && [ -f docker/mongo/target/moduleSchemas.js ]; } \
+    || { echo "maven outputs missing after build" >> "$OUT/shepherd.up.log"; return 1; }
   # bridge the compose default network onto the egress-free internal net
   cat > docker-compose.override.yml <<'YAML'
 networks:
@@ -91,9 +119,11 @@ networks:
     name: phasec-iso
     external: true
 YAML
-  docker compose up -d --build > "$OUT/shepherd.up.log" 2>&1 || return 1
-  # service is "web" on 8080 (probe goes service-to-service on the
-  # internal net; host port mappings are irrelevant inside the dind)
+  docker compose up -d --build > "$OUT/shepherd.up.log.2" 2>&1 || { cat "$OUT/shepherd.up.log.2" >> "$OUT/shepherd.up.log"; return 1; }
+  cat "$OUT/shepherd.up.log.2" >> "$OUT/shepherd.up.log"
+  # service is "web" (tomcat) on container port 8080 (probe goes
+  # service-to-service on the internal net; host port mappings are
+  # irrelevant inside the dind)
   wait_ready shepherd "http://web:8080/" 40 15
   return $?
 }
@@ -105,6 +135,27 @@ up_railsgoat() {
   git clone --quiet https://github.com/smDahlgren/RailGoat.git /tmp/railsgoat || return 1
   git -C /tmp/railsgoat checkout --quiet "$commit" || return 1
   cd /tmp/railsgoat || return 1
+  # ruby:2.5.0's apt points at EOL debian stretch (404 everywhere, run
+  # 43128061378). Patch sources.list to archive.debian.org BEFORE the
+  # image build, pre-installing a fresh ca-certificates from the archive
+  # too (belt-and-braces for rubygems TLS; the stretch store already
+  # verifies the live chain OK — 2026-11-12).
+  cat > Dockerfile.archive.patch <<'PATCH'
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -1,5 +1,8 @@
+ FROM ruby:2.5.0
+-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
++RUN printf 'deb http://archive.debian.org/debian stretch main\ndeb http://archive.debian.org/debian-security stretch/updates main\n' > /etc/apt/sources.list \
++    && apt-get -o Acquire::Check-Valid-Until=false update -qq \
++    && apt-get install -y --no-install-recommends ca-certificates \
++    && apt-get install -y build-essential libpq-dev nodejs
+ RUN mkdir /myapp
+ WORKDIR /myapp
+ ADD Gemfile /myapp/Gemfile
+PATCH
+  patch --quiet -p0 < Dockerfile.archive.patch \
+    || { echo "Dockerfile archive patch failed" > "$OUT/railsgoat.up.log"; return 1; }
   cat > docker-compose.override.yml <<'YAML'
 networks:
   default:

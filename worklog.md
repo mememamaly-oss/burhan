@@ -6707,3 +6707,28 @@ Two owner orders this round, both landed on r19-1-webgoat-spa (PR #86):
   calls in 199ms on a loaded runner; the early hits expired before
   the 4th call). Same medicine as r19-2c: stop betting on blind
   timing.
+
+- phaseC step-zero round 2 prep (2026-11-12) — two runner-side fixes after the
+  first run's BLOCKED records (run 43128061378 @ main ce77ada8; READY was
+  vampi/xvwa/wackopicko, BLOCKED shepherd+railsgoat):
+  (1) Shepherd: the up-script skipped the project's OWN documented build step
+  (README:19 `mvn -Pdocker clean package -DskipTests`) whose outputs the
+  compose Dockerfiles COPY (target/owaspSecurityShepherd.war,
+  docker/mariadb/target/{coreSchema,moduleSchemas}.sql,
+  docker/mongo/target/moduleSchemas.js). Fixed: run the build inside
+  digest-pinned maven (sha256:1a3524…8584, Java 17 = pom release 17), verify
+  all three artifacts exist, then compose up. .env IS tracked at the pinned
+  commit (build args TOMCAT_DOCKER_VERSION=11.0-jre17-temurin, DB 12.3,
+  MONGO 4.1.13 — registry HEAD 200 for all three, incl. mongo:4.1.13).
+  (2) RailGoat: ruby:2.5.0's apt hits EOL debian stretch -> 404. Fixed: diff-
+  generated Dockerfile patch (dry-run verified against the pinned tree)
+  redirecting sources.list to archive.debian.org with
+  Acquire::Check-Valid-Until=false + ca-certificates install; TLS to
+  rubygems.org pre-verified OK against the stretch CA store (GlobalSign Root
+  R3 present — openssl verify OK), so `bundle install` should proceed.
+  Both are RUNNER-SIDE (clone copies inside the job): the sealed trees,
+  membership, labels and pinned commits are untouched — seal verification
+  gate in the workflow re-checks hashes on every run. Owner orders 2026-11-12
+  already merged in 9c5e1c23 (two-number rule §3.2.1 + 4bis gate, B1-2
+  fragility register, token-print rule §5.1.6). No tool scan until explicit
+  owner approval (gate C).
