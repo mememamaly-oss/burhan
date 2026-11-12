@@ -1,0 +1,194 @@
+{
+ "app": "WackoPicko",
+ "origin": "adamdoupe/WackoPicko",
+ "pinned_commit": "cabc1b3a06beda7df98e839fa2d84db9a4bdfee7",
+ "sealed": "2026-11-11",
+ "reference_source": "README.markdown '## Vulnerabilities' — 15 documented vulns with exact URLs",
+ "label_count": 15,
+ "labels": [
+  {
+   "vuln": "Reflected XSS",
+   "url": "http://localhost/pictures/search.php?query=blah"
+  },
+  {
+   "vuln": "Stored XSS",
+   "url": "http://localhost/guestbook.php"
+  },
+  {
+   "vuln": "SessionID vulnerability",
+   "url": "http://localhost/admin/login.php"
+  },
+  {
+   "vuln": "Stored SQL Injection",
+   "url": "http://localhost/users/register.php -> http://localhost/users/similar.php"
+  },
+  {
+   "vuln": "Reflected SQL Injection",
+   "url": "http://localhost/users/login.php"
+  },
+  {
+   "vuln": "Directory Traversal",
+   "url": "http://localhost/pictures/upload.php"
+  },
+  {
+   "vuln": "Multi-Step Stored XSS",
+   "url": "http://localhost/pictures/view.php?picid=3"
+  },
+  {
+   "vuln": "Forceful Browsing",
+   "url": "http://localhost/pictures/highquality.php?picid=3&key=highquality"
+  },
+  {
+   "vuln": "Command-line Injection",
+   "url": "http://localhost/passcheck.php"
+  },
+  {
+   "vuln": "File Inclusion",
+   "url": "http://localhost/admin/index.php?page=login"
+  },
+  {
+   "vuln": "Parameter Manipulation",
+   "url": "http://localhost/users/sample.php?userid=1"
+  },
+  {
+   "vuln": "Reflected XSS Behind JavaScript",
+   "url": "http://localhost/piccheck.php"
+  },
+  {
+   "vuln": "Logic Flaw",
+   "url": "http://localhost/cart/review.php"
+  },
+  {
+   "vuln": "Reflected XSS Behind a Flash Form",
+   "url": "http://localhost/submitname.php"
+  },
+  {
+   "vuln": "Weak username/password",
+   "url": "https://localhost/admin/login.php"
+  }
+ ],
+ "notes": [
+  "official Dockerfile at root + Docker Hub image adamdoupe/wackopicko (port 80)",
+  "born from the DIMVA 2010 black-box scanner paper — reference is documentation-native",
+  "documented creds: scanner1/scanner1, admin/admin among others",
+  "REPLACES DVJA per owner rule (2026-11-11): documentation-native reference, not code-derived",
+  "count corrected 2026-11-11: 15 (initial claim of 16 was a paragraph-split miscount; verified line-by-line)"
+ ],
+ "image_pin": "adamdoupe/wackopicko@sha256:76d1a9ad02ad7fb6bbc000eb12956f457087a0f5883bd23b6cc49d3051feae02 (port 80; php5-era tutum/lamp base — built by official Dockerfile at cabc1b3)",
+ "classification": [
+  {
+   "label": "Reflected XSS",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "Stored XSS",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected"
+   ],
+   "reason": "stored via unauthenticated guestbook/comment POST"
+  },
+  {
+   "label": "SessionID vulnerability",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "predictable session values need session lifecycle"
+  },
+  {
+   "label": "Stored SQL Injection",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "register form SQLi — unauthenticated POST"
+  },
+  {
+   "label": "Reflected SQL Injection",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "login form SQLi — unauthenticated POST"
+  },
+  {
+   "label": "Directory Traversal",
+   "classification": "measurable",
+   "engine_types": [
+    "path_traversal"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "Multi-Step Stored XSS",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "requires a preview flow (multi-step browser state) beyond crawl budget"
+  },
+  {
+   "label": "Forceful Browsing",
+   "classification": "measurable",
+   "engine_types": [
+    "vertical_privilege_escalation"
+   ],
+   "reason": "unauthenticated access to protected URL"
+  },
+  {
+   "label": "Command-line Injection",
+   "classification": "measurable",
+   "engine_types": [
+    "command_injection"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "File Inclusion",
+   "classification": "measurable",
+   "engine_types": [
+    "path_traversal"
+   ],
+   "reason": "unauthenticated reachable; engine battery class present"
+  },
+  {
+   "label": "Parameter Manipulation",
+   "classification": "measurable",
+   "engine_types": [
+    "idor_bola"
+   ],
+   "reason": "userid manipulation on unauthenticated URL"
+  },
+  {
+   "label": "Reflected XSS Behind JavaScript",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "payload lands only after client-side JS execution — engine JS execution is not in this layer"
+  },
+  {
+   "label": "Logic Flaw",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "multi-step business logic (coupon reapplication) — attacker-action class"
+  },
+  {
+   "label": "Reflected XSS Behind a Flash Form",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "Flash client rendering — no engine battery class"
+  },
+  {
+   "label": "Weak username/password",
+   "classification": "measurable",
+   "engine_types": [
+    "credential_exposure"
+   ],
+   "reason": "default creds listed in docs; login differential is measurable"
+  }
+ ],
+ "classification_counts": {
+  "measurable": 10,
+  "out_of_scope": 5
+ }
+}

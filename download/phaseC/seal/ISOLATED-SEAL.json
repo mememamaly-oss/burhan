@@ -1,0 +1,64 @@
+{
+ "seal_date": "2026-11-11",
+ "rule": "owner 2026-11-11: isolated set sealed by sha256 in an independent commit BEFORE any run; changes only via a new seal commit with documented reason",
+ "isolated_set": [
+  {
+   "app": "Security Shepherd",
+   "file": "security-shepherd-reference.json",
+   "sha256": "9b1e598a9c26b6c7b2fe524223650adaa116eb336e1914036b7008f1b8c17412",
+   "labels": 56,
+   "pinned_commit": "14c195a0b83e84997f57a54d17d749fa33a6f002",
+   "origin": "OWASP/SecurityShepherd"
+  },
+  {
+   "app": "RailsGoat",
+   "file": "railsgoat-reference.json",
+   "sha256": "2bc81768cebe270463e6b4a70ba8334d56df314a3b3a1c01ffba168cc5c7619c",
+   "labels": 12,
+   "pinned_commit": "f1de24f380646b847dd6478583d8b5f9bc1f7180",
+   "origin": "smDahlgren/RailGoat"
+  },
+  {
+   "app": "VAmPI",
+   "file": "vampi-reference.json",
+   "sha256": "9783793e60376a60487f760c40f163b68aacf75fc5d99ac9951977b37a547153",
+   "labels": 9,
+   "pinned_commit": "f16052dce83f05847133ec98f01c5193a41de7d8",
+   "origin": "erev0s/VAmPI",
+   "image_pin": "erev0s/vampi@sha256:0a5a224b6e14ae7da6a6ea265178ff71286ff903aec74adee98f660bb0e4ca12 (env: vulnerable=1 unsafe / vulnerable=0 safe twin; single port 5000; /ui swagger)"
+  },
+  {
+   "app": "XVWA",
+   "file": "xvwa-reference.json",
+   "sha256": "d7868d8846feae802ee0a5e3e7e8070610e076f87e0e6bd303d007ac83b780e5",
+   "labels": 19,
+   "pinned_commit": "fb30fa517d288e618b521d252f61107ef6a24797",
+   "origin": "s4n7h0/xvwa"
+  },
+  {
+   "app": "WackoPicko",
+   "file": "wackopicko-reference.json",
+   "sha256": "4ecb90c1d72b1eea01d144a7a9f69f6d75e2e612ed02a3b5f5195d9d00b59e8d",
+   "labels": 15,
+   "pinned_commit": "cabc1b3a06beda7df98e839fa2d84db9a4bdfee7",
+   "origin": "adamdoupe/WackoPicko",
+   "image_pin": "adamdoupe/wackopicko@sha256:76d1a9ad02ad7fb6bbc000eb12956f457087a0f5883bd23b6cc49d3051feae02 (port 80; php5-era tutum/lamp base — built by official Dockerfile at cabc1b3)"
+  }
+ ],
+ "aggregate_labels_before_measurable_classification": 111,
+ "reserve_order": [
+  "sqli-labs (65 lessons, single-category SQLi)",
+  "owasp-skf"
+ ],
+ "burn_rule": "any tool change caused by an isolated-set result moves that app to the dev set immediately, documented; isolated results reviewed at milestones only",
+ "classification": {
+  "file": "CLASSIFICATION.json",
+  "sha256": "ff4688edf08cb14c648ea9a3667d55a84f2c95d59f43dd2a998fc455428e11da",
+  "totals": {
+   "labels": 111,
+   "measurable": 81,
+   "out_of_scope": 30
+  },
+  "note": "criteria + per-label split sealed with the references; measurable set drives P/R; out_of_scope drives the honest-counters report"
+ }
+}

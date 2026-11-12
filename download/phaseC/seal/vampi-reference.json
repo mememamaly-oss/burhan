@@ -1,0 +1,116 @@
+{
+ "app": "VAmPI",
+ "origin": "erev0s/VAmPI",
+ "pinned_commit": "f16052dce83f05847133ec98f01c5193a41de7d8",
+ "sealed": "2026-11-11",
+ "reference_source": "README.md 'List of Vulnerabilities' + openapi_specs/ (OpenAPI 3)",
+ "label_count": 9,
+ "labels": [
+  {
+   "vuln": "SQLi Injection"
+  },
+  {
+   "vuln": "Unauthorized Password Change"
+  },
+  {
+   "vuln": "Broken Object Level Authorization"
+  },
+  {
+   "vuln": "Mass Assignment"
+  },
+  {
+   "vuln": "Excessive Data Exposure through debug endpoint"
+  },
+  {
+   "vuln": "User and Password Enumeration"
+  },
+  {
+   "vuln": "RegexDOS (Denial of Service)"
+  },
+  {
+   "vuln": "Lack of Resources & Rate Limiting"
+  },
+  {
+   "vuln": "JWT authentication bypass via weak signing key"
+  }
+ ],
+ "notes": [
+  "official Docker Hub image erev0s/vampi + compose: SECURE twin :5001 / INSECIVE :5002 — native FP measurement",
+  "vuln on/off switch (vuln=1/0 in app.py) — false-positive/negative case coverage",
+  "Swagger UI at /ui"
+ ],
+ "image_pin": "erev0s/vampi@sha256:0a5a224b6e14ae7da6a6ea265178ff71286ff903aec74adee98f660bb0e4ca12 (env: vulnerable=1 unsafe / vulnerable=0 safe twin; single port 5000; /ui swagger)",
+ "classification": [
+  {
+   "label": "SQLi Injection",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "REST endpoint SQLi unauthenticated"
+  },
+  {
+   "label": "Unauthorized Password Change",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "requires authenticated account context"
+  },
+  {
+   "label": "Broken Object Level Authorization",
+   "classification": "measurable",
+   "engine_types": [
+    "idor_bola"
+   ],
+   "reason": "BOLA on REST object IDs unauthenticated"
+  },
+  {
+   "label": "Mass Assignment",
+   "classification": "measurable",
+   "engine_types": [
+    "idor_bola",
+    "vertical_privilege_escalation"
+   ],
+   "reason": "role escalation via extra fields on unauthenticated POST"
+  },
+  {
+   "label": "Excessive Data Exposure through debug endpoint",
+   "classification": "measurable",
+   "engine_types": [
+    "credential_exposure"
+   ],
+   "reason": "debug endpoint leaks data on unauthenticated GET"
+  },
+  {
+   "label": "User and Password Enumeration",
+   "classification": "measurable",
+   "engine_types": [
+    "credential_exposure"
+   ],
+   "reason": "differential responses on unauthenticated login attempts"
+  },
+  {
+   "label": "RegexDOS (Denial of Service)",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "DoS out of scope by policy"
+  },
+  {
+   "label": "Lack of Resources & Rate Limiting",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "resource-exhaustion behavior — DoS class, out of scope"
+  },
+  {
+   "label": "JWT authentication bypass via weak signing key",
+   "classification": "measurable",
+   "engine_types": [
+    "jwt_security"
+   ],
+   "reason": "engine JWT battery probes weak/unsigned tokens unauthenticated"
+  }
+ ],
+ "classification_counts": {
+  "measurable": 6,
+  "out_of_scope": 3
+ }
+}

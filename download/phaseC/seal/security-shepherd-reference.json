@@ -1,0 +1,732 @@
+{
+ "app": "Security Shepherd",
+ "origin": "OWASP/SecurityShepherd",
+ "pinned_commit": "14c195a0b83e84997f57a54d17d749fa33a6f002",
+ "sealed": "2026-11-11",
+ "reference_source": "src/main/resources/database/coreSchema.sql — INSERT INTO modules (the app's own module registry)",
+ "label_count": 56,
+ "labels": [
+  {
+   "name": "Insecure Direct Object References",
+   "type": "lesson",
+   "category": "Insecure Direct Object References"
+  },
+  {
+   "name": "Poor Data Validation",
+   "type": "lesson",
+   "category": "Poor Data Validation"
+  },
+  {
+   "name": "Security Misconfiguration",
+   "type": "lesson",
+   "category": "Security Misconfigurations"
+  },
+  {
+   "name": "Broken Session Management",
+   "type": "lesson",
+   "category": "Session Management"
+  },
+  {
+   "name": "Failure to Restrict URL Access",
+   "type": "lesson",
+   "category": "Failure to Restrict URL Access"
+  },
+  {
+   "name": "Cross Site Scripting",
+   "type": "lesson",
+   "category": "XSS"
+  },
+  {
+   "name": "Cross Site Scripting 1",
+   "type": "challenge",
+   "category": "XSS"
+  },
+  {
+   "name": "Insecure Cryptographic Storage",
+   "type": "lesson",
+   "category": "Insecure Cryptographic Storage"
+  },
+  {
+   "name": "SQL Injection",
+   "type": "lesson",
+   "category": "Injection"
+  },
+  {
+   "name": "Insecure Cryptographic Storage Challenge 1",
+   "type": "challenge",
+   "category": "Insecure Cryptographic Storage"
+  },
+  {
+   "name": "Insecure Direct Object Reference Challenge 1",
+   "type": "challenge",
+   "category": "Insecure Direct Object References"
+  },
+  {
+   "name": "Poor Data Validation 1",
+   "type": "challenge",
+   "category": "Poor Data Validation"
+  },
+  {
+   "name": "SQL Injection 1",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "Session Management Challenge 1",
+   "type": "challenge",
+   "category": "Session Management"
+  },
+  {
+   "name": "Failure to Restrict URL Access 1",
+   "type": "challenge",
+   "category": "Failure to Restrict URL Access"
+  },
+  {
+   "name": "Cross Site Request Forgery",
+   "type": "lesson",
+   "category": "CSRF"
+  },
+  {
+   "name": "Unvalidated Redirects and Forwards",
+   "type": "lesson",
+   "category": "Unvalidated Redirects and Forwards"
+  },
+  {
+   "name": "SQL Injection 2",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "NoSQL Injection One",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "SQL Injection Escaping",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "Session Management Challenge 2",
+   "type": "challenge",
+   "category": "Session Management"
+  },
+  {
+   "name": "CSRF 1",
+   "type": "challenge",
+   "category": "CSRF"
+  },
+  {
+   "name": "Session Management Challenge 3",
+   "type": "challenge",
+   "category": "Session Management"
+  },
+  {
+   "name": "Cross Site Scripting 2",
+   "type": "challenge",
+   "category": "XSS"
+  },
+  {
+   "name": "Insecure Cryptographic Storage Challenge 2",
+   "type": "challenge",
+   "category": "Insecure Cryptographic Storage"
+  },
+  {
+   "name": "Insecure Direct Object Reference Challenge 2",
+   "type": "challenge",
+   "category": "Insecure Direct Object References"
+  },
+  {
+   "name": "Cross Site Scripting 3",
+   "type": "challenge",
+   "category": "XSS"
+  },
+  {
+   "name": "Insecure Direct Object Reference Bank",
+   "type": "challenge",
+   "category": "Insecure Direct Object References"
+  },
+  {
+   "name": "SQL Injection 3",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "CSRF 2",
+   "type": "challenge",
+   "category": "CSRF"
+  },
+  {
+   "name": "CSRF 3",
+   "type": "challenge",
+   "category": "CSRF"
+  },
+  {
+   "name": "CSRF 4",
+   "type": "challenge",
+   "category": "CSRF"
+  },
+  {
+   "name": "CSRF JSON",
+   "type": "challenge",
+   "category": "CSRF"
+  },
+  {
+   "name": "Session Management Challenge 4",
+   "type": "challenge",
+   "category": "Session Management"
+  },
+  {
+   "name": "Cross Site Scripting 4",
+   "type": "challenge",
+   "category": "XSS"
+  },
+  {
+   "name": "SQL Injection 4",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "Insecure Cryptographic Storage Challenge 3",
+   "type": "challenge",
+   "category": "Insecure Cryptographic Storage"
+  },
+  {
+   "name": "CSRF 5",
+   "type": "challenge",
+   "category": "CSRF"
+  },
+  {
+   "name": "Poor Data Validation 2",
+   "type": "challenge",
+   "category": "Poor Data Validation"
+  },
+  {
+   "name": "Failure to Restrict URL Access 2",
+   "type": "challenge",
+   "category": "Failure to Restrict URL Access"
+  },
+  {
+   "name": "Cross Site Scripting 5",
+   "type": "challenge",
+   "category": "XSS"
+  },
+  {
+   "name": "SQL Injection 5",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "CSRF 6",
+   "type": "challenge",
+   "category": "CSRF"
+  },
+  {
+   "name": "SQL Injection Stored Procedure",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "Cross Site Scripting 6",
+   "type": "challenge",
+   "category": "XSS"
+  },
+  {
+   "name": "SQL Injection 6",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "Session Management Challenge 5",
+   "type": "challenge",
+   "category": "Session Management"
+  },
+  {
+   "name": "Failure to Restrict URL Access 3",
+   "type": "challenge",
+   "category": "Failure to Restrict URL Access"
+  },
+  {
+   "name": "Session Management Challenge 6",
+   "type": "challenge",
+   "category": "Session Management"
+  },
+  {
+   "name": "Security Misconfig Cookie Flag",
+   "type": "challenge",
+   "category": "Security Misconfigurations"
+  },
+  {
+   "name": "Session Management Challenge 7",
+   "type": "challenge",
+   "category": "Session Management"
+  },
+  {
+   "name": "SQL Injection 7",
+   "type": "challenge",
+   "category": "Injection"
+  },
+  {
+   "name": "Insecure Cryptographic Storage Challenge 4",
+   "type": "challenge",
+   "category": "Insecure Cryptographic Storage"
+  },
+  {
+   "name": "Session Management Challenge 8",
+   "type": "challenge",
+   "category": "Session Management"
+  },
+  {
+   "name": "CSRF 7",
+   "type": "challenge",
+   "category": "CSRF"
+  },
+  {
+   "name": "Insecure Cryptographic Storage Home Made Key",
+   "type": "challenge",
+   "category": "Insecure Cryptographic Storage"
+  }
+ ],
+ "notes": [
+  "82 modules total in self-registered table: 19 lessons + 63 challenges",
+  "excluded-with-reason: 24 Mobile modules (require Android app — out of unauthenticated-DAST scope, documented exclusion)",
+  "excluded-with-reason: 2 closed-status modules (XXE Injection, XXE Injection 1)",
+  "measurable web modules: 56",
+  "initial count of 12 (Java lesson files only) was corrected by this table"
+ ],
+ "classification": [
+  {
+   "label": "Insecure Direct Object References",
+   "classification": "measurable",
+   "engine_types": [
+    "idor_bola"
+   ],
+   "reason": "IDOR endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Poor Data Validation",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "path_traversal"
+   ],
+   "reason": "input-validation endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Security Misconfiguration",
+   "classification": "measurable",
+   "engine_types": [
+    "missing_security_headers",
+    "cors_misconfig"
+   ],
+   "reason": "header/config classes on unauthenticated GETs"
+  },
+  {
+   "label": "Broken Session Management",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "requires authenticated session lifecycle (login/change-password flows)"
+  },
+  {
+   "label": "Failure to Restrict URL Access",
+   "classification": "measurable",
+   "engine_types": [
+    "vertical_privilege_escalation"
+   ],
+   "reason": "admin-vs-user URL access: engine probes unauthenticated/admin-path reachability"
+  },
+  {
+   "label": "Cross Site Scripting",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "xss_dom"
+   ],
+   "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Cross Site Scripting 1",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "xss_dom"
+   ],
+   "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Insecure Cryptographic Storage",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+  },
+  {
+   "label": "SQL Injection",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Insecure Cryptographic Storage Challenge 1",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+  },
+  {
+   "label": "Insecure Direct Object Reference Challenge 1",
+   "classification": "measurable",
+   "engine_types": [
+    "idor_bola"
+   ],
+   "reason": "IDOR endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Poor Data Validation 1",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "path_traversal"
+   ],
+   "reason": "input-validation endpoints reachable unauthenticated"
+  },
+  {
+   "label": "SQL Injection 1",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Session Management Challenge 1",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "authenticated session flows (challenges 1-8)"
+  },
+  {
+   "label": "Failure to Restrict URL Access 1",
+   "classification": "measurable",
+   "engine_types": [
+    "vertical_privilege_escalation"
+   ],
+   "reason": "admin-vs-user URL access: engine probes unauthenticated/admin-path reachability"
+  },
+  {
+   "label": "Cross Site Request Forgery",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "CSRF lesson (the app spells it out; no hyphen) reachable unauthenticated"
+  },
+  {
+   "label": "Unvalidated Redirects and Forwards",
+   "classification": "measurable",
+   "engine_types": [
+    "open_redirect"
+   ],
+   "reason": "redirect parameter on unauthenticated URL"
+  },
+  {
+   "label": "SQL Injection 2",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "NoSQL Injection One",
+   "classification": "measurable",
+   "engine_types": [
+    "nosql_injection"
+   ],
+   "reason": "NoSQLi challenge reachable unauthenticated"
+  },
+  {
+   "label": "SQL Injection Escaping",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Session Management Challenge 2",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "authenticated session flows (challenges 1-8)"
+  },
+  {
+   "label": "CSRF 1",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Session Management Challenge 3",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "authenticated session flows (challenges 1-8)"
+  },
+  {
+   "label": "Cross Site Scripting 2",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "xss_dom"
+   ],
+   "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Insecure Cryptographic Storage Challenge 2",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+  },
+  {
+   "label": "Insecure Direct Object Reference Challenge 2",
+   "classification": "measurable",
+   "engine_types": [
+    "idor_bola"
+   ],
+   "reason": "IDOR endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Cross Site Scripting 3",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "xss_dom"
+   ],
+   "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Insecure Direct Object Reference Bank",
+   "classification": "measurable",
+   "engine_types": [
+    "idor_bola"
+   ],
+   "reason": "IDOR endpoints reachable unauthenticated"
+  },
+  {
+   "label": "SQL Injection 3",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "CSRF 2",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "CSRF 3",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "CSRF 4",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "CSRF JSON",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Session Management Challenge 4",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "authenticated session flows (challenges 1-8)"
+  },
+  {
+   "label": "Cross Site Scripting 4",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "xss_dom"
+   ],
+   "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+  },
+  {
+   "label": "SQL Injection 4",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Insecure Cryptographic Storage Challenge 3",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+  },
+  {
+   "label": "CSRF 5",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Poor Data Validation 2",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "path_traversal"
+   ],
+   "reason": "input-validation endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Failure to Restrict URL Access 2",
+   "classification": "measurable",
+   "engine_types": [
+    "vertical_privilege_escalation"
+   ],
+   "reason": "admin-vs-user URL access: engine probes unauthenticated/admin-path reachability"
+  },
+  {
+   "label": "Cross Site Scripting 5",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "xss_dom"
+   ],
+   "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+  },
+  {
+   "label": "SQL Injection 5",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "CSRF 6",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "SQL Injection Stored Procedure",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Cross Site Scripting 6",
+   "classification": "measurable",
+   "engine_types": [
+    "xss_reflected",
+    "xss_dom"
+   ],
+   "reason": "lesson/challenge XSS endpoints reachable unauthenticated"
+  },
+  {
+   "label": "SQL Injection 6",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Session Management Challenge 5",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "authenticated session flows (challenges 1-8)"
+  },
+  {
+   "label": "Failure to Restrict URL Access 3",
+   "classification": "measurable",
+   "engine_types": [
+    "vertical_privilege_escalation"
+   ],
+   "reason": "admin-vs-user URL access: engine probes unauthenticated/admin-path reachability"
+  },
+  {
+   "label": "Session Management Challenge 6",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "authenticated session flows (challenges 1-8)"
+  },
+  {
+   "label": "Security Misconfig Cookie Flag",
+   "classification": "measurable",
+   "engine_types": [
+    "missing_security_headers"
+   ],
+   "reason": "cookie-flag detection on unauthenticated responses"
+  },
+  {
+   "label": "Session Management Challenge 7",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "authenticated session flows (challenges 1-8)"
+  },
+  {
+   "label": "SQL Injection 7",
+   "classification": "measurable",
+   "engine_types": [
+    "sql_injection"
+   ],
+   "reason": "SQLi lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Insecure Cryptographic Storage Challenge 4",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+  },
+  {
+   "label": "Session Management Challenge 8",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "authenticated session flows (challenges 1-8)"
+  },
+  {
+   "label": "CSRF 7",
+   "classification": "measurable",
+   "engine_types": [
+    "csrf"
+   ],
+   "reason": "CSRF lesson/challenge endpoints reachable unauthenticated"
+  },
+  {
+   "label": "Insecure Cryptographic Storage Home Made Key",
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "weak storage in DB/source, not an HTTP-response-observable class in the engine battery"
+  }
+ ],
+ "classification_counts": {
+  "measurable": 41,
+  "out_of_scope": 15
+ }
+}
