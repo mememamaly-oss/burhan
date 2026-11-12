@@ -167,7 +167,28 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Engine doctor (19 checks)
-        run: python3 -m burhan.cli doctor
+        run: |
+          python3 -m burhan.cli doctor > /tmp/doctor.json
+          cat /tmp/doctor.json
+          # phaseC 2026-11-12 (owner order, task 4): every WARN must be
+          # VISIBLE in the run summary page, not only in the raw step log.
+          # A downgraded network_egress (dead probe hosts) is exactly the
+          # kind of degradation an operator must see at a glance.
+          python3 - <<'PY'
+          import json, os
+          report = json.load(open("/tmp/doctor.json"))
+          warns = [c for c in report.get("checks", []) if c["status"] == "WARN"]
+          summary = os.environ.get("GITHUB_STEP_SUMMARY", "")
+          if warns and summary:
+              with open(summary, "a") as f:
+                  f.write("## \u26a0\ufe0f Doctor warnings (%d)\n\n" % len(warns))
+                  f.write("| check | detail |\n|---|---|\n")
+                  for c in warns:
+                      f.write("| `%s` | %s |\n" % (c["check"], c["detail"].replace("|", "\\|")))
+              print("doctor: %d WARN(s) appended to the step summary" % len(warns))
+          elif warns:
+              print("doctor: %d WARN(s) (no summary file on this runner)" % len(warns))
+          PY
 
       # Round 8, part 1: the anti-pattern scanner gate on EVERY push — a new
       # engine site matching the anti-pattern classes (first-match selection,
@@ -671,7 +692,28 @@ jobs:
           python3 -m playwright install --with-deps chromium
 
       - name: Engine doctor (19 checks)
-        run: python3 -m burhan.cli doctor
+        run: |
+          python3 -m burhan.cli doctor > /tmp/doctor.json
+          cat /tmp/doctor.json
+          # phaseC 2026-11-12 (owner order, task 4): every WARN must be
+          # VISIBLE in the run summary page, not only in the raw step log.
+          # A downgraded network_egress (dead probe hosts) is exactly the
+          # kind of degradation an operator must see at a glance.
+          python3 - <<'PY'
+          import json, os
+          report = json.load(open("/tmp/doctor.json"))
+          warns = [c for c in report.get("checks", []) if c["status"] == "WARN"]
+          summary = os.environ.get("GITHUB_STEP_SUMMARY", "")
+          if warns and summary:
+              with open(summary, "a") as f:
+                  f.write("## \u26a0\ufe0f Doctor warnings (%d)\n\n" % len(warns))
+                  f.write("| check | detail |\n|---|---|\n")
+                  for c in warns:
+                      f.write("| `%s` | %s |\n" % (c["check"], c["detail"].replace("|", "\\|")))
+              print("doctor: %d WARN(s) appended to the step summary" % len(warns))
+          elif warns:
+              print("doctor: %d WARN(s) (no summary file on this runner)" % len(warns))
+          PY
 
       - name: Anti-pattern scanner gate (first-match carry-over + part-1 classes)
         run: python3 scripts/audit_antipatterns.py --ci-gate
