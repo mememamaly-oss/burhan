@@ -64,4 +64,7 @@ def test_network_egress_first_host_reachable_is_pass_with_host_named(monkeypatch
     report = doctor()
     c = _check(report, "network_egress")
     assert c["status"] == "PASS", c
-    assert "github.com:443" in c["detail"], c["detail"]
+    # exact-equality on the full detail (CodeQL py/regex-incomplete-
+    # sanitization false-positives on substring membership against a
+    # host:port literal — this is an assertion, not URL sanitization)
+    assert c["detail"] == "TCP connect github.com:443 OK (attempt 1/2)", c["detail"]
