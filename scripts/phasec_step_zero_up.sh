@@ -153,8 +153,8 @@ OLD = "RUN apt-get update -qq && apt-get install -y build-essential libpq-dev no
 NEW = ("RUN printf 'deb http://archive.debian.org/debian stretch main\\n"
        "deb http://archive.debian.org/debian-security stretch/updates main\\n' > /etc/apt/sources.list \\\n"
        "    && apt-get -o Acquire::Check-Valid-Until=false update -qq \\\n"
-       "    && apt-get install -y --no-install-recommends ca-certificates \\\n"
-       "    && apt-get install -y build-essential libpq-dev nodejs")
+       "    && apt-get -o Acquire::Check-Valid-Until=false install -y --allow-unauthenticated --no-install-recommends ca-certificates \\\n"
+       "    && apt-get -o Acquire::Check-Valid-Until=false install -y --allow-unauthenticated build-essential libpq-dev nodejs")
 if t.count(OLD) != 1:
     raise SystemExit(f"Dockerfile apt line count != 1 (got {t.count(OLD)}) at pinned commit")
 f.write_text(t.replace(OLD, NEW))
