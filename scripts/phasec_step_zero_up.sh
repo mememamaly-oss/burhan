@@ -140,22 +140,28 @@ up_railsgoat() {
   # image build, pre-installing a fresh ca-certificates from the archive
   # too (belt-and-braces for rubygems TLS; the stretch store already
   # verifies the live chain OK — 2026-11-12).
-  cat > Dockerfile.archive.patch <<'PATCH'
---- a/Dockerfile
-+++ b/Dockerfile
-@@ -1,5 +1,8 @@
- FROM ruby:2.5.0
--RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
-+RUN printf 'deb http://archive.debian.org/debian stretch main\ndeb http://archive.debian.org/debian-security stretch/updates main\n' > /etc/apt/sources.list \
-+    && apt-get -o Acquire::Check-Valid-Until=false update -qq \
-+    && apt-get install -y --no-install-recommends ca-certificates \
-+    && apt-get install -y build-essential libpq-dev nodejs
- RUN mkdir /myapp
- WORKDIR /myapp
- ADD Gemfile /myapp/Gemfile
-PATCH
-  patch --quiet -p0 < Dockerfile.archive.patch \
-    || { echo "Dockerfile archive patch failed" > "$OUT/railsgoat.up.log"; return 1; }
+  # same minimal-patch style as the XVWA config.php sed patch — but done
+  # via a small python heredoc so quoting stays auditable (run-43188415114
+  # taught: patch(1) needs -p1 for a/ b/ headers; python needs neither).
+  # Fails closed: any of grep-guard, replace-count!=1, or final check
+  # blocks the candidate with a distinct reason.
+  python3 - <<'PY' > "$OUT/railsgoat.up.log" 2>&1 || { echo "Dockerfile patch step failed" >> "$OUT/railsgoat.up.log"; return 1; }
+import pathlib
+f = pathlib.Path("Dockerfile")
+t = f.read_text()
+OLD = "RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs"
+NEW = ("RUN printf 'deb http://archive.debian.org/debian stretch main\\n"
+       "deb http://archive.debian.org/debian-security stretch/updates main\\n' > /etc/apt/sources.list \\\n"
+       "    && apt-get -o Acquire::Check-Valid-Until=false update -qq \\\n"
+       "    && apt-get install -y --no-install-recommends ca-certificates \\\n"
+       "    && apt-get install -y build-essential libpq-dev nodejs")
+if t.count(OLD) != 1:
+    raise SystemExit(f"Dockerfile apt line count != 1 (got {t.count(OLD)}) at pinned commit")
+f.write_text(t.replace(OLD, NEW))
+if "archive.debian.org" not in f.read_text():
+    raise SystemExit("post-patch check failed: archive line absent")
+print("Dockerfile patched: stretch -> archive.debian.org")
+PY
   cat > docker-compose.override.yml <<'YAML'
 networks:
   default:
