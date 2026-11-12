@@ -1,0 +1,110 @@
+time="2026-11-12T00:33:04Z" level=warning msg="/tmp/railsgoat/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image railsgoat-web Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 472B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 262B done
+#2 DONE 0.0s
+
+#3 [auth] library/ruby:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/ruby:2.5.0
+#4 DONE 0.6s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 14.80MB 0.0s done
+#6 DONE 0.1s
+
+#7 [1/8] FROM docker.io/library/ruby:2.5.0@sha256:cde5649ea901f6b36714b69a0ad8717ddaffa42131343dba30a02b61f3177fca
+#7 resolve docker.io/library/ruby:2.5.0@sha256:cde5649ea901f6b36714b69a0ad8717ddaffa42131343dba30a02b61f3177fca done
+#7 sha256:0ee3623a364d614e28b2a3f1ac2ec793dd27b5f0990981d43704ea8e86e3a299 164B / 164B 0.1s done
+#7 sha256:953e617a9c219c94b8de48800e0f9a918162365fe012481cbbd44f43b2940b03 207B / 207B 0.1s done
+#7 sha256:aa1f26029ba5253e256c4afec7533ac7ef450056866818643e750d7c92770484 1.05MB / 21.49MB 0.2s
+#7 sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1 0B / 213.16MB 0.2s
+#7 sha256:57c8de432dbe337bb6cb1ad328e6c564303a3d3fd05b5e872fd9c47c16fdd02c 0B / 50.02MB 0.2s
+#7 sha256:aa1f26029ba5253e256c4afec7533ac7ef450056866818643e750d7c92770484 11.53MB / 21.49MB 0.3s
+#7 sha256:57c8de432dbe337bb6cb1ad328e6c564303a3d3fd05b5e872fd9c47c16fdd02c 15.73MB / 50.02MB 0.3s
+#7 sha256:b542772b417703c0311c0b90136091369bcd9c2176c0e3ceed5a0114d743ee3c 4.34MB / 4.34MB 0.2s done
+#7 sha256:aa1f26029ba5253e256c4afec7533ac7ef450056866818643e750d7c92770484 21.49MB / 21.49MB 0.5s done
+#7 sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1 31.46MB / 213.16MB 0.5s
+#7 sha256:57c8de432dbe337bb6cb1ad328e6c564303a3d3fd05b5e872fd9c47c16fdd02c 50.02MB / 50.02MB 0.5s
+#7 sha256:c73ab1c6897bf5c11da3c95cab103e7ca8cf10a6d041eda2ff836f45a40e3d3b 5.24MB / 45.14MB 0.2s
+#7 sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1 68.16MB / 213.16MB 0.6s
+#7 sha256:c73ab1c6897bf5c11da3c95cab103e7ca8cf10a6d041eda2ff836f45a40e3d3b 45.14MB / 45.14MB 0.3s
+#7 sha256:1ab373b3deaed929a15574ac1912afc6e173f80d400aba0e96c89f6a58961f2d 11.11MB / 11.11MB 0.2s
+#7 sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1 97.52MB / 213.16MB 0.8s
+#7 sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1 121.63MB / 213.16MB 0.9s
+#7 sha256:57c8de432dbe337bb6cb1ad328e6c564303a3d3fd05b5e872fd9c47c16fdd02c 50.02MB / 50.02MB 0.7s done
+#7 sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1 178.26MB / 213.16MB 1.2s
+#7 sha256:c73ab1c6897bf5c11da3c95cab103e7ca8cf10a6d041eda2ff836f45a40e3d3b 45.14MB / 45.14MB 0.7s done
+#7 sha256:1ab373b3deaed929a15574ac1912afc6e173f80d400aba0e96c89f6a58961f2d 11.11MB / 11.11MB 0.6s done
+#7 extracting sha256:c73ab1c6897bf5c11da3c95cab103e7ca8cf10a6d041eda2ff836f45a40e3d3b
+#7 sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1 213.16MB / 213.16MB 1.4s
+#7 sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1 213.16MB / 213.16MB 2.5s done
+#7 extracting sha256:c73ab1c6897bf5c11da3c95cab103e7ca8cf10a6d041eda2ff836f45a40e3d3b 1.5s done
+#7 extracting sha256:1ab373b3deaed929a15574ac1912afc6e173f80d400aba0e96c89f6a58961f2d 0.2s done
+#7 DONE 2.7s
+
+#7 [1/8] FROM docker.io/library/ruby:2.5.0@sha256:cde5649ea901f6b36714b69a0ad8717ddaffa42131343dba30a02b61f3177fca
+#7 extracting sha256:b542772b417703c0311c0b90136091369bcd9c2176c0e3ceed5a0114d743ee3c 0.0s done
+#7 extracting sha256:57c8de432dbe337bb6cb1ad328e6c564303a3d3fd05b5e872fd9c47c16fdd02c
+#7 extracting sha256:57c8de432dbe337bb6cb1ad328e6c564303a3d3fd05b5e872fd9c47c16fdd02c 0.7s done
+#7 DONE 3.5s
+
+#7 [1/8] FROM docker.io/library/ruby:2.5.0@sha256:cde5649ea901f6b36714b69a0ad8717ddaffa42131343dba30a02b61f3177fca
+#7 extracting sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1
+#7 extracting sha256:1785850988c5179b2b83fc5877b21c5d95fd9b769561956798b83cb4c86d7de1 2.6s done
+#7 DONE 6.1s
+
+#7 [1/8] FROM docker.io/library/ruby:2.5.0@sha256:cde5649ea901f6b36714b69a0ad8717ddaffa42131343dba30a02b61f3177fca
+#7 extracting sha256:953e617a9c219c94b8de48800e0f9a918162365fe012481cbbd44f43b2940b03 done
+#7 extracting sha256:aa1f26029ba5253e256c4afec7533ac7ef450056866818643e750d7c92770484
+#7 extracting sha256:aa1f26029ba5253e256c4afec7533ac7ef450056866818643e750d7c92770484 0.3s done
+#7 DONE 6.4s
+
+#7 [1/8] FROM docker.io/library/ruby:2.5.0@sha256:cde5649ea901f6b36714b69a0ad8717ddaffa42131343dba30a02b61f3177fca
+#7 extracting sha256:0ee3623a364d614e28b2a3f1ac2ec793dd27b5f0990981d43704ea8e86e3a299 done
+#7 DONE 6.4s
+
+#8 [2/8] RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
+#8 2.143 W: The repository 'http://security.debian.org stretch/updates Release' does not have a Release file.
+#8 2.143 W: The repository 'http://deb.debian.org/debian stretch Release' does not have a Release file.
+#8 2.143 W: The repository 'http://deb.debian.org/debian stretch-updates Release' does not have a Release file.
+#8 2.143 E: Failed to fetch http://security.debian.org/dists/stretch/updates/main/binary-amd64/Packages  404  Not Found
+#8 2.143 E: Failed to fetch http://deb.debian.org/debian/dists/stretch/main/binary-amd64/Packages  404  Not Found
+#8 2.143 E: Failed to fetch http://deb.debian.org/debian/dists/stretch-updates/main/binary-amd64/Packages  404  Not Found
+#8 2.143 E: Some index files failed to download. They have been ignored, or old ones used instead.
+#8 ERROR: process "/bin/sh -c apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs" did not complete successfully: exit code: 100
+------
+ > [2/8] RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs:
+2.143 W: The repository 'http://security.debian.org stretch/updates Release' does not have a Release file.
+2.143 W: The repository 'http://deb.debian.org/debian stretch Release' does not have a Release file.
+2.143 W: The repository 'http://deb.debian.org/debian stretch-updates Release' does not have a Release file.
+2.143 E: Failed to fetch http://security.debian.org/dists/stretch/updates/main/binary-amd64/Packages  404  Not Found
+2.143 E: Failed to fetch http://deb.debian.org/debian/dists/stretch/main/binary-amd64/Packages  404  Not Found
+2.143 E: Failed to fetch http://deb.debian.org/debian/dists/stretch-updates/main/binary-amd64/Packages  404  Not Found
+2.143 E: Some index files failed to download. They have been ignored, or old ones used instead.
+------
+Dockerfile:2
+
+--------------------
+
+   1 |     FROM ruby:2.5.0
+
+   2 | >>> RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
+
+   3 |     RUN mkdir /myapp
+
+   4 |     WORKDIR /myapp
+
+--------------------
+
+failed to solve: process "/bin/sh -c apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs" did not complete successfully: exit code: 100
+

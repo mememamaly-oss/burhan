@@ -1,7 +1,7 @@
 {
  "phase": "B (quality gaps)",
- "date": "2026-11-11T19:30:00Z",
- "overall": "Owner approved: d1a d2a d2b-a d2j-a-MODIFIED (FP on proof-verified vuln breaks; unverified warns), d3a, d3b b+c. START step zero — with 7 new binding rules. This round (ALL LOCAL, PUSH BLOCKED: GH_TOKEN absent from env, remote URL stripped of token, per owner rule): (1) secrets audit — PAT file entered my-project LOCAL history (3 commits touched, 6 trees contain; repo has NO remotes — never left the box); recommendation: rotate + optional filter-repo (owner decision). burhan history: only sentinel test tokens. (2) SPEC v2.2 written: d2j as modified, §5.1 seven binding rules (app-burning, seal-before-run, WackoPicko replaces DVJA, Shepherd count correction, BLOCKED protocol, GH_TOKEN-only push, network isolation). (3) Shepherd count CORRECTED: modules table (self-registry) = 82 modules (19 lessons + 63 challenges) − 24 Mobile (documented exclusion) − 2 closed XXE = 56 measurable web. XVWA corrected to 19 (index.php is a listing), WackoPicko verified 15 line-by-line. (4) SEAL generated: download/phaseC/seal/ 6 files, 111 labels (56+12+9+19+15), sha256 per reference + seal file. (5) Step-zero workflow + up-script written (dind pattern, internal network, probe from scan path, BLOCKED records). NOT DONE (blocked): seal commit + step-zero run — need GH_TOKEN in env.",
+ "date": "2026-11-12T01:20:00Z",
+ "overall": "STEP-ZERO COMPLETE (run 43128061378, main@ce77ada8): READY vampi+unsafe/safe twins (200/200), xvwa (200), wackopicko (200); BLOCKED shepherd (Dockerfile COPY target/*.war fails — the compose expects a pre-built WAR not produced by plain 'docker compose up --build'; upstream build needs maven first) + railsgoat (base image ruby:2.5.0 apt-get against EOL debian stretch → 404). Evidence downloaded to download/phaseC/step-zero-results/ and summarized for owner review. Owner orders 2026-11-12 executed BEFORE any numbers: (1) SPEC §3.2.1 two-number rule — every published result carries recall-on-measurable (81) AND coverage-on-all (111, out_of_scope counts as absent) + the gap = tool limits; 4bis gate makes a report without both fields FAIL; (2) B1-2 registered in phaseB inventory: test_race_prober time-fragility, rerun-to-green NOT accepted as closure, root-cause fixes listed (env isolation per-process, generous explicit timeouts, flaky marker with published fail counter); (3) token-print rule in SPEC §5.1.6: never print any token-derived info (length/prefix/suffix) — binary present/absent only. STOPPED at READY/BLOCKED for owner review; NO tool scan before owner approval. Shepherd/RailGoat replacement or fix = owner decision (seal rules §5.1/2,5).",
  "items": {
   "B1_time_flakiness_sweep": {
    "status": "DONE + MERGED",
@@ -90,11 +90,10 @@
   ]
  },
  "next_session_steps": [
-  "1. OWNER ACTION: provide GH_TOKEN in the environment (and decide: rotate the PAT; optional git filter-repo on my-project local history).",
-  "2. With GH_TOKEN: commit+push the seal as an INDEPENDENT commit (seal/ 6 files), print ls-remote hash.",
-  "3. Then run phasec-step-zero workflow (manual dispatch), collect evidence + BLOCKED records, push with ls-remote hash.",
-  "4. Worktrees: /tmp/wt-inv may need re-creation after recycle (verified-push pattern script: scripts/phasec_feasibility_push.py).",
-  "5. Burn rule active from first run: any tool change from an isolated result -> app moves to dev set, documented in burn log."
+  "1. Monitor run 43128061378 (workflow phasec-step-zero, id 415314571) to completion; fetch artifact phasec-step-zero-evidence.",
+  "2. Read summary.txt: READY/BLOCKED per candidate; for BLOCKED follow §5.1/5 (record exists in artifact; replacement sqli-labs->owasp-skf needs new seal commit + owner decision).",
+  "3. STOP at results for owner review (explicit owner order).",
+  "4. Token hygiene: old PAT revocation is the owner's action (reminded); current PAT passed per-command only, never stored (no files, no remote URL, no logs)."
  ],
  "main_after_pr97": {
   "commit": "30b4c32936",
@@ -214,5 +213,42 @@
   "blocked_protocol": "failed candidate -> BLOCKED-<name>.md (command+output+reason) -> replacement sqli-labs then owasp-skf via new seal commit",
   "push_security": "GH_TOKEN from env only; absent -> stop and report; print ls-remote hash after every push; token never recovered from any source",
   "network_isolation": "no cloned code executes outside a container; target containers on internal:true network after pull/build"
+ },
+ "push_record_2026_11_12": {
+  "branch": "phaseC/seal-and-step-zero",
+  "pr": 98,
+  "merge_commit": "ce77ada85624ab00128fd84305bc3ac1d09570a2",
+  "commits_in_order": [
+   "868e6d8 seal",
+   "226981c docs",
+   "7135966 ci",
+   "ae1bf70 docs-copies"
+  ],
+  "transient_ci_failure": "test_race_prober (known time-sensitive; not caused by these commits; rerun green)",
+  "step_zero_run": {
+   "id": 43128061378,
+   "status_at_save": "in_progress",
+   "url": "https://github.com/mememamaly-oss/burhan/actions/runs/43128061378",
+   "artifact": "phasec-step-zero-evidence"
+  }
+ },
+ "step_zero_results": {
+  "run": 43128061378,
+  "conclusion": "failure (expected protocol: 2 BLOCKED)",
+  "ready": [
+   "vampi (unsafe 200 + safe 200)",
+   "xvwa (200)",
+   "wackopicko (200)"
+  ],
+  "blocked": {
+   "shepherd": "compose builds web/db/mongo from Dockerfiles that COPY target/*.war|coreSchema.sql — artifacts of a maven build that 'docker compose up --build' does not run",
+   "railsgoat": "Dockerfile FROM ruby:2.5.0 + apt-get on debian stretch (EOL) → 404 on all repos"
+  },
+  "evidence_local": "download/phaseC/step-zero-results/",
+  "next_owner_decisions": [
+   "A: shepherd — pre-build step (mvn package) in the up-script (needs maven image, still sealed commit) vs replacement per §5.1/5",
+   "B: railsgoat — newer base image tag/repo commit vs replacement (sqli-labs then owasp-skf) per §5.1/5",
+   "C: approve tool scan on the 3 READY apps (owner said no scan before approval)"
+  ]
  }
 }
