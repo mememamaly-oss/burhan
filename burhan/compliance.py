@@ -312,6 +312,11 @@ COMPLIANCE: dict[str, dict[str, str]] = {
         "owasp_2021": "A05:2021", "owasp_2021_src": "scope",
         "owasp_2025": "A02:2025", "owasp_2025_src": "official",
     },
+    "weak_random": {
+        "cwe": "CWE-330",
+        "owasp_2021": "A02:2021", "owasp_2021_src": "scope",
+        "owasp_2025": "A02:2025", "owasp_2025_src": "scope",
+    },
     "xxe": {
         "cwe": "CWE-611",
         "owasp_2021": "A05:2021", "owasp_2021_src": "scope",
