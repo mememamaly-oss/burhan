@@ -20,7 +20,7 @@
  */
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { db } from "@/lib/db";
-import { engineCancelScan, engineCancelScanDetailed, reconcileScan, scanDirFor } from "@/lib/engine";
+import { engineCancelScanDetailed, reconcileScan, scanDirFor } from "@/lib/engine";
 import fs from "fs";
 import path from "path";
 
@@ -84,8 +84,8 @@ describe("deterministic cancel-after-completion sequence (#105 CI failure)", () 
     expect(row?.status).toBe("COMPLETED"); // the row is NOT cancelled — it ended on its own
   });
 
-  test("STEP 3 (legacy boolean preserved): engineCancelScan keeps returning the boolean for old callers", async () => {
-    const ok = await engineCancelScan(scanId);
-    expect(ok).toBe(false);
+  test("STEP 3 (contract surface): the detailed outcome carries .ok for boolean-style callers", async () => {
+    const result = await engineCancelScanDetailed(scanId);
+    expect(result.ok).toBe(false); // boolean view preserved ON the outcome
   });
 });

@@ -579,6 +579,11 @@ export type CancelOutcome =
   | { outcome: "not_found"; ok: false };
 
 // Cancel a scan. The return value distinguishes WHY a cancel did not
+// (the legacy boolean wrapper was REMOVED with this change: it had no
+//  remaining src/ caller after the route switched to the detailed
+//  outcome — keeping a dead export trips the quantum-sweep
+//  EXPORT_UNROUTED gate, and dead compatibility surface is worse
+//  than a one-line migration for the single internal test caller).
 // happen: the scan had already finished on its own (engine raced the
 // operator — fast-fail scans against unreachable targets complete in
 // ~1s, owner order 2026-11-13 decision 2) versus the scan not existing.
@@ -623,9 +628,7 @@ async function cancelRunningScan(scanId: string, scan: { enginePid: number | nul
   });
 }
 
-export async function engineCancelScan(scanId: string): Promise<boolean> {
-  return (await engineCancelScanDetailed(scanId)).ok;
-}
+
 
 // ── REPRODUCE (Evidence OS — engine recipe for one finding) ──────────────────
 
