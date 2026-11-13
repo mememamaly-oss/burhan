@@ -1053,6 +1053,19 @@
       "owasp_2025_src": "official",
       "pci_dss": "6.4.2"
     },
+    "weak_random": {
+      "type": "weak_random",
+      "mapped": true,
+      "cwe": "CWE-330",
+      "cwe_label": "",
+      "owasp_2021": "A02:2021",
+      "owasp_2021_title": "Cryptographic Failures",
+      "owasp_2021_src": "scope",
+      "owasp_2025": "A02:2025",
+      "owasp_2025_title": "Security Misconfiguration",
+      "owasp_2025_src": "scope",
+      "pci_dss": "6.4.2"
+    },
     "websocket_cross_user_access": {
       "type": "websocket_cross_user_access",
       "mapped": true,
