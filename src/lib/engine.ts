@@ -199,7 +199,7 @@ function storePathFor(targetId: string): string {
   return path.join(STORES_DIR, `${targetId}.db`);
 }
 
-function scanDirFor(scanId: string): string {
+export function scanDirFor(scanId: string): string {
   return path.join(SCANS_DIR, scanId);
 }
 
@@ -573,9 +573,27 @@ export async function getScanProgress(scanId: string): Promise<ScanProgress> {
 
 // ── CANCEL ───────────────────────────────────────────────────────────────────
 
-export async function engineCancelScan(scanId: string): Promise<boolean> {
+export type CancelOutcome =
+  | { outcome: "cancelled"; ok: true }
+  | { outcome: "already_completed"; ok: false; finalStatus: string }
+  | { outcome: "not_found"; ok: false };
+
+// Cancel a scan. The return value distinguishes WHY a cancel did not
+// happen: the scan had already finished on its own (engine raced the
+// operator — fast-fail scans against unreachable targets complete in
+// ~1s, owner order 2026-11-13 decision 2) versus the scan not existing.
+// Callers that only need the boolean keep using .ok.
+export async function engineCancelScanDetailed(scanId: string): Promise<CancelOutcome> {
   const scan = await db.scan.findUnique({ where: { id: scanId } });
-  if (!scan || (scan.status !== "RUNNING" && scan.status !== "QUEUED")) return false;
+  if (!scan) return { outcome: "not_found", ok: false };
+  if (scan.status !== "RUNNING" && scan.status !== "QUEUED") {
+    return { outcome: "already_completed", ok: false, finalStatus: scan.status };
+  }
+  await cancelRunningScan(scanId, scan);
+  return { outcome: "cancelled", ok: true };
+}
+
+async function cancelRunningScan(scanId: string, scan: { enginePid: number | null; orgId: string; createdById: string }): Promise<void> {
   const pid = scan.enginePid;
   if (pid && pidAlive(pid)) {
     try {
@@ -603,7 +621,10 @@ export async function engineCancelScan(scanId: string): Promise<boolean> {
     });
     await audit("scan.cancelled", { orgId: scan.orgId, userId: scan.createdById, detail: { scanId } }, tx);
   });
-  return true;
+}
+
+export async function engineCancelScan(scanId: string): Promise<boolean> {
+  return (await engineCancelScanDetailed(scanId)).ok;
 }
 
 // ── REPRODUCE (Evidence OS — engine recipe for one finding) ──────────────────

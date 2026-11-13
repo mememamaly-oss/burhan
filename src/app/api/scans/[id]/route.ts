@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, requireOrgAccess, requireScanAccess, jsonError, parseJsonSafe, roleAtLeast } from "@/lib/rbac";
-import { getScanProgress, engineCancelScan, reconcileScan } from "@/lib/engine";
+import { getScanProgress, engineCancelScanDetailed, reconcileScan } from "@/lib/engine";
 
 // GET /api/scans/:id?orgId= — scan meta + live progress (reconciles state)
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
@@ -79,8 +79,25 @@ export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: stri
       return NextResponse.json({ error: "فقط منشئ الفحص أو ADMIN يمكنه الإلغاء" }, { status: 403 });
     }
     await reconcileScan(scan.id).catch(() => null);
-    const ok = await engineCancelScan(scan.id);
-    return NextResponse.json({ ok, cancelled: ok });
+    const result = await engineCancelScanDetailed(scan.id);
+    // Contract (owner order 2026-11-13, decision 2): a cancel that arrives
+    // AFTER the scan finished on its own is NOT a failure — the response
+    // must say so instead of a bare ok:false. ok/cancelled keep their
+    // legacy meaning (a cancel really happened); reason + finalStatus are
+    // the honest detail. 409 would break existing clients, so the response
+    // stays 200 with the distinction in the body.
+    if (result.outcome === "already_completed") {
+      return NextResponse.json({
+        ok: false,
+        cancelled: false,
+        reason: "already_completed",
+        finalStatus: result.finalStatus,
+      });
+    }
+    if (result.outcome === "not_found") {
+      return NextResponse.json({ ok: false, cancelled: false, reason: "not_found" }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true, cancelled: true, reason: "cancelled" });
   } catch (e) {
     return jsonError(e);
   }
