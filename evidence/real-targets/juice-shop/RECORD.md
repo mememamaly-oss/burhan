@@ -45,6 +45,13 @@ baseline.
 
 ## The floor contract
 
+Owner order 2026-11-13 (decisions 3+5): every result summary that cites
+these numbers must carry BOTH the type and the mode with the count —
+"59 verified, all one passive-hygiene class (missing_security_headers),
+unauthenticated-only, does not reflect vulnerabilities behind login".
+floor.json now carries this caveat verbatim in its `caveat` field and the
+CI gate prints a type-balance line (passive-hygiene / active-attack).
+
 `floor.json` beside this file is the regression floor the CI job now
 enforces (`--floor`): every future run must reproduce ≥ its numbers under
 the same config. It is a lower bound, deliberately weak — the honest
