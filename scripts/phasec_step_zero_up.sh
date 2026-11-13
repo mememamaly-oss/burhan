@@ -135,51 +135,14 @@ up_railsgoat() {
   local commit; commit=$(pinned_commit railsgoat)
   log "railsgoat: clone @${commit:0:12}…"
   rm -rf /tmp/railsgoat
-  git clone --quiet https://github.com/smDahlgren/RailGoat.git /tmp/railsgoat || return 1
+  # 2026-11-13 RESEAL: clone the OFFICIAL repo (OWASP/railsgoat, alive,
+  # default branch main) at the resealed commit f5951f1 — Rails 8.0.4 /
+  # Ruby 3.4.1, builds FROM ruby:3.4.1 with NO bring-up patches needed.
+  # The old smDahlgren mirror + its stretch-archive/parser patches are
+  # retired with the suspended f1de24f seal.
+  git clone --quiet https://github.com/OWASP/railsgoat.git /tmp/railsgoat || return 1
   git -C /tmp/railsgoat checkout --quiet "$commit" || return 1
   cd /tmp/railsgoat || return 1
-  # ruby:2.5.0's apt points at EOL debian stretch (404 everywhere, run
-  # 43128061378). Patch sources.list to archive.debian.org BEFORE the
-  # image build, pre-installing a fresh ca-certificates from the archive
-  # too (belt-and-braces for rubygems TLS; the stretch store already
-  # verifies the live chain OK — 2026-11-12).
-  # same minimal-patch style as the XVWA config.php sed patch — but done
-  # via a small python heredoc so quoting stays auditable (run-43188415114
-  # taught: patch(1) needs -p1 for a/ b/ headers; python needs neither).
-  # Fails closed: any of grep-guard, replace-count!=1, or final check
-  # blocks the candidate with a distinct reason.
-  python3 - <<'PY' > "$OUT/railsgoat.up.log" 2>&1 || { echo "Dockerfile patch step failed" >> "$OUT/railsgoat.up.log"; return 1; }
-import pathlib
-f = pathlib.Path("Dockerfile")
-t = f.read_text()
-OLD = "RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs"
-NEW = ("RUN printf 'deb http://archive.debian.org/debian stretch main\\n"
-       "deb http://archive.debian.org/debian-security stretch/updates main\\n' > /etc/apt/sources.list \\\n"
-       "    && apt-get -o Acquire::Check-Valid-Until=false update -qq \\\n"
-       "    && apt-get -o Acquire::Check-Valid-Until=false install -y --allow-unauthenticated --no-install-recommends ca-certificates \\\n"
-       "    && apt-get -o Acquire::Check-Valid-Until=false install -y --allow-unauthenticated build-essential libpq-dev nodejs")
-if t.count(OLD) != 1:
-    raise SystemExit(f"Dockerfile apt line count != 1 (got {t.count(OLD)}) at pinned commit")
-f.write_text(t.replace(OLD, NEW))
-if "archive.debian.org" not in f.read_text():
-    raise SystemExit("post-patch check failed: archive line absent")
-# parser 2.5.0.4 was yanked from rubygems.org (run-43190355488: "that
-# version could not be found in any of the sources" — the ONLY yanked gem
-# of the 134 pinned; verified 2026-11-12). Bump the lock to 2.5.0.5, the
-# adjacent release on the same 2.5.0 branch: same single runtime dep
-# (ast ~> 2.4.0, lock has ast 2.4.0) and the only dependent in the lock
-# (rubocop via parser >= 2.5) is still satisfied.
-lf = pathlib.Path("Gemfile.lock")
-lt = lf.read_text()
-OLDG = "    parser (2.5.0.4)"
-NEWG = "    parser (2.5.0.5)"
-if lt.count(OLDG) != 1:
-    raise SystemExit(f"Gemfile.lock parser pin count != 1 (got {lt.count(OLDG)})")
-lf.write_text(lt.replace(OLDG, NEWG))
-if "parser (2.5.0.5)" not in lf.read_text():
-    raise SystemExit("post-patch check failed: parser pin not bumped")
-print("Dockerfile patched: stretch -> archive.debian.org; Gemfile.lock parser 2.5.0.4 -> 2.5.0.5 (yanked upstream)")
-PY
   cat > docker-compose.override.yml <<'YAML'
 networks:
   default:
@@ -241,18 +204,11 @@ main() {
   local wanted="${*:-shepherd railsgoat vampi xvwa wackopicko}"
   local overall=0 name rc
   : > "$OUT/summary.txt"
-  # owner decision (ج) 2026-11-12: railsgoat is SUSPENDED (BLOCKED) —
-  # skip it unless explicitly requested for the record. Decision record:
-  # download/phaseC/seal/SUSPENDED.json (a NEW file beside the seal; the
-  # sealed hashes are untouched per the owner's no-new-seal order).
-  case " $wanted " in
-    *" railsgoat "*)
-      if [ -f "$SEAL_DIR/SUSPENDED.json" ] && [ "$wanted" != "railsgoat" ]; then
-        log "railsgoat: SUSPENDED (owner decision 2026-11-12) — skipped; run with the single argument 'railsgoat' to force it for the record"
-        wanted=$(printf '%s' "$wanted" | sed 's/\<railsgoat\>//; s/  */ /g; s/^ //; s/ $//')
-        echo "SUSPENDED railsgoat (skipped — owner decision 2026-11-12, see seal/SUSPENDED.json)" >> "$OUT/summary.txt"
-      fi ;;
-  esac
+  # 2026-11-13 RESEAL (owner approval): railsgoat is ACTIVE again — resealed
+  # from the official repo OWASP/railsgoat @ f5951f1 (Rails 8.0.4). The old
+  # 2026-11-12 SUSPENDED skip logic is removed: the suspension was resolved
+  # by the reseal (see download/phaseC/seal/SUSPENDED.json -> resolved).
+  # Bring-up must clone the OFFICIAL repo, not the smDahlgren mirror.
   for name in $wanted; do
     case "$name" in
       shepherd)    up_shepherd ;;

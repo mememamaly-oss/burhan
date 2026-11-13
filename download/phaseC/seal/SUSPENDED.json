@@ -2,7 +2,7 @@
  "suspended": [
   {
    "app": "railsgoat",
-   "decision": "BLOCKED (suspended)",
+   "decision": "RESOLVED-BY-RESEAL (was BLOCKED suspended)",
    "decided_by": "owner",
    "date": "2026-11-12",
    "order": "owner decision (ج): proceed with the remaining four isolated candidates; railsgoat stays BLOCKED, documented here — NO new seal commit at this time",
@@ -28,8 +28,14 @@
     "membership": "railsgoat REMAINS a seal member (suspended) — ISOLATED-SEAL.json and the reference manifests are NOT modified (no new seal commit per owner order)",
     "numbers": "isolated-set ACTIVE numbers are now computed EXCLUDING railsgoat: see download/phaseC/PHASEC-L1-ACTIVE-NUMBERS.md (replacing the previous all-5 figures; the old figures are retracted from use, not re-published)",
     "step_zero": "scripts/phasec_step_zero_up.sh and .github/workflows/phasec-step-zero.yml now SKIP railsgoat by default with an explicit SUSPENDED log line (running it on demand remains possible for the record)"
+   },
+   "resolved": {
+    "date": "2026-11-13",
+    "order": "owner approval of PROPOSED-NEW-SEAL-railsgoat.md with conditions: (1) reclassify measurable/out_of_scope on Rails 8 per the sealed criteria and seal in an independent commit BEFORE any run; (2) no tool run on railsgoat before that seal; (3) recompute the numbers by code and publish with the new two numbers (not 81/111, not 72/99)",
+    "reseal_commit_ref": "railsgoat-reference.json @ f5951f1 (this commit)",
+    "effect": "railsgoat is ACTIVE again as an isolated-set member; step-zero skip logic must be reverted in the same seal commit"
    }
   }
  ],
- "note": "This file is a DECISION RECORD beside the seal. It deliberately does not alter any sealed hash: suspending a member's ACTIVE status by owner order is a documented decision, and any future re-pin (e.g. to 2988d61) or replacement (sqli-labs / owasp-skf) will be a NEW seal commit per protocol §5.1/5."
+ "note": "Decision record kept for history. The 2026-11-13 reseal (official OWASP/railsgoat @ f5951f1) resolves the suspension: the syntax-broken training commit is out of the picture entirely."
 }
