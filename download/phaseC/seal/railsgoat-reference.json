@@ -1,147 +1,120 @@
 {
- "app": "RailsGoat",
- "origin": "smDahlgren/RailGoat (moved from OWASP/RailGoat — 404 there)",
- "pinned_commit": "f1de24f380646b847dd6478583d8b5f9bc1f7180",
- "sealed": "2026-11-11",
- "reference_source": "spec/vulnerabilities/*.rb — one official failing Capybara spec per vulnerability",
+ "app": "railsgoat",
+ "origin": "OWASP/railsgoat (official, ALIVE — case-sensitive lowercase name; default branch main)",
+ "pinned_commit": "f5951f13089d85c979de09e7da3c8c0fb982f94a",
+ "sealed": "2026-11-13",
+ "supersedes": "the 2018 mirror seal (smDahlgren/RailGoat @ f1de24f — suspended BLOCKED 2026-11-12; that training commit does NOT exist in official history)",
+ "stack": "Rails 8.0.4 / Ruby 3.4.1 / bundler 4.0.4",
+ "reference_source": "spec/vulnerabilities/*.rb on the official main — one official failing Capybara spec per vulnerability",
  "label_count": 12,
  "labels": [
-  {
-   "spec": "broken_auth_spec.rb"
-  },
-  {
-   "spec": "command_injection_spec.rb"
-  },
-  {
-   "spec": "csrf_spec.rb"
-  },
-  {
-   "spec": "insecure_dor_spec.rb"
-  },
-  {
-   "spec": "mass_assignment_spec.rb"
-  },
-  {
-   "spec": "password_complexity_spec.rb"
-  },
-  {
-   "spec": "password_hashing_spec.rb"
-  },
-  {
-   "spec": "sensitive_data_exposure.rb"
-  },
-  {
-   "spec": "sql_injection_spec.rb"
-  },
-  {
-   "spec": "unvalidated_redirects_spec.rb"
-  },
-  {
-   "spec": "url_access_spec.rb"
-  },
-  {
-   "spec": "xss_spec.rb"
-  }
- ],
- "notes": [
-  "each spec names its tutorial wiki page (e.g. R5-A1-SQL-Injection-Concatenation)",
-  "DB: SQLite in dev; MySQL env required for some SQLi vulns (README 'MySQL Environment')",
-  "official Dockerfile + docker-compose at repo root (port 3000)"
+  {"spec": "broken_auth_spec.rb"},
+  {"spec": "command_injection_spec.rb"},
+  {"spec": "csrf_spec.rb"},
+  {"spec": "insecure_dor_spec.rb"},
+  {"spec": "mass_assignment_spec.rb"},
+  {"spec": "password_complexity_spec.rb"},
+  {"spec": "password_hashing_spec.rb"},
+  {"spec": "sensitive_data_exposure.rb"},
+  {"spec": "sql_injection_spec.rb"},
+  {"spec": "unvalidated_redirects_spec.rb"},
+  {"spec": "url_access_spec.rb"},
+  {"spec": "xss_spec.rb"}
  ],
  "classification": [
   {
    "label": "broken_auth_spec.rb",
    "classification": "measurable",
-   "engine_types": [
-    "credential_exposure"
-   ],
-   "reason": "credential guessing/bypass on unauthenticated login"
+   "engine_types": ["credential_exposure"],
+   "reason": "credential enumeration on the unauthenticated login form (sessions#new is root; error text distinguishes unknown-email vs wrong-password)",
+   "evidence_f5951f1": "app/models/user.rb:41-48 authenticate() raises \"#{email} doesn't exist!\" vs \"Incorrect Password!\" — the sessions#create flash echoes e.message; both spec scenarios drive ONLY /login unauthenticated"
   },
   {
    "label": "command_injection_spec.rb",
-   "classification": "measurable",
-   "engine_types": [
-    "command_injection"
-   ],
-   "reason": "command injection on unauthenticated reachable input"
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "upload-form filename injection requires an AUTHENTICATED session (benefit_forms has no authenticated skip) — not reachable by an unauthenticated crawl",
+   "evidence_f5951f1": "app/controllers/benefit_forms_controller.rb has ZERO skip_before_action (authenticated enforced); Benefits.make_backup (app/models/benefits.rb:15) runs system(\"cp #{full_file_name} ...\") with the attacker filename — vulnerable code, but behind the auth gate on f5951f1"
   },
   {
    "label": "csrf_spec.rb",
    "classification": "out_of_scope",
    "engine_types": [],
-   "reason": "CSRF spec drives an authenticated victim session"
+   "reason": "CSRF spec drives an authenticated victim session",
+   "evidence_f5951f1": "spec/vulnerabilities/csrf_spec.rb:18 login(normal_user) — unchanged nature"
   },
   {
    "label": "insecure_dor_spec.rb",
-   "classification": "measurable",
-   "engine_types": [
-    "idor_bola"
-   ],
-   "reason": "insecure direct object reference on unauthenticated reachable routes"
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "both DOR scenarios operate on /users/:id/benefit_forms and /users/:id/work_info — authenticated surfaces on f5951f1",
+   "evidence_f5951f1": "benefit_forms_controller.rb and work_info_controller.rb have ZERO skip_before_action :authenticated — attack one (download param name=config/database.yml) and attack two (cross-user work_info read) both login(normal_user) first in the spec itself"
   },
   {
    "label": "mass_assignment_spec.rb",
    "classification": "measurable",
-   "engine_types": [
-    "vertical_privilege_escalation"
-   ],
-   "reason": "role escalation via extra fields on unauthenticated POST"
+   "engine_types": ["vertical_privilege_escalation"],
+   "reason": "attack two posts admin:\"t\" to /users (signup) — an UNAUTHENTICATED POST surface; permit! mass-assignment is observable there",
+   "evidence_f5951f1": "app/controllers/users_controller.rb:5 skip_before_action :authenticated, only: [:new, :create] + user_params (lines 49-51) params.require(:user).permit! — the signup create path accepts the admin field unauthenticated (spec attack two does page.driver.post \"/users\" with NO login)"
   },
   {
    "label": "password_complexity_spec.rb",
    "classification": "out_of_scope",
    "engine_types": [],
-   "reason": "policy weakness, not an HTTP-response-observable class"
+   "reason": "policy weakness, not an HTTP-response-observable class",
+   "evidence_f5951f1": "unchanged nature (no password policy on signup; not an HTTP response class)"
   },
   {
    "label": "password_hashing_spec.rb",
    "classification": "out_of_scope",
    "engine_types": [],
-   "reason": "weak hashing in DB — not an HTTP response class"
+   "reason": "weak hashing in DB — not an HTTP response class",
+   "evidence_f5951f1": "app/models/user.rb:45 Digest::MD5.hexdigest(password) — unchanged nature"
   },
   {
    "label": "sensitive_data_exposure.rb",
-   "classification": "measurable",
-   "engine_types": [
-    "credential_exposure"
-   ],
-   "reason": "secrets in served responses — unauthenticated GET"
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "SSN cleartext is served on /users/:id/work_info — an authenticated surface on f5951f1",
+   "evidence_f5951f1": "work_info_controller.rb has ZERO skip_before_action :authenticated; spec line 18 login(normal_user) before visiting work_info; encrypt_ssn stays commented out (app/models/work_info.rb:5) — vulnerable code, but behind the auth gate"
   },
   {
    "label": "sql_injection_spec.rb",
-   "classification": "measurable",
-   "engine_types": [
-    "sql_injection"
-   ],
-   "reason": "login-form SQLi — unauthenticated POST"
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "the SQLi surface (User.where on hidden user_id) is users#update — an authenticated surface on f5951f1",
+   "evidence_f5951f1": "app/controllers/users_controller.rb:29 User.where(\"id = '#{params[:user][:id]}'\") — update is NOT in the [:new, :create] authenticated skip; spec drives it via account_settings AFTER login(normal_user). The login form itself uses find_by_email (no injection) — no unauthenticated SQLi surface remains"
   },
   {
    "label": "unvalidated_redirects_spec.rb",
    "classification": "measurable",
-   "engine_types": [
-    "open_redirect"
-   ],
-   "reason": "redirect parameter reachable unauthenticated"
+   "engine_types": ["open_redirect"],
+   "reason": "redirect parameter is observed on the unauthenticated root/login flow",
+   "evidence_f5951f1": "app/controllers/sessions_controller.rb:7 @url = params[:url] (sessions#new = root, unauthenticated) and line 12 path = params[:url].present? ? params[:url] : home_dashboard_index_path — the url parameter flows from the unauthenticated login POST into redirect_to (spec starts with visit \"/?url=http://example.com/do/evil/things\" BEFORE any login)"
   },
   {
    "label": "url_access_spec.rb",
-   "classification": "measurable",
-   "engine_types": [
-    "vertical_privilege_escalation"
-   ],
-   "reason": "unauthenticated access to admin-adjacent URL — engine probes it"
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "admin/1/dashboard is guarded by the application-wide authenticated before_action (plus administrative) on f5951f1 — the unauthenticated probe is redirected to login, so no admin content is observable without a session",
+   "evidence_f5951f1": "admin_controller.rb:3 before_action :administrative, if: :admin_param — and the APPLICATION-WIDE before_action :authenticated (application_controller.rb:3) with NO skip in admin_controller: unauthenticated GET /admin/1/dashboard is redirected to root; the vulnerability (non-admin user reaching the admin dashboard) requires login(normal_user) per the spec itself"
   },
   {
    "label": "xss_spec.rb",
-   "classification": "measurable",
-   "engine_types": [
-    "xss_reflected"
-   ],
-   "reason": "XSS via unauthenticated forms"
+   "classification": "out_of_scope",
+   "engine_types": [],
+   "reason": "reflected XSS lives on the account_settings update form — an authenticated surface on f5951f1",
+   "evidence_f5951f1": "xss_spec.rb:16 login(normal_user) then visit account_settings; the injection (First name field -> users#update) is behind the auth gate"
   }
  ],
  "classification_counts": {
-  "measurable": 9,
-  "out_of_scope": 3
- }
+  "measurable": 3,
+  "out_of_scope": 9
+ },
+ "notes": [
+  "RECLASSIFICATION DIFFERENCE vs the 2018 seal (9 measurable -> 3): on official main f5951f1, ApplicationController enforces before_action :authenticated on every controller except sessions(new/create), users(new/create), password_resets, api/v1 (http-token gate) and tutorials — so command_injection, insecure_dor, sensitive_data_exposure, sql_injection, url_access and xss now sit behind the auth gate. Per the SEALED criteria (measurable = URL reachable by an UNAUTHENTICATED crawl), those six labels move to out_of_scope. This is the sealed criteria applied faithfully to the new commit, NOT a capability-driven reclassification (no engine limitation is involved — the labels' reachability changed on the new commit itself).",
+  "per the two-number rule (SPEC §3.2.1) any future re-enable of engine authentication may move these labels back to measurable via a NEW seal commit documenting before/after numbers",
+  "Dockerfile on f5951f1 builds FROM ruby:3.4.1 official with zero bring-up patches; Gemfile.lock bundler 4.0.4; README rails db:setup standard — no archive mirrors needed",
+  "step-zero bring-up must use the official repo OWASP/railsgoat @ f5951f1 (NOT the smDahlgren mirror @ f1de24f which is syntax-broken and fixes sealed vulns)"
+ ]
 }

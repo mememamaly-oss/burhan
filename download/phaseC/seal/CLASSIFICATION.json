@@ -465,8 +465,8 @@
    ]
   },
   "railsgoat": {
-   "measurable": 9,
-   "out_of_scope": 3,
+   "measurable": 3,
+   "out_of_scope": 9,
    "labels": [
     {
      "label": "broken_auth_spec.rb",
@@ -474,15 +474,13 @@
      "engine_types": [
       "credential_exposure"
      ],
-     "reason": "credential guessing/bypass on unauthenticated login"
+     "reason": "credential enumeration on the unauthenticated login form (sessions#new is root; error text distinguishes unknown-email vs wrong-password)"
     },
     {
      "label": "command_injection_spec.rb",
-     "classification": "measurable",
-     "engine_types": [
-      "command_injection"
-     ],
-     "reason": "command injection on unauthenticated reachable input"
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "upload-form filename injection requires an AUTHENTICATED session (benefit_forms has no authenticated skip) — not reachable by an unauthenticated crawl"
     },
     {
      "label": "csrf_spec.rb",
@@ -492,11 +490,9 @@
     },
     {
      "label": "insecure_dor_spec.rb",
-     "classification": "measurable",
-     "engine_types": [
-      "idor_bola"
-     ],
-     "reason": "insecure direct object reference on unauthenticated reachable routes"
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "both DOR scenarios operate on /users/:id/benefit_forms and /users/:id/work_info — authenticated surfaces on f5951f1"
     },
     {
      "label": "mass_assignment_spec.rb",
@@ -504,7 +500,7 @@
      "engine_types": [
       "vertical_privilege_escalation"
      ],
-     "reason": "role escalation via extra fields on unauthenticated POST"
+     "reason": "attack two posts admin:\"t\" to /users (signup) — an UNAUTHENTICATED POST surface; permit! mass-assignment is observable there"
     },
     {
      "label": "password_complexity_spec.rb",
@@ -520,19 +516,15 @@
     },
     {
      "label": "sensitive_data_exposure.rb",
-     "classification": "measurable",
-     "engine_types": [
-      "credential_exposure"
-     ],
-     "reason": "secrets in served responses — unauthenticated GET"
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "SSN cleartext is served on /users/:id/work_info — an authenticated surface on f5951f1"
     },
     {
      "label": "sql_injection_spec.rb",
-     "classification": "measurable",
-     "engine_types": [
-      "sql_injection"
-     ],
-     "reason": "login-form SQLi — unauthenticated POST"
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "the SQLi surface (User.where on hidden user_id) is users#update — an authenticated surface on f5951f1"
     },
     {
      "label": "unvalidated_redirects_spec.rb",
@@ -540,23 +532,19 @@
      "engine_types": [
       "open_redirect"
      ],
-     "reason": "redirect parameter reachable unauthenticated"
+     "reason": "redirect parameter is observed on the unauthenticated root/login flow"
     },
     {
      "label": "url_access_spec.rb",
-     "classification": "measurable",
-     "engine_types": [
-      "vertical_privilege_escalation"
-     ],
-     "reason": "unauthenticated access to admin-adjacent URL — engine probes it"
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "admin/1/dashboard is guarded by the application-wide authenticated before_action (plus administrative) on f5951f1 — the unauthenticated probe is redirected to login, so no admin content is observable without a session"
     },
     {
      "label": "xss_spec.rb",
-     "classification": "measurable",
-     "engine_types": [
-      "xss_reflected"
-     ],
-     "reason": "XSS via unauthenticated forms"
+     "classification": "out_of_scope",
+     "engine_types": [],
+     "reason": "reflected XSS lives on the account_settings update form — an authenticated surface on f5951f1"
     }
    ]
   },
@@ -902,8 +890,8 @@
  },
  "totals": {
   "labels": 111,
-  "measurable": 81,
-  "out_of_scope": 30
+  "measurable": 75,
+  "out_of_scope": 36
  },
  "pinned_commits_full": {
   "security-shepherd": "14c195a0b83e84997f57a54d17d749fa33a6f002",
@@ -915,5 +903,6 @@
  "image_pins": {
   "vampi": "erev0s/vampi@sha256:0a5a224b6e14ae7da6a6ea265178ff71286ff903aec74adee98f660bb0e4ca12 (env: vulnerable=1 unsafe / vulnerable=0 safe twin; single port 5000; /ui swagger)",
   "wackopicko": "adamdoupe/wackopicko@sha256:76d1a9ad02ad7fb6bbc000eb12956f457087a0f5883bd23b6cc49d3051feae02 (port 80; php5-era tutum/lamp base — built by official Dockerfile at cabc1b3)"
- }
+ },
+ "reseal_note": "2026-11-13 railsgoat resealed from official OWASP/railsgoat main @ f5951f1 (owner approval, order 2026-11-13): 9->3 measurable per the SAME sealed criteria — on f5951f1 ApplicationController enforces authenticated on all surfaces except sessions/users signup/password_resets/api-v1/tutorials, moving command_injection, insecure_dor, sensitive_data_exposure, sql_injection, url_access, xss behind the auth gate (out_of_scope per unauthenticated-crawl criteria; NOT capability-driven)"
 }
