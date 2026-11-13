@@ -271,6 +271,9 @@ SARIF_RULES = {
     # P2-C (2026-10-31): the engine emits this class (fixture battery) but it
     # was never registered — a real gap caught by the CI compliance check.
     "secure_cookie":                           "Burhan-CKI-001",
+    # GTP-09 (v4.3.0): the weak-random chain phase (Math.random()/LCG
+    # state recovery on security tokens) — rule id for weakrand findings.
+    "weak_random":                             "Burhan-RND-001",
 }
 SARIF_LEVEL = {"critical": "error", "high": "error", "medium": "warning",
                "low": "note", "info": "note"}
