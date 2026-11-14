@@ -57,14 +57,26 @@ def main() -> int:
     require_authorized(args.base)
 
     # 0. target must answer before we scan
+    import urllib.error
     import urllib.request
     try:
-        probe = urllib.request.urlopen(args.base + "/", timeout=10).status
-        assert probe == 200, probe
+        # A 302 at the root is a LIVE answer, not an outage: WebGoat (dev-set
+        # calibration run 43329704514, 2026-11-12) answers GET /WebGoat/ with
+        # a session-creating 302 loop when the probe carries no cookie jar.
+        # Accept any < 400 as proof of life; the engine's own fetcher (with
+        # cookie handling) does the real crawling afterwards. Fails closed
+        # on >= 400, network errors and timeouts exactly as before.
+        req = urllib.request.Request(args.base + "/", method="GET")
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                probe = resp.status
+        except urllib.error.HTTPError as http_err:
+            probe = http_err.code
+        assert probe < 400, probe
     except Exception as e:  # noqa: BLE001
         print(f"REAL-TARGET FAILURE: {args.base} unreachable: {e}")
         return 2
-    print(f"target up: {args.base}")
+    print(f"target up: {args.base} (probe status {probe})")
 
     # 1. the scan — unauthenticated, seeded, core axes
     from burhan.compliance import compliance_for, compliance_summary
