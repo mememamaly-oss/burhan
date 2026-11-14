@@ -30,7 +30,7 @@ documentation seeds; browser engine on; race/workflow/logic/symbolic/authz
 batteries off. Wall 238.8s, 108 endpoints, 15 browser pages,
 run_id run-f602a6227f.
 
-### Findings (after in-campaign FP fixes, see Result 3): 109, all verified
+### Findings (after in-campaign FP fixes, see Result 3): 109, all verified — **type breakdown: 108 missing_security_headers (passive hygiene, one-response presence proof) + 1 credential_exposure** (owner order 2026-11-13: counts travel with their types; unauthenticated-only — does not reflect vulnerabilities behind login)
 
 | type | count | assessment |
 |---|---|---|
