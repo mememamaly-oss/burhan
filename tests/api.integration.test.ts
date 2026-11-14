@@ -350,23 +350,46 @@ describe("bootstrap atomicity + auth + RBAC over the wire", () => {
       // RUNNING/QUEUED scan -> response {ok: true, cancelled: true},
       // the DB row transitions to CANCELLED, and the action lands in
       // the audit log (item 1.3 fail-closed pair).
+      //
+      // 2026-11-14 (owner order, flakiness policy §9.3 — NO rerun-until-
+      // green): the engine fails fast (~1s) against this suite's
+      // unreachable public target, so the scan can COMPLETE before the
+      // DELETE arrives (observed 1/11 locally, again in CI run
+      // 132552308417 on the UNRELATED #109 docs branch). The endpoint's
+      // FIXED contract (PR #106) reports that honestly as
+      // {ok:false, reason:"already_completed", finalStatus:"COMPLETED"}.
+      // Both terminal paths are now asserted — this is the deterministic
+      // state machine, not luck: each branch pins response shape + DB
+      // row + (for the cancel path) the audit pair.
       const del = await api(adminJar, "DELETE", `/api/scans/${id}?orgId=${orgId}`);
       expect(del.status).toBe(200);
-      const body = (await del.json()) as { ok?: boolean; cancelled?: boolean };
-      expect(body.ok).toBe(true);
-      expect(body.cancelled).toBe(true);
+      const body = (await del.json()) as {
+        ok?: boolean; cancelled?: boolean; reason?: string; finalStatus?: string;
+      };
       const row = await db.scan.findUnique({ where: { id } });
-      expect(row?.status).toBe("CANCELLED");
       expect(row?.finishedAt).toBeTruthy();
-      const auditRows = await db.auditLog.findMany({
-        where: { action: "scan.cancelled", orgId },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      });
-      const hit = auditRows.some(
-        (r) => (r.detail ?? "").includes(`"scanId":"${id}"`) || (r.detail ?? "").includes(`"scanId": "${id}"`)
-      );
-      expect(hit).toBe(true);
+      if (body.reason === "already_completed") {
+        // the engine finished before the cancel arrived — the honest race path
+        expect(body.ok).toBe(false);
+        expect(body.cancelled).toBe(false);
+        expect(body.finalStatus).toBe("COMPLETED");
+        expect(row?.status).toBe("COMPLETED"); // ended on its own, NOT cancelled
+      } else {
+        // the cancel won the race
+        expect(body.ok).toBe(true);
+        expect(body.cancelled).toBe(true);
+        expect(body.reason).toBe("cancelled");
+        expect(row?.status).toBe("CANCELLED");
+        const auditRows = await db.auditLog.findMany({
+          where: { action: "scan.cancelled", orgId },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        });
+        const hit = auditRows.some(
+          (r) => (r.detail ?? "").includes(`"scanId":"${id}"`) || (r.detail ?? "").includes(`"scanId": "${id}"`)
+        );
+        expect(hit).toBe(true);
+      }
     }
   });
 
