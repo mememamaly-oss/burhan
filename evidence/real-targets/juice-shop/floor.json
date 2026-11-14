@@ -1,23 +1,24 @@
 {
-  "target": "OWASP Juice Shop v20.3.0 (bkimminich/juice-shop:v20.3.0, container, unauthenticated)",
-  "source": "GitHub Actions run 41149783779 @ 2fba859 (2026-10-31, ubuntu-latest) — the FIRST live real-world scan by this engine; artifacts: real-target-juiceshop",
-  "seed": "real430real430real430real430real430real430real430real430",
-  "axes": {
-    "workflow": true,
-    "logic_active": true,
-    "race": false,
-    "symbolic": false
-  },
-  "budget": {
-    "max_requests": 2500,
-    "max_pages": 60
-  },
-  "findings_verified": 59,
-  "distinct_types": 1,
-  "observed_types": [
-    "missing_security_headers"
-  ],
-  "wall_seconds": 47.7,
-  "requests": 2500,
-  "contract": "Lower bound under the EXACT config above (image tag, mode, seed, axes, budget). A later run may only ship a NEW floor regenerated from its own observed green run — never hand-edited. Superseding floors must not lower these numbers."
+ "target": "OWASP Juice Shop v20.3.0 (bkimminich/juice-shop:v20.3.0, container, unauthenticated)",
+ "source": "GitHub Actions run 41149783779 @ 2fba859 (2026-10-31, ubuntu-latest) — the FIRST live real-world scan by this engine; artifacts: real-target-juiceshop",
+ "seed": "real430real430real430real430real430real430real430real430",
+ "axes": {
+  "workflow": true,
+  "logic_active": true,
+  "race": false,
+  "symbolic": false
+ },
+ "budget": {
+  "max_requests": 2500,
+  "max_pages": 60
+ },
+ "findings_verified": 59,
+ "distinct_types": 1,
+ "observed_types": [
+  "missing_security_headers"
+ ],
+ "wall_seconds": 47.7,
+ "requests": 2500,
+ "contract": "Lower bound under the EXACT config above (image tag, mode, seed, axes, budget). A later run may only ship a NEW floor regenerated from its own observed green run — never hand-edited. Superseding floors must not lower these numbers.",
+ "caveat": "MANDATORY CAVEAT (owner order 2026-11-13, decision 3): this floor measures an UNAUTHENTICATED crawl only and does NOT reflect any vulnerabilities behind login. Its verified findings are a single passive-hygiene class (missing_security_headers) — presence-verified from one response per VF-01, deliberately weaker than active-attack verification. Every result summary citing these numbers must carry this caveat verbatim."
 }

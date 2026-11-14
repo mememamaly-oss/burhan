@@ -20,7 +20,7 @@ subprocess CLI (`src/lib/engine.ts`).
   main only.
 - **Real-target validation now exists**: a CI job scanning OWASP Juice
   Shop v20.3.0 (pinned container) unauthenticated — the engine's first
-  live real-world scan (59 verified / 1 type / 0 unmapped, budget-capped
+  live real-world scan (59 verified / 1 type — the type is missing_security_headers only: passive hygiene, unauthenticated-only; does not reflect vulnerabilities behind login / 0 unmapped, budget-capped
   at 2500 requests; honest weak baseline, regression floor committed at
   evidence/real-targets/juice-shop/floor.json and enforced by CI).
   Exposed product gaps (asset burn, JSON-API auth, Angular param-intel)
@@ -1791,7 +1791,7 @@ inconsistency); clean-install proof = every CI job installs from
 requirements.txt on a bare runner (green on main 85b1c8a).
 
 Axes 3+4 (detection truth / false positives) — from the round-12 close:
-Juice Shop 59/59 verified against the committed floor, 0 false positives;
+Juice Shop 59/59 verified against the committed floor (all 59 are ONE passive-hygiene class — missing_security_headers; unauthenticated-only, nothing behind login), 0 false positives;
 crAPI confirmed jwt_signature_not_enforced + bfla with 0 FP and 7
 reasoned expected-misses; DVGA 0 FP; benchmark F1=1.0 (TP=38 FP=0 FN=0
 TN=37); reproducibility byte-identical Merkle across two fresh processes.
