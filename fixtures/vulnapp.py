@@ -1270,7 +1270,19 @@ class Handler(BaseHTTPRequestHandler):
                                   {"Content-Type": "application/json"})
             if os.environ.get("RACE_MODE") == "broken":
                 if COUPONS.get(code) is None:
-                    time.sleep(0.04)                 # the non-atomic window
+                    # The non-atomic window. 2026-11-14 (owner order, item 2 —
+                    # the PR #94 medicine): the original 40ms absorbed only the
+                    # BEST-CASE thread start-up; a loaded CI runner can take
+                    # >100ms just to schedule the client threads and the server
+                    # accept loop, so the burst serialized and the 2nd+ requests
+                    # arrived AFTER the window closed (winners <= quota → no
+                    # finding → flaky wiring test, first observed CI run
+                    # 132557089776). The window now absorbs worst-case
+                    # scheduling (0.5s = 12.5x, still far under the 10s burst
+                    # timeout and the per-request timeout) and stays tunable
+                    # via RACE_WINDOW_MS for future environments.
+                    _win = float(os.environ.get("RACE_WINDOW_MS", "500")) / 1000.0
+                    time.sleep(_win)                 # the non-atomic window
                     COUPONS[code] = "redeemed"
                     return self._send(200, json.dumps(
                         {"redeemed": True, "code": code}),
