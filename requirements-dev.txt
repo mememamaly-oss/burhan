@@ -20,4 +20,4 @@ psutil>=7.2.2
 # as planned-but-unused; Round 18 lands it scoped to the four core
 # invariants (merkle agreement, risk-score monotonicity, version-string
 # contracts, OCSF export laws). Test-only — the engine never imports it.
-hypothesis>=6.100
+hypothesis>=6.170.15
