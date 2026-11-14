@@ -147,7 +147,19 @@ def test_full_scan_wiring_and_vr37():
     finally:
         proc.terminate()
     fam = [f for f in data["findings"] if f["type"] == "race_condition"]
-    assert fam, sorted({f["type"] for f in data["findings"]})
+    # 2026-11-14 (owner flakiness policy §9.3): a CI run (132557089776) failed
+    # this assertion with NO race_condition among the types — 120 local runs
+    # (100 plain + 20 under 4-core CPU load) could not reproduce it. On any
+    # future failure the burst diagnostics below make the cause decidable
+    # from the log alone: whether the battery fired (sent==BURST) and what
+    # statuses came back, instead of a bare type list.
+    assert fam, {
+        "types": sorted({f["type"] for f in data["findings"]}),
+        "race_probe_counts": (data["stats"].get("modern_v2") or {})
+                             .get("probe_counts", {}).get("race_condition"),
+        "boundary": [b for b in (data["stats"].get("boundary") or [])
+                     if isinstance(b, dict) and "race" in str(b).lower()][:4],
+    }
     assert str(fam[0]["status"]).lower() == "verified", fam[0]["status"]
     m2 = data["stats"].get("modern_v2") or {}
     assert m2["probe_counts"]["race_condition"]["sent"] == BURST, \
