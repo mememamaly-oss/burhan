@@ -29,3 +29,4 @@ CAPABILITY_MATRIX.md
 *.pem
 *.key
 id_rsa*
+download/phaseC/secret/

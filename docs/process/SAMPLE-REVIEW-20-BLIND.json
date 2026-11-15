@@ -2,7 +2,7 @@
  "kind": "blind-sample-20",
  "generated": "2026-11-14",
  "seed_shuffle": 20261114,
- "note": "official text only — no generator fields; see BLIND-KEY for the mapping",
+ "note": "official text only — no generator fields; see BLIND-KEY for the mapping | BURNED 2026-11-15",
  "items": [
   {
    "blind_id": "BL-921310",
@@ -144,5 +144,6 @@
    "hint_1": "The challenge description probably gave away what form you should attack.",
    "hint_2": "You need to know (or smart-guess) Jim’s email address so you can launch a targeted attack."
   }
- ]
+ ],
+ "burned_for_blindness": "published on main alongside generator decisions — not valid for blind review; use a fresh seeded sample delivered as text"
 }
