@@ -1,0 +1,9 @@
+{
+ "kind": "blind-sample-fingerprint-B2",
+ "date": "2026-11-15",
+ "description": "fingerprint ONLY of the secret blind-sample key (key file itself stays outside the repo, under download/phaseC/secret/, now .gitignored). Owner verifies the key later by sha256 before unblinding.",
+ "algorithm": "sha256",
+ "fingerprint": "583361f57281ea02c690d13f1575bfc9e97a7abfb034c5ac97b0abc141bcb1eb",
+ "sample": "20 challenges, seed-independent draw, zero overlap with the burned SAMPLE-REVIEW-20",
+ "verify_command": "sha256sum download/phaseC/secret/BLIND-KEY-2026-11-15-B2.json"
+}
