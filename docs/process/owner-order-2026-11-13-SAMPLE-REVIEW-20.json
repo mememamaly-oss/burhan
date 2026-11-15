@@ -1,0 +1,431 @@
+{
+ "seed": 20261113,
+ "sample": [
+  {
+   "challenge_id": "forgedCouponChallenge",
+   "challenge_name": "Forged Coupon",
+   "category": "Cryptographic Issues",
+   "difficulty": 6,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Cryptographic Issues' maps to battery family 'jwt_security'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:jwt_security)",
+   "vuln_type_mapping": "jwt_security",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:jwt_security"
+   },
+   "official_description": "Forge a coupon code that gives you a discount of at least 80%.",
+   "official_tags": [
+    "Good for Demos",
+    "Code Analysis"
+   ],
+   "official_hints": [
+    "Try either a) a knowledgeable brute force attack or b) reverse engineering or c) some research in the cloud.",
+    "One viable solution would be to reverse-engineer how coupon codes are generated and craft your own 80% coupon by using the same (or at least similar) implementation."
+   ]
+  },
+  {
+   "challenge_id": "christmasSpecialChallenge",
+   "challenge_name": "Christmas Special",
+   "category": "Injection",
+   "difficulty": 4,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Injection' maps to battery family 'sql_injection'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:sql_injection)",
+   "vuln_type_mapping": "sql_injection",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:sql_injection"
+   },
+   "official_description": "Order the Christmas special offer of 2014.",
+   "official_tags": [],
+   "official_hints": [
+    "Find out how the application handles unavailable products and try to find a loophole.",
+    "Find out how the application hides deleted products from its customers."
+   ]
+  },
+  {
+   "challenge_id": "emptyUserRegistration",
+   "challenge_name": "Empty User Registration",
+   "category": "Improper Input Validation",
+   "difficulty": 2,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Improper Input Validation' maps to battery family 'xss_reflected'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:xss_reflected)",
+   "vuln_type_mapping": "xss_reflected",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:xss_reflected"
+   },
+   "official_description": "Register a user with an empty email and password.",
+   "official_tags": [],
+   "official_hints": [
+    "Consider intercepting and playing with the request payload."
+   ]
+  },
+  {
+   "challenge_id": "changeProductChallenge",
+   "challenge_name": "Product Tampering",
+   "category": "Broken Access Control",
+   "difficulty": 3,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Broken Access Control' maps to battery family 'idor_bola'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:idor_bola)",
+   "vuln_type_mapping": "idor_bola",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:idor_bola"
+   },
+   "official_description": "Change the <code>href</code> of the link within the <a href=\"/#/search?q=OWASP SSL Advanced Forensic Tool (O-Saft)\">OWASP SSL Advanced Forensic Tool (O-Saft)</a> product description into <i>https://owasp.slack.com</i>.",
+   "official_tags": [],
+   "official_hints": [
+    "Theoretically there are three possible ways to beat this challenge: a) broken admin functionality, b) holes in RESTful API or c) possibility for SQL Injection.",
+    "In practice two of these three ways should turn out to be dead ends."
+   ]
+  },
+  {
+   "challenge_id": "nullByteChallenge",
+   "challenge_name": "Poison Null Byte",
+   "category": "Improper Input Validation",
+   "difficulty": 4,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Improper Input Validation' maps to battery family 'xss_reflected'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:xss_reflected)",
+   "vuln_type_mapping": "xss_reflected",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:xss_reflected"
+   },
+   "official_description": "Bypass a security control with a <a href=\"https://hakipedia.com/index.php/Poison_Null_Byte\">Poison Null Byte</a> to access a file not meant for your eyes.",
+   "official_tags": [
+    "Prerequisite"
+   ],
+   "official_hints": [
+    "Analyze and tamper with links in the application until you get to an unprotected directory listing.",
+    "Some files in there are not directly accessible because a security mechanism prevents access."
+   ]
+  },
+  {
+   "challenge_id": "adminSectionChallenge",
+   "challenge_name": "Admin Section",
+   "category": "Broken Access Control",
+   "difficulty": 2,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Broken Access Control' maps to battery family 'idor_bola'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:idor_bola)",
+   "vuln_type_mapping": "idor_bola",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:idor_bola"
+   },
+   "official_description": "Access the administration section of the store.",
+   "official_tags": [
+    "Good for Demos"
+   ],
+   "official_hints": [
+    "It is just slightly harder to find than the score board link.",
+    "Knowing it exists, you can simply guess what URL the admin section might have."
+   ]
+  },
+  {
+   "challenge_id": "uploadTypeChallenge",
+   "challenge_name": "Upload Type",
+   "category": "Improper Input Validation",
+   "difficulty": 3,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Improper Input Validation' maps to battery family 'path_traversal'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:path_traversal)",
+   "vuln_type_mapping": "path_traversal",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:path_traversal"
+   },
+   "official_description": "Upload a file that has no .pdf or .zip extension.",
+   "official_tags": [],
+   "official_hints": [
+    "You can attach a PDF or ZIP file to the \"Complaint\" form. Investigate how this upload actually works.",
+    "If you solved the \"Upload a file larger than 100 kB\" challenge, you should try to apply the same solution here"
+   ]
+  },
+  {
+   "challenge_id": "dbSchemaChallenge",
+   "challenge_name": "Database Schema",
+   "category": "Injection",
+   "difficulty": 3,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Injection' maps to battery family 'sql_injection'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:sql_injection)",
+   "vuln_type_mapping": "sql_injection",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:sql_injection"
+   },
+   "official_description": "Exfiltrate the entire DB schema definition via SQL Injection.",
+   "official_tags": [],
+   "official_hints": [
+    "Find out where this information could come from. Then craft an attack string against an endpoint that offers an unnecessary way to filter data.",
+    "Find out which database system is in use and where it would usually store its schema definitions."
+   ]
+  },
+  {
+   "challenge_id": "weirdCryptoChallenge",
+   "challenge_name": "Weird Crypto",
+   "category": "Cryptographic Issues",
+   "difficulty": 2,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Cryptographic Issues' maps to battery family 'jwt_security'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:jwt_security)",
+   "vuln_type_mapping": "jwt_security",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:jwt_security"
+   },
+   "official_description": "<a href=\"/#/contact\">Inform the shop</a> about an algorithm or library it should definitely not use the way it does.",
+   "official_tags": [],
+   "official_hints": [
+    "Report one of five possible answers via the \"Customer Feedback\" form.",
+    "Cryptographic functions only used in the \"Apply some advanced cryptanalysis to find the real easter egg\" challenge do not count as they are only a developer’s prank and not a serious security problem."
+   ]
+  },
+  {
+   "challenge_id": "chatbotGreedyInjectionChallenge",
+   "challenge_name": "Greedy Chatbot Manipulation",
+   "category": "Injection",
+   "difficulty": 3,
+   "auth_required": false,
+   "classification": "measurable",
+   "classification_rationale": "category 'Injection' maps to battery family 'sql_injection'; official definition shows no attacker-action/auth/client-side evidence (rule b keywords); automatic oracle derivable (finding_type_match:sql_injection)",
+   "vuln_type_mapping": "sql_injection",
+   "oracle": {
+    "kind": "finding_type_match",
+    "definition": "finding_type_match:sql_injection"
+   },
+   "official_description": "Convince the chatbot to give you a coupon of 50% or more. Because apparently a 10% max policy is just a suggestion when you ask nicely enough.",
+   "official_tags": [
+    "AI/LLM"
+   ],
+   "official_hints": [
+    "The chatbot's system prompt says the maximum discount is 10%. But system prompts are more like guidelines than actual rules, right?",
+    "You already know how to make the chatbot generate a coupon. Now make it go way beyond the allowed maximum."
+   ]
+  },
+  {
+   "challenge_id": "captchaBypassChallenge",
+   "challenge_name": "CAPTCHA Bypass",
+   "category": "Broken Anti Automation",
+   "difficulty": 3,
+   "auth_required": false,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official category 'Broken Anti Automation' has no engine battery family (declared CATEGORY_TO_FAMILY table) — class gap",
+   "vuln_type_mapping": "none",
+   "oracle": {
+    "kind": "none",
+    "definition": "no automatic oracle derivable"
+   },
+   "official_description": "Submit 10 or more customer feedbacks within 20 seconds.",
+   "official_tags": [
+    "Brute Force"
+   ],
+   "official_hints": [
+    "After finding a CAPTCHA bypass, write a script that automates feedback submission. Or open many browser tabs and be really quick.",
+    "You could prepare 10 browser tabs, solving every CAPTCHA and filling out the each feedback form. Then you’d need to very quickly switch through the tabs and submit the forms in under 20 seconds total."
+   ]
+  },
+  {
+   "challenge_id": "tokenSaleChallenge",
+   "challenge_name": "Blockchain Hype",
+   "category": "Security through Obscurity",
+   "difficulty": 5,
+   "auth_required": false,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official category 'Security through Obscurity' has no engine battery family (declared CATEGORY_TO_FAMILY table) — class gap",
+   "vuln_type_mapping": "none",
+   "oracle": {
+    "kind": "none",
+    "definition": "no automatic oracle derivable"
+   },
+   "official_description": "Learn about the Token Sale before its official announcement.",
+   "official_tags": [
+    "Contraption",
+    "Code Analysis",
+    "Web3"
+   ],
+   "official_hints": [
+    "The developers truly believe in \"Security through Obscurity\" over actual access restrictions.",
+    "Guessing or brute forcing the URL of the token sale page is very unlikely to succeed."
+   ]
+  },
+  {
+   "challenge_id": "rceOccupyChallenge",
+   "challenge_name": "Successful RCE DoS",
+   "category": "Insecure Deserialization",
+   "difficulty": 6,
+   "auth_required": false,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official category 'Insecure Deserialization' has no engine battery family (declared CATEGORY_TO_FAMILY table) — class gap",
+   "vuln_type_mapping": "none",
+   "oracle": {
+    "kind": "none",
+    "definition": "no automatic oracle derivable"
+   },
+   "official_description": "Perform a Remote Code Execution that occupies the server for a while without using infinite loops.",
+   "official_tags": [
+    "Danger Zone"
+   ],
+   "official_hints": [
+    "Your attack payload must not trigger the protection against too many iterations and infinite loops.",
+    "This challenge uses the same leverage point as the \"Perform a Remote Code Execution that would keep a less hardened application busy forever\" challenge."
+   ]
+  },
+  {
+   "challenge_id": "iacLeakedKeyChallenge",
+   "challenge_name": "Login Cloud Admin",
+   "category": "Sensitive Data Exposure",
+   "difficulty": 4,
+   "auth_required": true,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official definition requires: requires login/authenticated session",
+   "vuln_type_mapping": "credential_exposure",
+   "oracle": {
+    "kind": "none",
+    "definition": "outside unauthenticated DAST reach"
+   },
+   "official_description": "Log in with the cloud admin's user account <i>without</i> using SQL Injection.",
+   "official_tags": [],
+   "official_hints": [
+    "Brute forcing the password will not work. The password is too strong.",
+    "There might be another way to authenticate besides using the correct password."
+   ]
+  },
+  {
+   "challenge_id": "persistedXssUserChallenge",
+   "challenge_name": "Client-side XSS Protection",
+   "category": "XSS",
+   "difficulty": 3,
+   "auth_required": false,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official definition requires: client-side rendering/inspection required",
+   "vuln_type_mapping": "xss_reflected",
+   "oracle": {
+    "kind": "none",
+    "definition": "outside unauthenticated DAST reach"
+   },
+   "official_description": "Perform a <i>persisted</i> XSS attack with <code>&lt;iframe src=\"javascript:alert(`xss`)\"&gt;</code> bypassing a <i>client-side</i> security mechanism.",
+   "official_tags": [
+    "Danger Zone"
+   ],
+   "official_hints": [
+    "There are only some input fields in the Juice Shop forms that validate their input.",
+    "Even less of these fields are persisted in a way where their content is shown on another screen."
+   ]
+  },
+  {
+   "challenge_id": "privacyPolicyChallenge",
+   "challenge_name": "Privacy Policy",
+   "category": "Miscellaneous",
+   "difficulty": 1,
+   "auth_required": false,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official category 'Miscellaneous' has no engine battery family (declared CATEGORY_TO_FAMILY table) — class gap",
+   "vuln_type_mapping": "none",
+   "oracle": {
+    "kind": "none",
+    "definition": "no automatic oracle derivable"
+   },
+   "official_description": "Read our privacy policy.",
+   "official_tags": [
+    "Good Practice",
+    "Tutorial",
+    "Good for Demos"
+   ],
+   "official_hints": [
+    "We won't even ask you to confirm that you did. Just read it. Please. Pretty please.",
+    "When you work with the application you will most likely solve this challenge in the process."
+   ]
+  },
+  {
+   "challenge_id": "registerAdminChallenge",
+   "challenge_name": "Admin Registration",
+   "category": "Improper Input Validation",
+   "difficulty": 3,
+   "auth_required": false,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official definition requires: account-creation attacker flow",
+   "vuln_type_mapping": "xss_reflected",
+   "oracle": {
+    "kind": "none",
+    "definition": "outside unauthenticated DAST reach"
+   },
+   "official_description": "Register as a user with administrator privileges.",
+   "official_tags": [],
+   "official_hints": [
+    "You have to assign the unassignable.",
+    "Register as an ordinary user to learn what API endpoints are involved in this use case."
+   ]
+  },
+  {
+   "challenge_id": "forgedReviewChallenge",
+   "challenge_name": "Forged Review",
+   "category": "Broken Access Control",
+   "difficulty": 3,
+   "auth_required": false,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official definition requires: multi-account/multi-step attacker action",
+   "vuln_type_mapping": "idor_bola",
+   "oracle": {
+    "kind": "none",
+    "definition": "outside unauthenticated DAST reach"
+   },
+   "official_description": "Post a product review as another user or edit any user's existing review.",
+   "official_tags": [],
+   "official_hints": [
+    "Observe the flow of product review posting and editing and see if you can exploit it.",
+    "This challenge can be solved by using developers tool of your browser or with tools like postman."
+   ]
+  },
+  {
+   "challenge_id": "yamlBombChallenge",
+   "challenge_name": "Memory Bomb",
+   "category": "Insecure Deserialization",
+   "difficulty": 5,
+   "auth_required": false,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official category 'Insecure Deserialization' has no engine battery family (declared CATEGORY_TO_FAMILY table) — class gap",
+   "vuln_type_mapping": "none",
+   "oracle": {
+    "kind": "none",
+    "definition": "no automatic oracle derivable"
+   },
+   "official_description": "Drop some explosive data into a vulnerable file-handling endpoint.",
+   "official_tags": [
+    "Danger Zone"
+   ],
+   "official_hints": [
+    "This one is actually similar to the XXE DoS challenge in every way except the data format being (ab)used.",
+    "You can only solve this challenge by keeping the server busy for >2sec with your attack."
+   ]
+  },
+  {
+   "challenge_id": "loginJimChallenge",
+   "challenge_name": "Login Jim",
+   "category": "Injection",
+   "difficulty": 3,
+   "auth_required": true,
+   "classification": "out_of_scope_reason",
+   "classification_rationale": "official definition requires: requires login/authenticated session",
+   "vuln_type_mapping": "sql_injection",
+   "oracle": {
+    "kind": "none",
+    "definition": "outside unauthenticated DAST reach"
+   },
+   "official_description": "Log in with Jim's user account.",
+   "official_tags": [
+    "Tutorial"
+   ],
+   "official_hints": [
+    "The challenge description probably gave away what form you should attack.",
+    "You need to know (or smart-guess) Jim’s email address so you can launch a targeted attack."
+   ]
+  }
+ ]
+}

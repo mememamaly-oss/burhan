@@ -158,9 +158,18 @@ def main() -> int:
         if len(distinct) < floor["distinct_types"]:
             print(f"GATE FAIL: distinct types {len(distinct)} < floor "
                   f"{floor['distinct_types']}"); ok = False
+        # owner order 2026-11-13 (decision 5): surface the TYPE BALANCE next to
+        # the counts — a green floor that is 100% passive hygiene must say so
+        # in the log line itself, not only in the committed JSON.
+        passive = ("missing_security_headers", "server_banner_disclosure",
+                   "tech_banner_disclosure", "vulnerable_js_dependency")
+        n_passive = sum(1 for fd in verified if fd.get("type") in passive)
+        n_active = len(verified) - n_passive
         print(f"floor check: verified>={floor['findings_verified']}, "
               f"types>={floor['distinct_types']} "
-              f"(floor: {floor.get('source', 'committed')})")
+              f"(floor: {floor.get('source', 'committed')}) | "
+              f"type-balance: {n_passive} passive-hygiene / {n_active} active-attack | "
+              f"CAVEAT: unauthenticated-only, does not reflect vulnerabilities behind login")
 
     if not ok:
         return 3
