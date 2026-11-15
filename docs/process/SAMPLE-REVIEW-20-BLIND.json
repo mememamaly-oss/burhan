@@ -1,0 +1,148 @@
+{
+ "kind": "blind-sample-20",
+ "generated": "2026-11-14",
+ "seed_shuffle": 20261114,
+ "note": "official text only — no generator fields; see BLIND-KEY for the mapping",
+ "items": [
+  {
+   "blind_id": "BL-921310",
+   "name": "Blockchain Hype",
+   "description": "Learn about the Token Sale before its official announcement.",
+   "hint_1": "The developers truly believe in \"Security through Obscurity\" over actual access restrictions.",
+   "hint_2": "Guessing or brute forcing the URL of the token sale page is very unlikely to succeed."
+  },
+  {
+   "blind_id": "BL-167186",
+   "name": "Forged Coupon",
+   "description": "Forge a coupon code that gives you a discount of at least 80%.",
+   "hint_1": "Try either a) a knowledgeable brute force attack or b) reverse engineering or c) some research in the cloud.",
+   "hint_2": "One viable solution would be to reverse-engineer how coupon codes are generated and craft your own 80% coupon by using the same (or at least similar) implementation."
+  },
+  {
+   "blind_id": "BL-261273",
+   "name": "Admin Registration",
+   "description": "Register as a user with administrator privileges.",
+   "hint_1": "You have to assign the unassignable.",
+   "hint_2": "Register as an ordinary user to learn what API endpoints are involved in this use case."
+  },
+  {
+   "blind_id": "BL-607877",
+   "name": "Poison Null Byte",
+   "description": "Bypass a security control with a <a href=\"https://hakipedia.com/index.php/Poison_Null_Byte\">Poison Null Byte</a> to access a file not meant for your eyes.",
+   "hint_1": "Analyze and tamper with links in the application until you get to an unprotected directory listing.",
+   "hint_2": "Some files in there are not directly accessible because a security mechanism prevents access."
+  },
+  {
+   "blind_id": "BL-125751",
+   "name": "Greedy Chatbot Manipulation",
+   "description": "Convince the chatbot to give you a coupon of 50% or more. Because apparently a 10% max policy is just a suggestion when you ask nicely enough.",
+   "hint_1": "The chatbot's system prompt says the maximum discount is 10%. But system prompts are more like guidelines than actual rules, right?",
+   "hint_2": "You already know how to make the chatbot generate a coupon. Now make it go way beyond the allowed maximum."
+  },
+  {
+   "blind_id": "BL-352609",
+   "name": "Christmas Special",
+   "description": "Order the Christmas special offer of 2014.",
+   "hint_1": "Find out how the application handles unavailable products and try to find a loophole.",
+   "hint_2": "Find out how the application hides deleted products from its customers."
+  },
+  {
+   "blind_id": "BL-901608",
+   "name": "Upload Type",
+   "description": "Upload a file that has no .pdf or .zip extension.",
+   "hint_1": "You can attach a PDF or ZIP file to the \"Complaint\" form. Investigate how this upload actually works.",
+   "hint_2": "If you solved the \"Upload a file larger than 100 kB\" challenge, you should try to apply the same solution here"
+  },
+  {
+   "blind_id": "BL-629927",
+   "name": "Admin Section",
+   "description": "Access the administration section of the store.",
+   "hint_1": "It is just slightly harder to find than the score board link.",
+   "hint_2": "Knowing it exists, you can simply guess what URL the admin section might have."
+  },
+  {
+   "blind_id": "BL-347868",
+   "name": "Login Cloud Admin",
+   "description": "Log in with the cloud admin's user account <i>without</i> using SQL Injection.",
+   "hint_1": "Brute forcing the password will not work. The password is too strong.",
+   "hint_2": "There might be another way to authenticate besides using the correct password."
+  },
+  {
+   "blind_id": "BL-876039",
+   "name": "Privacy Policy",
+   "description": "Read our privacy policy.",
+   "hint_1": "We won't even ask you to confirm that you did. Just read it. Please. Pretty please.",
+   "hint_2": "When you work with the application you will most likely solve this challenge in the process."
+  },
+  {
+   "blind_id": "BL-558839",
+   "name": "CAPTCHA Bypass",
+   "description": "Submit 10 or more customer feedbacks within 20 seconds.",
+   "hint_1": "After finding a CAPTCHA bypass, write a script that automates feedback submission. Or open many browser tabs and be really quick.",
+   "hint_2": "You could prepare 10 browser tabs, solving every CAPTCHA and filling out the each feedback form. Then you’d need to very quickly switch through the tabs and submit the forms in under 20 seconds total."
+  },
+  {
+   "blind_id": "BL-680425",
+   "name": "Empty User Registration",
+   "description": "Register a user with an empty email and password.",
+   "hint_1": "Consider intercepting and playing with the request payload.",
+   "hint_2": "(لا يوجد تلميح ثانٍ)"
+  },
+  {
+   "blind_id": "BL-235227",
+   "name": "Database Schema",
+   "description": "Exfiltrate the entire DB schema definition via SQL Injection.",
+   "hint_1": "Find out where this information could come from. Then craft an attack string against an endpoint that offers an unnecessary way to filter data.",
+   "hint_2": "Find out which database system is in use and where it would usually store its schema definitions."
+  },
+  {
+   "blind_id": "BL-550757",
+   "name": "Client-side XSS Protection",
+   "description": "Perform a <i>persisted</i> XSS attack with <code>&lt;iframe src=\"javascript:alert(`xss`)\"&gt;</code> bypassing a <i>client-side</i> security mechanism.",
+   "hint_1": "There are only some input fields in the Juice Shop forms that validate their input.",
+   "hint_2": "Even less of these fields are persisted in a way where their content is shown on another screen."
+  },
+  {
+   "blind_id": "BL-715463",
+   "name": "Product Tampering",
+   "description": "Change the <code>href</code> of the link within the <a href=\"/#/search?q=OWASP SSL Advanced Forensic Tool (O-Saft)\">OWASP SSL Advanced Forensic Tool (O-Saft)</a> product description into <i>https://owasp.slack.com</i>.",
+   "hint_1": "Theoretically there are three possible ways to beat this challenge: a) broken admin functionality, b) holes in RESTful API or c) possibility for SQL Injection.",
+   "hint_2": "In practice two of these three ways should turn out to be dead ends."
+  },
+  {
+   "blind_id": "BL-621340",
+   "name": "Weird Crypto",
+   "description": "<a href=\"/#/contact\">Inform the shop</a> about an algorithm or library it should definitely not use the way it does.",
+   "hint_1": "Report one of five possible answers via the \"Customer Feedback\" form.",
+   "hint_2": "Cryptographic functions only used in the \"Apply some advanced cryptanalysis to find the real easter egg\" challenge do not count as they are only a developer’s prank and not a serious security problem."
+  },
+  {
+   "blind_id": "BL-990041",
+   "name": "Memory Bomb",
+   "description": "Drop some explosive data into a vulnerable file-handling endpoint.",
+   "hint_1": "This one is actually similar to the XXE DoS challenge in every way except the data format being (ab)used.",
+   "hint_2": "You can only solve this challenge by keeping the server busy for >2sec with your attack."
+  },
+  {
+   "blind_id": "BL-985633",
+   "name": "Successful RCE DoS",
+   "description": "Perform a Remote Code Execution that occupies the server for a while without using infinite loops.",
+   "hint_1": "Your attack payload must not trigger the protection against too many iterations and infinite loops.",
+   "hint_2": "This challenge uses the same leverage point as the \"Perform a Remote Code Execution that would keep a less hardened application busy forever\" challenge."
+  },
+  {
+   "blind_id": "BL-127806",
+   "name": "Forged Review",
+   "description": "Post a product review as another user or edit any user's existing review.",
+   "hint_1": "Observe the flow of product review posting and editing and see if you can exploit it.",
+   "hint_2": "This challenge can be solved by using developers tool of your browser or with tools like postman."
+  },
+  {
+   "blind_id": "BL-541114",
+   "name": "Login Jim",
+   "description": "Log in with Jim's user account.",
+   "hint_1": "The challenge description probably gave away what form you should attack.",
+   "hint_2": "You need to know (or smart-guess) Jim’s email address so you can launch a targeted attack."
+  }
+ ]
+}
