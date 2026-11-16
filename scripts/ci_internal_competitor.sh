@@ -118,7 +118,7 @@ if [[ "$ACTIVE_ZAP_ONLY" == 1 ]]; then
     url="${INTERNAL_TARGETS[$name]}"
     mkdir -p "artifacts/$name"
     start="$(date +%s)"
-    docker run -d --user zap --name zap-active --network "$NETWORK" -p 127.0.0.1:8090:8080 "$ZAP" zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true >/dev/null
+    docker run -d --user zap --name zap-active --network "$NETWORK" -p 127.0.0.1:8090:8080 "$ZAP" zap.sh -daemon -host 0.0.0.0 -port 8080 -config 'api.disablekey=true' -config 'api.addrs.addr.name=.*' -config api.addrs.addr.regex=true >/dev/null
     api=http://127.0.0.1:8090
     ready=$((SECONDS + 90))
     until curl -fsS "$api/JSON/core/view/version/" >/dev/null 2>&1; do
@@ -166,17 +166,20 @@ PY
 fi
 
 if [[ -z "${BURHAN_OWNER_PASSWORD:-}" ]]; then
-  echo 'BURHAN_OWNER_PASSWORD CI secret is required for the Burhan proof run; no scan started' >&2
+  echo 'ephemeral BURHAN_OWNER_PASSWORD environment value is required; no scan started' >&2
   exit 2
 fi
-OWNER_GATE_DIR="$(mktemp -d)"
-OWNER_GATE="$OWNER_GATE_DIR/owner-gate.json"
+OWNER_GATE="${BURHAN_OWNER_GATE:-${RUNNER_TEMP:-/tmp}/burhan-owner-gate.json}"
+rm -f "$OWNER_GATE"
+mkdir -p "$(dirname "$OWNER_GATE")"
 export BURHAN_OWNER_GATE="$OWNER_GATE"
-BURHAN_OWNER_PASSWORD="$BURHAN_OWNER_PASSWORD" python3 - <<'PY'
-import os
-from burhan.owner_gate import OwnerGate
-OwnerGate.setup(os.environ['BURHAN_OWNER_GATE'], os.environ['BURHAN_OWNER_PASSWORD'])
-PY
+python3 -m burhan.cli owner init >/dev/null
+cleanup_owner() {
+  rm -f "$OWNER_GATE"
+  unset BURHAN_OWNER_PASSWORD
+  cleanup
+}
+trap cleanup_owner EXIT
 PROOF_SEED='burhan-m3-fixed-proof-seed-2026-11-16-00000000000000000000000000000000'
 echo 'burhan_mode=internal-lab-proof'
 echo 'burhan_proof_seed=fixed'
@@ -242,6 +245,14 @@ for lineno,line in enumerate(p.read_text().splitlines(),1):
 print(f'nuclei_jsonl_valid={name}')
 PY
 done
+
+leak_list="$(mktemp)"
+if grep -R -F -l -- "$BURHAN_OWNER_PASSWORD" artifacts >"$leak_list" 2>/dev/null; then
+  echo 'ephemeral owner credential found in artifacts; refusing success' >&2
+  rm -f "$leak_list"
+  exit 1
+fi
+rm -f "$leak_list"
 
 python3 - <<'PY'
 import json

@@ -85,8 +85,6 @@ jobs:
     timeout-minutes: 35
     permissions:
       contents: read
-    env:
-      BURHAN_OWNER_PASSWORD: ${{ secrets.BURHAN_OWNER_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -108,6 +106,14 @@ jobs:
           printf 'nuclei_templates_tar_sha256=%s\n' "$sha256"
           printf 'nuclei_templates_loaded=%s\n' "$count"
 
+      - name: Generate ephemeral owner credential
+        run: |
+          set -euo pipefail
+          owner_password="$(openssl rand -hex 24)"
+          printf '::add-mask::%s\n' "$owner_password"
+          printf 'BURHAN_OWNER_PASSWORD=%s\n' "$owner_password" >> "$GITHUB_ENV"
+          printf 'BURHAN_OWNER_GATE=%s/burhan-owner-gate.json\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+
       - name: Run only the pinned internal lab
         run: bash scripts/ci_internal_competitor.sh
 
@@ -118,6 +124,13 @@ jobs:
           name: competitor-comparison-${{ github.run_id }}
           path: artifacts/
           if-no-files-found: error
+
+      - name: Remove ephemeral owner credential and gate
+        if: always()
+        run: |
+          set -euo pipefail
+          rm -f "${BURHAN_OWNER_GATE:-$RUNNER_TEMP/burhan-owner-gate.json}"
+          printf 'BURHAN_OWNER_PASSWORD=\nBURHAN_OWNER_GATE=\n' >> "$GITHUB_ENV"
 
   active-zap:
     name: Internal ZAP active scan (time-limited development set)
