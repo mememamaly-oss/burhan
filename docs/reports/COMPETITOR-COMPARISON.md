@@ -35,6 +35,13 @@ in 16m05s and produced Nuclei outputs for all four targets, but ZAP reported an
 reports were absent. The second dispatch, 43876225804, correctly failed closed
 when the reports were still missing. The script now runs ZAP as root only
 inside the disposable container, uses relative report names (the image maps
-them under `/zap/wrk`), and fails closed when either report is missing. A third
-dispatch is required before claiming a result.
+them under `/zap/wrk`), and fails closed when either report is missing.
+
+The third dispatch, 43877456695, passed in 5m43s. It produced non-empty ZAP
+JSON/HTML reports and Nuclei JSONL outputs for all four targets, plus the
+[comparison artifact](https://github.com/mememamaly-oss/burhan/actions/runs/43877456695/artifacts/14231905000).
+The summary recorded ZAP totals of 10 (crAPI), 15 (DVWA), 9 (Juice Shop), and
+13 (WebGoat). Nuclei completed with zero emitted findings in this run; that is
+reported as zero output, not as proof that the applications are clean. The
+comparison is tool-output telemetry, not ground truth or a coverage claim.
 No external target, isolated target, phaseC path, or seal path is an input.
