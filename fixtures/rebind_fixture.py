@@ -61,6 +61,16 @@ def _is_private(ip: str) -> bool:
             or ip.startswith("172.31.") or ip == "0.0.0.0")
 
 
+# r19-1 (owner order 2026-11-16, item 1a): explicit allowlist of addresses
+# exempt from the private-range check. The default stays empty (validation
+# is unchanged for every existing test); it exists so the A6 BLUE test can
+# run its positive leg — a fetcher pinned to a REACHABLE "public" address
+# (the loopback upstream listener) must actually COMPLETE the fetch, so the
+# test proves the internal probe stayed dark on a live fetch path instead
+# of passing vacuously on a fetch blocked at validation.
+_ALLOW_IPS: set[str] = set()
+
+
 class _Fetcher(BaseHTTPRequestHandler):
     role = "vuln"
     dns_port = 0
@@ -99,7 +109,9 @@ class _Fetcher(BaseHTTPRequestHandler):
         host, port, path = u.hostname, u.port or 80, u.path or "/"
         # -- the validation resolve (query 1: FlipDNS answers PUBLIC) -------
         ip_validated = resolve(host, "127.0.0.1", self.dns_port)
-        if _is_private(ip_validated):
+        if ip_validated in _ALLOW_IPS:
+            pass  # r19-1: explicit test-only exemption (empty by default)
+        elif _is_private(ip_validated):
             return self._send(403, {
                 "error": "private address blocked",
                 "stage": "validation", "ip": ip_validated})
@@ -123,7 +135,9 @@ class _Fetcher(BaseHTTPRequestHandler):
                                     "stage": "fetch", "ip": ip_validated})
 
 
-def serve(role: str, dns_port: int, http_port: int):
+def serve(role: str, dns_port: int, http_port: int, allow_ips: list[str]):
+    _ALLOW_IPS.clear()
+    _ALLOW_IPS.update(allow_ips)
     handler = type(f"Fetcher_{role}", (_Fetcher,),
                    {"role": role, "dns_port": dns_port})
     srv = ThreadingHTTPServer(("127.0.0.1", http_port), handler)
@@ -141,5 +155,9 @@ if __name__ == "__main__":
     # r18-8.5: default 0 = child-chosen ephemeral port, announced on
     # stdout (the parent no longer pre-picks and races)
     ap.add_argument("--http-port", type=int, default=0)
+    # r19-1: test-only allowlist for the A6 positive leg (default: empty)
+    ap.add_argument("--allow-ip", action="append", default=[],
+                    help="address exempt from the private-range check "
+                         "(test harness only)")
     a = ap.parse_args()
-    serve(a.role, a.dns_port, a.http_port)
+    serve(a.role, a.dns_port, a.http_port, a.allow_ip)
