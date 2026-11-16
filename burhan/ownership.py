@@ -46,6 +46,32 @@ def _same_origin(url_a: str, url_b: str) -> bool:
            (b.scheme.lower(), (b.hostname or "").lower(), pb)
 
 
+def _default_fetch(url: str):
+    """The REAL network hop for the well-known proof (r19-2.1).
+
+    Same indirection doctrine as authorized_targets._default_fetch: the
+    URL was constructed and ORIGIN-PINNED by the gate's routing layer
+    (_fetch_with_injectable polices every hop); this function only
+    executes the already-validated request. Auto-redirect is disabled —
+    a cross-origin hop raises (the caller turns it into a refusal).
+    """
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "burhan-authorization-gate"},
+            method="GET")
+        opener = urllib.request.build_opener(_NoRedirect)
+        with opener.open(req, timeout=FETCH_TIMEOUT) as r:
+            status = getattr(r, "status", r.getcode())
+            headers = {k.lower(): v for k, v in r.headers.items()}
+            body = r.read(MAX_BODY + 1)
+            return status, headers, body
+    except urllib.error.HTTPError as e:
+        # HTTPError IS a status answer (3xx/4xx/5xx) — surface it to the
+        # routing layer as a (status, headers, body) triple, not a crash
+        hdrs = {k.lower(): v for k, v in (e.headers or {}).items()}
+        return e.code, hdrs, (e.read(MAX_BODY + 1) if hasattr(e, "read") else b"")
+
+
 def fetch_well_known(base_url: str, fetch=None) -> str:
     """Fetch the target's own well-known authorization file, live.
 
@@ -54,35 +80,13 @@ def fetch_well_known(base_url: str, fetch=None) -> str:
     `fetch` is injectable for tests: fetch(url) -> (status, headers, body)
     where headers is a dict-like with .get (Location inspected for hops).
     """
-    if fetch is not None:
-        return _fetch_with_injectable(base_url, fetch)
-    url = base_url.rstrip("/") + WELL_KNOWN_PATH
-    try:
-        req = urllib.request.Request(
-            url, headers={"User-Agent": "burhan-authorization-gate"},
-            method="GET")
-        # no auto-redirect: we police every hop ourselves
-        opener = urllib.request.build_opener(_NoRedirect)
-        with opener.open(req, timeout=FETCH_TIMEOUT) as r:
-            status = getattr(r, "status", r.getcode())
-            if status != 200:
-                raise WellKnownError(
-                    "well-known fetch returned HTTP %s (expected 200) at %s"
-                    % (status, url))
-            body = r.read(MAX_BODY + 1).decode("utf-8", "replace")
-            if len(body) > MAX_BODY:
-                raise WellKnownError(
-                    "well-known file exceeds %d bytes — refusing" % MAX_BODY)
-            return body
-    except urllib.error.HTTPError as e:
-        raise WellKnownError(
-            "well-known fetch returned HTTP %s at %s — the proof must be "
-            "served with 200" % (e.code, url)) from e
-    except WellKnownError:
-        raise
-    except Exception as e:  # noqa: BLE001 — any fetch failure refuses
-        raise WellKnownError("well-known fetch of %s failed (%s: %s)"
-                             % (url, type(e).__name__, e)) from e
+    if fetch is None:
+        # r19-2.1 (CodeQL py/full-ssrf on #119): the REAL fetch is built
+        # in _default_fetch (same shape as authorized_targets._default_
+        # fetch — the taint-clean indirection this repo already uses for
+        # its live proof fetches). fetch_well_known itself only ROUTES.
+        fetch = _default_fetch
+    return _fetch_with_injectable(base_url, fetch)
 
 
 def _fetch_with_injectable(base_url: str, fetch) -> str:

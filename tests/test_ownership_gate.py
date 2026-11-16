@@ -354,3 +354,57 @@ def test_api_launch_scan_refuses_unauthorized_target(tmp_path):
             "REFUSED" in res.get("refusal_banner", "")
     finally:
         at.DEFAULT_REGISTRY = old
+
+# --------------------------------------- r19-2.1: the REAL fetch path (live)
+def test_well_known_real_fetch_live_positive_and_404():
+    """r19-2.1 (CodeQL fix follow-up): the refactored _default_fetch
+    indirection still performs a REAL urlopen against a live local
+    server — positive leg (token body comes back) and negative leg (a
+    404 answer refuses). Pins the behavior the refactor could have
+    silently broken."""
+    from burhan.ownership import fetch_well_known, WellKnownError
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    class _H(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == "/.well-known/burhan-authorization.txt":
+                body = b"tok-live-123"
+                self.send_response(200)
+            else:
+                body = b"nope"
+                self.send_response(404)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *a):
+            pass
+
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), _H)
+    port = srv.server_address[1]
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        # positive: the token body really comes back over the wire
+        body = fetch_well_known(f"http://127.0.0.1:{port}/")
+        assert body == "tok-live-123", body
+        # negative: a server answering 404 for the well-known path refuses
+        class _H404(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(404)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+
+            def log_message(self, *a):
+                pass
+        srv404 = ThreadingHTTPServer(("127.0.0.1", 0), _H404)
+        port404 = srv404.server_address[1]
+        threading.Thread(target=srv404.serve_forever, daemon=True).start()
+        try:
+            fetch_well_known(f"http://127.0.0.1:{port404}/")
+            raise AssertionError("404 must refuse")
+        except WellKnownError as e:
+            assert "404" in str(e)
+        finally:
+            srv404.shutdown()
+    finally:
+        srv.shutdown()
