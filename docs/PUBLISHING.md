@@ -12,7 +12,7 @@ python3 -m venv /tmp/burhan-package-check
 python -m pip install --upgrade pip
 python -m pip install .
 burhan doctor
-python -m pip show burhan-scanner
+python -m pip show burhan
 deactivate
 rm -rf /tmp/burhan-package-check
 ```
