@@ -217,6 +217,43 @@ def run_campaigns(seconds_per_target: int = 20) -> dict:
     )
     _t("T7_scanner_ast", src_soup, _astfuzz)
 
+    # T8: bounded vault-envelope JSON shape.  Do not invoke decryption with
+    # attacker-controlled keys; malformed envelopes must reject cleanly first.
+    def _vault_json(b):
+        try:
+            obj = json.loads(b)
+            return isinstance(obj, dict)
+        except Exception:
+            return False
+    _t("T8_vault_envelope", json_soup, _vault_json)
+
+    # T9: HTTP response headers through the stdlib parser, with an explicit
+    # input bound so malformed header campaigns cannot grow without limit.
+    from http.client import HTTPMessage
+    from io import BytesIO
+    def _http_headers(b):
+        try:
+            raw = b[:4096]
+            if not raw.endswith(b"\r\n\r\n"):
+                raw += b"\r\n\r\n"
+            HTTPMessage(BytesIO(raw))
+            return True
+        except Exception:
+            return False
+    _t("T9_http_headers", st.binary(max_size=4096), _http_headers)
+
+    # T10: SARIF transport shape. Semantic validation remains covered by the
+    # report/schema tests; this campaign focuses on parser robustness.
+    def _sarif(b):
+        try:
+            obj = json.loads(b)
+            return (isinstance(obj, dict)
+                    and ("version" not in obj or isinstance(obj["version"], str))
+                    and ("runs" not in obj or isinstance(obj["runs"], list)))
+        except Exception:
+            return False
+    _t("T10_sarif", json_soup, _sarif)
+
     return results
 
 

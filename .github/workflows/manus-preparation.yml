@@ -1,0 +1,81 @@
+name: Manus preparation gates
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  pip-install:
+    name: pip install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install package in clean virtual environment
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install .
+          burhan doctor
+
+  docker-local-scan:
+    name: Docker build and local fixture scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Start repository-local fixture
+        run: |
+          python fixtures/vulnapp.py > "$RUNNER_TEMP/vulnapp.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/vulnapp.pid"
+          for i in $(seq 1 60); do
+            curl --fail --silent http://127.0.0.1:8777/ >/dev/null && break
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8777/ >/dev/null
+      - name: Build image
+        run: docker build --tag burhan:ci .
+      - name: Initialize owner gate in container
+        run: |
+          mkdir -p "$RUNNER_TEMP/burhan-gate"
+          docker run --rm --network host \
+            --user 10001:10001 \
+            --volume "$RUNNER_TEMP/burhan-gate:/var/lib/burhan" \
+            burhan:ci owner init --password ci-only-owner-password
+      - name: Scan local fixture in container
+        run: |
+          docker run --rm --network host \
+            --user 10001:10001 \
+            --volume "$RUNNER_TEMP/burhan-gate:/var/lib/burhan" \
+            --env BURHAN_OWNER_PASSWORD=ci-only-owner-password \
+            burhan:ci scan http://127.0.0.1:8777 --allow-private \
+            --out /tmp/burhan-ci-result.json
+      - name: Stop local fixture
+        if: always()
+        run: kill "$(cat "$RUNNER_TEMP/vulnapp.pid")" 2>/dev/null || true
+
+  parser-fuzz:
+    name: parser fuzzing (at least five minutes)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install development dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run bounded parser fuzz campaign
+        run: timeout 390 python scripts/fuzz_parsers.py --seconds 31
