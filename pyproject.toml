@@ -4,7 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "burhan-scanner"
-version = "19.0.0"
+version = "5.3.0"
+# r19-3.1 (owner followup item 4): the version line is UNIFIED with the
+# repo's governing release line (git tags v5.0.0 -> v5.1.0 -> v5.2.0).
+# 19.0.0 was a mistake (an owner-order round counter, not a release).
+# 5.3.0 = the next minor after v5.2.0; core.py VERSION moves with it.
 description = "Deterministic DAST web scanner with signed, independently verifiable findings (Ed25519 + Merkle proofs) and OWASP Top 10 / CWE / PCI DSS mappings"
 readme = "README.md"
 requires-python = ">=3.12"
