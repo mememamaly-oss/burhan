@@ -504,6 +504,14 @@ def test_adversarial_A5_flip_after_must_match_query_count():
 def test_adversarial_A6_pinned_public_fetch_never_hits_internal():
     # safe fetcher pinned to a REACHABLE public upstream: fetch succeeds and
     # the internal listener is never hit — no false positive
+    #
+    # r19-1 (owner order 2026-11-16, item 1a): this test used to be a blind
+    # bet — it fired ONE request, slept 1.5s, and asserted silence. If the
+    # request never left the harness (spawn race, engine hiccup, fixture
+    # not ready), the negative assertion passed vacuously. Now the public
+    # upstream listener RECORDS every hit, and the test asserts the
+    # positive leg (the fetch really happened through the fixture) BEFORE
+    # the negative leg (the internal probe stayed dark).
     import urllib.parse
     dns = FlipDNS(port=0, flip_after=1, public_ip="127.0.0.1",
                   internal_ip="127.0.0.2")
@@ -514,6 +522,8 @@ def test_adversarial_A6_pinned_public_fetch_never_hits_internal():
     up.bind(("127.0.0.1", 0))
     up.listen(4)
     up_port = up.getsockname()[1]
+    upstream_hits: list[str] = []
+    upstream_lock = threading.Lock()
 
     def _serve():
         while True:
@@ -521,6 +531,8 @@ def test_adversarial_A6_pinned_public_fetch_never_hits_internal():
                 c, _ = up.accept()
                 c.recv(1024)
                 c.sendall(b"HTTP/1.0 200 OK\r\nContent-Length: 2\r\n\r\nok")
+                with upstream_lock:
+                    upstream_hits.append("hit")
                 c.close()
             except OSError:
                 return
@@ -528,7 +540,8 @@ def test_adversarial_A6_pinned_public_fetch_never_hits_internal():
     threading.Thread(target=_serve, daemon=True).start()
     port, p, _errf = _spawn_port(
         [os.path.join(ROOT, "fixtures", "rebind_fixture.py"),
-         "--role", "safe", "--dns-port", str(dns.port)],
+         "--role", "safe", "--dns-port", str(dns.port),
+         "--allow-ip", "127.0.0.1"],
          port_flag="--http-port")
     try:
         target = f"http://rebind.burhan.test:{up_port}/x"
@@ -537,8 +550,25 @@ def test_adversarial_A6_pinned_public_fetch_never_hits_internal():
                 url=f"http://127.0.0.1:{port}/fetch?url="
                     f"{urllib.parse.quote(target, safe='')}",
                 method="GET"), note="adv-a6"))
-        time.sleep(1.5)
-        assert not probe.hits
+        # positive leg first: the fetch must actually reach the PUBLIC
+        # upstream via the fixture (bounded wait, not a fixed sleep) —
+        # otherwise the negative assertion below would pass vacuously
+        deadline = time.time() + 8.0
+        while time.time() < deadline:
+            with upstream_lock:
+                if upstream_hits:
+                    break
+            time.sleep(0.1)
+        assert upstream_hits, (
+            "blind-bet guard: the /fetch request never reached the public "
+            "upstream — the negative assertion on probe.hits would pass "
+            "vacuously (the fixture never ran its fetch path)")
+        # settle window: give a misbehaving fetcher ample time to ALSO hit
+        # the internal address after the pinned fetch already succeeded
+        time.sleep(1.0)
+        assert not probe.hits, (
+            f"safe fetcher hit the internal probe {len(probe.hits)}x "
+            f"after the pinned fetch: {probe.hits[:3]}")
     finally:
         p.terminate()
 
