@@ -37,6 +37,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import urllib.parse
 
 import pytest
 
@@ -275,9 +276,14 @@ def test_M1_http_target_fetches_its_own_http_origin(tmp_path):
     ok, reason, _ = authorize("http://example.test:8080/", reg, fetch=fetch)
     assert ok is True, reason
     # the proof fetch must consult the scanned origin (http + port 8080),
-    # not an https rebuild of the bare host
-    assert seen and "http://example.test:8080" in seen[0], seen
-    assert not seen[0].startswith("https://"), seen
+    # not an https rebuild of the bare host — parsed-component equality,
+    # not substring matching (CodeQL py/incomplete-url-substring-
+    # sanitization: a substring would also match
+    # http://example.test:8080.evil.net/)
+    assert seen, "the well-known proof fetch must have run"
+    u = urllib.parse.urlsplit(seen[0])
+    assert (u.scheme, u.hostname, u.port) == ("http", "example.test", 8080), seen
+    assert u.scheme != "https", seen
 
 
 def test_M1b_schemeless_input_documents_ternary_reachability():
