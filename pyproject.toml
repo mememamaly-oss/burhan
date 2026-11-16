@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "burhan-scanner"
+version = "19.0.0"
+description = "Deterministic DAST web scanner with signed, independently verifiable findings (Ed25519 + Merkle proofs) and OWASP Top 10 / CWE / PCI DSS mappings"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Burhan project" }]
+keywords = ["security", "dast", "scanner", "web", "vulnerability"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+# Runtime engine dependencies — mirrors requirements.txt (the repo-internal
+# development pin file) exactly; both must be updated together.
+dependencies = [
+    "cryptography>=50.0.2",
+    "blake3==1.0.11",
+    "numpy>=2.5.4",
+    "python-docx>=1.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mememamaly-oss/burhan"
+
+[project.scripts]
+burhan = "burhan.cli:main"
+
+[project.optional-dependencies]
+# Optional surfaces; the engine degrades loudly and honestly when these
+# are absent (UNTESTABLE markers, capability-skips), never silently.
+browser = ["playwright>=1.40"]
+siem = ["syslog-rfc5424-parser>=0.3.2"]
+dev = [
+    "pytest>=8",
+    "hypothesis>=6",
+    "playwright>=1.40",
+    "syslog-rfc5424-parser>=0.3.2",
+]
+
+[tool.setuptools]
+packages = { find = { include = ["burhan*", "perf*"] } }
+
+[tool.setuptools.package-data]
+burhan = ["py.typed"]
