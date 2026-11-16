@@ -72,8 +72,11 @@ def test_public_addresses_are_allowed(addr):
 
 
 def test_classifier_version_is_440():
-    # v5.0.0: version constant aligned with README (the Burhan rename release)
-    assert VERSION == "5.0.0"
+    # r19-3.1 (owner followup item 4): the version constant is UNIFIED
+    # with the repo's governing release line (git tags). v5.0.0 was the
+    # rename release; the tag line moved to v5.2.0 while the constant
+    # lagged at 5.0.0 — 5.3.0 is the next minor (packaging PR #121).
+    assert VERSION == "5.3.0"
 
 
 # ----------------------------------------------------------------------------

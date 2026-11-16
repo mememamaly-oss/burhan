@@ -1,0 +1,13 @@
+.git
+.venv
+__pycache__
+*.pyc
+tests
+fixtures
+results
+*.db
+*.sqlite
+docs
+skills
+node_modules
+mutants
