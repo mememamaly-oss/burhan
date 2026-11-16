@@ -136,15 +136,16 @@ if [[ "$ACTIVE_ZAP_ONLY" == 1 ]]; then
     done
     zap_api '/JSON/core/view/version/' >/dev/null
     zap_api '/JSON/spider/action/scan/' --data-urlencode "url=$url" --data-urlencode 'recurse=true' >/dev/null
-    deadline=$((SECONDS + 180))
-    while (( SECONDS < deadline )); do
+    spider_deadline=$((SECONDS + 120))
+    while (( SECONDS < spider_deadline )); do
       status="$(zap_api '/JSON/spider/view/status/' | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
       [[ "$status" == 100 ]] && break
       sleep 3
     done
     test "$status" = 100 || { docker logs zap-active > "artifacts/$name/zap-active-daemon.log" 2>&1 || true; echo "ZAP spider time limit exceeded for $name" >&2; exit 1; }
     zap_api '/JSON/ascan/action/scan/' --data-urlencode "url=$url" --data-urlencode 'recurse=true' --data-urlencode 'inScopeOnly=false' >/dev/null
-    while (( SECONDS < deadline )); do
+    active_deadline=$((SECONDS + 180))
+    while (( SECONDS < active_deadline )); do
       status="$(zap_api '/JSON/ascan/view/status/' | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
       [[ "$status" == 100 ]] && break
       sleep 3
@@ -163,7 +164,7 @@ count=int(msg.get('numberOfMessages',0))
 Path('artifacts',name,'zap-active-summary.json').write_text(json.dumps({
  'target':name,'mode':'active','duration_seconds':end-start,
  'request_count':count,'alert_count':len(alerts.get('alerts',[])),
- 'time_limit_seconds':180
+ 'spider_time_limit_seconds':120,'active_time_limit_seconds':180
 },indent=2))
 PY
     docker rm -f zap-active >/dev/null
