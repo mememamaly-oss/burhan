@@ -251,3 +251,51 @@ def test_L5_host_resolving_public_and_private_counts_as_private():
     # resolution failure must NOT be treated as private (fail-closed at
     # the REGISTRY layer instead, not by inventing an address class)
     assert _is_loopback_or_private("this-host-does-not-exist.invalid") is False
+
+
+# ------------------------------------------ M1: origin-build ternary (not #172)
+def test_M1_http_target_fetches_its_own_http_origin(tmp_path):
+    """authorize() must pass the FULL input URL (scheme included) to the
+    well-known proof fetch when the caller already spelled a scheme. The
+    #172 mutant (dropping `not` in the ternary) instead rebuilds
+    'https://' + host for schemed inputs, so an http-scanned target's
+    proof is sought on the WRONG origin — the token legitimately served
+    only over http stops matching (false refusal) or, worse, an https
+    listener with a DIFFERENT file can answer."""
+    reg = _reg(tmp_path, [{
+        "id": "wk", "kind": "permissioned-public-demo",
+        "match": {"host_suffix": "example.test"},
+        "proof": {"type": "well_known", "token": "tok"}}])
+    seen = []
+
+    def fetch(url):
+        seen.append(url)
+        return 200, {}, b"tok"
+
+    ok, reason, _ = authorize("http://example.test:8080/", reg, fetch=fetch)
+    assert ok is True, reason
+    # the proof fetch must consult the scanned origin (http + port 8080),
+    # not an https rebuild of the bare host
+    assert seen and "http://example.test:8080" in seen[0], seen
+    assert not seen[0].startswith("https://"), seen
+
+
+def test_M1b_schemeless_input_documents_ternary_reachability():
+    """Reachability note (documentation test, r19-2.7): the ternary's
+    FALSE arm ('https://' + host, for inputs with no '://' at all) is
+    UNREACHABLE through authorize() itself — a schemeless spelling that
+    still yields a hostname is impossible: '//host' lacks '://' (so it
+    takes the true arm and fetch_well_known re-derives the origin), and
+    'scheme:host' parses as scheme with hostname None, refused upstream
+    by the no-host check. The observable, testable direction of the
+    ternary is therefore exactly the one M1 pins: a schemed input must
+    keep ITS OWN origin. The #172 mutant ('not' dropped) is killed by
+    M1 alone; this test records why no second leg exists."""
+    import urllib.parse
+    # bare host:port -> urlsplit sees a SCHEME, not a host
+    assert urllib.parse.urlsplit("example.test:8080").hostname is None
+    # protocol-relative -> has a host but contains no '://'
+    u = urllib.parse.urlsplit("//example.test/")
+    assert u.hostname == "example.test" and "://" not in "//example.test/"
+    # 'example.test:8080' DOES contain '://'? no — one colon only
+    assert "://" not in "example.test:8080"
