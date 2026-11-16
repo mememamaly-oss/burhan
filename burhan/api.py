@@ -38,7 +38,19 @@ def launch_scan(store: Store, target: str, max_pages: int = 25, allow_private: b
                 timeout: float = 12.0, seed: str | None = None, strategy_path: str | None = None) -> dict:
     """Create the scanner, register its run_id, and execute in a daemon thread.
     Phase 52: channel-aware OAST arming — local listener for lab targets, PUBLIC
-    webhook channel for remote targets (auto policy, honest None on outage)."""
+    webhook channel for remote targets (auto policy, honest None on outage).
+    r19-2 (order 2026-11-16 item 1b): the ownership gate runs HERE, before
+    the scanner is even built — an unauthorized target never gets a run_id
+    and ZERO requests are sent (the API wrapper surfaces the refusal as a
+    503-shaped error payload rather than exit code 2, which is the CLI's
+    channel; the web UI shows the banner text)."""
+    from .authorized_targets import authorize, _banner, DEFAULT_REGISTRY
+    ok, reason, entry_id = authorize(target)
+    if not ok:
+        banner = _banner(DEFAULT_REGISTRY, "target refused", reason)
+        print(banner, flush=True)   # server log
+        return {"error": "scan refused by the authorization gate",
+                "detail": reason, "refusal_banner": banner}
     from .core import is_private_ip
     from urllib.parse import urlparse
     from .oast import make_oast

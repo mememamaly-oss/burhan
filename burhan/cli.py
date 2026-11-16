@@ -760,6 +760,14 @@ def main():
             ap.error("--seed must carry at least 32 bytes (64 hex chars "
                      "recommended) — weak seeds are fail-closed rejected "
                      "(RT-03/RT-04)")
+        # r19-2 (order 2026-11-16 item 1b): the ownership gate. EVERY live
+        # scan target must pass the authorized-targets registry (DNS TXT /
+        # well-known / scope page / signed letter, verified live at scan
+        # time; loopback/private hosts pass via the self-hosted entry).
+        # Refusal = loud banner, exit 2, ZERO requests — the scan process
+        # dies before any socket to the target is opened.
+        from burhan.authorized_targets import require_authorized
+        require_authorized(a.target)
         auth = None
         if a.auth_token:
             # AUTH-05 token mode: Bearer JWT / API key / custom header.
