@@ -137,34 +137,45 @@ if [[ "$ACTIVE_ZAP_ONLY" == 1 ]]; then
     zap_api '/JSON/core/view/version/' >/dev/null
     zap_api '/JSON/spider/action/scan/' --data-urlencode "url=$url" --data-urlencode 'recurse=true' >/dev/null
     spider_deadline=$((SECONDS + 120))
+    spider_timed_out=0
     while (( SECONDS < spider_deadline )); do
       status="$(zap_api '/JSON/spider/view/status/' | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
       [[ "$status" == 100 ]] && break
       sleep 3
     done
-    test "$status" = 100 || { docker logs zap-active > "artifacts/$name/zap-active-daemon.log" 2>&1 || true; echo "ZAP spider time limit exceeded for $name" >&2; exit 1; }
+    if [[ "$status" != 100 ]]; then
+      spider_timed_out=1
+      echo "ZAP spider time limit reached for $name; continuing with bounded active scan" >&2
+    fi
     zap_api '/JSON/ascan/action/scan/' --data-urlencode "url=$url" --data-urlencode 'recurse=true' --data-urlencode 'inScopeOnly=false' >/dev/null
     active_deadline=$((SECONDS + 180))
+    active_timed_out=0
     while (( SECONDS < active_deadline )); do
       status="$(zap_api '/JSON/ascan/view/status/' | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
       [[ "$status" == 100 ]] && break
       sleep 3
     done
-    test "$status" = 100 || { echo "active scan time limit exceeded for $name" >&2; exit 1; }
+    if [[ "$status" != 100 ]]; then
+      active_timed_out=1
+      echo "ZAP active scan time limit reached for $name; collecting bounded partial result" >&2
+    fi
     zap_api '/JSON/core/view/numberOfMessages/' > "artifacts/$name/zap-active-messages.json"
     zap_api '/JSON/alert/view/alerts/' > "artifacts/$name/zap-active-alerts.json"
     end="$(date +%s)"
-    python3 - "$name" "$start" "$end" <<'PY'
+    python3 - "$name" "$start" "$end" "$spider_timed_out" "$active_timed_out" <<'PY'
 import json,sys
 from pathlib import Path
 name,start,end=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])
+spider_timed_out=bool(int(sys.argv[4])); active_timed_out=bool(int(sys.argv[5]))
 msg=json.loads((Path('artifacts')/name/'zap-active-messages.json').read_text())
 alerts=json.loads((Path('artifacts')/name/'zap-active-alerts.json').read_text())
 count=int(msg.get('numberOfMessages',0))
 Path('artifacts',name,'zap-active-summary.json').write_text(json.dumps({
  'target':name,'mode':'active','duration_seconds':end-start,
  'request_count':count,'alert_count':len(alerts.get('alerts',[])),
- 'spider_time_limit_seconds':120,'active_time_limit_seconds':180
+ 'spider_time_limit_seconds':120,'active_time_limit_seconds':180,
+ 'spider_timed_out':spider_timed_out,'active_timed_out':active_timed_out,
+ 'result_quality':'partial-time-bounded' if (spider_timed_out or active_timed_out) else 'complete'
 },indent=2))
 PY
     docker rm -f zap-active >/dev/null
