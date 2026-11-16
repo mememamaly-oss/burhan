@@ -76,7 +76,7 @@ for name in juice-shop crapi webgoat dvwa; do
   url="${TARGETS[$name]}"
   mkdir -p "artifacts/$name"
   set +e
-  docker run --rm --network "$NETWORK" -v "$PWD/artifacts/$name:/zap/wrk/:rw" "$ZAP" zap-baseline.py -t "$url" -m 5 -I -r /zap/wrk/zap.html -J /zap/wrk/zap.json
+  docker run --rm --user 0:0 --network "$NETWORK" -v "$PWD/artifacts/$name:/zap/wrk/:rw" "$ZAP" zap-baseline.py -t "$url" -m 5 -I -r zap.html -J zap.json
   zap_rc=$?
   docker run --rm --network "$NETWORK" -v "$PWD/artifacts/$name:/out:rw" "$NUCLEI" -u "$url" -jsonl -o /out/nuclei.jsonl -silent -no-color
   nuclei_rc=$?
