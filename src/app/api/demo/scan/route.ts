@@ -137,6 +137,12 @@ export async function POST(req: NextRequest) {
       "--max-pages", "25",
       "--timeout", "10",
       "--allow-private",
+      // r19-2.5: the ownership gate refuses the loopback demo fixture
+      // without the EXPLICIT laboratory mode — same server-side decision
+      // as engine.ts (the demo target is platform-managed and local);
+      // the spawned CLI needs the flag so the gate passes and the demo
+      // report records stats.lab_mode.
+      "--lab",
     ],
     { cwd: ENGINE_DIR, env: { ...process.env, PYTHONUNBUFFERED: "1" }, stdio: ["ignore", out, out], detached: true }
   );
