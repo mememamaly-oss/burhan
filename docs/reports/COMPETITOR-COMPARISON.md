@@ -17,8 +17,9 @@ All target images, crAPI service images, databases, and scanner images are
 referenced by immutable Docker digests in
 `scripts/ci_internal_competitor.sh`. The crAPI compose file is fetched from the
 pinned source commit and its expected image references are checked before
-replacement with the pinned digests. Nuclei templates are downloaded in a
-separate networked preparation step as v10.5.0, commit
+replacement with the pinned digests. Nuclei templates are downloaded from the
+official GitHub codeload archive in a separate networked preparation step as
+v10.5.0, commit
 `f8b8b8dcd70d93826c3767e1829ef8243af9f03b`, with tarball SHA-256
 `80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41`. The
 download step prints the YAML template count; the scan step independently
