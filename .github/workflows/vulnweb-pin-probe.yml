@@ -8,6 +8,13 @@ name: vulnweb scope-page pin probe (round 12)
 # vulnweb until the exact quote is pinned in authorized-targets.json.
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "Choose pin probe or the internal competitor lab"
+        required: true
+        type: choice
+        default: pin
+        options: [pin, internal]
 
 permissions:
   contents: read
@@ -15,6 +22,7 @@ permissions:
 jobs:
   pin-probe:
     name: Fetch vulnweb.com permission page (for owner pinning)
+    if: ${{ inputs.mode == 'pin' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -67,4 +75,26 @@ jobs:
         with:
           name: vulnweb-pin-probe
           path: vulnweb-pin-probe.json
+          if-no-files-found: error
+
+
+  competitor-comparison:
+    name: Internal ZAP and Nuclei comparison (development set)
+    if: ${{ inputs.mode == 'internal' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run only the pinned internal lab
+        run: bash scripts/ci_internal_competitor.sh
+
+      - name: Upload comparison artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: competitor-comparison-${{ github.run_id }}
+          path: artifacts/
           if-no-files-found: error

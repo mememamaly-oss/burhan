@@ -1,9 +1,9 @@
 # Development competitor comparison
 
-This report describes the manual-only workflow in
-`.github/workflows/competitor-comparison.yml`. It is intentionally not a
-pull-request or push trigger. A run requires the explicit input
-`INTERNAL-LAB`.
+This report describes the manual-only `internal` mode of the existing
+`.github/workflows/vulnweb-pin-probe.yml` dispatch workflow. The mode is
+explicitly selected and is not a push or pull-request trigger. The legacy
+permission-page probe is skipped in this mode.
 
 ## Scope
 
@@ -14,9 +14,10 @@ bound to loopback only. ZAP and Nuclei join the same bridge and address targets
 by container alias. No external target is used.
 
 All target images, crAPI service images, databases, and scanner images are
-referenced by immutable Docker digests in the workflow. The crAPI compose file
-is fetched from the pinned source commit and its expected image references are
-checked before replacement with the pinned digests.
+referenced by immutable Docker digests in
+`scripts/ci_internal_competitor.sh`. The crAPI compose file is fetched from the
+pinned source commit and its expected image references are checked before
+replacement with the pinned digests.
 
 ## Comparison output
 
@@ -28,5 +29,6 @@ coverage. Findings do not fail the workflow; tool execution errors do.
 
 ## Execution status
 
-**PENDING:** the workflow must be dispatched manually on the development set.
+**PENDING:** dispatch `vulnweb-pin-probe.yml` with `mode=internal` on the
+development set.
 No external target, isolated target, phaseC path, or seal path is an input.
