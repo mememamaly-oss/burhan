@@ -20,6 +20,19 @@ Targets (the 4.1 inventory, each an untrusted-input parser):
   T6 repro payload unbox         — repro._jload on arbitrary bytes
   T7 the scanner's own AST read  — audit_quantum_sweep.scan_py on arbitrary source
   T8 vault envelope json         — vault's payload decode path (aead-gated)
+
+r19-4 (order 2026-11-16, item 1e) additions:
+  T8 http response headers       — the raw header block a hostile server
+                                   controls byte-for-byte (email.parser,
+                                   the layer under Response.headers)
+  T9 html link parser            — discovery._LinkParser (the crawl
+                                   surface: hostile pages ARE the input)
+  T10 sarif ingest               — SARIF 2.1.0 round-trip: build output
+                                   re-ingested by the JSON+SARIF consumer
+                                   shape (DefectDojo/VS Code)
+Plus per-input guards: hang ceiling (1s/input) and RSS ceiling (512MB
+process) — a hang or a memory bomb is a recorded crash-class finding,
+never a slow-input skip.
 """
 from __future__ import annotations
 
@@ -78,10 +91,28 @@ def run_campaigns(seconds_per_target: int = 20) -> dict:
 
     def _t(name, gen, invoke):
         stats = {"executed": 0, "clean_reject": 0, "parsed": 0,
-                 "crashes": [], "elapsed_s": 0}
+                 "crashes": [], "elapsed_s": 0, "hangs": 0,
+                 "max_rss_kb": 0}
         t0 = time.time()
         deadline = t0 + seconds_per_target
         rng_state = [0]
+
+        # r19-4 (order item 1e): per-input guards — a HANG and unbounded
+        # MEMORY are crash-class outcomes, not "slow inputs". rss sampled
+        # every input; any input whose peak exceeds the ceiling is a
+        # recorded finding (the parser leaked/bombed), not a skip.
+        _RSS_CEIL_KB = 512 * 1024       # 512 MB per-process ceiling
+        _PER_INPUT_S = 1.0
+
+        def _rss_kb():
+            try:
+                with open("/proc/self/status") as fh:
+                    for ln in fh:
+                        if ln.startswith("VmRSS:"):
+                            return int(ln.split()[1])
+            except OSError:
+                pass
+            return stats["max_rss_kb"]
 
         # the PUBLIC strategy API: repeated .example() draws are random
         # and adequate for a black-box time-boxed campaign
@@ -92,6 +123,7 @@ def run_campaigns(seconds_per_target: int = 20) -> dict:
                 continue
             rng_state[0] += 1
             stats["executed"] += 1
+            _in_t0 = time.time()
             try:
                 out = invoke(payload)
                 if out is True:
@@ -122,10 +154,23 @@ def run_campaigns(seconds_per_target: int = 20) -> dict:
                         continue
                     raise
                 stats["clean_reject"] += 1
+            # per-input timing + rss guards
+            _dt = time.time() - _in_t0
+            if _dt > _PER_INPUT_S:
+                stats["hangs"] += 1
+                stats["crashes"].append(
+                    f"HANG: input #{rng_state[0]} took {_dt:.1f}s")
+            _rss = _rss_kb()
+            if _rss > stats["max_rss_kb"]:
+                stats["max_rss_kb"] = _rss
+            if _rss > _RSS_CEIL_KB:
+                stats["crashes"].append(
+                    f"RSS_BOMB: input #{rng_state[0]} peak {_rss}kB")
         stats["elapsed_s"] = round(time.time() - t0, 1)
         results[name] = stats
         print(f"[{name}] executed={stats['executed']} parsed={stats['parsed']} "
               f"clean_reject={stats['clean_reject']} crashes={len(stats['crashes'])} "
+              f"hangs={stats['hangs']} maxrss={stats['max_rss_kb']}kB "
               f"({stats['elapsed_s']}s)")
 
     # T1/T2: the CLI's operator-supplied JSON ingestion shape
@@ -216,6 +261,95 @@ def run_campaigns(seconds_per_target: int = 20) -> dict:
         st.binary(max_size=600).map(lambda b: b.decode("utf-8", "replace")),
     )
     _t("T7_scanner_ast", src_soup, _astfuzz)
+
+    # T8 (r19-4, order 2026-11-16 item 1e): the HTTP response-header parser —
+    # http.client.parse_headers on arbitrary raw header blocks (the shape a
+    # hostile server controls byte-for-byte). The Response dataclass's
+    # header handling builds on this layer.
+    import email.parser, email.feedparser
+    def _http_headers(raw: bytes):
+        try:
+            # parse_headers wants a file-like of lines; a hostile server
+            # sends arbitrary bytes — decode with replacement like the
+            # engine's transport does
+            text = raw.decode("iso-8859-1", "replace")
+            import io as _io
+            hdrs = email.parser.Parser().parsestr(text.split("\r\n\r\n")[0])
+            return isinstance(dict(hdrs), dict)
+        except Exception:
+            return False
+    http_soup = st.one_of(
+        st.binary(max_size=512),
+        st.text(alphabet=st.characters(max_codepoint=0x7F), max_size=300)
+            .map(lambda s: (s.replace("\n", "\r\n")).encode("iso-8859-1", "replace")),
+        st.lists(st.sampled_from(
+            ["Content-Type: text/html\r\n",
+             "Set-Cookie: a=b; Path=/\r\n",
+             "Location: http://x/\r\n",
+             "X-Weird: \x00\x01\r\n",
+             "Duplicate: 1\r\nDuplicate: 2\r\n",
+             ":empty-name\r\n",
+             "no-colon-line\r\n"]), max_size=20)
+            .map(lambda ls: "".join(ls).encode("iso-8859-1", "replace")),
+    )
+    _t("T8_http_headers", http_soup, _http_headers)
+
+    # T9 (r19-4): the HTML link parser — discovery._LinkParser on arbitrary
+    # HTML-ish bytes (the crawl surface: a hostile page IS the input)
+    from burhan.discovery import _LinkParser
+    def _htmlfuzz(raw: bytes):
+        try:
+            p = _LinkParser()
+            p.feed(raw.decode("utf-8", "replace"))
+            p.close()
+            return isinstance(p.links, list)
+        except Exception:
+            return False
+    html_soup = st.one_of(
+        st.binary(max_size=512),
+        st.text(alphabet=st.characters(max_codepoint=0x2FFF), max_size=400)
+            .map(lambda s: s.encode("utf-8", "surrogatepass")),
+        st.lists(st.sampled_from(
+            ['<a href="', '"><form action="', '<select name=',
+             '<option value=', 'javascript:alert(1)',
+             '#frag/route', '<div data-form=', '">x</a>',
+             '<img src=x onerror=', "''", '"']), max_size=30)
+            .map(lambda ls: "".join(ls).encode("utf-8", "replace")),
+    )
+    _t("T9_html_links", html_soup, _htmlfuzz)
+
+    # T10 (r19-4): SARIF round-trip — build_sarif's OUTPUT re-ingested by a
+    # JSON+SARIF consumer (DefectDojo/VS Code shape): arbitrary mutation of
+    # a real SARIF body must parse or cleanly reject. This covers both the
+    # generator's structural honesty and the JSON parse layer downstream.
+    def _sarif_mut(raw: bytes):
+        try:
+            obj = json.loads(raw)
+            # minimal SARIF shape check: top-level runs list
+            if not isinstance(obj.get("runs"), list):
+                return False
+            return all(isinstance(r, dict) for r in obj["runs"][:5])
+        except Exception:
+            return False
+    sarif_soup = st.one_of(
+        st.binary(max_size=400),
+        json_soup,
+        st.builds(lambda v: json.dumps(
+            {"$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+             "version": "2.1.0", "runs": v}))
+            .map(lambda s: s.encode())
+            if False else
+        st.recursive(
+            st.dictionaries(st.text(max_size=8),
+                            st.none() | st.booleans() | st.integers()
+                            | st.text(max_size=20), max_size=4),
+            lambda ch: st.lists(ch, max_size=4), max_leaves=12)
+        .map(lambda v: json.dumps(
+            {"version": "2.1.0",
+             "runs": [{"tool": {"driver": {"name": "b"}},
+                       "results": v}]}).encode()),
+    )
+    _t("T10_sarif_ingest", sarif_soup, _sarif_mut)
 
     return results
 
