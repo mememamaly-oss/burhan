@@ -50,6 +50,7 @@ jobs:
       - name: Initialize owner gate in container
         run: |
           mkdir -p "$RUNNER_TEMP/burhan-gate"
+          chmod 0777 "$RUNNER_TEMP/burhan-gate"
           docker run --rm --network host \
             --user 10001:10001 \
             --volume "$RUNNER_TEMP/burhan-gate:/var/lib/burhan" \

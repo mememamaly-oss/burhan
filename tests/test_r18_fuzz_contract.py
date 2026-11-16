@@ -19,7 +19,7 @@ import scripts.fuzz_parsers as fp  # noqa: E402
 
 def test_fuzz_campaign_no_crash_ci_scale():
     rep = fp.run_campaigns(seconds_per_target=2)
-    assert len(rep) == 7, "the 4.1 parser inventory targets"
+    assert len(rep) == 10, "the 4.1 parser inventory targets"
     for name, s in rep.items():
         assert not s["crashes"], (name, s["crashes"])
         assert s["executed"] > 0, f"{name}: campaign ran zero inputs"
