@@ -118,10 +118,10 @@ if [[ "$ACTIVE_ZAP_ONLY" == 1 ]]; then
     url="${INTERNAL_TARGETS[$name]}"
     mkdir -p "artifacts/$name"
     start="$(date +%s)"
-    docker run -d --user zap --name zap-active --network "$NETWORK" -p 127.0.0.1:8090:8080 "$ZAP" zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.key=burhan-active-ci -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true >/dev/null
+    docker run -d --user zap --name zap-active --network "$NETWORK" -p 127.0.0.1:8090:8080 "$ZAP" zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true >/dev/null
     api=http://127.0.0.1:8090
     ready=$((SECONDS + 90))
-    until curl -fsS "$api/JSON/core/view/version/?apikey=burhan-active-ci" >/dev/null 2>&1; do
+    until curl -fsS "$api/JSON/core/view/version/" >/dev/null 2>&1; do
       if (( SECONDS >= ready )); then
         docker logs zap-active > "artifacts/$name/zap-active-daemon.log" 2>&1 || true
         echo "ZAP API did not become ready for $name" >&2
@@ -129,23 +129,23 @@ if [[ "$ACTIVE_ZAP_ONLY" == 1 ]]; then
       fi
       sleep 2
     done
-    curl -fsS --get "$api/JSON/spider/action/scan/" --data-urlencode "apikey=burhan-active-ci" --data-urlencode "url=$url" --data-urlencode 'recurse=true' >/dev/null
+    curl -fsS --get "$api/JSON/spider/action/scan/" --data-urlencode "url=$url" --data-urlencode 'recurse=true' >/dev/null
     deadline=$((SECONDS + 180))
     while (( SECONDS < deadline )); do
-      status="$(curl -fsS --get "$api/JSON/spider/view/status/" --data-urlencode 'apikey=burhan-active-ci' | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
+      status="$(curl -fsS --get "$api/JSON/spider/view/status/" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
       [[ "$status" == 100 ]] && break
       sleep 3
     done
     test "$status" = 100 || { docker logs zap-active > "artifacts/$name/zap-active-daemon.log" 2>&1 || true; echo "ZAP spider time limit exceeded for $name" >&2; exit 1; }
-    curl -fsS --get "$api/JSON/ascan/action/scan/" --data-urlencode 'apikey=burhan-active-ci' --data-urlencode "url=$url" --data-urlencode 'recurse=true' --data-urlencode 'inScopeOnly=false' >/dev/null
+    curl -fsS --get "$api/JSON/ascan/action/scan/" --data-urlencode "url=$url" --data-urlencode 'recurse=true' --data-urlencode 'inScopeOnly=false' >/dev/null
     while (( SECONDS < deadline )); do
-      status="$(curl -fsS --get "$api/JSON/ascan/view/status/" --data-urlencode 'apikey=burhan-active-ci' | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
+      status="$(curl -fsS --get "$api/JSON/ascan/view/status/" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
       [[ "$status" == 100 ]] && break
       sleep 3
     done
     test "$status" = 100 || { echo "active scan time limit exceeded for $name" >&2; exit 1; }
-    curl -fsS --get "$api/JSON/core/view/numberOfMessages/" --data-urlencode 'apikey=burhan-active-ci' > "artifacts/$name/zap-active-messages.json"
-    curl -fsS --get "$api/JSON/alert/view/alerts/" --data-urlencode 'apikey=burhan-active-ci' > "artifacts/$name/zap-active-alerts.json"
+    curl -fsS --get "$api/JSON/core/view/numberOfMessages/" > "artifacts/$name/zap-active-messages.json"
+    curl -fsS --get "$api/JSON/alert/view/alerts/" > "artifacts/$name/zap-active-alerts.json"
     end="$(date +%s)"
     python3 - "$name" "$start" "$end" <<'PY'
 import json,sys
