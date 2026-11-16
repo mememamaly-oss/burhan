@@ -78,14 +78,39 @@ def fetch_well_known(base_url: str, fetch=None) -> str:
     error, non-200, or a redirect hop that leaves the scanned origin.
     `fetch` is injectable for tests: fetch(url) -> (status, headers, body)
     where headers is a dict-like with .get (Location inspected for hops).
+
+    r19-2.6 (CodeQL py/full-ssrf, second discharge): the scan-time base_url
+    is OPERATOR/USER input, and a string-concat routing URL from it is the
+    exact taint shape CodeQL flags. The proof origin is therefore rebuilt
+    from PARSED components (scheme + hostname + port — no userinfo, no
+    path, no query from the input), the same doctrine the registry gate
+    uses on its own fetches: whatever the caller spells, the fetch goes to
+    <sanitized-origin>/.well-known/burhan-authorization.txt and nothing
+    else. _fetch_with_injectable then polices every hop on that origin.
     """
+    parts = urllib.parse.urlsplit(base_url)
+    scheme = parts.scheme or "https"
+    if scheme not in ("http", "https"):
+        raise WellKnownError(
+            "unsupported scheme %r for the well-known proof (http/https "
+            "only)" % scheme)
+    host = (parts.hostname or "").lower().rstrip(".")
+    if not host:
+        raise WellKnownError("no host in the target URL for the "
+                             "well-known proof")
+    try:
+        port = parts.port
+    except ValueError as e:
+        raise WellKnownError("invalid port in the target URL: %s" % e)
+    netloc = host if port is None else "%s:%d" % (host, port)
+    origin = urllib.parse.urlunsplit((scheme, netloc, "", "", ""))
     if fetch is None:
         # r19-2.1 (CodeQL py/full-ssrf on #119): the REAL fetch is built
         # in _default_fetch (same shape as authorized_targets._default_
         # fetch — the taint-clean indirection this repo already uses for
         # its live proof fetches). fetch_well_known itself only ROUTES.
         fetch = _default_fetch
-    return _fetch_with_injectable(base_url, fetch)
+    return _fetch_with_injectable(origin, fetch)
 
 
 def _fetch_with_injectable(base_url: str, fetch) -> str:

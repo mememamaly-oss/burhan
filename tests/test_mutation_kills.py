@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import os
+import urllib.parse
 import sys
 
 import pytest
@@ -80,7 +81,10 @@ def test_k2_default_ports_pin_the_origin():
     # and the behavioral twin through the router: an https well-known
     # that 302s to http on the same host REFUSES (port downgrade)
     def fetch(url):
-        if url.startswith("https://example.test"):
+        # exact-origin comparison (CodeQL py/incomplete-url-substring-
+        # sanitization): startswith would also match evilexample.test
+        u = urllib.parse.urlsplit(url)
+        if u.scheme == "https" and u.hostname == "example.test":
             return (302, {"Location": "http://example.test/x.txt"}, b"")
         return (200, {}, b"tok")
     with pytest.raises(WellKnownError, match="leaves the scanned origin"):
