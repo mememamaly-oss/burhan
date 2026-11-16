@@ -408,6 +408,11 @@ jobs:
           exit 1
 
       - name: Scan the real target (baseline floor enforced)
+        # r19-2.4: the containerized Juice Shop answers on loopback — the
+        # EXPLICIT laboratory mode is the sanctioned channel for CI
+        # private-range targets (refused without it: zero requests)
+        env:
+          BURHAN_LAB_MODE: "1"
         run: python3 scripts/ci_real_target_scan.py --base http://127.0.0.1:3000 --out-dir "$RUNNER_TEMP/real" --floor evidence/real-targets/juice-shop/floor.json
 
       - name: Upload real-target artifacts
@@ -563,6 +568,7 @@ jobs:
           target: http://127.0.0.1:8788
           out: burhan-result.json
           allow-private: "true"
+          lab: "true"
 
       - name: Assert the action's contract (signed result, findings, outputs)
         run: |
