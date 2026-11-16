@@ -64,3 +64,24 @@ def test_subpackages_clean_too():
                  if p.name != "repro.py"
                  and IMPORT_RE.search(p.read_text(encoding="utf-8"))]
     assert offenders == [], f"repro stream consumers: {offenders}"
+
+# ---------------------------------------------- r19-2.3 positive control
+def test_the_scanner_regex_actually_catches_a_violation():
+    """r19-2.3 (owner followup item 3 — vacuous-test audit): the suite's
+    negative sweeps (offenders == []) are only evidence if the scanner
+    regex can actually CATCH a violation. A broken IMPORT_RE (wrong
+    pattern, anchor typo) would pass every negative sweep forever while
+    matching nothing. This is the missing positive control: a planted
+    offender MUST be caught by the exact regex the sweeps use."""
+    planted = (
+        "from burhan.repro import SeededPRNG\n"
+        "import burhan.repro\n"
+        "def f():\n"
+        "    return burhan.repro.derive_stream(1)\n"
+    )
+    assert IMPORT_RE.search(planted), (
+        "IMPORT_RE no longer matches a planted repro consumer — the "
+        "negative sweeps above are passing vacuously")
+    # and the word-level gate for the secret-path check
+    assert WORD_RE.search("x = repro.y"), (
+        "WORD_RE no longer matches a bare repro reference")
