@@ -17,15 +17,23 @@ All target images, crAPI service images, databases, and scanner images are
 referenced by immutable Docker digests in
 `scripts/ci_internal_competitor.sh`. The crAPI compose file is fetched from the
 pinned source commit and its expected image references are checked before
-replacement with the pinned digests.
+replacement with the pinned digests. Nuclei templates are downloaded in a
+separate networked preparation step as v10.5.0, commit
+`f8b8b8dcd70d93826c3767e1829ef8243af9f03b`, with tarball SHA-256
+`80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41`. The
+download step prints the YAML template count; the scan step independently
+lists templates from the mounted directory before scanning.
 
 ## Comparison output
 
-For each target the workflow runs a ZAP baseline scan and a Nuclei scan, then
-writes raw artifacts and `comparison-summary.json`. The summary reports totals,
-severity/category keys, and the intersection of normalized `severity:name`
-keys. This is a tool-output comparison, not a claim of ground truth or equal
-coverage. Findings do not fail the workflow; tool execution errors do.
+For each target the workflow runs **ZAP baseline mode**, not ZAP active mode,
+and a Nuclei HTTP-template scan against the private Docker network. It writes
+raw artifacts, `comparison-summary.json`, and a category matrix. The Nuclei
+step fails closed on a fatal `[FTL]` log, any non-zero exit code, a missing
+`nuclei.jsonl`, or invalid JSONL. The matrix reports each category's ZAP and
+Nuclei findings, evidence names, and whether one tool observed a category that
+the other did not. This is tool-output telemetry, not ground truth or a
+coverage claim.
 
 ## Execution status
 

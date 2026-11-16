@@ -3,6 +3,8 @@ set -euo pipefail
 
 NETWORK=burhan-dev
 CRAPI_COMMIT=700f03d12a392d9e408260b4beae72ed02a4a1a4
+TEMPLATE_DIR="${NUCLEI_TEMPLATE_DIR:-$PWD/.ci/nuclei-templates}"
+TEMPLATE_COUNT_FILE="${NUCLEI_TEMPLATE_COUNT_FILE:-$PWD/.ci/nuclei-template-count}"
 JUICE='docker.io/bkimminich/juice-shop@sha256:cea5a4af4aacee498c491491af0408934ec81d004035c0a02ef3e54395e3bf27'
 WEBGOAT='docker.io/webgoat/webgoat@sha256:2775102b8186df1656f8a69cfb7a6bf6c77b43a25fa0accd6d44e6ae04c8d3b7'
 DVWA='docker.io/vulnerables/web-dvwa@sha256:14c929ec1a99edb77326201f7f0fb431d1b3dd099c09ddeaf46312ab0ff53cfe'
@@ -15,6 +17,23 @@ cleanup() {
   docker network rm "$NETWORK" 2>/dev/null || true
 }
 trap cleanup EXIT
+
+test -d "$TEMPLATE_DIR" || { echo "Nuclei template directory missing: $TEMPLATE_DIR" >&2; exit 1; }
+test -s "$TEMPLATE_COUNT_FILE" || { echo "Nuclei template count file missing" >&2; exit 1; }
+TEMPLATE_COUNT="$(cat "$TEMPLATE_COUNT_FILE")"
+case "$TEMPLATE_COUNT" in ''|*[!0-9]*) echo "invalid template count: $TEMPLATE_COUNT" >&2; exit 1;; esac
+(( TEMPLATE_COUNT > 0 )) || { echo "zero Nuclei templates loaded" >&2; exit 1; }
+printf 'nuclei_templates_version=v10.5.0\n'
+printf 'nuclei_templates_commit=f8b8b8dcd70d93826c3767e1829ef8243af9f03b\n'
+printf 'nuclei_templates_tar_sha256=80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41\n'
+printf 'nuclei_templates_loaded=%s\n' "$TEMPLATE_COUNT"
+
+docker pull "$ZAP"
+docker pull "$NUCLEI"
+docker run --rm --network host -v "$TEMPLATE_DIR:/templates:ro" "$NUCLEI" -duc -t /templates -tl > /tmp/nuclei-template-list.txt 2>/tmp/nuclei-template-list.log
+RUNTIME_TEMPLATE_COUNT="$(wc -l < /tmp/nuclei-template-list.txt | tr -d ' ')"
+printf 'nuclei_runtime_templates_listed=%s\n' "$RUNTIME_TEMPLATE_COUNT"
+(( RUNTIME_TEMPLATE_COUNT > 0 )) || { cat /tmp/nuclei-template-list.log >&2; exit 1; }
 
 docker network create "$NETWORK"
 docker run -d --name dev-juice --network "$NETWORK" --network-alias juice-shop -p 127.0.0.1:3000:3000 "$JUICE"
@@ -63,9 +82,19 @@ wait_http webgoat http://127.0.0.1:8080/WebGoat/
 wait_http dvwa http://127.0.0.1:8081/
 wait_http crapi http://127.0.0.1:8888/
 
-docker pull "$ZAP"
-docker pull "$NUCLEI"
 mkdir -p artifacts
+cat > artifacts/nuclei-run-metadata.json <<EOF
+{
+  "engine_image": "$NUCLEI",
+  "templates_version": "v10.5.0",
+  "templates_commit": "f8b8b8dcd70d93826c3767e1829ef8243af9f03b",
+  "templates_tar_sha256": "80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41",
+  "templates_loaded": $TEMPLATE_COUNT,
+  "runtime_templates_listed": $RUNTIME_TEMPLATE_COUNT,
+  "scan_mode": "Nuclei HTTP templates; no ZAP active scan"
+}
+EOF
+
 declare -A TARGETS=(
   [juice-shop]=http://juice-shop:3000/
   [crapi]=http://crapi-web:80/
@@ -75,50 +104,110 @@ declare -A TARGETS=(
 for name in juice-shop crapi webgoat dvwa; do
   url="${TARGETS[$name]}"
   mkdir -p "artifacts/$name"
+
   set +e
-  docker run --rm --user 0:0 --network "$NETWORK" -v "$PWD/artifacts/$name:/zap/wrk/:rw" "$ZAP" zap-baseline.py -t "$url" -m 5 -I -r zap.html -J zap.json
+  docker run --rm --user 0:0 --network "$NETWORK" -v "$PWD/artifacts/$name:/zap/wrk/:rw" "$ZAP" zap-baseline.py -t "$url" -m 5 -I -r zap.html -J zap.json >"artifacts/$name/zap.log" 2>&1
   zap_rc=$?
-  docker run --rm --network "$NETWORK" -v "$PWD/artifacts/$name:/out:rw" "$NUCLEI" -u "$url" -jsonl -o /out/nuclei.jsonl -silent -no-color
-  nuclei_rc=$?
   set -e
   case "$zap_rc" in 0|1) ;; *) echo "ZAP execution error for $name: $zap_rc"; exit "$zap_rc";; esac
-  case "$nuclei_rc" in 0|1) ;; *) echo "Nuclei execution error for $name: $nuclei_rc"; exit "$nuclei_rc";; esac
   test -s "artifacts/$name/zap.json" || { echo "ZAP JSON report missing for $name" >&2; exit 1; }
   test -s "artifacts/$name/zap.html" || { echo "ZAP HTML report missing for $name" >&2; exit 1; }
+
+  set +e
+  docker run --rm --network "$NETWORK" -v "$TEMPLATE_DIR:/templates:ro" -v "$PWD/artifacts/$name:/out:rw" "$NUCLEI" -duc -t /templates -u "$url" -jsonl -o /out/nuclei.jsonl -silent -no-color -stats >"artifacts/$name/nuclei.log" 2>&1
+  nuclei_rc=$?
+  set -e
+  if grep -Fq '[FTL]' "artifacts/$name/nuclei.log"; then
+    echo "Nuclei fatal log detected for $name" >&2
+    cat "artifacts/$name/nuclei.log" >&2
+    exit 1
+  fi
+  if (( nuclei_rc != 0 )); then
+    echo "Nuclei execution failed for $name with rc=$nuclei_rc" >&2
+    cat "artifacts/$name/nuclei.log" >&2
+    exit "$nuclei_rc"
+  fi
+  test -f "artifacts/$name/nuclei.jsonl" || { echo "Nuclei JSONL report missing for $name" >&2; exit 1; }
+  python3 - "$name" <<'PY'
+import json, sys
+from pathlib import Path
+name = sys.argv[1]
+p = Path('artifacts') / name / 'nuclei.jsonl'
+for lineno, line in enumerate(p.read_text().splitlines(), 1):
+    if not line.strip():
+        continue
+    try:
+        value = json.loads(line)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f'invalid Nuclei JSONL for {name}, line {lineno}: {exc}')
+    if not isinstance(value, dict):
+        raise SystemExit(f'invalid Nuclei JSONL object for {name}, line {lineno}')
+print(f'nuclei_jsonl_valid={name}')
+PY
 done
 
 python3 - <<'PY'
 import json
 from pathlib import Path
-out = {}
+
+rules = [
+    ('security-headers', ['header missing', 'security header', 'x-content-type', 'permissions policy']),
+    ('cross-origin-policy', ['cross-origin']),
+    ('cookies-and-session', ['cookie', 'session management']),
+    ('csp-clickjacking-csrf', ['content security policy', 'anti-clickjacking', 'csrf', 'anti-csrf']),
+    ('exposed-files-endpoints', ['robots', 'swagger', 'setup', 'configuration', 'env ', 'actuator', 'directory', 'public swagger', 'api']),
+    ('technology-version-disclosure', ['version', 'technology', 'php detect', 'modern web', 'information disclosure', 'fingerprint', 'wappalyzer', 'server leaks']),
+    ('javascript-xss', ['javascript', 'xss', 'dom']),
+    ('authentication-authorization', ['auth', 'login', 'admin', 'authorization', 'bfla', 'idor']),
+]
+
+def category(text):
+    low = text.lower()
+    for name, needles in rules:
+        if any(n in low for n in needles):
+            return name
+    return 'other'
+
+def add(bucket, cat, item):
+    bucket.setdefault(cat, []).append(item)
+
+matrix = []
 for d in sorted(Path('artifacts').iterdir()):
     if not d.is_dir():
         continue
-    zap = json.loads((d/'zap.json').read_text()) if (d/'zap.json').exists() else {}
-    zap_counts = {}
+    zap = json.loads((d/'zap.json').read_text())
+    zap_by = {}
     for site in zap.get('site', []):
         for alert in site.get('alerts', []):
-            risk = (alert.get('riskdesc') or 'unknown').split(' ')[0].lower()
-            name = alert.get('name') or alert.get('pluginid') or 'unknown'
-            zap_counts[f'{risk}:{name}'] = zap_counts.get(f'{risk}:{name}', 0) + 1
-    nuclei_counts = {}
-    p = d/'nuclei.jsonl'
-    if p.exists():
-        for line in p.read_text().splitlines():
-            if not line.strip():
-                continue
-            x = json.loads(line)
-            info = x.get('info') or {}
-            sev = str(info.get('severity') or 'unknown').lower()
-            name = str(info.get('name') or x.get('template-id') or 'unknown')
-            nuclei_counts[f'{sev}:{name}'] = nuclei_counts.get(f'{sev}:{name}', 0) + 1
-    out[d.name] = {
-        'zap_total': sum(zap_counts.values()),
-        'nuclei_total': sum(nuclei_counts.values()),
-        'zap_by_category_severity': zap_counts,
-        'nuclei_by_category_severity': nuclei_counts,
-        'common_normalized_keys': sorted(set(zap_counts) & set(nuclei_counts)),
-    }
-Path('artifacts/comparison-summary.json').write_text(json.dumps(out, indent=2, sort_keys=True))
-print(json.dumps({k: {'zap_total': v['zap_total'], 'nuclei_total': v['nuclei_total'], 'common': len(v['common_normalized_keys'])} for k,v in out.items()}, indent=2))
+            text = alert.get('name') or alert.get('pluginid') or 'unknown'
+            add(zap_by, category(text), f"{alert.get('riskdesc', 'unknown')}: {text}")
+    nuclei_by = {}
+    np = d/'nuclei.jsonl'
+    for line in np.read_text().splitlines():
+        if not line.strip():
+            continue
+        finding = json.loads(line)
+        info = finding.get('info') or {}
+        text = str(info.get('name') or finding.get('template-id') or 'unknown')
+        add(nuclei_by, category(text), f"{info.get('severity', 'unknown')}: {text}")
+    categories = sorted(set(zap_by) | set(nuclei_by))
+    for cat in categories:
+        z = zap_by.get(cat, [])
+        n = nuclei_by.get(cat, [])
+        matrix.append({
+            'target': d.name,
+            'category': cat,
+            'zap_findings': z,
+            'nuclei_findings': n,
+            'evidence': {'zap': z[:8], 'nuclei': n[:8]},
+            'gap': 'yes' if bool(z) != bool(n) else ('no' if z and n else 'none-observed'),
+            'zap_mode': 'baseline',
+        })
+Path('artifacts/comparison-matrix.json').write_text(json.dumps(matrix, indent=2, sort_keys=True))
+lines = ['# ZAP baseline vs Nuclei comparison', '', '| Target | Category | ZAP | Nuclei | Evidence | Gap? |', '|---|---|---:|---:|---|---|']
+for row in matrix:
+    evidence = '<br>'.join((row['evidence']['zap'] + row['evidence']['nuclei'])[:4]).replace('|', '\\|')
+    lines.append(f"| {row['target']} | {row['category']} | {len(row['zap_findings'])} | {len(row['nuclei_findings'])} | {evidence or 'none'} | {row['gap']} |")
+Path('artifacts/comparison-table.md').write_text('\n'.join(lines) + '\n')
+print('\n'.join(lines))
 PY

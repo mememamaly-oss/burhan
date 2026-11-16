@@ -88,6 +88,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download pinned Nuclei templates (networked preparation)
+        run: |
+          set -euo pipefail
+          version=v10.5.0
+          commit=f8b8b8dcd70d93826c3767e1829ef8243af9f03b
+          sha256=80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41
+          mkdir -p .ci/nuclei-templates
+          curl -fsSL "https://github.com/projectdiscovery/nuclei-templates/releases/download/${version}/nuclei-templates-10.5.0.tar.gz" -o /tmp/nuclei-templates.tar.gz
+          echo "${sha256}  /tmp/nuclei-templates.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/nuclei-templates.tar.gz --strip-components=1 -C .ci/nuclei-templates
+          count="$(find .ci/nuclei-templates -type f -name '*.yaml' ! -path '*/phasec/*' ! -path '*/seal/*' | wc -l | tr -d ' ')"
+          test "$count" -gt 0
+          printf '%s\n' "$count" > .ci/nuclei-template-count
+          printf 'nuclei_templates_version=%s\n' "$version"
+          printf 'nuclei_templates_commit=%s\n' "$commit"
+          printf 'nuclei_templates_tar_sha256=%s\n' "$sha256"
+          printf 'nuclei_templates_loaded=%s\n' "$count"
+
       - name: Run only the pinned internal lab
         run: bash scripts/ci_internal_competitor.sh
 
