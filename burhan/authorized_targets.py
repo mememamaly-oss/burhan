@@ -277,6 +277,7 @@ def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
                 body = fetch_well_known(
                     "https://" + host if "://" not in base_url else base_url,
                     fetch=fetch)
+            # except WellKnownError swallowed deliberately (safe): refusal below is the observable outcome
             except WellKnownError as e:
                 return False, ("registry entry '%s': live well-known "
                                "fetch failed (%s) — proof NOT verified, "
