@@ -8,7 +8,7 @@ from enum import Enum
 from typing import Optional
 from urllib.parse import urlsplit
 
-VERSION = "5.0.0"  # v5.0.0 = the breaking brand rename release
+VERSION = "5.3.0"  # unified with the git tag line (r19-3.1): v5.0.0 -> v5.1.0 -> v5.2.0 -> v5.3.0
 SCANNER_VERSION = "burhan-core/" + VERSION
 
 
