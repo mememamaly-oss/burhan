@@ -14,7 +14,7 @@ on:
         required: true
         type: choice
         default: pin
-        options: [pin, internal]
+        options: [pin, internal, active]
 
 permissions:
   contents: read
@@ -85,6 +85,8 @@ jobs:
     timeout-minutes: 35
     permissions:
       contents: read
+    env:
+      BURHAN_OWNER_PASSWORD: ${{ secrets.BURHAN_OWNER_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -114,5 +116,26 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: competitor-comparison-${{ github.run_id }}
+          path: artifacts/
+          if-no-files-found: error
+
+  active-zap:
+    name: Internal ZAP active scan (time-limited development set)
+    if: ${{ inputs.mode == 'active' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run only the pinned internal active-ZAP lab
+        run: ACTIVE_ZAP_ONLY=1 bash scripts/ci_internal_competitor.sh
+
+      - name: Upload active-ZAP artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: competitor-active-zap-${{ github.run_id }}
           path: artifacts/
           if-no-files-found: error

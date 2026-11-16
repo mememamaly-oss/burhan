@@ -5,36 +5,51 @@ NETWORK=burhan-dev
 CRAPI_COMMIT=700f03d12a392d9e408260b4beae72ed02a4a1a4
 TEMPLATE_DIR="${NUCLEI_TEMPLATE_DIR:-$PWD/.ci/nuclei-templates}"
 TEMPLATE_COUNT_FILE="${NUCLEI_TEMPLATE_COUNT_FILE:-$PWD/.ci/nuclei-template-count}"
+TEMPLATE_ARCHIVE="${NUCLEI_TEMPLATE_ARCHIVE:-/tmp/nuclei-templates.tar.gz}"
+TEMPLATE_SHA256_EXPECTED=80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41
+TEMPLATE_COMMIT=f8b8b8dcd70d93826c3767e1829ef8243af9f03b
 JUICE='docker.io/bkimminich/juice-shop@sha256:cea5a4af4aacee498c491491af0408934ec81d004035c0a02ef3e54395e3bf27'
 WEBGOAT='docker.io/webgoat/webgoat@sha256:2775102b8186df1656f8a69cfb7a6bf6c77b43a25fa0accd6d44e6ae04c8d3b7'
 DVWA='docker.io/vulnerables/web-dvwa@sha256:14c929ec1a99edb77326201f7f0fb431d1b3dd099c09ddeaf46312ab0ff53cfe'
 ZAP='docker.io/zaproxy/zap-stable@sha256:9624669db72f54d86c4b46a7064518bd9bf79d8c61a4c31befa9923489f328af'
 NUCLEI='docker.io/projectdiscovery/nuclei@sha256:aeb5ea2db32a252b8135707d2ad0e89b90e19a18ea7816d38759bc51efb46b97'
+ACTIVE_ZAP_ONLY="${ACTIVE_ZAP_ONLY:-0}"
 
 cleanup() {
+  docker rm -f zap-active 2>/dev/null || true
   docker compose -p crapi -f /tmp/crapi-compose.yml down -v --remove-orphans 2>/dev/null || true
   docker rm -f dev-juice dev-webgoat dev-dvwa 2>/dev/null || true
   docker network rm "$NETWORK" 2>/dev/null || true
 }
 trap cleanup EXIT
 
-test -d "$TEMPLATE_DIR" || { echo "Nuclei template directory missing: $TEMPLATE_DIR" >&2; exit 1; }
-test -s "$TEMPLATE_COUNT_FILE" || { echo "Nuclei template count file missing" >&2; exit 1; }
-TEMPLATE_COUNT="$(cat "$TEMPLATE_COUNT_FILE")"
-case "$TEMPLATE_COUNT" in ''|*[!0-9]*) echo "invalid template count: $TEMPLATE_COUNT" >&2; exit 1;; esac
-(( TEMPLATE_COUNT > 0 )) || { echo "zero Nuclei templates loaded" >&2; exit 1; }
-printf 'nuclei_templates_version=v10.5.0\n'
-printf 'nuclei_templates_commit=f8b8b8dcd70d93826c3767e1829ef8243af9f03b\n'
-printf 'nuclei_templates_tar_sha256=80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41\n'
-printf 'nuclei_templates_loaded=%s\n' "$TEMPLATE_COUNT"
+if [[ "$ACTIVE_ZAP_ONLY" != 1 ]]; then
+  test -d "$TEMPLATE_DIR" || { echo "Nuclei template directory missing" >&2; exit 1; }
+  test -s "$TEMPLATE_COUNT_FILE" || { echo "Nuclei template count file missing" >&2; exit 1; }
+  test -s "$TEMPLATE_ARCHIVE" || { echo "Nuclei template archive missing" >&2; exit 1; }
+  TEMPLATE_SHA256_COMPUTED="$(sha256sum "$TEMPLATE_ARCHIVE" | awk '{print $1}')"
+  test "$TEMPLATE_SHA256_COMPUTED" = "$TEMPLATE_SHA256_EXPECTED" || {
+    echo "Nuclei template archive SHA-256 mismatch" >&2; exit 1;
+  }
+  TEMPLATE_COUNT="$(cat "$TEMPLATE_COUNT_FILE")"
+  case "$TEMPLATE_COUNT" in ''|*[!0-9]*) echo "invalid template count" >&2; exit 1;; esac
+  (( TEMPLATE_COUNT > 0 )) || { echo "zero Nuclei templates loaded" >&2; exit 1; }
+  printf 'nuclei_templates_version=v10.5.0\n'
+  printf 'nuclei_templates_commit=%s\n' "$TEMPLATE_COMMIT"
+  printf 'nuclei_templates_tar_sha256_computed=%s\n' "$TEMPLATE_SHA256_COMPUTED"
+  printf 'nuclei_templates_loaded=%s\n' "$TEMPLATE_COUNT"
+  docker pull "$NUCLEI"
+  docker run --rm --network host -v "$TEMPLATE_DIR:/templates:ro" "$NUCLEI" -duc -t /templates -tl > /tmp/nuclei-template-list.txt 2>/tmp/nuclei-template-list.log
+  RUNTIME_TEMPLATE_COUNT="$(wc -l < /tmp/nuclei-template-list.txt | tr -d ' ')"
+  printf 'nuclei_runtime_templates_listed=%s\n' "$RUNTIME_TEMPLATE_COUNT"
+  (( RUNTIME_TEMPLATE_COUNT > 0 )) || { cat /tmp/nuclei-template-list.log >&2; exit 1; }
+else
+  RUNTIME_TEMPLATE_COUNT=0
+  TEMPLATE_COUNT=0
+  TEMPLATE_SHA256_COMPUTED=""
+fi
 
 docker pull "$ZAP"
-docker pull "$NUCLEI"
-docker run --rm --network host -v "$TEMPLATE_DIR:/templates:ro" "$NUCLEI" -duc -t /templates -tl > /tmp/nuclei-template-list.txt 2>/tmp/nuclei-template-list.log
-RUNTIME_TEMPLATE_COUNT="$(wc -l < /tmp/nuclei-template-list.txt | tr -d ' ')"
-printf 'nuclei_runtime_templates_listed=%s\n' "$RUNTIME_TEMPLATE_COUNT"
-(( RUNTIME_TEMPLATE_COUNT > 0 )) || { cat /tmp/nuclei-template-list.log >&2; exit 1; }
-
 docker network create "$NETWORK"
 docker run -d --name dev-juice --network "$NETWORK" --network-alias juice-shop -p 127.0.0.1:3000:3000 "$JUICE"
 docker run -d --name dev-webgoat --network "$NETWORK" --network-alias webgoat -p 127.0.0.1:8080:8080 "$WEBGOAT"
@@ -82,28 +97,115 @@ wait_http webgoat http://127.0.0.1:8080/WebGoat/
 wait_http dvwa http://127.0.0.1:8081/
 wait_http crapi http://127.0.0.1:8888/
 
+TARGETS=(juice-shop crapi webgoat dvwa)
+declare -A INTERNAL_TARGETS=(
+  [juice-shop]=http://juice-shop:3000/
+  [crapi]=http://crapi-web:80/
+  [webgoat]=http://webgoat:8080/WebGoat/
+  [dvwa]=http://dvwa:80/
+)
+declare -A HOST_TARGETS=(
+  [juice-shop]=http://127.0.0.1:3000/
+  [crapi]=http://127.0.0.1:8888/
+  [webgoat]=http://127.0.0.1:8080/WebGoat/
+  [dvwa]=http://127.0.0.1:8081/
+)
 mkdir -p artifacts
+
+if [[ "$ACTIVE_ZAP_ONLY" == 1 ]]; then
+  echo 'burhan_mode=internal-lab-active-zap'
+  for name in "${TARGETS[@]}"; do
+    url="${INTERNAL_TARGETS[$name]}"
+    mkdir -p "artifacts/$name"
+    start="$(date +%s)"
+    docker run -d --name zap-active --network "$NETWORK" -p 127.0.0.1:8090:8080 "$ZAP" zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.key=burhan-active-ci -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true >/dev/null
+    api=http://127.0.0.1:8090
+    ready=$((SECONDS + 90))
+    until curl -fsS "$api/JSON/core/view/version/?apikey=burhan-active-ci" >/dev/null 2>&1; do
+      (( SECONDS < ready )) || { echo "ZAP API did not become ready for $name" >&2; exit 1; }
+      sleep 2
+    done
+    curl -fsS --get "$api/JSON/spider/action/scan/" --data-urlencode "apikey=burhan-active-ci" --data-urlencode "url=$url" --data-urlencode 'recurse=true' >/dev/null
+    deadline=$((SECONDS + 180))
+    while (( SECONDS < deadline )); do
+      status="$(curl -fsS --get "$api/JSON/spider/view/status/" --data-urlencode 'apikey=burhan-active-ci' | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
+      [[ "$status" == 100 ]] && break
+      sleep 3
+    done
+    curl -fsS --get "$api/JSON/ascan/action/scan/" --data-urlencode 'apikey=burhan-active-ci' --data-urlencode "url=$url" --data-urlencode 'recurse=true' --data-urlencode 'inScopeOnly=false' >/dev/null
+    while (( SECONDS < deadline )); do
+      status="$(curl -fsS --get "$api/JSON/ascan/view/status/" --data-urlencode 'apikey=burhan-active-ci' | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status","100"))')"
+      [[ "$status" == 100 ]] && break
+      sleep 3
+    done
+    test "$status" = 100 || { echo "active scan time limit exceeded for $name" >&2; exit 1; }
+    curl -fsS --get "$api/JSON/core/view/numberOfMessages/" --data-urlencode 'apikey=burhan-active-ci' > "artifacts/$name/zap-active-messages.json"
+    curl -fsS --get "$api/JSON/alert/view/alerts/" --data-urlencode 'apikey=burhan-active-ci' > "artifacts/$name/zap-active-alerts.json"
+    end="$(date +%s)"
+    python3 - "$name" "$start" "$end" <<'PY'
+import json,sys
+from pathlib import Path
+name,start,end=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])
+msg=json.loads((Path('artifacts')/name/'zap-active-messages.json').read_text())
+alerts=json.loads((Path('artifacts')/name/'zap-active-alerts.json').read_text())
+count=int(msg.get('numberOfMessages',0))
+Path('artifacts',name,'zap-active-summary.json').write_text(json.dumps({
+ 'target':name,'mode':'active','duration_seconds':end-start,
+ 'request_count':count,'alert_count':len(alerts.get('alerts',[])),
+ 'time_limit_seconds':180
+},indent=2))
+PY
+    docker rm -f zap-active >/dev/null
+  done
+  exit 0
+fi
+
+if [[ -z "${BURHAN_OWNER_PASSWORD:-}" ]]; then
+  echo 'BURHAN_OWNER_PASSWORD CI secret is required for the Burhan proof run; no scan started' >&2
+  exit 2
+fi
+OWNER_GATE_DIR="$(mktemp -d)"
+OWNER_GATE="$OWNER_GATE_DIR/owner-gate.json"
+export BURHAN_OWNER_GATE="$OWNER_GATE"
+BURHAN_OWNER_PASSWORD="$BURHAN_OWNER_PASSWORD" python3 - <<'PY'
+import os
+from burhan.owner_gate import OwnerGate
+OwnerGate.setup(os.environ['BURHAN_OWNER_GATE'], os.environ['BURHAN_OWNER_PASSWORD'])
+PY
+PROOF_SEED='burhan-m3-fixed-proof-seed-2026-11-16-00000000000000000000000000000000'
+echo 'burhan_mode=internal-lab-proof'
+echo 'burhan_proof_seed=fixed'
+
 cat > artifacts/nuclei-run-metadata.json <<EOF
 {
   "engine_image": "$NUCLEI",
   "templates_version": "v10.5.0",
-  "templates_commit": "f8b8b8dcd70d93826c3767e1829ef8243af9f03b",
-  "templates_tar_sha256": "80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41",
+  "templates_commit": "$TEMPLATE_COMMIT",
+  "templates_tar_sha256_computed": "$TEMPLATE_SHA256_COMPUTED",
   "templates_loaded": $TEMPLATE_COUNT,
   "runtime_templates_listed": $RUNTIME_TEMPLATE_COUNT,
   "scan_mode": "Nuclei HTTP templates; no ZAP active scan"
 }
 EOF
 
-declare -A TARGETS=(
-  [juice-shop]=http://juice-shop:3000/
-  [crapi]=http://crapi-web:80/
-  [webgoat]=http://webgoat:8080/WebGoat/
-  [dvwa]=http://dvwa:80/
-)
-for name in juice-shop crapi webgoat dvwa; do
-  url="${TARGETS[$name]}"
+for name in "${TARGETS[@]}"; do
+  url="${INTERNAL_TARGETS[$name]}"
+  host_url="${HOST_TARGETS[$name]}"
   mkdir -p "artifacts/$name"
+
+  BURHAN_OWNER_GATE="$OWNER_GATE" BURHAN_OWNER_PASSWORD="$BURHAN_OWNER_PASSWORD" \
+    python3 -m burhan.cli scan "$host_url" --allow-private --no-oast --no-browser \
+      --seed "$PROOF_SEED" --max-pages 25 --timeout 12 \
+      --owner-gate "$OWNER_GATE" --out "artifacts/$name/burhan.json" \
+      >"artifacts/$name/burhan.log" 2>&1
+  python3 - "$name" <<'PY'
+import json,sys
+from pathlib import Path
+name=sys.argv[1]; p=Path('artifacts')/name/'burhan.json'
+r=json.loads(p.read_text())
+if not isinstance(r.get('findings'),list): raise SystemExit(f'invalid Burhan proof JSON: {name}')
+print(f'burhan_json_valid={name}')
+PY
 
   set +e
   docker run --rm --user 0:0 --network "$NETWORK" -v "$PWD/artifacts/$name:/zap/wrk/:rw" "$ZAP" zap-baseline.py -t "$url" -m 5 -I -r zap.html -J zap.json >"artifacts/$name/zap.log" 2>&1
@@ -118,30 +220,20 @@ for name in juice-shop crapi webgoat dvwa; do
   nuclei_rc=$?
   set -e
   if grep -Fq '[FTL]' "artifacts/$name/nuclei.log"; then
-    echo "Nuclei fatal log detected for $name" >&2
-    cat "artifacts/$name/nuclei.log" >&2
-    exit 1
+    echo "Nuclei fatal log detected for $name" >&2; cat "artifacts/$name/nuclei.log" >&2; exit 1
   fi
   if (( nuclei_rc != 0 )); then
-    echo "Nuclei execution failed for $name with rc=$nuclei_rc" >&2
-    cat "artifacts/$name/nuclei.log" >&2
-    exit "$nuclei_rc"
+    echo "Nuclei execution failed for $name with rc=$nuclei_rc" >&2; cat "artifacts/$name/nuclei.log" >&2; exit "$nuclei_rc"
   fi
   test -f "artifacts/$name/nuclei.jsonl" || { echo "Nuclei JSONL report missing for $name" >&2; exit 1; }
   python3 - "$name" <<'PY'
-import json, sys
+import json,sys
 from pathlib import Path
-name = sys.argv[1]
-p = Path('artifacts') / name / 'nuclei.jsonl'
-for lineno, line in enumerate(p.read_text().splitlines(), 1):
-    if not line.strip():
-        continue
-    try:
-        value = json.loads(line)
-    except json.JSONDecodeError as exc:
-        raise SystemExit(f'invalid Nuclei JSONL for {name}, line {lineno}: {exc}')
-    if not isinstance(value, dict):
-        raise SystemExit(f'invalid Nuclei JSONL object for {name}, line {lineno}')
+name=sys.argv[1]; p=Path('artifacts')/name/'nuclei.jsonl'
+for lineno,line in enumerate(p.read_text().splitlines(),1):
+    if line.strip():
+        value=json.loads(line)
+        if not isinstance(value,dict): raise SystemExit(f'invalid Nuclei JSONL object: {name}:{lineno}')
 print(f'nuclei_jsonl_valid={name}')
 PY
 done
@@ -149,73 +241,87 @@ done
 python3 - <<'PY'
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 
-rules = [
-    ('security-headers', ['header missing', 'security header', 'x-content-type', 'permissions policy']),
-    ('cross-origin-policy', ['cross-origin']),
-    ('cookies-and-session', ['cookie', 'session management']),
-    ('csp-clickjacking-csrf', ['content security policy', 'anti-clickjacking', 'csrf', 'anti-csrf']),
-    ('exposed-files-endpoints', ['robots', 'swagger', 'setup', 'configuration', 'env ', 'actuator', 'directory', 'public swagger', 'api']),
-    ('technology-version-disclosure', ['version', 'technology', 'php detect', 'modern web', 'information disclosure', 'fingerprint', 'wappalyzer', 'server leaks']),
-    ('javascript-xss', ['javascript', 'xss', 'dom']),
-    ('authentication-authorization', ['auth', 'login', 'admin', 'authorization', 'bfla', 'idor']),
-]
+SEVERITIES=('critical','high','medium','low','info')
 
-def category(text):
-    low = text.lower()
-    for name, needles in rules:
-        if any(n in low for n in needles):
-            return name
-    return 'other'
+def severity(value, source=''):
+    s=str(value or '').lower().strip()
+    if source=='zap' and '(' in s: s=s.split('(',1)[0].strip()
+    return s if s in SEVERITIES else 'info'
 
-def add(bucket, cat, item):
-    bucket.setdefault(cat, []).append(item)
+def path_of(value):
+    raw=str(value or '')
+    parsed=urlsplit(raw)
+    return parsed.path or raw.split('?',1)[0] or '/'
 
-matrix = []
-summary = {}
+def values(value):
+    if value is None: return []
+    if isinstance(value,list): return [str(x).strip() for x in value if str(x).strip()]
+    return [str(value).strip()] if str(value).strip() else []
+
+def cwe_type(cwes, fallback):
+    clean=[]
+    for item in values(cwes):
+        item=item.upper().replace('CWE-','').strip()
+        if item not in ('','0','NONE','NULL'): clean.append(f'CWE-{item}')
+    return '|'.join(sorted(set(clean))) if clean else fallback
+
+def add(store, sev, typ, path, evidence):
+    store.setdefault(sev,{})[(typ,path)] = evidence
+
+def zap_records(d):
+    out={}
+    data=json.loads((d/'zap.json').read_text())
+    for site in data.get('site',[]):
+        for alert in site.get('alerts',[]):
+            name=alert.get('name') or alert.get('pluginid') or 'unknown'
+            cwe=alert.get('cweid')
+            wasc=alert.get('wascid')
+            fallback=f"NO-CWE|WASC-{wasc}" if str(wasc or '').strip() not in ('','0') else f"NO-CWE|ZAP:{alert.get('pluginid') or name}"
+            typ=cwe_type(cwe,fallback)
+            add(out,severity(alert.get('riskdesc') or alert.get('riskcode'),'zap'),typ,path_of(alert.get('uri') or site.get('@name')),name)
+    return out
+
+def nuclei_records(d):
+    out={}
+    for line in (d/'nuclei.jsonl').read_text().splitlines():
+        if not line.strip(): continue
+        finding=json.loads(line); info=finding.get('info') or {}
+        cls=info.get('classification') or {}
+        tags=values(info.get('tags'))
+        fallback=f"NO-CWE|NUCLEI-TAGS:{','.join(sorted(set(tags))) or 'none'}|{finding.get('template-id','unknown')}"
+        typ=cwe_type(cls.get('cwe-id'),fallback)
+        add(out,severity(info.get('severity'),'nuclei'),typ,path_of(finding.get('matched-at') or finding.get('host') or finding.get('url')),str(info.get('name') or finding.get('template-id') or 'unknown'))
+    return out
+
+def burhan_records(d):
+    out={}; data=json.loads((d/'burhan.json').read_text())
+    for finding in data.get('findings',[]):
+        typ=cwe_type(finding.get('cwe') or finding.get('cwe_id'),f"NO-CWE|BURHAN:{finding.get('type','unknown')}")
+        add(out,severity(finding.get('severity'),'burhan'),typ,path_of(finding.get('url')),str(finding.get('type','unknown')))
+    return out
+
+matrix=[]; summary={}
 for d in sorted(Path('artifacts').iterdir()):
-    if not d.is_dir():
-        continue
-    zap = json.loads((d/'zap.json').read_text())
-    zap_by = {}
-    for site in zap.get('site', []):
-        for alert in site.get('alerts', []):
-            text = alert.get('name') or alert.get('pluginid') or 'unknown'
-            add(zap_by, category(text), f"{alert.get('riskdesc', 'unknown')}: {text}")
-    nuclei_by = {}
-    np = d/'nuclei.jsonl'
-    for line in np.read_text().splitlines():
-        if not line.strip():
-            continue
-        finding = json.loads(line)
-        info = finding.get('info') or {}
-        text = str(info.get('name') or finding.get('template-id') or 'unknown')
-        add(nuclei_by, category(text), f"{info.get('severity', 'unknown')}: {text}")
-    summary[d.name] = {
-        'zap_total': sum(len(items) for items in zap_by.values()),
-        'nuclei_total': sum(len(items) for items in nuclei_by.values()),
-        'zap_by_category': {key: len(value) for key, value in sorted(zap_by.items())},
-        'nuclei_by_category': {key: len(value) for key, value in sorted(nuclei_by.items())},
-    }
-    categories = sorted(set(zap_by) | set(nuclei_by))
-    for cat in categories:
-        z = zap_by.get(cat, [])
-        n = nuclei_by.get(cat, [])
-        matrix.append({
-            'target': d.name,
-            'category': cat,
-            'zap_findings': z,
-            'nuclei_findings': n,
-            'evidence': {'zap': z[:8], 'nuclei': n[:8]},
-            'gap': 'yes' if bool(z) != bool(n) else ('no' if z and n else 'none-observed'),
-            'zap_mode': 'baseline',
-        })
-Path('artifacts/comparison-matrix.json').write_text(json.dumps(matrix, indent=2, sort_keys=True))
-Path('artifacts/comparison-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True))
-lines = ['# ZAP baseline vs Nuclei comparison', '', '| Target | Category | ZAP | Nuclei | Evidence | Gap? |', '|---|---|---:|---:|---|---|']
+    if not d.is_dir() or not (d/'zap.json').exists(): continue
+    tools={'zap':zap_records(d),'nuclei':nuclei_records(d),'burhan':burhan_records(d)}
+    summary[d.name]={}
+    for tool,records in tools.items():
+        summary[d.name][tool]={sev:len(records.get(sev,{})) for sev in SEVERITIES}
+        summary[d.name][tool]['total']=sum(len(records.get(sev,{})) for sev in SEVERITIES)
+    for sev in SEVERITIES:
+        keys=set().union(*(tools[t].get(sev,{}) for t in tools))
+        for typ,path in sorted(keys):
+            z=tools['zap'].get(sev,{}).get((typ,path)); n=tools['nuclei'].get(sev,{}).get((typ,path)); b=tools['burhan'].get(sev,{}).get((typ,path))
+            gap=(sev!='info' and (z is not None or n is not None) and b is None)
+            matrix.append({'target':d.name,'severity':sev,'standard_type':typ,'path':path,'zap':z is not None,'nuclei':n is not None,'burhan':b is not None,'evidence':{'zap':z,'nuclei':n,'burhan':b},'gap_for_burhan':gap,'info_is_vulnerability':False if sev=='info' else True,'zap_mode':'baseline'})
+Path('artifacts/comparison-matrix.json').write_text(json.dumps(matrix,indent=2,sort_keys=True))
+Path('artifacts/comparison-summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True))
+lines=['# ZAP baseline vs Nuclei vs Burhan proof','', '| Target | Severity | Standard type | Path | ZAP | Nuclei | Burhan proof | Evidence | Gap for Burhan? |','|---|---|---|---|---:|---:|---:|---|---|']
 for row in matrix:
-    evidence = '<br>'.join((row['evidence']['zap'] + row['evidence']['nuclei'])[:4]).replace('|', '\\|')
-    lines.append(f"| {row['target']} | {row['category']} | {len(row['zap_findings'])} | {len(row['nuclei_findings'])} | {evidence or 'none'} | {row['gap']} |")
-Path('artifacts/comparison-table.md').write_text('\n'.join(lines) + '\n')
+    ev='<br>'.join(f"{k}: {v}" for k,v in row['evidence'].items() if v).replace('|','\\|') or 'none'
+    lines.append(f"| {row['target']} | {row['severity']} | {row['standard_type']} | {row['path']} | {int(row['zap'])} | {int(row['nuclei'])} | {int(row['burhan'])} | {ev} | {'yes' if row['gap_for_burhan'] else 'no'} |")
+Path('artifacts/comparison-table.md').write_text('\n'.join(lines)+'\n')
 print('\n'.join(lines))
 PY
