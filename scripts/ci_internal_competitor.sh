@@ -76,13 +76,15 @@ for name in juice-shop crapi webgoat dvwa; do
   url="${TARGETS[$name]}"
   mkdir -p "artifacts/$name"
   set +e
-  docker run --rm --network "$NETWORK" -v "$PWD/artifacts/$name:/zap/wrk/:rw" "$ZAP" zap-baseline.py -t "$url" -m 5 -I -r zap.html -J zap.json
+  docker run --rm --network "$NETWORK" -v "$PWD/artifacts/$name:/zap/wrk/:rw" "$ZAP" zap-baseline.py -t "$url" -m 5 -I -r /zap/wrk/zap.html -J /zap/wrk/zap.json
   zap_rc=$?
   docker run --rm --network "$NETWORK" -v "$PWD/artifacts/$name:/out:rw" "$NUCLEI" -u "$url" -jsonl -o /out/nuclei.jsonl -silent -no-color
   nuclei_rc=$?
   set -e
   case "$zap_rc" in 0|1) ;; *) echo "ZAP execution error for $name: $zap_rc"; exit "$zap_rc";; esac
   case "$nuclei_rc" in 0|1) ;; *) echo "Nuclei execution error for $name: $nuclei_rc"; exit "$nuclei_rc";; esac
+  test -s "artifacts/$name/zap.json" || { echo "ZAP JSON report missing for $name" >&2; exit 1; }
+  test -s "artifacts/$name/zap.html" || { echo "ZAP HTML report missing for $name" >&2; exit 1; }
 done
 
 python3 - <<'PY'

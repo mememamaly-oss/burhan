@@ -29,6 +29,10 @@ coverage. Findings do not fail the workflow; tool execution errors do.
 
 ## Execution status
 
-**PENDING:** dispatch `vulnweb-pin-probe.yml` with `mode=internal` on the
-development set.
+The first dispatch was run 43870912563. The internal job completed successfully
+in 16m05s and produced Nuclei outputs for all four targets, but the expected
+ZAP JSON/HTML reports were absent from the artifact. It is therefore **not
+accepted as a complete comparison**. The script now uses absolute ZAP output
+paths and fails closed when either report is missing; a second dispatch is
+required before claiming a result.
 No external target, isolated target, phaseC path, or seal path is an input.
