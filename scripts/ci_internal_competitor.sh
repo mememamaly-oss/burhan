@@ -172,6 +172,7 @@ def add(bucket, cat, item):
     bucket.setdefault(cat, []).append(item)
 
 matrix = []
+summary = {}
 for d in sorted(Path('artifacts').iterdir()):
     if not d.is_dir():
         continue
@@ -190,6 +191,12 @@ for d in sorted(Path('artifacts').iterdir()):
         info = finding.get('info') or {}
         text = str(info.get('name') or finding.get('template-id') or 'unknown')
         add(nuclei_by, category(text), f"{info.get('severity', 'unknown')}: {text}")
+    summary[d.name] = {
+        'zap_total': sum(len(items) for items in zap_by.values()),
+        'nuclei_total': sum(len(items) for items in nuclei_by.values()),
+        'zap_by_category': {key: len(value) for key, value in sorted(zap_by.items())},
+        'nuclei_by_category': {key: len(value) for key, value in sorted(nuclei_by.items())},
+    }
     categories = sorted(set(zap_by) | set(nuclei_by))
     for cat in categories:
         z = zap_by.get(cat, [])
@@ -204,6 +211,7 @@ for d in sorted(Path('artifacts').iterdir()):
             'zap_mode': 'baseline',
         })
 Path('artifacts/comparison-matrix.json').write_text(json.dumps(matrix, indent=2, sort_keys=True))
+Path('artifacts/comparison-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True))
 lines = ['# ZAP baseline vs Nuclei comparison', '', '| Target | Category | ZAP | Nuclei | Evidence | Gap? |', '|---|---|---:|---:|---|---|']
 for row in matrix:
     evidence = '<br>'.join((row['evidence']['zap'] + row['evidence']['nuclei'])[:4]).replace('|', '\\|')
