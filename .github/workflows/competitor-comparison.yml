@@ -53,6 +53,7 @@ jobs:
               'crapi/crapi-identity:${VERSION:-latest}': 'crapi/crapi-identity@sha256:5d1db5b3ba8e02bc68711ec6fc4e35ed7cd8b87e63785ece9e7ff5b5e36c5260',
               'crapi/crapi-community:${VERSION:-latest}': 'crapi/crapi-community@sha256:8ba0c7eda86ae065a673f1fa554d0109a24f25c5a8d65097ae024e5ee715c54e',
               'crapi/crapi-workshop:${VERSION:-latest}': 'crapi/crapi-workshop@sha256:d4d2d94d35a31e211b04d5a771881f5ae13e358e8fa0804463ae3bace05dd815',
+              'crapi/crapi-chatbot:${VERSION:-latest}': 'crapi/crapi-chatbot@sha256:36d274d54182a8baddba7ede17282035bb43ab9cb9cf87927e1fe7109901e0aa',
               'crapi/crapi-web:${VERSION:-latest}': 'crapi/crapi-web@sha256:b27d246c646bd33898e7d1d2095b6e7576c0993a7b81a73aa7386929493d7151',
               'crapi/gateway-service:${VERSION:-latest}': 'crapi/gateway-service@sha256:97dade9daf0e758547b1686e2d3303c8c9b79838167f728a9211f0ee1f4622b0',
               'crapi/mailhog:${VERSION:-latest}': 'crapi/mailhog@sha256:015c23f79d40c9dc1800cd0a458503b89aeda3b585a12c37d53829d6c7d61fdd',
