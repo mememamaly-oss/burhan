@@ -35,7 +35,8 @@ MAX_CONCURRENT_SCANS = 2
 
 # ---------------------------------------------------------------- scan manager
 def launch_scan(store: Store, target: str, max_pages: int = 25, allow_private: bool = False,
-                timeout: float = 12.0, seed: str | None = None, strategy_path: str | None = None) -> dict:
+                timeout: float = 12.0, seed: str | None = None, strategy_path: str | None = None,
+                lab: bool = False) -> dict:
     """Create the scanner, register its run_id, and execute in a daemon thread.
     Phase 52: channel-aware OAST arming — local listener for lab targets, PUBLIC
     webhook channel for remote targets (auto policy, honest None on outage).
@@ -45,7 +46,9 @@ def launch_scan(store: Store, target: str, max_pages: int = 25, allow_private: b
     503-shaped error payload rather than exit code 2, which is the CLI's
     channel; the web UI shows the banner text)."""
     from .authorized_targets import authorize, _banner, DEFAULT_REGISTRY
-    ok, reason, entry_id = authorize(target)
+    from .lab_mode import is_lab_mode
+    _lab, _via = is_lab_mode(lab)
+    ok, reason, entry_id = authorize(target, lab_flag=_lab)
     if not ok:
         banner = _banner(DEFAULT_REGISTRY, "target refused", reason)
         print(banner, flush=True)   # server log
@@ -56,7 +59,8 @@ def launch_scan(store: Store, target: str, max_pages: int = 25, allow_private: b
     from .oast import make_oast
     oast = make_oast(urlparse(target).hostname or "", mode="auto")
     cfg = ScanConfig(allow_private=allow_private, max_pages=max_pages,
-                     timeout=timeout, seed=seed, strategy_path=strategy_path, oast=oast)
+                     timeout=timeout, seed=seed, strategy_path=strategy_path,
+                     oast=oast, lab=_lab)
     sc = BurhanScanner(target, cfg)
     entry = {"state": "queued", "run_id": sc.run_id, "target": target,
              "started": time.time(), "finished": None, "report": None, "error": None}
@@ -304,7 +308,8 @@ class ApiHandler(BaseHTTPRequestHandler):
                               max_pages=int(body.get("max_pages", 25)),
                               allow_private=bool(body.get("allow_private", False)),
                               timeout=float(body.get("timeout", 12.0)),
-                              seed=body.get("seed"))
+                              seed=body.get("seed"),
+                              lab=bool(body.get("lab", False)))
             return self._json(res, 202 if "run_id" in res else 503)
         return self._json({"error": "not found"}, 404)
 

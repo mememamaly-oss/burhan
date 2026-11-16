@@ -357,6 +357,11 @@ def main():
     s = sub.add_parser("scan"); s.add_argument("target"); s.add_argument("--allow-private", action="store_true")
     s.add_argument("--max-pages", type=int, default=25); s.add_argument("--timeout", type=float, default=12.0)
     s.add_argument("--no-crawl", action="store_true"); s.add_argument("--seed")
+    s.add_argument("--lab", action="store_true",
+                   help="r19-2.4: EXPLICIT laboratory mode — required (this "
+                        "flag or BURHAN_LAB_MODE=1) to scan loopback/private "
+                        "targets (fixtures, lab apps, training ranges); "
+                        "recorded in every scan report (stats.lab_mode)")
     s.add_argument("--modern-v2", action="store_true",
                    help="owner order part 3: NEW detection layers (jwt weak-secret, "
                         "graphql aliasing, excessive data exposure, rebind TOCTOU) — off by default")
@@ -763,11 +768,12 @@ def main():
         # r19-2 (order 2026-11-16 item 1b): the ownership gate. EVERY live
         # scan target must pass the authorized-targets registry (DNS TXT /
         # well-known / scope page / signed letter, verified live at scan
-        # time; loopback/private hosts pass via the self-hosted entry).
+        # time; loopback/private hosts pass via the self-hosted entry —
+        # which itself requires the EXPLICIT lab mode, r19-2.4).
         # Refusal = loud banner, exit 2, ZERO requests — the scan process
         # dies before any socket to the target is opened.
         from burhan.authorized_targets import require_authorized
-        require_authorized(a.target)
+        require_authorized(a.target, lab_flag=getattr(a, "lab", False))
         auth = None
         if a.auth_token:
             # AUTH-05 token mode: Bearer JWT / API key / custom header.
@@ -807,7 +813,8 @@ def main():
                          race=a.race, race_parallel=a.race_parallel,
                          race_variance=a.race_variance, symbolic=a.symbolic,
                          modern_v2=a.modern_v2,
-                         prioritize_store=a.prioritize_store or None)
+                         prioritize_store=a.prioritize_store or None,
+                         lab=getattr(a, "lab", False))
         # AXIS-18: computed payloads are SENT to validation endpoints — a
         # loud, explicit notice before the first symbolic request leaves.
         if a.symbolic:

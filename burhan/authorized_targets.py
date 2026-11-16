@@ -167,7 +167,7 @@ def _candidate_permission_sentence(page_text: str) -> str:
 
 
 def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
-              fetch=None) -> tuple[bool, str, str | None]:
+              fetch=None, lab_flag: bool = False) -> tuple[bool, str, str | None]:
     """Verdict for ONE target. Returns (ok, reason, entry_id).
 
     `fetch` is injectable for tests: fetch(url) -> page text.
@@ -180,15 +180,26 @@ def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
     fetch = fetch or _default_fetch
 
     # ---- self-hosted fixtures: the operator's own loopback/private host
+    # r19-2.4 (owner followup item 2): the self-hosted proof ALSO requires
+    # the explicit laboratory mode (CLI --lab or BURHAN_LAB_MODE=1) —
+    # without it a private target is refused loudly naming both channels,
+    # so an accidental 127.0.0.1 scan (habit, inherited CI env) can never
+    # run silently.
     if _is_loopback_or_private(host):
-        for t in reg["targets"]:
-            if t.get("kind") == "self-hosted" and \
-                    (t.get("match") or {}).get("loopback_or_private"):
-                return True, ("loopback/private target — the operator's own "
-                              "host (self-hosted fixtures: %s)"
-                              % ", ".join((t.get("covers") or [])[:3])), t["id"]
-        return False, ("loopback/private target but NO self-hosted entry in "
-                       "the registry"), None
+        from .lab_mode import is_lab_mode, refusal_reason
+        lab, _via = is_lab_mode(lab_flag)
+        if lab:
+            for t in reg["targets"]:
+                if t.get("kind") == "self-hosted" and \
+                        (t.get("match") or {}).get("loopback_or_private"):
+                    return True, ("loopback/private target — the operator's "
+                                  "own host, EXPLICIT lab mode (self-hosted "
+                                  "fixtures: %s)"
+                                  % ", ".join((t.get("covers") or [])[:3])
+                                  ), t["id"]
+        return False, (refusal_reason(host) if lab is False else
+                       "loopback/private target but NO self-hosted entry "
+                       "in the registry"), None
 
     # ---- public targets: an entry with a scan-time-verified proof
     for t in reg["targets"]:
@@ -296,13 +307,14 @@ def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
 
 
 def require_authorized(base_url: str, registry_path: str = DEFAULT_REGISTRY,
-                       fetch=None) -> str:
+                       fetch=None, lab_flag: bool = False) -> str:
     """The loud gate every live-scan entry point calls BEFORE any request.
 
     Returns the entry id on success; prints the refusal banner and raises
     SystemExit(2) on any refusal — the scan process must die here.
     """
-    ok, reason, entry_id = authorize(base_url, registry_path, fetch)
+    ok, reason, entry_id = authorize(base_url, registry_path, fetch,
+                                     lab_flag=lab_flag)
     if not ok:
         banner = _banner(registry_path, "target refused", reason)
         print(banner, file=sys.stdout, flush=True)
