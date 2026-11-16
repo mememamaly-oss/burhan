@@ -532,15 +532,21 @@ def test_adversarial_A6_pinned_public_fetch_never_hits_internal():
          port_flag="--http-port")
     try:
         target = f"http://rebind.burhan.test:{up_port}/x"
-        _engine().send(RequestMutation(
+        response = _engine().send(RequestMutation(
             endpoint=Endpoint(
                 url=f"http://127.0.0.1:{port}/fetch?url="
                     f"{urllib.parse.quote(target, safe='')}",
                 method="GET"), note="adv-a6"))
-        time.sleep(1.5)
+        assert response is not None, "safe fetch request did not complete"
+        # Negative proof: observe for a bounded window before asserting
+        # that the internal listener stayed untouched.
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline and not probe.hits:
+            time.sleep(0.01)
         assert not probe.hits
     finally:
         p.terminate()
+        up.close()
 
 
 # ---------------------------------------------------------------- flag contract
