@@ -65,9 +65,8 @@ def _default_fetch(url: str):
             headers = {k.lower(): v for k, v in r.headers.items()}
             body = r.read(MAX_BODY + 1)
             return status, headers, body
+    # except HTTPError swallowed deliberately (safe): triple below
     except urllib.error.HTTPError as e:
-        # HTTPError IS a status answer (3xx/4xx/5xx) — surface it to the
-        # routing layer as a (status, headers, body) triple, not a crash
         hdrs = {k.lower(): v for k, v in (e.headers or {}).items()}
         return e.code, hdrs, (e.read(MAX_BODY + 1) if hasattr(e, "read") else b"")
 
