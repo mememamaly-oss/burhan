@@ -35,7 +35,10 @@ RUN pip install --no-cache-dir /tmp/*.whl && rm -f /tmp/*.whl
 # the authorization registry: root-owned, read-only for the runtime user
 COPY --chown=root:root authorized-targets.json /opt/burhan/authorized-targets.json
 RUN chmod 0444 /opt/burhan/authorized-targets.json
+# Runtime state/output is writable by the fixed non-root UID, including mounted CI volumes.
+RUN install -d -o 10001 -g 10001 -m 0750 /var/lib/burhan
 ENV BURHAN_AUTHORIZED_TARGETS=/opt/burhan/authorized-targets.json
+ENV BURHAN_DATA_DIR=/var/lib/burhan
 
 USER burhan
 ENTRYPOINT ["/usr/bin/tini", "--", "burhan"]
