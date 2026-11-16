@@ -1,100 +1,142 @@
-# Development competitor comparison
+# M3: ZAP baseline vs Nuclei vs Burhan proof
 
-This report describes the manual-only `internal` mode of the existing
-`.github/workflows/vulnweb-pin-probe.yml` dispatch workflow. The mode is
-explicitly selected and is not a push or pull-request trigger. The legacy
-permission-page probe is skipped in this mode.
+## Final execution
 
-## Scope
+- Comparison workflow: [43978489296](https://github.com/mememamaly-oss/burhan/actions/runs/43978489296)
+- Active-ZAP workflow: [43978493391](https://github.com/mememamaly-oss/burhan/actions/runs/43978493391)
+- Commit: `d9edc0aa4b1bb8397fab71e407f60f926387f076`
+- Targets: Juice Shop, crAPI, WebGoat, DVWA only; internal Docker network.
+- ZAP comparison mode: **baseline**. Active ZAP was a separate workflow/job.
+- Nuclei templates: v10.5.0, pinned commit `f8b8b8dcd70d93826c3767e1829ef8243af9f03b`, archive SHA-256 verified in the job.
+- Burhan proof: ephemeral owner password generated inside the job with `openssl rand -hex 24`, masked, initialized through `burhan owner init` using environment only, and removed after the job. Artifact grep found no credential.
+- Measurement unit: distinct `(standard_type, path)` pairs per severity. `info` is displayed separately and is not a vulnerability or Burhan gap.
 
-The controlled development set is Juice Shop v20.3.0, crAPI from pinned source
-commit `700f03d12a392d9e408260b4beae72ed02a4a1a4`, WebGoat v2023.4, and DVWA
-1.9. They run on a private Docker bridge named `burhan-dev`; host ports are
-bound to loopback only. ZAP and Nuclei join the same bridge and address targets
-by container alias. No external target is used.
+## ZAP active results
 
-All target images, crAPI service images, databases, and scanner images are
-referenced by immutable Docker digests in
-`scripts/ci_internal_competitor.sh`. The crAPI compose file is fetched from the
-pinned source commit and its expected image references are checked before
-replacement with the pinned digests. Nuclei templates are downloaded from the
-official GitHub codeload archive in a separate networked preparation step as
-v10.5.0, commit
-`f8b8b8dcd70d93826c3767e1829ef8243af9f03b`, with tarball SHA-256
-`80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41`. The
-download step prints the YAML template count; the scan step independently
-lists templates from the mounted directory before scanning.
+| Target | Duration (s) | Requests | Alerts | Spider timed out | Active timed out | Quality |
+|---|---:|---:|---:|---|---|---|
+| crapi | 150 | 781 | 77 | no | no | complete |
+| dvwa | 187 | 2015 | 174 | no | no | complete |
+| juice-shop | 212 | 3447 | 235 | no | yes | partial-time-bounded |
+| webgoat | 135 | 2450 | 131 | no | no | complete |
 
-## Comparison output
+## Full comparison table
 
-For each target the workflow runs **ZAP baseline mode**, not ZAP active mode,
-and a Nuclei HTTP-template scan against the private Docker network. It writes
-raw artifacts, `comparison-summary.json`, and a category matrix. The Nuclei
-step fails closed on a fatal `[FTL]` log, any non-zero exit code, a missing
-`nuclei.jsonl`, or invalid JSONL. The matrix reports each category's ZAP and
-Nuclei findings, evidence names, and whether one tool observed a category that
-the other did not. This is tool-output telemetry, not ground truth or a
-coverage claim.
+# ZAP baseline vs Nuclei vs Burhan proof
 
-## Execution status
-
-The first dispatch was run 43870912563. The internal job completed successfully
-in 16m05s and produced Nuclei outputs for all four targets, but ZAP reported an
-`AccessDeniedException` while writing its report, so the expected ZAP JSON/HTML
-reports were absent. The second dispatch, 43876225804, correctly failed closed
-when the reports were still missing. The script now runs ZAP as root only
-inside the disposable container, uses relative report names (the image maps
-them under `/zap/wrk`), and fails closed when either report is missing.
-
-The third dispatch, 43877456695, passed in 5m43s. It produced non-empty ZAP
-JSON/HTML reports and Nuclei JSONL outputs for all four targets, plus the
-[comparison artifact](https://github.com/mememamaly-oss/burhan/actions/runs/43877456695/artifacts/14231905000).
-The summary recorded ZAP totals of 10 (crAPI), 15 (DVWA), 9 (Juice Shop), and
-13 (WebGoat). Nuclei completed with zero emitted findings in this run; that is
-reported as zero output, not as proof that the applications are clean. The
-comparison is tool-output telemetry, not ground truth or a coverage claim.
-No external target, isolated target, phaseC path, or seal path is an input.
-
-
-## Corrected final run
-
-The corrected final dispatch was **43953761548**, on commit `b7df84e413ceb70539d6ee54503f494b85ef9664`, and passed in 16m47s. The artifact is [competitor-comparison-43953761548](https://github.com/mememamaly-oss/burhan/actions/runs/43953761548/artifacts/14271590177).
-
-Nuclei used image `docker.io/projectdiscovery/nuclei@sha256:aeb5ea2db32a252b8135707d2ad0e89b90e19a18ea7816d38759bc51efb46b97` with templates v10.5.0, commit `f8b8b8dcd70d93826c3767e1829ef8243af9f03b`, and tarball SHA-256 `80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41`. The preparation step counted **14,036 YAML files**; the runtime Nuclei image listed **11,199 templates** from the mounted directory. No `[FTL]` records were present. The JSONL result counts were crAPI 17, DVWA 10, Juice Shop 15, and WebGoat 22, and all four JSONL files parsed successfully.
-
-ZAP ran in **baseline mode**, not active mode. The category table below is generated from the artifact's `comparison-table.md`; `Gap=yes` means one tool emitted findings in that category while the other emitted none. It is a comparison of tool outputs, not ground truth.
-
-| Target | Category | ZAP | Nuclei | Evidence | Gap? |
-|---|---|---:|---:|---|---|
-| crAPI | csp-clickjacking-csrf | 2 | 0 | CSP header not set; missing anti-clickjacking header | yes |
-| crAPI | exposed-files-endpoints | 0 | 4 | `.env` discovery; generic env disclosure; robots.txt | yes |
-| crAPI | other | 1 | 2 | storable/cacheable content; OpenResty; SOA detection | no |
-| crAPI | security-headers | 5 | 10 | cross-origin policies; permissions policy; HTTP missing headers | no |
-| crAPI | technology-version-disclosure | 2 | 1 | server version; modern web; Laravel sensitive disclosure | no |
-| DVWA | cookies-and-session | 3 | 3 | HttpOnly; SameSite; session management | no |
-| DVWA | csp-clickjacking-csrf | 2 | 0 | CSP header not set; missing anti-clickjacking header | yes |
-| DVWA | exposed-files-endpoints | 0 | 3 | robots.txt; configuration listing | yes |
-| DVWA | other | 2 | 3 | non-storable/cacheable content; WAF detection/fuzzing | no |
-| DVWA | security-headers | 5 | 0 | cross-origin policies; permissions policy; X-Content-Type-Options | yes |
-| DVWA | technology-version-disclosure | 3 | 1 | Apache version; server version; suspicious comments; Wappalyzer | no |
-| Juice Shop | csp-clickjacking-csrf | 1 | 0 | CSP header not set | yes |
-| Juice Shop | exposed-files-endpoints | 1 | 1 | cross-domain misconfiguration; public Swagger API | no |
-| Juice Shop | javascript-xss | 0 | 1 | DOM EventListener detection | yes |
-| Juice Shop | other | 5 | 3 | dangerous JS; deprecated policy; cache findings | no |
-| Juice Shop | security-headers | 2 | 8 | cross-origin policies; HTTP missing security headers | no |
-| Juice Shop | technology-version-disclosure | 1 | 2 | modern web; FingerprintHub; Wappalyzer | no |
-| WebGoat | authentication-authorization | 1 | 0 | authentication request identified | yes |
-| WebGoat | cookies-and-session | 3 | 3 | HttpOnly; SameSite; session/cookie findings | no |
-| WebGoat | csp-clickjacking-csrf | 2 | 0 | anti-CSRF tokens; CSP header not set | yes |
-| WebGoat | exposed-files-endpoints | 0 | 3 | Spring Boot env/configprops/health actuator | yes |
-| WebGoat | javascript-xss | 1 | 1 | potential XSS attribute; XSS-Protection detection | no |
-| WebGoat | other | 2 | 4 | cacheability; internal IP; form/WordPress detection | no |
-| WebGoat | security-headers | 4 | 8 | cross-origin policies; permissions policy | no |
-| WebGoat | technology-version-disclosure | 0 | 3 | Wappalyzer technology detections | yes |
-
-The raw reports, complete evidence names, JSONL files, and machine-readable matrix are in the linked artifact. No PR was merged.
-
-## References
-
-[1]: https://docs.projectdiscovery.io/opensource/nuclei/running "Nuclei running and template directory documentation"
-[2]: https://github.com/projectdiscovery/nuclei-templates/releases/tag/v10.5.0 "Nuclei templates v10.5.0 release"
+| Target | Severity | Standard type | Path | ZAP | Nuclei | Burhan proof | Evidence | Gap for Burhan? |
+|---|---|---|---|---:|---:|---:|---|---|
+| crapi | high | CWE-522 | //.env | 0 | 1 | 0 | nuclei: Laravel - Sensitive Information Disclosure | yes |
+| crapi | high | CWE-552 | //.env | 0 | 1 | 0 | nuclei: Generic Env File Disclosure | yes |
+| crapi | high | NO-CWE|BURHAN:weak_random | /static/js/main.8c78208c.js | 0 | 0 | 1 | burhan: weak_random | no |
+| crapi | medium | CWE-1021 | http://crapi-web | 1 | 0 | 0 | zap: Missing Anti-clickjacking Header | yes |
+| crapi | medium | CWE-693 | http://crapi-web | 1 | 0 | 0 | zap: Content Security Policy (CSP) Header Not Set | yes |
+| crapi | low | CWE-497 | http://crapi-web | 1 | 0 | 0 | zap: Server Leaks Version Information via "Server" HTTP Response Header Field | yes |
+| crapi | low | CWE-693 | http://crapi-web | 1 | 0 | 0 | zap: X-Content-Type-Options Header Missing | yes |
+| crapi | low | NO-CWE|BURHAN:missing_security_headers | / | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| crapi | low | NO-CWE|BURHAN:missing_security_headers | /images/favicon.ico | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| crapi | low | NO-CWE|BURHAN:missing_security_headers | /images/logo192.png | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| crapi | low | NO-CWE|BURHAN:missing_security_headers | /manifest.json | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| crapi | low | NO-CWE|BURHAN:missing_security_headers | /static/css/main.dd33429d.css | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| crapi | low | NO-CWE|BURHAN:missing_security_headers | /static/js/'),B=f(' | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| crapi | low | NO-CWE|BURHAN:missing_security_headers | /static/js/main.8c78208c.js | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| crapi | low | NO-CWE|BURHAN:server_banner_disclosure | / | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| crapi | low | NO-CWE|BURHAN:server_banner_disclosure | /images/favicon.ico | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| crapi | low | NO-CWE|BURHAN:server_banner_disclosure | /images/logo192.png | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| crapi | low | NO-CWE|BURHAN:server_banner_disclosure | /manifest.json | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| crapi | low | NO-CWE|BURHAN:server_banner_disclosure | /static/css/main.dd33429d.css | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| crapi | low | NO-CWE|BURHAN:server_banner_disclosure | /static/js/'),B=f(' | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| crapi | low | NO-CWE|BURHAN:server_banner_disclosure | /static/js/main.8c78208c.js | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| crapi | info | CWE-524 | http://crapi-web | 1 | 0 | 0 | zap: Storable and Cacheable Content | no |
+| crapi | info | CWE-693 | / | 0 | 1 | 0 | nuclei: HTTP Missing Security Headers | no |
+| crapi | info | NO-CWE|NUCLEI-TAGS:discovery,dns,soa|soa-detect | crapi-web | 0 | 1 | 0 | nuclei: SOA Record Service - Detection | no |
+| crapi | info | NO-CWE|NUCLEI-TAGS:discovery,generic,misc,miscellaneous|robots-txt-endpoint | /robots.txt | 0 | 1 | 0 | nuclei: robots.txt endpoint prober | no |
+| crapi | info | NO-CWE|NUCLEI-TAGS:discovery,openresty,tech|openresty-detect | / | 0 | 1 | 0 | nuclei: OpenResty detection | no |
+| crapi | info | NO-CWE|NUCLEI-TAGS:generic,misc,miscellaneous,vuln|robots-txt | /robots.txt | 0 | 1 | 0 | nuclei: robots.txt file | no |
+| crapi | info | NO-CWE|WASC--1 | http://crapi-web | 1 | 0 | 0 | zap: Modern Web Application | no |
+| dvwa | high | CWE-1395 | http://dvwa | 1 | 0 | 0 | zap: Apache HTTP Server Version with Known Vulnerabilities | yes |
+| dvwa | medium | CWE-1021 | http://dvwa | 1 | 0 | 0 | zap: Missing Anti-clickjacking Header | yes |
+| dvwa | medium | CWE-200 | /config/ | 0 | 1 | 0 | nuclei: Sensitive Configuration Files Listing - Detect | yes |
+| dvwa | medium | CWE-693 | http://dvwa | 1 | 0 | 0 | zap: Content Security Policy (CSP) Header Not Set | yes |
+| dvwa | low | CWE-1004 | http://dvwa | 1 | 0 | 0 | zap: Cookie No HttpOnly Flag | yes |
+| dvwa | low | CWE-1275 | http://dvwa | 1 | 0 | 0 | zap: Cookie without SameSite Attribute | yes |
+| dvwa | low | CWE-497 | http://dvwa | 1 | 0 | 0 | zap: Server Leaks Version Information via "Server" HTTP Response Header Field | yes |
+| dvwa | low | CWE-693 | http://dvwa | 1 | 0 | 0 | zap: X-Content-Type-Options Header Missing | yes |
+| dvwa | low | NO-CWE|BURHAN:missing_security_headers | / | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| dvwa | low | NO-CWE|BURHAN:missing_security_headers | /about.php | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| dvwa | low | NO-CWE|BURHAN:missing_security_headers | /docs/DVWA_v1.3.pdf | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| dvwa | low | NO-CWE|BURHAN:missing_security_headers | /dvwa/css/main.css | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| dvwa | low | NO-CWE|BURHAN:missing_security_headers | /dvwa/js/dvwaPage.js | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| dvwa | low | NO-CWE|BURHAN:missing_security_headers | /favicon.ico | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| dvwa | low | NO-CWE|BURHAN:missing_security_headers | /instructions.php | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| dvwa | low | NO-CWE|BURHAN:server_banner_disclosure | / | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| dvwa | low | NO-CWE|BURHAN:server_banner_disclosure | /about.php | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| dvwa | low | NO-CWE|BURHAN:server_banner_disclosure | /docs/DVWA_v1.3.pdf | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| dvwa | low | NO-CWE|BURHAN:server_banner_disclosure | /dvwa/css/main.css | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| dvwa | low | NO-CWE|BURHAN:server_banner_disclosure | /dvwa/js/dvwaPage.js | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| dvwa | low | NO-CWE|BURHAN:server_banner_disclosure | /favicon.ico | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| dvwa | low | NO-CWE|BURHAN:server_banner_disclosure | /instructions.php | 0 | 0 | 1 | burhan: server_banner_disclosure | no |
+| dvwa | info | CWE-1004 | 80 | 0 | 1 | 0 | nuclei: Cookies without HttpOnly attribute - Detect | no |
+| dvwa | info | CWE-200 | / | 0 | 1 | 0 | nuclei: WAF Detection | no |
+| dvwa | info | CWE-524 | http://dvwa | 1 | 0 | 0 | zap: Storable but Non-Cacheable Content | no |
+| dvwa | info | CWE-614 | 80 | 0 | 1 | 0 | nuclei: Cookies without Secure attribute - Detect | no |
+| dvwa | info | CWE-615 | http://dvwa | 1 | 0 | 0 | zap: Information Disclosure - Suspicious Comments | no |
+| dvwa | info | CWE-693 | / | 0 | 1 | 0 | nuclei: Missing Cookie SameSite Strict | no |
+| dvwa | info | NO-CWE|NUCLEI-TAGS:discovery,dns,soa|soa-detect | dvwa | 0 | 1 | 0 | nuclei: SOA Record Service - Detection | no |
+| dvwa | info | NO-CWE|NUCLEI-TAGS:discovery,generic,misc,miscellaneous|robots-txt-endpoint | /robots.txt | 0 | 1 | 0 | nuclei: robots.txt endpoint prober | no |
+| dvwa | info | NO-CWE|NUCLEI-TAGS:discovery,tech|tech-detect | / | 0 | 1 | 0 | nuclei: Wappalyzer Technology Detection | no |
+| dvwa | info | NO-CWE|NUCLEI-TAGS:generic,misc,miscellaneous,vuln|robots-txt | /robots.txt | 0 | 1 | 0 | nuclei: robots.txt file | no |
+| dvwa | info | NO-CWE|WASC--1 | http://dvwa | 1 | 0 | 0 | zap: Session Management Response Identified | no |
+| juice-shop | medium | CWE-264 | http://juice-shop:3000 | 1 | 0 | 0 | zap: Cross-Domain Misconfiguration | yes |
+| juice-shop | medium | CWE-693 | http://juice-shop:3000 | 1 | 0 | 0 | zap: Content Security Policy (CSP) Header Not Set | yes |
+| juice-shop | low | CWE-16 | http://juice-shop:3000 | 1 | 0 | 0 | zap: Deprecated Feature Policy Header Set | yes |
+| juice-shop | low | CWE-693 | http://juice-shop:3000 | 1 | 0 | 0 | zap: Cross-Origin-Opener-Policy Header Missing or Invalid | yes |
+| juice-shop | low | CWE-749 | http://juice-shop:3000 | 1 | 0 | 0 | zap: Dangerous JS Functions | yes |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | / | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /assets/public/favicon_js.ico | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /basket | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /chunk-1qQQGal7.js | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /chunk-Cv2YgWUq.js | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /chunk-DBPdFzgj.js | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /main.js | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /polyfills.js | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /redirect | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /rolldown-runtime-BoHGiXSq.js | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /scripts.js | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /styles.css | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | low | NO-CWE|BURHAN:missing_security_headers | /{{href}} | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| juice-shop | info | CWE-200 | //api-docs/swagger.json | 0 | 1 | 0 | nuclei: Public Swagger API - Detect | no |
+| juice-shop | info | CWE-524 | http://juice-shop:3000 | 1 | 0 | 0 | zap: Storable but Non-Cacheable Content | no |
+| juice-shop | info | NO-CWE|WASC--1 | http://juice-shop:3000 | 1 | 0 | 0 | zap: Modern Web Application | no |
+| webgoat | medium | CWE-352 | http://webgoat:8080 | 1 | 0 | 0 | zap: Absence of Anti-CSRF Tokens | yes |
+| webgoat | medium | CWE-693 | http://webgoat:8080 | 1 | 0 | 0 | zap: Content Security Policy (CSP) Header Not Set | yes |
+| webgoat | medium | NO-CWE|BURHAN:host_header_injection | /WebGoat/ | 0 | 0 | 1 | burhan: host_header_injection | no |
+| webgoat | medium | NO-CWE|BURHAN:host_header_injection | /WebGoat/start.mvc | 0 | 0 | 1 | burhan: host_header_injection | no |
+| webgoat | low | CWE-1004 | http://webgoat:8080 | 1 | 0 | 0 | zap: Cookie No HttpOnly Flag | yes |
+| webgoat | low | CWE-1275 | http://webgoat:8080 | 1 | 0 | 0 | zap: Cookie without SameSite Attribute | yes |
+| webgoat | low | CWE-693 | http://webgoat:8080 | 1 | 0 | 0 | zap: Permissions Policy Header Not Set | yes |
+| webgoat | low | NO-CWE|BURHAN:missing_security_headers | /WebGoat/ | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| webgoat | low | NO-CWE|BURHAN:missing_security_headers | /WebGoat/css/animate.css | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| webgoat | low | NO-CWE|BURHAN:missing_security_headers | /WebGoat/css/font-awesome.min.css | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| webgoat | low | NO-CWE|BURHAN:missing_security_headers | /WebGoat/css/img/favicon.ico | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| webgoat | low | NO-CWE|BURHAN:missing_security_headers | /WebGoat/css/main.css | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| webgoat | low | NO-CWE|BURHAN:missing_security_headers | /WebGoat/login | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| webgoat | low | NO-CWE|BURHAN:missing_security_headers | /WebGoat/plugins/bootstrap/css/bootstrap.min.css | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| webgoat | low | NO-CWE|BURHAN:missing_security_headers | /WebGoat/registration | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| webgoat | low | NO-CWE|BURHAN:missing_security_headers | /WebGoat/start.mvc | 0 | 0 | 1 | burhan: missing_security_headers | no |
+| webgoat | low | NO-CWE|NUCLEI-TAGS:env,exposure,misconfig,springboot,vuln|springboot-env | /WebGoat/actuator/env | 0 | 1 | 0 | nuclei: Springboot Env Actuator - Detect | yes |
+| webgoat | low | NO-CWE|NUCLEI-TAGS:exposure,misconfig,springboot,vuln|springboot-configprops | /WebGoat/actuator/configprops | 0 | 1 | 0 | nuclei: Detect Springboot Configprops Actuator | yes |
+| webgoat | info | CWE-1004 | 8080 | 0 | 1 | 0 | nuclei: Cookies without HttpOnly attribute - Detect | no |
+| webgoat | info | CWE-20 | http://webgoat:8080 | 1 | 0 | 0 | zap: User Controllable HTML Element Attribute (Potential XSS) | no |
+| webgoat | info | CWE-200 | /WebGoat/actuator/health | 0 | 1 | 0 | nuclei: Spring Boot Health Actuator Panel - Detect | no |
+| webgoat | info | CWE-524 | http://webgoat:8080 | 1 | 0 | 0 | zap: Storable and Cacheable Content | no |
+| webgoat | info | CWE-614 | 8080 | 0 | 1 | 0 | nuclei: Cookies without Secure attribute - Detect | no |
+| webgoat | info | CWE-693 | /WebGoat/ | 0 | 1 | 0 | nuclei: Missing Cookie SameSite Strict | no |
+| webgoat | info | CWE-693 | /WebGoat/login | 0 | 1 | 0 | nuclei: HTTP Missing Security Headers | no |
+| webgoat | info | CWE-79 | /WebGoat/ | 0 | 1 | 0 | nuclei: XSS-Protection Header - Cross-Site Scripting | no |
+| webgoat | info | NO-CWE|NUCLEI-TAGS:detection,discovery,plugin,tech,wordpress,wp,wp-plugin|wordpress-plugin-detect | /WebGoat/login | 0 | 1 | 0 | nuclei: Wordpress Plugin Detection | no |
+| webgoat | info | NO-CWE|NUCLEI-TAGS:disclosure,misconfig,vuln|internal-ip-disclosure | /WebGoat/ | 0 | 1 | 0 | nuclei: Internal IP Disclosure | no |
+| webgoat | info | NO-CWE|NUCLEI-TAGS:discovery,dns,soa|soa-detect | webgoat | 0 | 1 | 0 | nuclei: SOA Record Service - Detection | no |
+| webgoat | info | NO-CWE|NUCLEI-TAGS:discovery,tech|tech-detect | /WebGoat/login | 0 | 1 | 0 | nuclei: Wappalyzer Technology Detection | no |
+| webgoat | info | NO-CWE|NUCLEI-TAGS:form,misc,miscellaneous,vuln|form-detection | /WebGoat/login | 0 | 1 | 0 | nuclei: Form Detection | no |
+| webgoat | info | NO-CWE|WASC--1 | http://webgoat:8080 | 1 | 0 | 0 | zap: Session Management Response Identified | no |
