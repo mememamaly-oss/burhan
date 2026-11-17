@@ -117,7 +117,7 @@ def fetch(path):
             'body_sha256':hashlib.sha256(body).hexdigest(),
             'first_200_bytes':body[:200].decode('utf-8','replace'),
             'body_length':len(body),'curl_rc':p.returncode,
-            'wordpress_plugin_path_marker':(b'/plugins/' in body or b'wp-content/plugins' in body)}
+            'wordpress_plugin_path_marker':(b'wp-content/plugins/' in body.lower() or b'wp-includes/' in body.lower() or b'wordpress' in body.lower())}
 target=fetch(target_path); random=fetch(random_path)
 same=(target['status']==random['status'] and target['body_sha256']==random['body_sha256'])
 wp_false=(label=='webgoat-wordpress-plugin' and not target['wordpress_plugin_path_marker'])
