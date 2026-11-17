@@ -9,7 +9,8 @@ TEMPLATE_ARCHIVE="${NUCLEI_TEMPLATE_ARCHIVE:-/tmp/nuclei-templates.tar.gz}"
 TEMPLATE_SHA256_EXPECTED=80fbabceca095fac40afecc7f023748df22b9576b9ff10a4422bd2fbf81f9a41
 TEMPLATE_COMMIT=f8b8b8dcd70d93826c3767e1829ef8243af9f03b
 JUICE='docker.io/bkimminich/juice-shop@sha256:cea5a4af4aacee498c491491af0408934ec81d004035c0a02ef3e54395e3bf27'
-WEBGOAT='docker.io/webgoat/webgoat@sha256:2775102b8186df1656f8a69cfb7a6bf6c77b43a25fa0accd6d44e6ae04c8d3b7'
+WEBGOAT_VERSION=v2023.8
+WEBGOAT='docker.io/webgoat/webgoat@sha256:01672eb9aeba60d042ae1131d6de683b98fa64e9da60fa5d3daad2642a6795dd'
 DVWA='docker.io/vulnerables/web-dvwa@sha256:14c929ec1a99edb77326201f7f0fb431d1b3dd099c09ddeaf46312ab0ff53cfe'
 ZAP='docker.io/zaproxy/zap-stable@sha256:9624669db72f54d86c4b46a7064518bd9bf79d8c61a4c31befa9923489f328af'
 NUCLEI='docker.io/projectdiscovery/nuclei@sha256:aeb5ea2db32a252b8135707d2ad0e89b90e19a18ea7816d38759bc51efb46b97'
@@ -97,6 +98,38 @@ wait_http webgoat http://127.0.0.1:8080/WebGoat/
 wait_http dvwa http://127.0.0.1:8081/
 wait_http crapi http://127.0.0.1:8888/
 
+mkdir -p artifacts
+manual_probe() {
+  local label="$1" base="$2" target_path="$3" random_path="$4"
+  local out="artifacts/manual-${label}.json"
+  python3 - "$label" "$base" "$target_path" "$random_path" "$out" "$ZAP" "$NETWORK" <<'PY'
+import hashlib,json,subprocess,sys
+label,base,target_path,random_path,out,zap,network=sys.argv[1:]
+def fetch(path):
+    url=base+path
+    p=subprocess.run(['docker','run','--rm','--network',network,zap,'curl','-ksS','--max-time','15','-D','-','-o','-','-w','\nBURHAN_STATUS:%{http_code}\n',url],capture_output=True,text=False)
+    raw=p.stdout; marker=b'\nBURHAN_STATUS:'
+    head,_,tail=raw.rpartition(marker)
+    status=tail.strip().splitlines()[0].decode('ascii','replace') if marker in raw else '000'
+    body=head
+    if b'\r\n\r\n' in body: body=body.split(b'\r\n\r\n',1)[1]
+    return {'url':url,'status':int(status) if status.isdigit() else 0,
+            'body_sha256':hashlib.sha256(body).hexdigest(),
+            'first_200_bytes':body[:200].decode('utf-8','replace'),
+            'body_length':len(body),'curl_rc':p.returncode}
+target=fetch(target_path); random=fetch(random_path)
+same=(target['status']==random['status'] and target['body_sha256']==random['body_sha256'])
+result={'label':label,'target':target,'random_control':random,
+        'likely_false_positive':same,
+        'disposition':'إنذار كاذب مرجّح: الهدف والمسار العشوائي متطابقان في الحالة والبصمة' if same else 'مختلف عن الضابط العشوائي'}
+open(out,'w').write(json.dumps(result,ensure_ascii=False,indent=2))
+print(json.dumps(result,ensure_ascii=False))
+PY
+}
+manual_probe crapi-env http://crapi-web:80 //.env //.-burhan-random-env
+manual_probe webgoat-wordpress-plugin http://webgoat:8080 /WebGoat/login /WebGoat/login-burhan-random
+printf 'webgoat_version=%s\nwebgoat_source=docker.io/webgoat/webgoat:%s (digest-pinned)\n' "$WEBGOAT_VERSION" "$WEBGOAT_VERSION" | tee artifacts/webgoat-version.txt
+
 TARGETS=(juice-shop crapi webgoat dvwa)
 declare -A INTERNAL_TARGETS=(
   [juice-shop]=http://juice-shop:3000/
@@ -110,8 +143,6 @@ declare -A HOST_TARGETS=(
   [webgoat]=http://127.0.0.1:8080/WebGoat/
   [dvwa]=http://127.0.0.1:8081/
 )
-mkdir -p artifacts
-
 if [[ "$ACTIVE_ZAP_ONLY" == 1 ]]; then
   echo 'burhan_mode=internal-lab-active-zap'
   for name in "${TARGETS[@]}"; do
@@ -176,7 +207,23 @@ Path('artifacts',name,'zap-active-summary.json').write_text(json.dumps({
  'spider_time_limit_seconds':120,'active_time_limit_seconds':180,
  'spider_timed_out':spider_timed_out,'active_timed_out':active_timed_out,
  'result_quality':'partial-time-bounded' if (spider_timed_out or active_timed_out) else 'complete'
-},indent=2))
+ },indent=2))
+PY
+    python3 - "$name" <<'PY'
+import json,sys
+from pathlib import Path
+name=sys.argv[1]
+data=json.loads((Path('artifacts')/name/'zap-active-alerts.json').read_text())
+def norm(a):
+    n=str(a.get('name','')).lower()
+    if any(x in n for x in ('anti-clickjacking','content security policy','x-content-type','permissions policy','cross-origin-opener','missing security headers')): return 'SECURITY_HEADERS'
+    c=str(a.get('cweid') or '').strip()
+    if c not in ('','0','-1'): return 'CWE-'+c.replace('CWE-','')
+    return 'NO-CWE|WASC-'+str(a.get('wascid') or '-1')
+rows=[]
+for a in data.get('alerts',[]):
+    rows.append({'severity':str(a.get('riskdesc') or 'info').split('(',1)[0].strip().lower(),'standard_type':norm(a),'cwe':a.get('cweid'),'path':a.get('uri'),'name':a.get('name')})
+Path('artifacts',name,'zap-active-types.json').write_text(json.dumps(rows,indent=2,ensure_ascii=False))
 PY
     docker rm -f zap-active >/dev/null
   done
@@ -276,86 +323,90 @@ python3 - <<'PY'
 import json
 from pathlib import Path
 from urllib.parse import urlsplit
-
 SEVERITIES=('critical','high','medium','low','info')
-
-def severity(value, source=''):
+BAD_PATHS={"/static/js/'),B=f('","/{{href}}"}
+def severity(value,source=''):
     s=str(value or '').lower().strip()
     if source=='zap' and '(' in s: s=s.split('(',1)[0].strip()
     return s if s in SEVERITIES else 'info'
-
 def path_of(value):
-    raw=str(value or '')
-    parsed=urlsplit(raw)
+    raw=str(value or ''); parsed=urlsplit(raw)
     return parsed.path or raw.split('?',1)[0] or '/'
-
 def values(value):
-    if value is None: return []
-    if isinstance(value,list): return [str(x).strip() for x in value if str(x).strip()]
+    if value is None:return []
+    if isinstance(value,list):return [str(x).strip() for x in value if str(x).strip()]
     return [str(value).strip()] if str(value).strip() else []
-
-def cwe_type(cwes, fallback):
-    clean=[]
+def cwe(cwes):
+    out=[]
     for item in values(cwes):
         item=item.upper().replace('CWE-','').strip()
-        if item not in ('','0','-1','NONE','NULL'): clean.append(f'CWE-{item}')
-    return '|'.join(sorted(set(clean))) if clean else fallback
-
-def add(store, sev, typ, path, evidence):
-    store.setdefault(sev,{})[(typ,path)] = evidence
-
+        if item not in ('','0','-1','NONE','NULL'):out.append(f'CWE-{item}')
+    return '|'.join(sorted(set(out)))
+def norm(source,name='',cwes=None,burhan_type=''):
+    n=str(name).lower()
+    if burhan_type=='missing_security_headers' or any(x in n for x in ('anti-clickjacking','content security policy','x-content-type','permissions policy','cross-origin-opener','missing security headers')): return 'SECURITY_HEADERS'
+    if burhan_type=='server_banner_disclosure' or 'server leaks version' in n:return 'SERVER_BANNER_DISCLOSURE'
+    if burhan_type=='weak_random':return 'CWE-330'
+    if burhan_type=='host_header_injection':return 'CWE-644'
+    return cwe(cwes) or (f'NO-CWE|{source.upper()}:{burhan_type or name or "unknown"}')
+def add(store,sev,typ,path,evidence):
+    if path in BAD_PATHS:return
+    store.setdefault(sev,{}).setdefault(typ,{})[path]=evidence
 def zap_records(d):
-    out={}
-    data=json.loads((d/'zap.json').read_text())
+    out={}; data=json.loads((d/'zap.json').read_text())
     for site in data.get('site',[]):
-        for alert in site.get('alerts',[]):
-            name=alert.get('name') or alert.get('pluginid') or 'unknown'
-            cwe=alert.get('cweid')
-            wasc=alert.get('wascid')
-            fallback=f"NO-CWE|WASC-{wasc}" if str(wasc or '').strip() not in ('','0') else f"NO-CWE|ZAP:{alert.get('pluginid') or name}"
-            typ=cwe_type(cwe,fallback)
-            add(out,severity(alert.get('riskdesc') or alert.get('riskcode'),'zap'),typ,path_of(alert.get('uri') or site.get('@name')),name)
+      for a in site.get('alerts',[]):
+        name=a.get('name') or a.get('pluginid') or 'unknown'
+        add(out,severity(a.get('riskdesc') or a.get('riskcode'),'zap'),norm('zap',name,a.get('cweid')),path_of(a.get('uri') or site.get('@name')),name)
     return out
-
-def nuclei_records(d):
+def probe_disposition():
     out={}
-    for line in (d/'nuclei.jsonl').read_text().splitlines():
-        if not line.strip(): continue
-        finding=json.loads(line); info=finding.get('info') or {}
-        cls=info.get('classification') or {}
-        tags=values(info.get('tags'))
-        fallback=f"NO-CWE|NUCLEI-TAGS:{','.join(sorted(set(tags))) or 'none'}|{finding.get('template-id','unknown')}"
-        typ=cwe_type(cls.get('cwe-id'),fallback)
-        add(out,severity(info.get('severity'),'nuclei'),typ,path_of(finding.get('matched-at') or finding.get('host') or finding.get('url')),str(info.get('name') or finding.get('template-id') or 'unknown'))
+    for p in Path('artifacts').glob('manual-*.json'):
+        try:
+            d=json.loads(p.read_text()); out[d['label']]=d
+        except Exception: pass
     return out
-
+def nuclei_records(d):
+    out={}; probes=probe_disposition(); labels={'laravel-env':'crapi-env','generic-env':'crapi-env','codeigniter-env':'crapi-env','wordpress-plugin-detect':'webgoat-wordpress-plugin'}
+    for line in (d/'nuclei.jsonl').read_text().splitlines():
+      if not line.strip():continue
+      f=json.loads(line); info=f.get('info') or {}; tid=f.get('template-id','unknown'); cls=info.get('classification') or {}
+      ev=str(info.get('name') or tid)
+      if labels.get(tid) in probes and probes[labels[tid]].get('likely_false_positive'): ev+=' (إنذار كاذب مرجّح: مطابق للضابط العشوائي)'
+      add(out,severity(info.get('severity'),'nuclei'),norm('nuclei',info.get('name'),cls.get('cwe-id')),path_of(f.get('matched-at') or f.get('host') or f.get('url')),ev)
+    return out
 def burhan_records(d):
     out={}; data=json.loads((d/'burhan.json').read_text())
-    for finding in data.get('findings',[]):
-        typ=cwe_type(finding.get('cwe') or finding.get('cwe_id'),f"NO-CWE|BURHAN:{finding.get('type','unknown')}")
-        add(out,severity(finding.get('severity'),'burhan'),typ,path_of(finding.get('url')),str(finding.get('type','unknown')))
+    for f in data.get('findings',[]):
+      typ=f.get('type','unknown'); add(out,severity(f.get('severity'),'burhan'),norm('burhan','',[(f.get('compliance') or {}).get('cwe')],typ),path_of(f.get('url')),typ)
     return out
-
-matrix=[]; summary={}
+matrix=[]; summary={}; excluded=0
 for d in sorted(Path('artifacts').iterdir()):
-    if not d.is_dir() or not (d/'zap.json').exists(): continue
-    tools={'zap':zap_records(d),'nuclei':nuclei_records(d),'burhan':burhan_records(d)}
-    summary[d.name]={}
+    if not d.is_dir() or not (d/'zap.json').exists():continue
+    tools={'zap':zap_records(d),'nuclei':nuclei_records(d),'burhan':burhan_records(d)}; summary[d.name]={}
     for tool,records in tools.items():
-        summary[d.name][tool]={sev:len(records.get(sev,{})) for sev in SEVERITIES}
-        summary[d.name][tool]['total']=sum(len(records.get(sev,{})) for sev in SEVERITIES)
+      summary[d.name][tool]={}
+      for sev in SEVERITIES:
+        groups=records.get(sev,{})
+        summary[d.name][tool][sev]={'distinct_types':len(groups),'paths':sum(len(v) for v in groups.values())}
+      summary[d.name][tool]['total_types']=len({t for sev in SEVERITIES for t in records.get(sev,{})})
+      summary[d.name][tool]['total_paths']=sum(len(v) for sev in SEVERITIES for v in records.get(sev,{}).values())
     for sev in SEVERITIES:
-        keys=set().union(*(tools[t].get(sev,{}) for t in tools))
-        for typ,path in sorted(keys):
-            z=tools['zap'].get(sev,{}).get((typ,path)); n=tools['nuclei'].get(sev,{}).get((typ,path)); b=tools['burhan'].get(sev,{}).get((typ,path))
-            gap=(sev!='info' and (z is not None or n is not None) and b is None)
-            matrix.append({'target':d.name,'severity':sev,'standard_type':typ,'path':path,'zap':z is not None,'nuclei':n is not None,'burhan':b is not None,'evidence':{'zap':z,'nuclei':n,'burhan':b},'gap_for_burhan':gap,'info_is_vulnerability':False if sev=='info' else True,'zap_mode':'baseline'})
-Path('artifacts/comparison-matrix.json').write_text(json.dumps(matrix,indent=2,sort_keys=True))
-Path('artifacts/comparison-summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True))
-lines=['# ZAP baseline vs Nuclei vs Burhan proof','', '| Target | Severity | Standard type | Path | ZAP | Nuclei | Burhan proof | Evidence | Gap for Burhan? |','|---|---|---|---|---:|---:|---:|---|---|']
-for row in matrix:
-    ev='<br>'.join(f"{k}: {v}" for k,v in row['evidence'].items() if v).replace('|','\\|') or 'none'
-    lines.append(f"| {row['target']} | {row['severity']} | {row['standard_type']} | {row['path']} | {int(row['zap'])} | {int(row['nuclei'])} | {int(row['burhan'])} | {ev} | {'yes' if row['gap_for_burhan'] else 'no'} |")
-Path('artifacts/comparison-table.md').write_text('\n'.join(lines)+'\n')
-print('\n'.join(lines))
+      types=set().union(*(tools[t].get(sev,{}) for t in tools))
+      for typ in sorted(types):
+        groups={t:tools[t].get(sev,{}).get(typ,{}) for t in tools}
+        zpaths=sorted(groups['zap']); npaths=sorted(groups['nuclei']); bpaths=sorted(groups['burhan'])
+        ev=sorted(set(list(groups['zap'].values())+list(groups['nuclei'].values())+list(groups['burhan'].values())))
+        gap=sev!='info' and bool(zpaths or npaths) and not bpaths
+        matrix.append({'target':d.name,'severity':sev,'standard_type':typ,'zap_paths':zpaths,'nuclei_paths':npaths,'burhan_paths':bpaths,'evidence':ev,'gap_for_burhan':gap,'info_is_vulnerability':sev!='info','zap_mode':'baseline'})
+    raw=json.loads((d/'burhan.json').read_text())
+    excluded+=sum(1 for f in raw.get('findings',[]) if path_of(f.get('url')) in BAD_PATHS)
+summary['_normalization']={'excluded_extracted_paths_count':excluded,'excluded_paths':sorted(BAD_PATHS),'burhan_grouping':'distinct standard_type with path counts'}
+Path('artifacts/comparison-matrix.json').write_text(json.dumps(matrix,indent=2,sort_keys=True,ensure_ascii=False))
+Path('artifacts/comparison-summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True,ensure_ascii=False))
+lines=['# ZAP baseline vs Nuclei vs Burhan proof','', '| Target | Severity | Standard type | ZAP paths | Nuclei paths | Burhan paths | Evidence | Gap for Burhan? |','|---|---|---|---:|---:|---:|---|---|']
+for r in matrix:
+  ev='<br>'.join(sorted(set(r['evidence']))).replace('|','\\|') or 'none'
+  lines.append(f"| {r['target']} | {r['severity']} | {r['standard_type']} | {len(r['zap_paths'])} | {len(r['nuclei_paths'])} | {len(r['burhan_paths'])} | {ev} | {'yes' if r['gap_for_burhan'] else 'no'} |")
+Path('artifacts/comparison-table.md').write_text('\n'.join(lines)+'\n'); print('\n'.join(lines))
 PY
