@@ -747,3 +747,23 @@ jobs:
           python3 scripts/repro_attest.py --tag a --out-dir "$RUNNER_TEMP/repro"
           python3 scripts/repro_attest.py --tag b --out-dir "$RUNNER_TEMP/repro"
           python3 scripts/repro_attest.py --compare "$RUNNER_TEMP/repro"
+
+  docker-image:
+    name: Docker image (non-root runtime contract)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Dockerfile
+        run: docker build --tag burhan-ci:${{ github.sha }} .
+
+      - name: Run image as non-root and verify writable state path
+        run: |
+          set -euo pipefail
+          image="burhan-ci:${{ github.sha }}"
+          uid="$(docker run --rm --entrypoint /usr/bin/id "$image" -u)"
+          test "$uid" != 0
+          test "$uid" = 10001
+          docker run --rm --entrypoint /bin/sh "$image" -c \
+            'test "$(id -u)" = 10001 && touch /var/lib/burhan/ci-write-probe && test -f /var/lib/burhan/ci-write-probe'
+          printf 'container_uid=%s\n' "$uid"
