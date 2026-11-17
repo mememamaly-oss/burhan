@@ -116,12 +116,14 @@ def fetch(path):
     return {'url':url,'status':int(status) if status.isdigit() else 0,
             'body_sha256':hashlib.sha256(body).hexdigest(),
             'first_200_bytes':body[:200].decode('utf-8','replace'),
-            'body_length':len(body),'curl_rc':p.returncode}
+            'body_length':len(body),'curl_rc':p.returncode,
+            'wordpress_plugin_path_marker':(b'/plugins/' in body or b'wp-content/plugins' in body)}
 target=fetch(target_path); random=fetch(random_path)
 same=(target['status']==random['status'] and target['body_sha256']==random['body_sha256'])
+wp_false=(label=='webgoat-wordpress-plugin' and not target['wordpress_plugin_path_marker'])
 result={'label':label,'target':target,'random_control':random,
-        'likely_false_positive':same,
-        'disposition':'إنذار كاذب مرجّح: الهدف والمسار العشوائي متطابقان في الحالة والبصمة' if same else 'مختلف عن الضابط العشوائي'}
+        'likely_false_positive':(same or wp_false),
+        'disposition':('إنذار كاذب مرجّح: لا توجد مؤشرات WordPress/plugin في جسم WebGoat' if wp_false else ('إنذار كاذب مرجّح: الهدف والمسار العشوائي متطابقان في الحالة والبصمة' if same else 'مختلف عن الضابط العشوائي'))}
 open(out,'w').write(json.dumps(result,ensure_ascii=False,indent=2))
 print(json.dumps(result,ensure_ascii=False))
 PY
@@ -222,7 +224,9 @@ def norm(a):
     return 'NO-CWE|WASC-'+str(a.get('wascid') or '-1')
 rows=[]
 for a in data.get('alerts',[]):
-    rows.append({'severity':str(a.get('riskdesc') or 'info').split('(',1)[0].strip().lower(),'standard_type':norm(a),'cwe':a.get('cweid'),'path':a.get('uri'),'name':a.get('name')})
+    sev=str(a.get('riskdesc') or 'info').split('(',1)[0].strip().lower()
+    if sev.startswith('inform'): sev='info'
+    rows.append({'severity':sev,'standard_type':norm(a),'cwe':a.get('cweid'),'path':a.get('uri'),'name':a.get('name')})
 Path('artifacts',name,'zap-active-types.json').write_text(json.dumps(rows,indent=2,ensure_ascii=False))
 PY
     docker rm -f zap-active >/dev/null
