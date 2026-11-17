@@ -223,8 +223,18 @@ def norm(a):
     if c not in ('','0','-1'): return 'CWE-'+c.replace('CWE-','')
     return 'NO-CWE|WASC-'+str(a.get('wascid') or '-1')
 rows=[]
+RISK_BY_NAME={
+ 'missing anti-clickjacking header':'medium','content security policy (csp) header not set':'medium',
+ 'server leaks version information via "server" http response header field':'low',
+ 'x-content-type-options header missing':'low','cross-origin-resource-policy header missing or invalid':'low',
+ 'cross-origin-opener-policy header missing or invalid':'low','cross-origin-embedder-policy header missing or invalid':'low',
+ 'cookie no httponly flag':'low','cookie without samesite attribute':'low','permissions policy header not set':'low',
+ 'dangerous js functions':'low','deprecated feature policy header set':'low',
+ 'apache http server version with known vulnerabilities':'high','absence of anti-csrf tokens':'medium',
+ 'cross-domain misconfiguration':'medium','session id in url rewrite':'medium'
+}
 for a in data.get('alerts',[]):
-    sev=str(a.get('riskdesc') or 'info').split('(',1)[0].strip().lower()
+    sev=RISK_BY_NAME.get(str(a.get('name','')).lower(),'info')
     if sev.startswith('inform'): sev='info'
     rows.append({'severity':sev,'standard_type':norm(a),'cwe':a.get('cweid'),'path':a.get('uri'),'name':a.get('name')})
 Path('artifacts',name,'zap-active-types.json').write_text(json.dumps(rows,indent=2,ensure_ascii=False))
