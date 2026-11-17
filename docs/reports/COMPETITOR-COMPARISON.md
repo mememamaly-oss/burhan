@@ -14,7 +14,7 @@
 
 كل رقم هو عدد المسارات المتميزة داخل النوع المعياري، وليس عدد التنبيهات الخام. جُمعت نتائج Burhan حسب النوع المعياري ثم عُرض عدد المسارات؛ لذلك لا يتكرر النوع بسبب كل مسار. صُنفت `info` منفصلة ولا تدخل في حساب فجوة Burhan. `NO-CWE` تعني أن الأداة لم تقدم CWE صالحًا، ولا يجري اختراع CWE بديل.
 
-`SECURITY_HEADERS` تصنيف مشترك يغطي missing_security_headers في Burhan وتنبيهات CSP وclickjacking وX-Content-Type-Options في ZAP. استُبعدت 3 مسارات مستخرجة تالفة من قياس Burhan: `/static/js/'),B=f('` و`/{href}`؛ وعدّ الاستبعاد محفوظ في summary.
+`SECURITY_HEADERS` تصنيف مشترك يغطي missing_security_headers في Burhan وتنبيهات CSP وclickjacking وX-Content-Type-Options في ZAP. استُبعدت 3 مسارات مستخرجة تالفة من قياس Burhan: `/static/js/'),B=f('` و`/{{href}}`؛ وعدّ الاستبعاد محفوظ في summary.
 
 ## جدول baseline المجمّع
 
@@ -103,9 +103,9 @@
 
 | Target | Duration (s) | Requests | Alerts | Spider timeout | Active timeout | Quality |
 |---|---:|---:|---:|---|---|---|
-| crapi | 114 | 779 | 77 | no | no | complete |
-| dvwa | 142 | 2018 | 177 | no | no | complete |
-| juice-shop | 207 | 3944 | 235 | no | yes | partial-time-bounded |
+| crapi | 134 | 779 | 77 | no | no | complete |
+| dvwa | 185 | 2018 | 177 | no | no | complete |
+| juice-shop | 212 | 3944 | 235 | no | yes | partial-time-bounded |
 | webgoat | 123 | 2948 | 128 | no | no | complete |
 
 | Target | Severity | Standard type | CWE | Active paths |
@@ -114,34 +114,36 @@
 | crapi | info | CWE-497 | 497 | 1 |
 | crapi | info | NO-CWE|WASC--1 | -1 | 1 |
 | crapi | info | NO-CWE|WASC-0 | 0 | 1 |
-| crapi | info | SECURITY_HEADERS | 1021 | 1 |
-| crapi | info | SECURITY_HEADERS | 693 | 1 |
-| dvwa | info | CWE-1004 | 1004 | 1 |
-| dvwa | info | CWE-1275 | 1275 | 1 |
+| crapi | low | CWE-497 | 497 | 1 |
+| crapi | low | SECURITY_HEADERS | 693 | 1 |
+| crapi | medium | SECURITY_HEADERS | 1021 | 1 |
+| crapi | medium | SECURITY_HEADERS | 693 | 1 |
+| dvwa | high | CWE-1395 | 1395 | 1 |
 | dvwa | info | CWE-1295 | 1295 | 1 |
-| dvwa | info | CWE-1395 | 1395 | 1 |
 | dvwa | info | CWE-311 | 311 | 1 |
 | dvwa | info | CWE-497 | 497 | 1 |
 | dvwa | info | CWE-548 | 548 | 1 |
 | dvwa | info | CWE-615 | 615 | 1 |
 | dvwa | info | NO-CWE|WASC--1 | -1 | 1 |
 | dvwa | info | NO-CWE|WASC-0 | 0 | 1 |
-| dvwa | info | SECURITY_HEADERS | 1021 | 1 |
-| dvwa | info | SECURITY_HEADERS | 693 | 1 |
-| juice-shop | info | CWE-264 | 264 | 1 |
+| dvwa | low | CWE-1004 | 1004 | 1 |
+| dvwa | low | CWE-1275 | 1275 | 1 |
+| dvwa | low | CWE-497 | 497 | 1 |
+| dvwa | low | SECURITY_HEADERS | 693 | 1 |
+| dvwa | medium | SECURITY_HEADERS | 1021 | 1 |
+| dvwa | medium | SECURITY_HEADERS | 693 | 1 |
 | juice-shop | info | NO-CWE|WASC--1 | -1 | 1 |
-| juice-shop | info | SECURITY_HEADERS | 693 | 1 |
-| webgoat | info | CWE-1004 | 1004 | 1 |
-| webgoat | info | CWE-1275 | 1275 | 1 |
+| juice-shop | medium | CWE-264 | 264 | 1 |
+| juice-shop | medium | SECURITY_HEADERS | 693 | 1 |
 | webgoat | info | CWE-20 | 20 | 1 |
-| webgoat | info | CWE-352 | 352 | 1 |
-| webgoat | info | CWE-598 | 598 | 1 |
-| webgoat | info | CWE-89 | 89 | 1 |
 | webgoat | info | NO-CWE|WASC--1 | -1 | 1 |
 | webgoat | info | NO-CWE|WASC-0 | 0 | 1 |
-| webgoat | info | SECURITY_HEADERS | 1021 | 1 |
-| webgoat | info | SECURITY_HEADERS | 693 | 1 |
-
+| webgoat | low | CWE-1004 | 1004 | 1 |
+| webgoat | low | CWE-1275 | 1275 | 1 |
+| webgoat | low | SECURITY_HEADERS | 693 | 1 |
+| webgoat | medium | CWE-352 | 352 | 1 |
+| webgoat | medium | SECURITY_HEADERS | 1021 | 1 |
+| webgoat | medium | SECURITY_HEADERS | 693 | 1 |
 Juice Shop لم يكتمل active scan خلال نافذة 180 ثانية؛ لذلك وسمت نتيجته جزئية ولم تُقدّم كاكتمال.
 
 ## التحقق اليدوي من إنذارات Nuclei المشبوهة
