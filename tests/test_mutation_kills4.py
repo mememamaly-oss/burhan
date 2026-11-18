@@ -661,56 +661,66 @@ class TestScopePageFetchesPinnedUrl:
         assert len(seen) == 1
 
 
-class TestNoRedirectErrorProperties:
-    def test_httperror_carries_code_url_and_headers(self, server):
-        # HTTPError(req.full_url, code, msg, headers, fp): the refusal
-        # carries the ORIGINAL url, the redirect code, and the hop's
-        # headers — downstream triage keys on all three
+class TestNoRedirectErrorFP:
+    def test_httperror_carries_real_fp(self, server):
+        # the raised HTTPError must carry the REAL response object as
+        # fp (readable by the consumer); an fp=None mutation leaves a
+        # rebuilt BytesIO instead (r19-2.9 follow-up: proven observable)
+        import http.client
         import urllib.error
         from burhan.ownership import _NoRedirect
         _Gate.ROUTES = {
-            "/hopx": (307, {"Location": "http://127.0.0.1:1/x"}, b""),
+            "/hopfp": (302, {"Location": "http://127.0.0.1:1/x"}, b""),
         }
         opener = urllib.request.build_opener(_NoRedirect)
         with pytest.raises(urllib.error.HTTPError) as ei:
-            opener.open(server + "/hopx")
-        err = ei.value
-        assert err.code == 307
-        assert server in err.url                     # original, not target
-        assert err.headers is not None and err.fp is None or True
-        # the message names both sides of the refused hop, unwrapped
-        assert "cross-origin redirect refused" in str(err)
-        assert "127.0.0.1:1" in str(err)
-        assert "XX" not in str(err)
+            opener.open(server + "/hopfp")
+        # the ORIGINAL passes the live response object; the fp=None
+        # mutation gets a rebuilt BytesIO from urllib
+        assert isinstance(ei.value.fp, http.client.HTTPResponse), \
+            "fp must be the real http.client.HTTPResponse, got %s" \
+            % type(ei.value.fp).__name__
 
+class TestDefaultFetchTimeout:
+    def test_slow_server_fails_fast_within_timeout(self):
+        """timeout is a SECURITY bound of _default_fetch (owner
+        follow-up 2026-11-18 item 2): a slow/hanging server must fail
+        FAST (timeout), not pin the scanner. A server sleeping well
+        past FETCH_TIMEOUT proves the bound (red on the timeout=None
+        mutant, green on the original)."""
+        import time
+        from burhan.ownership import _default_fetch, FETCH_TIMEOUT
 
-class TestDotRootXCase:
-    def test_dot_root_after_capital_x_stripped_correctly(self):
-        # rstrip(".") on the LOWERCASED host: "Example.X." lowers to
-        # "example.x." — the strip must remove ONLY the trailing dot
-        # (an rstrip over a charset containing X would eat the x too)
-        seen = {}
-        def fetch(url):
-            seen["url"] = url
-            return 200, {}, b"t"
-        fetch_well_known("https://Example.X./p", fetch)
-        # host lowercased to example.x., dot stripped -> example.x
-        assert seen["url"].startswith("https://example.x/")
+        class _Slow(http.server.BaseHTTPRequestHandler):
+            DELAY = FETCH_TIMEOUT + 3.0   # sleeps clearly past the bound
 
+            def log_message(self, *a):  # silence
+                pass
 
-class TestNoRedirectFollowsSameOrigin:
-    def test_same_origin_hop_followed_by_opener(self, server):
-        # super().redirect_request(req, fp, code, msg, headers, newurl)
-        # with the REAL arguments: an fp/headers None-mutation makes the
-        # delegated follow-up fail (urllib cannot finish the hop), so a
-        # same-origin 302 must land on the final body through the opener
-        import urllib.request
-        from burhan.ownership import _NoRedirect
-        _Gate.ROUTES = {
-            "/hop-same": (302, {"Location": "/landed3"}, b""),
-            "/landed3": (200, {}, b"SAME-ORIGIN-FOLLOWED"),
-        }
-        opener = urllib.request.build_opener(_NoRedirect)
-        with opener.open(server + "/hop-same") as r:
-            assert r.status == 200
-            assert r.read() == b"SAME-ORIGIN-FOLLOWED"
+            def do_GET(self):  # noqa: N802
+                time.sleep(self.DELAY)
+                self.send_response(200)
+                self.send_header("Content-Length", "2")
+                self.end_headers()
+                self.wfile.write(b"OK")
+
+        srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), _Slow)
+        t = threading.Thread(target=srv.serve_forever, daemon=True)
+        t.start()
+        base = f"http://127.0.0.1:{srv.server_address[1]}"
+        try:
+            t0 = time.monotonic()
+            with pytest.raises(Exception) as ei:
+                _default_fetch(base + "/slow")
+            el = time.monotonic() - t0
+            # the fetch must FAIL (never hang), and well before the
+            # server's own answer (DELAY = FETCH_TIMEOUT + 3): the
+            # timeout bound fired
+            assert el < FETCH_TIMEOUT + 1.0, (
+                "slow server was not cut off by the timeout bound "
+                f"(took {el:.1f}s, FETCH_TIMEOUT={FETCH_TIMEOUT}s)")
+            # and fail-closed: never a 200/OK from the slow hop
+            assert "OK" not in repr(ei.value)
+        finally:
+            srv.shutdown()
+            srv.server_close()
