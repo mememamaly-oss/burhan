@@ -218,6 +218,58 @@ JS_PATTERNS = [
 ]
 QUERY_RE = re.compile(r"[?&]([A-Za-z_][\w]*)=([^&#\s]*)")
 
+# SPA clients build the injectable URL as a template whose VALUE is
+# interpolated: `/rest/products/search?q=${criteria}` or
+# '/rest/products/search?q=' + criteria. JS_PATTERNS' backtick rule plus
+# plausible_js_url reject any `${`, so both the endpoint and its parameter
+# disappear (the Juice Shop search shape). The PATH and the parameter NAME
+# are static. Harvest those and nothing else — no fishing in minified code.
+_JS_INTERP_QUERY = re.compile(
+    r"`(/[^`$?\\\s]{1,160})\?([A-Za-z_][\w-]{0,40})=\$\{[A-Za-z_$][\w$.]{0,60}\}`"
+)
+_JS_CONCAT_QUERY = re.compile(
+    r"""['"](/[^'"$?\\\s]{1,160})\?([A-Za-z_][\w-]{0,40})=['"]\s*\+"""
+)
+# Leaf suffixes that are files, not injectable routes. Independent of
+# _SKIP_AS_PAGE (that tuple is defined later for the page-fetch gate).
+_INTERP_STATIC_LEAF = (
+    ".css", ".ico", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff",
+    ".woff2", ".ttf", ".otf", ".eot", ".mp4", ".webm", ".webp",
+    ".js", ".mjs", ".cjs", ".map", ".json", ".html", ".htm", ".txt",
+    ".xml", ".pdf", ".wasm",
+)
+
+
+def js_interpolated_query_urls(body: str) -> list[str]:
+    """Return `path?name=` for SPA query templates, source order, de-duplicated.
+
+    Only a single static parameter name whose value is one interpolation or
+    a trailing concatenation. Paths that fail plausible_js_url, or whose
+    leaf is a static asset, are rejected.
+    """
+    if not body:
+        return []
+    hits = []
+    for rx in (_JS_INTERP_QUERY, _JS_CONCAT_QUERY):
+        for m in rx.finditer(body):
+            hits.append((m.start(), m.group(1), m.group(2)))
+    hits.sort(key=lambda t: t[0])
+    out: list[str] = []
+    seen: set[str] = set()
+    for _pos, path, name in hits:
+        if not plausible_js_url(path):
+            continue
+        leaf = path.rstrip("/").rsplit("/", 1)[-1].lower()
+        if any(leaf.endswith(ext) for ext in _INTERP_STATIC_LEAF):
+            continue
+        url = f"{path}?{name}="
+        if url in seen:
+            continue
+        seen.add(url)
+        out.append(url)
+    return out
+
+
 # DISC-06 (live-caught on ginandjuice.shop): the XXE surface on /catalog/product/stock
 # only exists for XML bodies that JavaScript builds at runtime (xmlStockCheckPayload.js
 # overrides Content-Type to application/xml and wraps form fields in <stockCheck> XML).
@@ -452,6 +504,26 @@ class DiscoveryEngine:
             plist.append(pobj)
         clean = urllib.parse.urlunsplit((p.scheme, p.netloc, p.path, "", ""))
         return Endpoint(url=clean, method=method, parameters=plist, source=source)
+
+    def _absorb_interpolated_queries(self, body, base, seed_host, endpoints):
+        """Record SPA interpolated query endpoints. Tagged spa:interp-query.
+
+        They are NOT queued as page fetches. The orchestrator holds the tag
+        out of the battery unless --spa-query is set, so a default scan's
+        request budget (and the Juice Shop floor) does not move.
+        """
+        for url in js_interpolated_query_urls(body or ""):
+            n = self._normalize(base, url)
+            if not n or urllib.parse.urlsplit(n).netloc != seed_host:
+                continue
+            ep = self._mk_endpoint(n, DiscoverySource.JS_STATIC)
+            if not ep.parameters:
+                continue
+            if "spa:interp-query" not in ep.tags:
+                ep.tags.append("spa:interp-query")
+            if ep.id not in endpoints:
+                endpoints[ep.id] = ep
+
 
     def crawl(self, seed_url: str, extra_seeds: list | None = None, exclude_urls: list | None = None):
         """BFS crawl same-host; returns (endpoints, js_findings, crawl_stats).
@@ -736,6 +808,7 @@ class DiscoveryEngine:
                             js_hits.append(match)
                             e4 = self._mk_endpoint(n, DiscoverySource.JS_STATIC)
                             if e4.id not in endpoints: endpoints[e4.id] = e4
+                self._absorb_interpolated_queries(resp.body, link_base, seed_host, endpoints)
                 # DISC-06: learn JS-driven XML request transformations (XXE surface)
                 if _JS_XML_CT.search(resp.body):
                     for root in _JS_XML_ROOT.findall(resp.body):
@@ -802,6 +875,7 @@ class DiscoveryEngine:
                         if n and urllib.parse.urlsplit(n).netloc == seed_host:
                             e5 = self._mk_endpoint(n, DiscoverySource.JS_STATIC)
                             if e5.id not in endpoints: endpoints[e5.id] = e5
+                    self._absorb_interpolated_queries(blk, link_base, seed_host, endpoints)
         # ---- ENG-11 (Phase 56, live-caught during suite-isolation work): JS
         # assets discovered as ENDPOINTS (link/script-src extraction) but never
         # PAGE-FETCHED (the BFS page budget exhausted before their queue position)
@@ -828,6 +902,7 @@ class DiscoveryEngine:
                         js_hits.append(match)
                         e4 = self._mk_endpoint(n, DiscoverySource.JS_STATIC)
                         if e4.id not in endpoints: endpoints[e4.id] = e4
+            self._absorb_interpolated_queries(resp.body, ep.url, seed_host, endpoints)
             # V411-WS-DISC-2: same observed-channel harvest for tail-fetched JS
             for wu in observe_ws_urls(resp.body):
                 if wu not in self.ws_observed:

@@ -1,14 +1,31 @@
 # Burhan — DAST Platform (axes 1-18, final build v5.0.0 — the Burhan rename release)
 
-[![CI](https://github.com/mememamaly-oss/burhan/actions/workflows/ci.yml/badge.svg)](https://github.com/memamaly-oss/Burhan/actions/workflows/ci.yml)
+[![CI](https://github.com/mememamaly-oss/burhan/actions/workflows/ci.yml/badge.svg)](https://github.com/mememamaly-oss/burhan/actions/workflows/ci.yml)
 [![License: PolyForm Shield 1.0.0](https://img.shields.io/badge/License-PolyForm--Shield--1.0.0-orange)](LICENSE)
-[![Release](https://img.shields.io/badge/release-v5.0.0-blue)](https://github.com/mememamaly-oss/burhan/releases)
+[![Release](https://img.shields.io/badge/release-v5.2.0-blue)](https://github.com/mememamaly-oss/burhan/releases)
 
 منصة فحص اختراق تطبيقات الويب الآلي (DAST) — المحرك (Python stdlib نقي) + تطبيق
 إدارة SaaS (Next.js). هذا المستودع مُنظّف تشغيلياً: كود المحاور 1-18 فقط.
 
 كل نتيجة فحص موقّعة (Ed25519 فوق جذر Merkle فوق النتائج) وقابلة للتحقق
 المستقل بلا أي كود من هذا المشروع — انظر «سجل الشفافية» أدناه.
+
+## أثبت نتيجة واحدة
+
+التحقق لا يستورد كود المحرك. التقرير الموقّع هو مخرجات أمر `report`، لا ملف `--out` الخام.
+
+```bash
+python3 -m burhan.cli scan http://127.0.0.1:PORT --db store.db --allow-private --seed demo
+python3 -m burhan.cli report --db store.db --format json --out report.json
+pip install cryptography
+python3 tools/independent_verify.py verify-report report.json
+```
+
+الأمر الأخير يخرج 0 إذا طابق جذر Merkle والتوقيع النتائج. غيّر حرفاً واحداً داخل `findings` في `report.json` وأعد الأمر: يخرج 1. هذا هو العقد، بلا مقارنة بأدوات أخرى.
+
+معاملات الاستعلام المخبأة في قوالب SPA (`/rest/products/search?q=${criteria}`) تُسجَّل دائماً ولا تُفحَص إلا مع `--spa-query`. العلم مطفأ افتراضياً حتى تبقى أرضية Juice Shop المنشورة ثابتة تحت ميزانية الطلبات.
+
+ترخيص تجاري منفصل عن PolyForm Shield: [COMMERCIAL.md](COMMERCIAL.md).
 
 ## بنية المستودع
 

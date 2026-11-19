@@ -70,7 +70,8 @@ class ScanConfig:
                  max_requests: int = 500,
                  race: bool = False, race_parallel: int = 10,
                  race_candidates: list | None = None,
-                 race_variance: float = 0.005, symbolic=False):
+                 race_variance: float = 0.005, symbolic=False,
+                 spa_query: bool = False):
         self.allow_private = allow_private
         self.max_pages = max_pages
         # RT-07 fix (audit-rb-1 AUD-GOV-01): hard request budget. The engine had
@@ -135,6 +136,11 @@ class ScanConfig:
         # current tree; the signing path is covered by
         # tests/test_symbolic_rfc8032.py).
         self.symbolic = bool(symbolic)              # --symbolic (operator opt-in)
+        # SPA template-literal query parameters (`/rest/x?q=${v}`). Discovered
+        # always, but held OUT of the battery unless --spa-query. R19-1d showed
+        # extra map entries displace the Juice Shop verified floor under the
+        # fixed request budget; default-off keeps that floor byte-stable.
+        self.spa_query = bool(spa_query)
 
 
 class _FingerprintingProxy:
@@ -804,6 +810,17 @@ class BurhanScanner:
                          not in getattr(self, "_xhr_channel_paths", set())]
             for _xc in _xhr_channels:
                 self.coverage.discover(_xc)
+        # spa:interp-query endpoints are discovered from JS templates. Held
+        # out of passive+active unless the operator passed --spa-query, so a
+        # default scan issues no extra requests (Juice Shop floor stays put).
+        _interp = [e for e in endpoints if "spa:interp-query" in (e.tags or [])]
+        if _interp and not self.cfg.spa_query:
+            endpoints = [e for e in endpoints if "spa:interp-query" not in (e.tags or [])]
+            for _ie in _interp:
+                self.coverage.discover(_ie)
+            self.stats["spa_interp_held"] = len(_interp)
+        elif _interp:
+            self.stats["spa_interp_probed"] = len(_interp)
         for ep in endpoints:
             self.coverage.discover(ep)
         self.param_profile = ParamIntel.enrich(endpoints)
