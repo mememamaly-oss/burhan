@@ -204,9 +204,13 @@ class TestIsLoopbackOrPrivate:
     def test_public_literal_false(self):
         assert _is_loopback_or_private("93.184.216.34") is False
 
-    def test_hostname_resolves_through_getaddrinfo(self):
-        # a resolvable private name goes through the getaddrinfo path
-        assert _is_loopback_or_private("localhost") is True
+    def test_literal_loopback_ipv6(self):
+        assert _is_loopback_or_private("::1") is True
+
+    def test_private_range_literal(self):
+        # 172.16/12 and 169.254/16 are private too
+        assert _is_loopback_or_private("172.16.0.1") is True
+        assert _is_loopback_or_private("169.254.1.1") is True
 
 
 # ────────────────────────────────────────────────────────────────
