@@ -681,18 +681,24 @@ class TestNoRedirectErrorFP:
             "fp must be the real http.client.HTTPResponse, got %s" \
             % type(ei.value.fp).__name__
 
+
 class TestDefaultFetchTimeout:
-    def test_slow_server_fails_fast_within_timeout(self):
-        """timeout is a SECURITY bound of _default_fetch (owner
-        follow-up 2026-11-18 item 2): a slow/hanging server must fail
-        FAST (timeout), not pin the scanner. A server sleeping well
-        past FETCH_TIMEOUT proves the bound (red on the timeout=None
-        mutant, green on the original)."""
+    def test_slow_server_fails_fast_within_timeout(self, monkeypatch):
+        """timeout is a SECURITY bound of _default_fetch: a slow/hanging
+        server must fail FAST, not pin the scanner. FETCH_TIMEOUT is
+        monkeypatched to 1.0s (read at CALL time), the server sleeps
+        4.0s, and the fetch must die within 2.5s with a TIMEOUT-FAMILY
+        exception (type, not text). Red on the timeout=None mutant,
+        green on the original."""
         import time
-        from burhan.ownership import _default_fetch, FETCH_TIMEOUT
+        import urllib.error
+        from burhan import ownership
+        from burhan.ownership import _default_fetch
+
+        monkeypatch.setattr(ownership, "FETCH_TIMEOUT", 1.0)
 
         class _Slow(http.server.BaseHTTPRequestHandler):
-            DELAY = FETCH_TIMEOUT + 3.0   # sleeps clearly past the bound
+            DELAY = 4.0   # sleeps well past the patched 1.0s bound
 
             def log_message(self, *a):  # silence
                 pass
@@ -710,17 +716,13 @@ class TestDefaultFetchTimeout:
         base = f"http://127.0.0.1:{srv.server_address[1]}"
         try:
             t0 = time.monotonic()
-            with pytest.raises(Exception) as ei:
+            # exception TYPE, not message text: the timeout family
+            with pytest.raises((urllib.error.URLError, socket.timeout)):
                 _default_fetch(base + "/slow")
             el = time.monotonic() - t0
-            # the fetch must FAIL (never hang), and well before the
-            # server's own answer (DELAY = FETCH_TIMEOUT + 3): the
-            # timeout bound fired
-            assert el < FETCH_TIMEOUT + 1.0, (
+            assert el < 2.5, (
                 "slow server was not cut off by the timeout bound "
-                f"(took {el:.1f}s, FETCH_TIMEOUT={FETCH_TIMEOUT}s)")
-            # and fail-closed: never a 200/OK from the slow hop
-            assert "OK" not in repr(ei.value)
+                f"(took {el:.1f}s, patched FETCH_TIMEOUT=1.0s)")
         finally:
             srv.shutdown()
             srv.server_close()
