@@ -106,7 +106,18 @@ def run_benchmark(base_url="http://127.0.0.1:8777", out="results/benchmark.json"
     on an ephemeral port (determinism regardless of leftover listeners) and
     tears it down after; explicit --url targets keep OP-01 self-repair.
     ORD-002-WIRE: race=False keeps the anchored regression record; --race
-    additionally exercises the race battery (the no-regression proof run)."""
+    additionally exercises the race battery (the no-regression proof run).
+    r19-2.17 (owner order 2026-11-20 PR-A/4): an EXPLICIT --url pointing
+    at a non-loopback host is a live remote target and goes through the
+    authorization gate BEFORE any fixture logic or scanner construction —
+    `ensure_fixture` deliberately ignores remote hosts, so nothing else
+    stood between a bare --url and BurhanScanner. Loopback URLs (the
+    operator's own fixture) are exempt like every lab target."""
+    from urllib.parse import urlsplit as _urlsplit
+    _bhost = (_urlsplit(base_url).hostname or "").lower()
+    if _bhost not in ("127.0.0.1", "localhost", "::1"):
+        from burhan.authorized_targets import require_authorized
+        require_authorized(base_url)
     base_url, spawned = _benchmark_fixture(base_url)   # ENG-20 owned fixture
     try:
         return _run_benchmark_inner(base_url, out, strategy_path, timeout, label,
