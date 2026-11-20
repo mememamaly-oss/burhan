@@ -32,13 +32,18 @@ def test_unlisted_public_target_is_refused_loudly(capsys):
 
 
 def test_loopback_fixture_authorized_via_self_hosted_entry():
-    ok, reason, eid = at.authorize("http://127.0.0.1:8888")
+    # r19-2.4: the self-hosted proof now requires the EXPLICIT lab mode —
+    # the positive path pins lab_flag=True; the refusal without it is
+    # pinned in tests/test_lab_mode.py (CLI e2e included).
+    ok, reason, eid = at.authorize("http://127.0.0.1:8888", lab_flag=True)
     assert ok is True and eid == "self-hosted-fixtures"
     assert "operator's own host" in reason
 
 
 def test_private_docker_network_authorized():
-    ok, _reason, eid = at.authorize("http://172.17.0.2:3000")
+    # r19-2.4: docker-network fixtures are lab targets — lab_flag carries
+    # the mode (the env channel BURHAN_LAB_MODE covers CI containers).
+    ok, _reason, eid = at.authorize("http://172.17.0.2:3000", lab_flag=True)
     assert ok is True and eid == "self-hosted-fixtures"
 
 

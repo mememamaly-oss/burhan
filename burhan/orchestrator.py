@@ -70,8 +70,10 @@ class ScanConfig:
                  max_requests: int = 500,
                  race: bool = False, race_parallel: int = 10,
                  race_candidates: list | None = None,
-                 race_variance: float = 0.005, symbolic=False):
+                 race_variance: float = 0.005, symbolic=False,
+                 lab: bool = False):
         self.allow_private = allow_private
+        self.lab = lab   # r19-2.4: explicit lab mode (CLI --lab / env)
         self.max_pages = max_pages
         # RT-07 fix (audit-rb-1 AUD-GOV-01): hard request budget. The engine had
         # NO built-in limit — the live testasp campaign breached 1,261 requests
@@ -249,6 +251,12 @@ class BurhanScanner:
         self.vault = None         # Phase 57: opened Credential Vault (armed capture)
         self.stats = {"requests": 0, "endpoints": 0, "candidates": 0, "verified": 0, "rejected": 0,
                       "duration": 0.0}
+        # r19-2.4 (owner followup item 2): the explicit laboratory mode is
+        # RECORDED in every scan report — active flag + which channel
+        # carried it (flag / env), so a lab report is self-identifying.
+        from .lab_mode import is_lab_mode
+        _lab_active, _lab_via = is_lab_mode(getattr(cfg, "lab", False))
+        self.stats["lab_mode"] = {"active": _lab_active, "via": _lab_via}
         self._race_section = None    # AXIS-17 WIRE: set ONLY when cfg.race ran
         self._symbolic_sources: list[dict] = []  # AXIS-18: passive-baseline response
         #                                          sources, collected ONLY when
