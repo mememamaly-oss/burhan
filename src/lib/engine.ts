@@ -312,6 +312,13 @@ export async function engineStartScan(scanId: string, target: { id: string; url:
     "--timeout", String(opts.timeout),
   ];
   if (opts.allowPrivate) args.push("--allow-private");
+  // r19-2.4: the ownership gate refuses private/loopback targets without
+  // the EXPLICIT laboratory mode. The SaaS policy (normalizeScanOptions)
+  // already makes allowPrivate a server-side decision (isDemo fixture or
+  // deployment lab mode) — the same decision carries the --lab flag, so
+  // the report records stats.lab_mode and the gate passes. Non-private
+  // targets are untouched (flag absent = mode off).
+  if (opts.allowPrivate) args.push("--lab");
   if (opts.noBrowser) args.push("--no-browser");
 
   const out = fs.openSync(logPath, "a");

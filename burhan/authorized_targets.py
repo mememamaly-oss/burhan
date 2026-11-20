@@ -36,7 +36,12 @@ import urllib.parse
 import urllib.request
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_REGISTRY = os.path.join(REPO_ROOT, "authorized-targets.json")
+# r19-2: the registry path is env-overridable (BURHAN_AUTHORIZED_TARGETS)
+# for installs that pip-install the package (no repo root on disk) and for
+# tests. The default keeps pointing at the repo-root registry file.
+DEFAULT_REGISTRY = os.environ.get(
+    "BURHAN_AUTHORIZED_TARGETS",
+    os.path.join(REPO_ROOT, "authorized-targets.json"))
 FETCH_TIMEOUT = 15.0
 
 
@@ -95,6 +100,20 @@ def _host_of(base_url: str) -> str:
     # dot-root spelling (fail-closed, but a false refusal of the SAME host).
     if host.endswith("."):
         host = host[:-1]
+    # r19-2 (order 2026-11-16 item 1b): IDN unification. A URL spelled in
+    # unicode ("пример.испытание") and the same domain in punycode
+    # ("xn--e1afmkfd.xn--80akhbyknj4f") are the SAME host to every
+    # resolver and browser; the registry is ASCII/punycode. Normalize the
+    # unicode spelling TO punycode so a unicode-spelled URL cannot slip
+    # past a punycode-suffix entry's proof path (or be falsely refused).
+    # Bare-ASCII hosts pass through unchanged; anything IDNA cannot encode
+    # (an IP literal, a malformed label) keeps its original spelling and
+    # fails later against the registry as it always did (fail-closed).
+    if host and not host.isascii():
+        try:
+            host = host.encode("idna").decode("ascii")
+        except Exception:  # noqa: BLE001 — unencodable = keep, refuse later
+            pass
     return host
 
 
@@ -148,7 +167,7 @@ def _candidate_permission_sentence(page_text: str) -> str:
 
 
 def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
-              fetch=None) -> tuple[bool, str, str | None]:
+              fetch=None, lab_flag: bool = False) -> tuple[bool, str, str | None]:
     """Verdict for ONE target. Returns (ok, reason, entry_id).
 
     `fetch` is injectable for tests: fetch(url) -> page text.
@@ -161,15 +180,26 @@ def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
     fetch = fetch or _default_fetch
 
     # ---- self-hosted fixtures: the operator's own loopback/private host
+    # r19-2.4 (owner followup item 2): the self-hosted proof ALSO requires
+    # the explicit laboratory mode (CLI --lab or BURHAN_LAB_MODE=1) —
+    # without it a private target is refused loudly naming both channels,
+    # so an accidental 127.0.0.1 scan (habit, inherited CI env) can never
+    # run silently.
     if _is_loopback_or_private(host):
-        for t in reg["targets"]:
-            if t.get("kind") == "self-hosted" and \
-                    (t.get("match") or {}).get("loopback_or_private"):
-                return True, ("loopback/private target — the operator's own "
-                              "host (self-hosted fixtures: %s)"
-                              % ", ".join((t.get("covers") or [])[:3])), t["id"]
-        return False, ("loopback/private target but NO self-hosted entry in "
-                       "the registry"), None
+        from .lab_mode import is_lab_mode, refusal_reason
+        lab, _via = is_lab_mode(lab_flag)
+        if lab:
+            for t in reg["targets"]:
+                if t.get("kind") == "self-hosted" and \
+                        (t.get("match") or {}).get("loopback_or_private"):
+                    return True, ("loopback/private target — the operator's "
+                                  "own host, EXPLICIT lab mode (self-hosted "
+                                  "fixtures: %s)"
+                                  % ", ".join((t.get("covers") or [])[:3])
+                                  ), t["id"]
+        return False, (refusal_reason(host) if lab is False else
+                       "loopback/private target but NO self-hosted entry "
+                       "in the registry"), None
 
     # ---- public targets: an entry with a scan-time-verified proof
     for t in reg["targets"]:
@@ -247,6 +277,28 @@ def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
                            "does not match the registry (%s != %s) — "
                            "refusing" % (t["id"], got[:12], want[:12])), \
                 t["id"]
+        if ptype == "well_known":
+            # r19-2 (order 2026-11-16 item 1b): the target's own
+            # /.well-known/burhan-authorization.txt, fetched live, must
+            # carry the entry's token verbatim. Cross-origin redirect
+            # hops in the proof fetch are a refusal (ownership.py).
+            from .ownership import fetch_well_known, WellKnownError
+            token = proof.get("token", "")
+            try:
+                body = fetch_well_known(
+                    "https://" + host if "://" not in base_url else base_url,
+                    fetch=fetch)
+            # except WellKnownError swallowed deliberately (safe): refusal below is the observable outcome
+            except WellKnownError as e:
+                return False, ("registry entry '%s': live well-known "
+                               "fetch failed (%s) — proof NOT verified, "
+                               "refusing" % (t["id"], e)), t["id"]
+            if token and token in body:
+                return True, ("live well-known authorization file carries "
+                              "the owner's token"), t["id"]
+            return False, ("registry entry '%s': the live well-known file "
+                           "does NOT carry the authorization token — "
+                           "refusing" % t["id"]), t["id"]
         return False, ("registry entry '%s' carries an unknown proof type "
                        "%r — refusing" % (t["id"], ptype)), t["id"]
 
@@ -255,13 +307,14 @@ def authorize(base_url: str, registry_path: str = DEFAULT_REGISTRY,
 
 
 def require_authorized(base_url: str, registry_path: str = DEFAULT_REGISTRY,
-                       fetch=None) -> str:
+                       fetch=None, lab_flag: bool = False) -> str:
     """The loud gate every live-scan entry point calls BEFORE any request.
 
     Returns the entry id on success; prints the refusal banner and raises
     SystemExit(2) on any refusal — the scan process must die here.
     """
-    ok, reason, entry_id = authorize(base_url, registry_path, fetch)
+    ok, reason, entry_id = authorize(base_url, registry_path, fetch,
+                                     lab_flag=lab_flag)
     if not ok:
         banner = _banner(registry_path, "target refused", reason)
         print(banner, file=sys.stdout, flush=True)

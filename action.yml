@@ -37,6 +37,13 @@ inputs:
     description: "Allow private/loopback targets (for CI fixtures). Default false."
     required: false
     default: "false"
+  lab:
+    description: >-
+      Explicit laboratory mode (r19-2.4): REQUIRED for private/loopback
+      targets since the ownership gate refuses them without it. Records
+      stats.lab_mode in every scan report. Default false.
+    required: false
+    default: "false"
   auth-user:
     description: "Authenticated scanning — username"
     required: false
@@ -121,6 +128,13 @@ runs:
         fi
         ARGS=(--out "${{ inputs.out }}" --max-pages "${{ inputs.max-pages }}" --timeout "${{ inputs.timeout }}")
         if [ "${{ inputs.allow-private }}" = "true" ]; then ARGS+=(--allow-private); fi
+        # r19-2.4: the ownership gate refuses private/loopback targets
+        # without the EXPLICIT laboratory mode — the action's natural
+        # channel is this input, falling back to the runner env var.
+        if [ "${{ inputs.lab }}" = "true" ] || [ "${BURHAN_LAB_MODE:-}" = "1" ]; then
+          export BURHAN_LAB_MODE=1
+          ARGS+=(--lab)
+        fi
         if [ -n "${{ inputs.seed }}" ]; then ARGS+=(--seed "${{ inputs.seed }}"); fi
         if [ -n "${{ inputs.db }}" ]; then ARGS+=(--db "${{ inputs.db }}"); fi
         if [ -n "${{ inputs.auth-user }}" ]; then
