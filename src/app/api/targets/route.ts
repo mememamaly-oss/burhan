@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, requireOrgAccess, jsonError, ApiError, audit } from "@/lib/rbac";
 import { ensureDemoTarget, DEMO_TARGET_URL, DEMO_TARGET_NAME } from "@/lib/demo-target";
-import { isLocalUrl, labModeEnabled } from "@/lib/engine";
+import { isLocalUrl, labModeEnabled, strictBooleanField } from "@/lib/engine";
 
 // GET /api/targets?orgId=... — org-scoped list with scan stats
 export async function GET(req: NextRequest) {
@@ -71,7 +71,19 @@ export async function POST(req: NextRequest) {
     let url = String(body.url || "").trim();
     let name = String(body.name || "").trim();
     const description = body.description ? String(body.description).slice(0, 500) : null;
-    let isDemo = Boolean(body.isDemo);
+    // r19-2.17 (owner order 2026-11-20 PR-ب/P2-1): isDemo is a REAL boolean
+    // or absent — never coerced (Boolean("false") === true used to ARM the
+    // demo path: forced url + allowPrivate later). The shared helper
+    // throws a plain Error; mapped here to a 400 naming the field.
+    let isDemo: boolean;
+    try {
+      isDemo = strictBooleanField(body.isDemo, "isDemo");
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith("isDemo")) {
+        throw new ApiError(400, `isDemo يجب أن يكون قيمة منطقية (true/false) أو غائبًا`);
+      }
+      throw e;
+    }
 
     if (isDemo) {
       const demo = await ensureDemoTarget();
