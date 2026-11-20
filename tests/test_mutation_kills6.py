@@ -207,11 +207,16 @@ class TestLoadRegistryEncoding:
         import subprocess
         reg = tmp_path / "reg.json"
         reg.write_bytes(b'{"targets": [{"id": "t-\xc3\xbc"}]}')
+        # The child prints ONLY ASCII (hex) and signals success via its
+        # EXIT CODE: under LC_ALL=C a child's piped stdout is ascii, so
+        # printing the raw id would crash in print() (a probe defect
+        # observed on CI 2026-11-19), masking the real property under
+        # test. Hex keeps the round-trip byte-exact on every platform.
         code = (
             "import sys; sys.path.insert(0, %r); "
             "from burhan.authorized_targets import load_registry; "
             "r = load_registry(%r); "
-            "print('OK', r['targets'][0]['id'])"
+            "print('OK', r['targets'][0]['id'].encode('utf-8').hex())"
             % (os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                str(reg)))
         env = dict(os.environ)
@@ -221,9 +226,11 @@ class TestLoadRegistryEncoding:
         r = subprocess.run([sys.executable, "-c", code], env=env,
                            capture_output=True, timeout=60)
         out = (r.stdout + r.stderr).decode("utf-8", "replace")
-        assert "OK t-ü" in out, (
-            "registry with a non-ASCII id must parse under LC_ALL=C — "
-            f"the encoding kwarg is load-bearing (got: {out[-200:]!r})")
+        # 't-ü' == b't-\xc3\xbc' -> hex 742dc3bc
+        assert r.returncode == 0 and "OK 742dc3bc" in out, (
+            "registry with a non-ASCII id must parse under LC_ALL=C and "
+            "the child must exit 0 — the encoding kwarg is load-bearing "
+            f"(rc={r.returncode}, got: {out[-200:]!r})")
 
     def test_registry_reads_utf8_in_process_too(self, tmp_path):
         """The in-process half of the encoding property: whatever the
