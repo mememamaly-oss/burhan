@@ -44,7 +44,24 @@ def main() -> int:
         # round-12 part 2.2: a target may declare a local FIXTURE the runner
         # starts first (the dogfood pattern: the repo's own vulnapp). The
         # fixture is started ONLY when declared — external targets are
-        # untouched, and the authorized-targets gate still applies at scan.
+        # untouched, and the authorization verdict below is checked LIVE
+        # before any scan is built.
+        # r19-2.15 (owner order 2026-11-20 ب-2, live-caught defect): the
+        # scheduled monitor previously built BurhanScanner DIRECTLY with
+        # no require_authorized call — a registry-less config reached the
+        # network anyway (live-verified: 36 connections to an unregistered
+        # 127.0.0.1 target). The gate now runs HERE, before the scanner
+        # is constructed: a target absent from authorized-targets.json is
+        # refused with zero scan requests, exactly like the CLI/API paths.
+        from burhan.authorized_targets import authorize
+        ok, reason, entry_id = authorize(t["target"],
+                                         lab_flag=bool(t.get("lab", False)))
+        if not ok:
+            results.append({"id": t.get("id"), "target": t["target"],
+                            "exit": 2,
+                            "refused": reason,
+                            "authorized_entry": None})
+            continue
         fixture_proc = None
         fx = t.get("fixture")
         if fx:
