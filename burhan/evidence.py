@@ -634,6 +634,11 @@ def replay_finding(proof: dict, scope, bus, timeout: float = 12.0,
         return out
     req = (proof.get("requests") or [{}])[0]
     url, param = req.get("url", ""), req.get("parameter", "")
+    # r19-2.21: initialized here so the finally-block's transport count
+    # below reads a REAL value (None -> 0) on every early exit — no
+    # NameError handling needed (the quantum sweep's SILENT_EXCEPT gate
+    # rejects undocumented excepts, rightly).
+    engine = None
     try:
         engine = RequestEngine(scope, bus, timeout=timeout)
         verifier = VerificationEngine(engine, bus, oast=oast)
@@ -729,11 +734,9 @@ def replay_finding(proof: dict, scope, bus, timeout: float = 12.0,
         # count. engine.requests_sent increments once per engine.send() —
         # the single choke point every detector/verifier request goes
         # through — so this is the actual number of live requests the
-        # replay made, NOT a verdict-derived constant. Early returns above
-        # (the NOT_REPLAYABLE family) never built an engine and keep the
-        # dict default of 0.
-        try:
-            out["live_requests_sent"] = engine.requests_sent
-        except NameError:
-            out.setdefault("live_requests_sent", 0)
+        # replay made, NOT a verdict-derived constant. engine is None on
+        # every early exit (the NOT_REPLAYABLE family never built one), so
+        # those keep the honest 0.
+        out["live_requests_sent"] = (engine.requests_sent
+                                     if engine is not None else 0)
     return out
