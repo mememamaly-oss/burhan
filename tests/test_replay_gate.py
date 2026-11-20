@@ -74,9 +74,14 @@ def _proof(url):
     # sql_injection: a REPLAYABLE class (evidence.REPLAYABLE_TYPES) — the
     # engine re-executes a live request for it, which is what the mutation
     # kill needs to observe on the listener.
+    # r19-2.21: `parameter` lives INSIDE the recorded request (the shape
+    # evidence.replay_finding reads — RP-1); the old fixture put it at the
+    # proof root where the replay engine never saw it, so the sqli battery
+    # produced no candidates (sent 0).
     return {"finding_id": "F-replaytest01", "type": "sql_injection",
-            "url": url, "parameter": "q",
-            "requests": [{"method": "GET", "url": url, "status": 200}]}
+            "url": url,
+            "requests": [{"method": "GET", "url": url, "status": 200,
+                          "parameter": "q"}]}
 
 
 def _make_db(tmp, url):
@@ -167,9 +172,10 @@ def test_mutation_kill_gate_is_the_discriminator(tmp_path):
     proof/registry but the lab mode OFF, gets exit 2, `replay: REFUSED`
     and the refusal reason. That PAIR is the discriminator: neutering the
     gate makes test 1's world identical to this one (no REFUSED, no
-    gate reason), flipping its assertions. The `live_requests_sent: 1`
-    field is corroborating only (the engine reports it for replayable
-    classes); the verdict pair above is the load-bearing check."""
+    gate reason), flipping their assertions. r19-2.21: the corroborating
+    field is now the REAL transport count (>= 1 — the engine sends at
+    least the probe battery's first request), no longer a hard-coded 1;
+    the verdict pair above stays the load-bearing check."""
     port = _free_port()
     srv = _start_listener(port)
     try:
@@ -182,6 +188,8 @@ def test_mutation_kill_gate_is_the_discriminator(tmp_path):
         assert "authorization gate" not in out.lower(), out[-400:]
         assert "REFUSED" not in out, out[-400:]
         # a replayable class re-executed: the engine's own honest counter
-        assert '"live_requests_sent": 1' in out, out[-400:]
+        import re as _re
+        m = _re.search(r'"live_requests_sent":\s*(\d+)', out)
+        assert m and int(m.group(1)) >= 1, out[-400:]
     finally:
         srv.shutdown()

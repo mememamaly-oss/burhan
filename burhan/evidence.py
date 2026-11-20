@@ -724,4 +724,16 @@ def replay_finding(proof: dict, scope, bus, timeout: float = 12.0,
     except Exception as e:
         out.update(replay="REPRODUCTION_FAILED",
                    reason=f"replay engine error: {type(e).__name__}: {e}")
+    finally:
+        # r19-2.21 (supervisor 2026-11-20 item 1ب): the REAL transport-layer
+        # count. engine.requests_sent increments once per engine.send() —
+        # the single choke point every detector/verifier request goes
+        # through — so this is the actual number of live requests the
+        # replay made, NOT a verdict-derived constant. Early returns above
+        # (the NOT_REPLAYABLE family) never built an engine and keep the
+        # dict default of 0.
+        try:
+            out["live_requests_sent"] = engine.requests_sent
+        except NameError:
+            out.setdefault("live_requests_sent", 0)
     return out
