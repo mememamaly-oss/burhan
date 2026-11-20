@@ -12,7 +12,14 @@ version = "5.3.0"
 description = "Deterministic DAST web scanner with signed, independently verifiable findings (Ed25519 + Merkle proofs) and OWASP Top 10 / CWE / PCI DSS mappings"
 readme = "README.md"
 requires-python = ">=3.12"
-license = "MIT"
+# r19-2.18 (owner order 2026-11-20 PR-ج): the license line said "MIT"
+# (from commit a1ea406, the r19-3 packaging round) while the repo's
+# LICENSE file has been PolyForm Shield 1.0.0 since ff8af33 — a build
+# (python -m build) proved the wheel METADATA carried
+# "License-Expression: MIT" with the PolyForm text bundled alongside,
+# i.e. PyPI would have displayed MIT falsely. PolyForm Shield 1.0.0 has
+# no SPDX identifier, so per PEP 639 the deprecated license field stays
+# ABSENT and the license-files pointer alone carries the terms.
 license-files = ["LICENSE"]
 authors = [{ name = "Burhan project" }]
 keywords = ["security", "dast", "scanner", "web", "vulnerability"]
