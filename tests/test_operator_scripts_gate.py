@@ -87,16 +87,19 @@ def _env(tmp, registry):
 # ----------------------------------------------------- webgoat --base
 
 
-def test_webgoat_remote_base_refused(tmp_path):
+def test_webgoat_remote_base_refused(tmp_path, monkeypatch):
     """A NON-loopback --base with an empty registry: the script must
     refuse (SystemExit 2 via require_authorized) BEFORE registering a
     user or building the scanner. We drive main() in-process with a
     .invalid host (RFC 2606 — can never resolve, can never authorize)
     and assert the gate's exit, not a network error."""
-    import os
     import pytest
     reg = _registry_empty(tmp_path)
-    os.environ.update(_env(tmp_path, reg))
+    # monkeypatch (not os.environ.update): the full-suite CI run showed the
+    # manual update leaked a tmp HOME/PATH into every LATER test; the
+    # fixture restores the process env atomically on exit.
+    for k, v in _env(tmp_path, reg).items():
+        monkeypatch.setenv(k, v)
     sys.path.insert(0, str(ROOT / "scripts"))
     old_argv = sys.argv
     sys.argv = ["r19_webgoat_live_check.py",
@@ -111,8 +114,6 @@ def test_webgoat_remote_base_refused(tmp_path):
     finally:
         sys.argv = old_argv
         sys.path.remove(str(ROOT / "scripts"))
-        for k in ("BURHAN_AUTHORIZED_TARGETS",):
-            os.environ.pop(k, None)
 
 
 def test_webgoat_loopback_default_untouched(tmp_path):
@@ -216,7 +217,7 @@ def test_benchmark_loopback_url_exempt_from_gate(tmp_path):
         (r.returncode, out[-300:])
 
 
-def test_mutation_kill_gate_removed_from_benchmark(tmp_path):
+def test_mutation_kill_gate_removed_from_benchmark(tmp_path, monkeypatch):
     """Kills the drop-the-gate mutant in run_benchmark: if the
     require_authorized call is removed, the remote --url case no longer
     exits 2 with the refusal banner — test_benchmark_remote_url_refused
@@ -225,18 +226,14 @@ def test_mutation_kill_gate_removed_from_benchmark(tmp_path):
     asserting the discriminator contract from the other side: with the
     gate present, run_benchmark('http://scanme-preflight.invalid')
     raises SystemExit(2) before touching _benchmark_fixture."""
-    import os
     sys.path.insert(0, str(ROOT))
     from burhan import cli as burhan_cli
     reg = _registry_empty(tmp_path)
-    os.environ["BURHAN_AUTHORIZED_TARGETS"] = str(reg)
-    try:
-        import pytest
-        with pytest.raises(SystemExit) as ei:
-            burhan_cli.run_benchmark("http://scanme-preflight.invalid")
-        assert ei.value.code == 2
-    finally:
-        os.environ.pop("BURHAN_AUTHORIZED_TARGETS", None)
+    monkeypatch.setenv("BURHAN_AUTHORIZED_TARGETS", str(reg))
+    import pytest
+    with pytest.raises(SystemExit) as ei:
+        burhan_cli.run_benchmark("http://scanme-preflight.invalid")
+    assert ei.value.code == 2
         # also prove the loopback exemption: no SystemExit for loopback
         # (the fixture path takes over; we do not let it run long — a
         # closed-port loopback is fine, _benchmark_fixture spawns its own)
