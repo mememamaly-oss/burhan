@@ -288,6 +288,22 @@ class ApiHandler(BaseHTTPRequestHandler):
                 return self._json(s)
         return self._json({"error": "not found", "path": u.path}, 404)
 
+    @staticmethod
+    def _strict_bool(body: dict, field: str):
+        """r19-2.14 (owner order 2026-11-20 ب-1): launch_scan's boolean
+        fields accept REAL booleans ONLY. A JSON string/number is a client
+        bug or a probe: bool("false") is True in Python, so the old
+        coercion turned an explicit "false" into ENABLED — live-verified to
+        arm lab mode (and with it allow_private) on a target the operator
+        meant to refuse. Returns (ok, value): missing -> (True, False);
+        True/False -> (True, value); anything else -> (False, None)."""
+        v = body.get(field, False)
+        if isinstance(v, bool):
+            return True, v
+        if v is None:
+            return True, False
+        return False, None
+
     def do_POST(self):
         if not self._authorized():
             return self._json({"error": "unauthorized"}, 401)
@@ -304,12 +320,24 @@ class ApiHandler(BaseHTTPRequestHandler):
                 return self._json({"error": "target is required"}, 400)
             if not target.startswith(("http://", "https://")):
                 return self._json({"error": "target must be an absolute http(s) URL"}, 400)
+            # r19-2.14: strict booleans — a non-boolean lab/allow_private is
+            # refused with 400 BEFORE any scan is built (zero requests).
+            strict_fields = {}
+            for field in ("lab", "allow_private"):
+                ok, val = self._strict_bool(body, field)
+                if not ok:
+                    return self._json({
+                        "error": f"'{field}' must be a JSON boolean "
+                                 f"(true or false), got "
+                                 f"{type(body.get(field)).__name__}: "
+                                 f"{body.get(field)!r}"}, 400)
+                strict_fields[field] = val
             res = launch_scan(self.store, target,
                               max_pages=int(body.get("max_pages", 25)),
-                              allow_private=bool(body.get("allow_private", False)),
+                              allow_private=strict_fields["allow_private"],
                               timeout=float(body.get("timeout", 12.0)),
                               seed=body.get("seed"),
-                              lab=bool(body.get("lab", False)))
+                              lab=strict_fields["lab"])
             return self._json(res, 202 if "run_id" in res else 503)
         return self._json({"error": "not found"}, 404)
 
