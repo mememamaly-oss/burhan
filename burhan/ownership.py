@@ -127,7 +127,15 @@ def _fetch_with_injectable(base_url: str, fetch) -> str:
             raise WellKnownError("well-known fetch of %s failed (%s: %s)"
                                  % (current, type(e).__name__, e)) from e
         if status in (301, 302, 303, 307, 308):
-            loc = (headers.get("Location") or "").strip()
+            # case-insensitive: _default_fetch lowercases header keys,
+            # while injected fakes (and some servers) spell "Location"
+            # capitalized — the hop decision must not depend on casing
+            loc = ""
+            for k, v in (headers or {}).items():
+                if str(k).lower() == "location":
+                    loc = v or ""
+                    break
+            loc = loc.strip()
             if not loc:
                 raise WellKnownError(
                     "redirect status %s without a Location header" % status)

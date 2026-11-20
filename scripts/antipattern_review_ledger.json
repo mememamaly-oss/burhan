@@ -2318,5 +2318,14 @@
    "round": 15,
    "code": "except Exception:  # noqa: BLE001"
   }
+  ,{
+   "id": "AP-254",
+   "file": "burhan/ownership.py",
+   "code": "break",
+   "class": "case-insensitive-location-first-match",
+   "reason": "the loop stops after the first header key whose normalized name is Location; this is bounded header selection, not verdict selection, and the redirect verdict still runs after the loop",
+   "scanner_class": "BREAK",
+   "line": 137
+  }
  ]
 }
