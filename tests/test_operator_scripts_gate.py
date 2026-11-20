@@ -203,9 +203,17 @@ def test_benchmark_loopback_url_exempt_from_gate(tmp_path):
     reg = _registry_empty(tmp_path)
     env = _env(tmp_path, reg)
     port = _free_port()   # nothing listens: fixture self-repair will act
+    # r19-2.22 (supervisor 2026-11-20 round-4 item 2): --out into tmp_path.
+    # The default out=results/benchmark.json is RELATIVE to cwd — with
+    # cwd=ROOT the fixture self-repair leg wrote results/benchmark.json
+    # into the REPO, and the later test_r15 tree-isolation battery saw it
+    # as a POLLUTANT and failed (reproduced 2/2 in the CI-mirror run;
+    # this test alone, run on a clean tree, leaves the file behind).
+    out_path = tmp_path / "benchmark-loopback.json"
     r = subprocess.run(
         [sys.executable, "-m", "burhan.cli", "benchmark",
-         "--url", f"http://127.0.0.1:{port}"],
+         "--url", f"http://127.0.0.1:{port}",
+         "--out", str(out_path)],
         capture_output=True, text=True, timeout=300,
         cwd=str(ROOT), env=env)
     out = r.stdout + r.stderr
