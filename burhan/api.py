@@ -44,7 +44,20 @@ def launch_scan(store: Store, target: str, max_pages: int = 25, allow_private: b
     the scanner is even built — an unauthorized target never gets a run_id
     and ZERO requests are sent (the API wrapper surfaces the refusal as a
     503-shaped error payload rather than exit code 2, which is the CLI's
-    channel; the web UI shows the banner text)."""
+    channel; the web UI shows the banner text).
+    r19-2.20 (supervisor 2026-11-20 item 1أ): the boolean contract is
+    enforced HERE TOO, not only at do_POST — a direct library caller
+    passing lab="false" would previously slip the string into
+    is_lab_mode/ScanConfig (live-verified: bool("false") is True armed
+    lab mode). A non-boolean returns the SAME error-payload shape as the
+    gate refusal, BEFORE the gate or any scanner construction."""
+    if lab is not True and lab is not False:
+        return {"error": "invalid argument: 'lab' must be a real boolean "
+                         f"(True or False), got {type(lab).__name__}: {lab!r}"}
+    if allow_private is not True and allow_private is not False:
+        return {"error": "invalid argument: 'allow_private' must be a real "
+                         f"boolean (True or False), got "
+                         f"{type(allow_private).__name__}: {allow_private!r}"}
     from .authorized_targets import authorize, _banner, DEFAULT_REGISTRY
     from .lab_mode import is_lab_mode
     _lab, _via = is_lab_mode(lab)
