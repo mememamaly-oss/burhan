@@ -679,7 +679,10 @@ def main():
                                   "store": store}))
                 sys.exit(0)
             if a.action == "init":
-                pw = a.password or getpass.getpass("owner password: ")
+                # CI/lab bootstrap may provide the ephemeral credential only
+                # through the environment; never put it in argv or output.
+                pw = (a.password or os.environ.get("BURHAN_OWNER_PASSWORD", "")
+                      or getpass.getpass("owner password: "))
                 og.OwnerGate.setup(store, pw)
                 print(json.dumps({"owner_gate": "installed",
                                   "note": "scans now require this password"}))
