@@ -77,7 +77,18 @@ export async function POST(req: NextRequest) {
       throw new ApiError(409, "يوجد فحص نشط على هذا الهدف بالفعل — انتظر انتهاءه أو ألغِه أولًا (تسلسل الفحوصات لكل هدف)");
     }
 
-    const options = normalizeScanOptions(body.options, { url: target.url, isDemo: target.isDemo });
+    // r19-2.17 (owner order 2026-11-20 PR-ب/P2-2): a non-boolean
+    // options.noBrowser is a CLIENT error (same strict-boolean contract as
+    // the targets route's isDemo guard) — 400, never a 500.
+    let options;
+    try {
+      options = normalizeScanOptions(body.options, { url: target.url, isDemo: target.isDemo });
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith("options.noBrowser")) {
+        throw new ApiError(400, e.message);
+      }
+      throw e;
+    }
 
     // self-healing demo target: restart the managed fixture if it is down
     if (target.isDemo) {
