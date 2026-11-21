@@ -91,8 +91,20 @@ def main() -> int:
             oast = OastServer()
             t0 = _tt.time()
             try:
-                cfg = ScanConfig(allow_private=True, max_pages=40,
-                                 timeout=12.0, oast=oast,
+                # r19-3.1 (supervisor 2026-11-21, CI macOS diagnosis): the
+                # per-target scan caps are now overridable from the target's
+                # own config entry (max_pages / timeout / browser). Defaults
+                # are UNCHANGED (40 pages / 12s / browser on) — the monitor's
+                # production contract is untouched; this exists so a test
+                # (or an operator) can bound a probe on slow hardware (the
+                # macOS ARM runner needs ~180x the Linux time for a full
+                # browser scan; the gate test only needs to prove the target
+                # is REACHED, not deep-crawled).
+                cfg = ScanConfig(allow_private=True,
+                                 max_pages=int(t.get("max_pages", 40)),
+                                 timeout=float(t.get("timeout", 12.0)),
+                                 browser=bool(t.get("browser", True)),
+                                 oast=oast,
                                  prioritize_store=t.get(
                                      "store", "results/monitor.db"))
                 sc = BurhanScanner(t["target"], cfg)

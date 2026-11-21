@@ -108,9 +108,17 @@ class TestMonitorGate:
         listener = _CountingListener(port)
         try:
             cfg = tmp_path / "monitor-config.json"
+            # r19-3.1: bounded probe — the contract under test is "the
+            # registered lab target is REACHED and scanned", not "deeply
+            # crawled". On the macOS ARM runner a full browser scan takes
+            # >180s and blew the test's subprocess timeout (CI run
+            # 44841623077: 1 failed, 825 passed). max_pages=2 + browser
+            # off keeps the proof identical on every platform.
             cfg.write_text(json.dumps({
                 "targets": [{"id": "ok", "target": f"http://127.0.0.1:{port}/",
-                             "cron": "* * * * *", "lab": True}]}),
+                             "cron": "* * * * *", "lab": True,
+                             "max_pages": 2, "timeout": 4.0,
+                             "browser": False}]}),
                 encoding="utf-8")
             reg = tmp_path / "authorized-targets.json"
             reg.write_text(json.dumps({"targets": [{
