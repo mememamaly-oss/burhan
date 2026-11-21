@@ -153,6 +153,16 @@ python3 tools/independent_verify.py verify-log transparency-log/log.jsonl \
 قبل `ff8af33` لم يكن في المستودع أي ملف ترخيص أصلاً، رغم أن المستودع كان
 عاماً منذ إنشائه في 2026-10-02.
 
+**تصحيح سطر الترخيص في التغليف (r19-2.18، أمر المالك 2026-11-20)**: حمل
+`pyproject.toml` سطر `license = "MIT"` متبقياً من جولة التغليف r19-3 (الالتزام
+`a1ea406`) — أي أن بناء `python -m build` أنتج wheel يقول ملف METADATA فيه
+`License-Expression: MIT` بينما ملف LICENSE المضمّن معه هو نص PolyForm Shield
+نفسه، فكان PyPI سيعرض «MIT» زوراً لمشروع مرخّص بـShield. السطر الآن محذوف
+عمداً ويحمل التعريفَ `license-files = ["LICENSE"]` وحده (PolyForm Shield 1.0.0
+ليس له معرّف SPDX، فالكتابة الصحيحة وفق PEP 639 هي المؤشر إلى الملف دون
+تعبير مُختلَق). تحقّق البناء بعد التصحيح: METADATA يقول
+`License-File: LICENSE` ولا يظهر «MIT» فيه إطلاقاً.
+
 ## ملفات المجتمع
 
 `CONTRIBUTING.md` · `CODE_OF_CONDUCT.md` · `SECURITY.md` (الإفصاح المسؤول
