@@ -48,6 +48,19 @@ def main() -> int:
     ap.add_argument("--max-pages", type=int, default=30)
     a = ap.parse_args()
 
+    # r19-2.17 (owner order 2026-11-20 PR-A/4): --base can name a REMOTE
+    # target, so the same entry rule as every other live entry point
+    # applies — the authorization gate runs BEFORE anything is built.
+    # Loopback bases (the documented default, the operator's own WebGoat)
+    # pass via the self-hosted entry under lab mode exactly like a scan;
+    # a remote --base must be registry-covered or the script refuses with
+    # zero requests.
+    from burhan.authorized_targets import require_authorized
+    from urllib.parse import urlsplit
+    _host = (urlsplit(a.base).hostname or "").lower()
+    if _host not in ("127.0.0.1", "localhost", "::1"):
+        require_authorized(a.base)
+
     user = f"scanbot{int(time.time()) % 100000}"
     pw = "Sc4nx9!q"
     register(a.base, user, pw)

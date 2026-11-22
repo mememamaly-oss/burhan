@@ -44,7 +44,20 @@ def launch_scan(store: Store, target: str, max_pages: int = 25, allow_private: b
     the scanner is even built — an unauthorized target never gets a run_id
     and ZERO requests are sent (the API wrapper surfaces the refusal as a
     503-shaped error payload rather than exit code 2, which is the CLI's
-    channel; the web UI shows the banner text)."""
+    channel; the web UI shows the banner text).
+    r19-2.20 (supervisor 2026-11-20 item 1أ): the boolean contract is
+    enforced HERE TOO, not only at do_POST — a direct library caller
+    passing lab="false" would previously slip the string into
+    is_lab_mode/ScanConfig (live-verified: bool("false") is True armed
+    lab mode). A non-boolean returns the SAME error-payload shape as the
+    gate refusal, BEFORE the gate or any scanner construction."""
+    if lab is not True and lab is not False:
+        return {"error": "invalid argument: 'lab' must be a real boolean "
+                         f"(True or False), got {type(lab).__name__}: {lab!r}"}
+    if allow_private is not True and allow_private is not False:
+        return {"error": "invalid argument: 'allow_private' must be a real "
+                         f"boolean (True or False), got "
+                         f"{type(allow_private).__name__}: {allow_private!r}"}
     from .authorized_targets import authorize, _banner, DEFAULT_REGISTRY
     from .lab_mode import is_lab_mode
     _lab, _via = is_lab_mode(lab)
@@ -288,6 +301,22 @@ class ApiHandler(BaseHTTPRequestHandler):
                 return self._json(s)
         return self._json({"error": "not found", "path": u.path}, 404)
 
+    @staticmethod
+    def _strict_bool(body: dict, field: str):
+        """r19-2.14 (owner order 2026-11-20 ب-1): launch_scan's boolean
+        fields accept REAL booleans ONLY. A JSON string/number is a client
+        bug or a probe: bool("false") is True in Python, so the old
+        coercion turned an explicit "false" into ENABLED — live-verified to
+        arm lab mode (and with it allow_private) on a target the operator
+        meant to refuse. Returns (ok, value): missing -> (True, False);
+        True/False -> (True, value); anything else -> (False, None)."""
+        v = body.get(field, False)
+        if isinstance(v, bool):
+            return True, v
+        if v is None:
+            return True, False
+        return False, None
+
     def do_POST(self):
         if not self._authorized():
             return self._json({"error": "unauthorized"}, 401)
@@ -304,12 +333,24 @@ class ApiHandler(BaseHTTPRequestHandler):
                 return self._json({"error": "target is required"}, 400)
             if not target.startswith(("http://", "https://")):
                 return self._json({"error": "target must be an absolute http(s) URL"}, 400)
+            # r19-2.14: strict booleans — a non-boolean lab/allow_private is
+            # refused with 400 BEFORE any scan is built (zero requests).
+            strict_fields = {}
+            for field in ("lab", "allow_private"):
+                ok, val = self._strict_bool(body, field)
+                if not ok:
+                    return self._json({
+                        "error": f"'{field}' must be a JSON boolean "
+                                 f"(true or false), got "
+                                 f"{type(body.get(field)).__name__}: "
+                                 f"{body.get(field)!r}"}, 400)
+                strict_fields[field] = val
             res = launch_scan(self.store, target,
                               max_pages=int(body.get("max_pages", 25)),
-                              allow_private=bool(body.get("allow_private", False)),
+                              allow_private=strict_fields["allow_private"],
                               timeout=float(body.get("timeout", 12.0)),
                               seed=body.get("seed"),
-                              lab=bool(body.get("lab", False)))
+                              lab=strict_fields["lab"])
             return self._json(res, 202 if "run_id" in res else 503)
         return self._json({"error": "not found"}, 404)
 
