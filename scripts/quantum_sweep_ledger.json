@@ -2607,6 +2607,28 @@
       "scanner_class": "ENTRYPOINT_UNREACHABLE",
       "line": 37,
       "origin": "r19-2 (owner order 2026-11-16 item 1b) — routing re-verified by hand: cli.py 'serve' branch calls run_server; api.run_server mounts ApiHandler; do_POST (the HTTP entry) calls launch_scan on every POST /api/scans"
+    },
+    {
+      "id": "QS-241",
+      "file": "burhan/api.py",
+      "code": "ApiHandler",
+      "class": "ENTRYPOINT_UNREACHABLE",
+      "reason": "r19-2.14 (owner order 2026-11-20 ب-1): the new strict-boolean tests import ApiHandler (the HTTP handler class) to drive the real do_POST path, which put the class name into the sweep's test-words set for the first time. Routing is REAL and unchanged: cli.py 'serve' -> run_server -> ThreadingHTTPServer(ApiHandler) — the same wiring the launch_scan ledger entry (QS-2606-era) documents; the wiring graph resolves call expressions only, so a CLASS REFERENCE (not a call) is invisible to v1.1 routing. No behavior change; the flag is an artifact of the class becoming test-visible, identical in kind to the FetchError precedent.",
+      "scanner_class": "ENTRYPOINT_UNREACHABLE",
+      "line": 0,
+      "classification": "test-visible-class",
+      "origin": "r19-2.14 strict-boolean test battery"
+    },
+    {
+      "id": "QS-242",
+      "file": "burhan/race/__init__.py",
+      "code": "register",
+      "class": "ENTRYPOINT_UNREACHABLE",
+      "reason": "r19-2.15 (owner order 2026-11-20 ب-2): the monitor-gate test references race.register (the race battery's plugin registrar) in a monkeypatch, first time the symbol appears in test words. Production routing exists through the orchestrator's race battery import (ScanConfig(race=True) -> orchestrator -> race.register at battery init); the sweep's v1.1 graph does not follow module-level registrar calls. No behavior change; ledgered under the same test-visible-symbol precedent as FetchError/QS-184.",
+      "scanner_class": "ENTRYPOINT_UNREACHABLE",
+      "line": 0,
+      "classification": "test-visible-registrar",
+      "origin": "r19-2.15 monitor-gate test battery"
     }
   ]
 }

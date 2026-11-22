@@ -106,7 +106,18 @@ def run_benchmark(base_url="http://127.0.0.1:8777", out="results/benchmark.json"
     on an ephemeral port (determinism regardless of leftover listeners) and
     tears it down after; explicit --url targets keep OP-01 self-repair.
     ORD-002-WIRE: race=False keeps the anchored regression record; --race
-    additionally exercises the race battery (the no-regression proof run)."""
+    additionally exercises the race battery (the no-regression proof run).
+    r19-2.17 (owner order 2026-11-20 PR-A/4): an EXPLICIT --url pointing
+    at a non-loopback host is a live remote target and goes through the
+    authorization gate BEFORE any fixture logic or scanner construction —
+    `ensure_fixture` deliberately ignores remote hosts, so nothing else
+    stood between a bare --url and BurhanScanner. Loopback URLs (the
+    operator's own fixture) are exempt like every lab target."""
+    from urllib.parse import urlsplit as _urlsplit
+    _bhost = (_urlsplit(base_url).hostname or "").lower()
+    if _bhost not in ("127.0.0.1", "localhost", "::1"):
+        from burhan.authorized_targets import require_authorized
+        require_authorized(base_url)
     base_url, spawned = _benchmark_fixture(base_url)   # ENG-20 owned fixture
     try:
         return _run_benchmark_inner(base_url, out, strategy_path, timeout, label,
@@ -547,12 +558,17 @@ def main():
     rpr.add_argument("--replay", action="store_true",
                      help="v4.1.0: LIVE re-execution of the proof from a clean "
                           "engine (records REPRODUCTION_VERIFIED / "
-                          "REPRODUCTION_FAILED with reason)")
+                          "REPRODUCTION_FAILED with reason). r19-2.17: this "
+                          "path goes through the SAME live authorization "
+                          "gate + per-finding rate limit as --gated (an "
+                          "unauthorized target is refused with zero live "
+                          "requests; see the gate banner)")
     rpr.add_argument("--gated", action="store_true",
-                     help="r11 Part 2: replay under the live authorized-targets "
-                          "gate + per-finding rate limit; implies --replay "
-                          "(REFUSED exits 2 with zero live requests, "
-                          "RATE_LIMITED exits 3)")
+                     help="r11 Part 2 (historical): replay under the live "
+                          "authorized-targets gate + per-finding rate "
+                          "limit. r19-2.17 made the gate UNCONDITIONAL — "
+                          "--gated is now the same path as --replay and is "
+                          "kept for compatibility with existing scripts")
     rpr.add_argument("--timeout", type=float, default=12.0)
     cm = sub.add_parser("capability-matrix", help="v4.1.0: generate "
                         "CAPABILITY_MATRIX.md from ACTUAL run data (never "
@@ -1231,11 +1247,16 @@ def main():
                                       f"runs' proof files (or its run predates v4.0.0)"}),
                   file=sys.stderr)
             sys.exit(2)
-        if getattr(a, "gated", False):
-            # --gated implies --replay (there is no gated non-replay mode)
-            # Part 2: gated replay — same engine plus the live authorization
-            # check + per-finding rate limit + identity-linked lifecycle
-            # event. Refusals exit 2 (zero live requests); rate limit exit 3.
+        if a.replay or getattr(a, "gated", False):
+            # r19-2.17 (owner order 2026-11-20 item PR-أ/3): the bare
+            # --replay path ran replay_finding with NO authorization gate —
+            # a stored proof could be re-executed against a target that has
+            # since left the registry. The gate is now UNCONDITIONAL: both
+            # --replay and --gated go through replay_finding_gated (live
+            # authorize() BEFORE any re-execution, per-finding rate limit,
+            # identity-linked lifecycle event). Refusals exit 2 with zero
+            # live requests; rate limit exits 3. --gated is kept as an
+            # accepted no-op flag so existing scripts keep working.
             from burhan.replay import replay_finding_gated, ReplayRateLimited
             try:
                 g = replay_finding_gated(proof)
@@ -1244,42 +1265,6 @@ def main():
                 raise SystemExit(3) from e
             print(json.dumps(g, indent=1, ensure_ascii=False))
             sys.exit(0 if g.get("replay") == "REPRODUCTION_VERIFIED" else 2)
-        if a.replay:
-            from urllib.parse import urlsplit
-            from burhan.core import ScopeRule, EventBus
-            from burhan.evidence import replay_finding
-            req = (proof.get("requests") or [{}])[0]
-            origin = "{0.scheme}://{0.netloc}".format(urlsplit(req.get("url", "")))
-            # OWSP-24 (OWASP campaign, caught by the Mutillidae-round gate
-            # cycle): allowed_domains must carry the HOSTNAME, never the
-            # netloc — netloc keeps the port ("127.0.0.1:8812") while
-            # _scope_ok matches against the port-free hostname, so every
-            # replay against a non-default-port target was scope-blocked
-            # (status 0). Pre-OWSP-22 the nested-scope bug masked this
-            # (allowed_domains never gated at all); the independent gating
-            # exposed the latent mismatch.
-            scope = ScopeRule(allowed_domains=[urlsplit(req.get("url", "")).hostname],
-                              allow_private=True)
-            # RP-2 (replay fidelity, 2026-10-31): OOB-dependent classes
-            # (cmdi/ssrf/xxe) verify through an OAST channel — the replay
-            # must arm one exactly like the scan did. Loopback targets get a
-            # LOCAL OastServer (zero external side effects); remote targets
-            # need a public provider, which the caller must supply — the
-            # verdict then says NOT_REPLAYABLE with the reason, never the
-            # misleading 'no longer produces a candidate'.
-            replay_oast = None
-            _host = (urlsplit(req.get("url", "")).hostname or "").lower()
-            if _host in ("127.0.0.1", "localhost", "::1"):
-                from burhan.oast import OastServer
-                replay_oast = OastServer()
-            try:
-                result = replay_finding(proof, scope, EventBus("replay"),
-                                        timeout=a.timeout, oast=replay_oast)
-            finally:
-                if replay_oast is not None:
-                    replay_oast.stop()
-            print(json.dumps(result, indent=1, ensure_ascii=False))
-            sys.exit(0 if result.get("replay") == "REPRODUCTION_VERIFIED" else 1)
         print(json.dumps(proof, indent=1, ensure_ascii=False))
         print("\n" + reproduce_command(proof))
     elif a.cmd == "sca":
