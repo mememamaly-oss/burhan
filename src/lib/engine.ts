@@ -167,6 +167,25 @@ export function isLocalUrl(raw: string): boolean {
 }
 
 /**
+ * r19-2.17 (owner order 2026-11-20, PR-ب): the strict-boolean boundary
+ * shared by the API routes. A boolean field arrives as a REAL boolean or
+ * absent — anything else (the JSON client sent "false", 0/1, null) is a
+ * 400-worthy client error, never a silent coercion. Returns the boolean
+ * (absent -> false); THROWS a plain Error naming the field and the
+ * received type otherwise (routes map it to ApiError(400, …)).
+ */
+export function strictBooleanField(
+  value: unknown,
+  field: string,
+): boolean {
+  if (value === undefined) return false;
+  if (typeof value === "boolean") return value;
+  throw new Error(
+    `${field} must be a boolean (true/false) or absent — got ${value === null ? "null" : typeof value}`,
+  );
+}
+
+/**
  * SERVER-SIDE scan network policy (audit 2026-10-23).
  *
  * Before the fix, `allowPrivate` came from the request body — any MEMBER
@@ -187,11 +206,25 @@ export function normalizeScanOptions(
 ): ScanOptions {
   const local = isLocalUrl(target.url);
   const allowPrivate = target.isDemo || (labModeEnabled() && local);
+  // r19-2.17 (owner order 2026-11-20 PR-ب/P2-2): noBrowser is a REAL
+  // boolean or absent — never coerced. Boolean("false") === true silently
+  // DISABLED the browser half of the scan (less coverage with no signal
+  // to the operator); numbers/null were silently-off masks. A non-boolean
+  // value throws a plain Error with the field name and the received type;
+  // the scans route maps it to a 400 (same contract as the targets route's
+  // isDemo guard).
+  if (input?.noBrowser !== undefined && typeof input.noBrowser !== "boolean") {
+    throw new Error(
+      `options.noBrowser must be a boolean (true/false) or absent — got ${
+        input.noBrowser === null ? "null" : typeof input.noBrowser
+      }`,
+    );
+  }
   return {
     allowPrivate,
     maxPages: Math.min(Math.max(Number(input?.maxPages) || 25, 1), 200),
     timeout: Math.min(Math.max(Number(input?.timeout) || 10, 3), 60),
-    noBrowser: Boolean(input?.noBrowser),
+    noBrowser: input?.noBrowser === true,
   };
 }
 
@@ -312,6 +345,13 @@ export async function engineStartScan(scanId: string, target: { id: string; url:
     "--timeout", String(opts.timeout),
   ];
   if (opts.allowPrivate) args.push("--allow-private");
+  // r19-2.4: the ownership gate refuses private/loopback targets without
+  // the EXPLICIT laboratory mode. The SaaS policy (normalizeScanOptions)
+  // already makes allowPrivate a server-side decision (isDemo fixture or
+  // deployment lab mode) — the same decision carries the --lab flag, so
+  // the report records stats.lab_mode and the gate passes. Non-private
+  // targets are untouched (flag absent = mode off).
+  if (opts.allowPrivate) args.push("--lab");
   if (opts.noBrowser) args.push("--no-browser");
 
   const out = fs.openSync(logPath, "a");

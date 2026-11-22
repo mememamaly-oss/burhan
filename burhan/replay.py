@@ -166,9 +166,14 @@ def replay_finding_gated(proof: dict, registry_path: str | None = None,
                        else "REPRODUCTION_NOT_REPRODUCED"
                        if verdict == "REPRODUCTION_FAILED"
                        else verdict)     # NOT_REPLAYABLE passes through as-is
+    # r19-2.21 (supervisor 2026-11-20 item 1ب): the transport-layer count
+    # from evidence.replay_finding (engine.requests_sent — one increment
+    # per engine.send()) replaces the old verdict-derived constant
+    # (1 if verdict != "NOT_REPLAYABLE" else 0), which understated real
+    # replays (14 live requests observed while the field said 1).
     return {**base, **result,
             "replay": verdict,
             "lifecycle_event": lifecycle_event,
             "linked_identity": identity,
             "registry_entry": entry_id,
-            "live_requests_sent": 1 if verdict != "NOT_REPLAYABLE" else 0}
+            "live_requests_sent": result.get("live_requests_sent", 0)}

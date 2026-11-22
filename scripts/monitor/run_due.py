@@ -21,6 +21,41 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 
+def _validated_caps(t: dict) -> tuple[dict, str | None]:
+    """r19-3.4 (supervisor order 2026-11-21 item 2): validate the
+    per-target scan caps BEFORE any scan is built. Returns (caps, err):
+    caps is a dict of the three validated values, err is a human-readable
+    rejection reason (None when valid). A target with bad caps is SKIPPED
+    with exit=3 and a clear message — never scanned with unknown values.
+
+    Rules (supervisor-specified):
+      max_pages: integer (bool rejected) in [1, 200]
+      timeout:   int or float (bool rejected) in [1, 300]
+      browser:   a REAL boolean (anything else rejected)
+    """
+    caps: dict = {}
+    mp = t.get("max_pages", 40)
+    if isinstance(mp, bool) or not isinstance(mp, int):
+        return {}, (f"max_pages must be an integer in [1, 200], "
+                    f"got {type(mp).__name__}: {mp!r}")
+    if not 1 <= mp <= 200:
+        return {}, (f"max_pages must be in [1, 200], got {mp}")
+    caps["max_pages"] = mp
+    to = t.get("timeout", 12.0)
+    if isinstance(to, bool) or not isinstance(to, (int, float)):
+        return {}, (f"timeout must be a number in [1, 300], "
+                    f"got {type(to).__name__}: {to!r}")
+    if not 1 <= float(to) <= 300:
+        return {}, (f"timeout must be in [1, 300], got {to}")
+    caps["timeout"] = float(to)
+    br = t.get("browser", True)
+    if not isinstance(br, bool):
+        return {}, (f"browser must be a real boolean, "
+                    f"got {type(br).__name__}: {br!r}")
+    caps["browser"] = br
+    return caps, None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=str(ROOT / "scripts/monitor/monitor-config.json"))
@@ -44,7 +79,24 @@ def main() -> int:
         # round-12 part 2.2: a target may declare a local FIXTURE the runner
         # starts first (the dogfood pattern: the repo's own vulnapp). The
         # fixture is started ONLY when declared — external targets are
-        # untouched, and the authorized-targets gate still applies at scan.
+        # untouched, and the authorization verdict below is checked LIVE
+        # before any scan is built.
+        # r19-2.15 (owner order 2026-11-20 ب-2, live-caught defect): the
+        # scheduled monitor previously built BurhanScanner DIRECTLY with
+        # no require_authorized call — a registry-less config reached the
+        # network anyway (live-verified: 36 connections to an unregistered
+        # 127.0.0.1 target). The gate now runs HERE, before the scanner
+        # is constructed: a target absent from authorized-targets.json is
+        # refused with zero scan requests, exactly like the CLI/API paths.
+        from burhan.authorized_targets import authorize
+        ok, reason, entry_id = authorize(t["target"],
+                                         lab_flag=bool(t.get("lab", False)))
+        if not ok:
+            results.append({"id": t.get("id"), "target": t["target"],
+                            "exit": 2,
+                            "refused": reason,
+                            "authorized_entry": None})
+            continue
         fixture_proc = None
         fx = t.get("fixture")
         if fx:
@@ -70,12 +122,35 @@ def main() -> int:
             from burhan.store import Store
             from burhan.monitor import run_monitor_cycle
 
+            caps, cap_err = _validated_caps(t)
+            if cap_err is not None:
+                # r19-3.4: bad caps -> the target is SKIPPED loudly
+                # (exit=3), never scanned with unknown values
+                # (supervisor rule: "no scan with unknown values").
+                results.append({"id": t.get("id"),
+                                "target": t.get("target", ""),
+                                "exit": 3, "skipped": cap_err})
+                continue
             st = Store(t.get("store", "results/monitor.db"))
             oast = OastServer()
             t0 = _tt.time()
             try:
-                cfg = ScanConfig(allow_private=True, max_pages=40,
-                                 timeout=12.0, oast=oast,
+                # r19-3.1 (supervisor 2026-11-21, CI macOS diagnosis): the
+                # per-target scan caps are now overridable from the target's
+                # own config entry (max_pages / timeout / browser). Defaults
+                # are UNCHANGED (40 pages / 12s / browser on) — the monitor's
+                # production contract is untouched; this exists so a test
+                # (or an operator) can bound a probe on slow hardware (the
+                # macOS ARM runner needs ~180x the Linux time for a full
+                # browser scan; the gate test only needs to prove the target
+                # is REACHED, not deep-crawled).
+                # r19-3.4: values pass _validated_caps first — types
+                # AND bounds; the raw t.get defaults never reach here.
+                cfg = ScanConfig(allow_private=True,
+                                 max_pages=caps["max_pages"],
+                                 timeout=caps["timeout"],
+                                 browser=caps["browser"],
+                                 oast=oast,
                                  prioritize_store=t.get(
                                      "store", "results/monitor.db"))
                 sc = BurhanScanner(t["target"], cfg)

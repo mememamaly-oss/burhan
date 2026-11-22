@@ -16,6 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from burhan.authorized_targets import require_authorized             # noqa: E402
 from burhan.core import ScopeRule
 from burhan.oast import make_oast
 from burhan.orchestrator import ScanConfig, BurhanScanner
@@ -29,6 +30,15 @@ TIMEOUT = float(os.environ.get("GJ_TIMEOUT", "6.0"))
 
 EV = Path("evidence/full-reverify/ginandjuice-shop")
 EV.mkdir(parents=True, exist_ok=True)
+
+# r19-2.17 (owner order 2026-11-20 PR-A/4): this script drives a LIVE
+# EXTERNAL target — the same entry rule as every other entry point: the
+# authorization gate runs BEFORE BurhanScanner is constructed. The target
+# is registry-covered (ginandjuice.shop, scope-page proof), so the normal
+# run is unchanged; what changes is that a registry without the entry (or
+# an unverified proof page) now refuses loudly with zero requests instead
+# of scanning anyway.
+require_authorized("https://ginandjuice.shop/")
 
 oast = make_oast("ginandjuice.shop", mode="auto")
 print(f"config: max_pages={MAX_PAGES} max_requests={MAX_REQ} "

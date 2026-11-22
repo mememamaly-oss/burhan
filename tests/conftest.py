@@ -31,3 +31,12 @@ if "BURHAN_OWNER_GATE" not in os.environ:
     except Exception:  # noqa: BLE001 — never break collection
         os.environ.pop("BURHAN_OWNER_GATE", None)
         os.environ.pop("BURHAN_OWNER_PASSWORD", None)
+
+# r19-2.4 (owner followup item 2): the test session IS a laboratory — every
+# suite that scans loopback fixtures (the honest-exit, SIGINT, compound-
+# fault, owner-CLI families) runs under the EXPLICIT lab mode via the env
+# channel. The mode's own negative contract (a private target WITHOUT the
+# mode is refused) is tested ISOLATED in tests/test_lab_mode.py, whose
+# CLI e2e strips this variable from the child env before each invocation
+# — the session default never leaks into the refusal tests.
+os.environ.setdefault("BURHAN_LAB_MODE", "1")

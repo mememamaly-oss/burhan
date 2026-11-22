@@ -2201,3 +2201,70 @@ stretches a PG round-trip past 50ms (observed: the adjacent test ran
 under test unchanged.
 
 - Round-by-round history: `git log`, worklog.md (current + history).
+
+## 2026-11-16 (II) — ROUND 19-2 owner follow-ups: the ownership proof gate, lab mode, and merge-day ledger (PR #119 + merges #120-#122)
+
+Owner order 2026-11-16 (items 1b, 2, and the follow-up): the target-
+ownership proof gate at every entry point, the explicit laboratory
+mode, and the same-day merge chain this record documents.
+
+PART 1b — THE OWNERSHIP PROOF GATE (burhan/ownership.py, PR #119).
+Fourth standard proof method alongside scope_page/dns_txt/signed_
+letter: the target's own /.well-known/burhan-authorization.txt,
+fetched LIVE at scan time, required to carry the registry entry's
+token verbatim. The fetch is redirect-safe and origin-pinned: urllib
+auto-redirect disabled, every hop inspected, a cross-origin hop is a
+refusal (a proof must come from the scanned host, not wherever the
+server forwards us); the proof origin is rebuilt from PARSED
+components (scheme+host+port only — no userinfo/path/query), the same
+taint-clean doctrine the registry gate uses (CodeQL py/full-ssrf
+discharges r19-2.1/r19-2.6). No storage: the file is fetched, matched,
+dropped — re-verified at every scan by design.
+
+PART 2 — THE EXPLICIT LABORATORY MODE (burhan/lab_mode.py). Scanning
+loopback/private hosts is a DIFFERENT activity from production
+scanning and must never happen by accident. Activation is explicit on
+both channels the owner named (CLI --lab, BURHAN_LAB_MODE=1 for CI/
+demo/containers); every report records stats["lab_mode"] with the
+carrying channel. Without it a private target is refused loudly
+(zero requests sent) naming both sanctioned channels.
+
+Boundary proofs run 2026-11-16 against the final #119 code (registry
+fixture, injectable fetch): (1) a public target without lab mode
+walks the PUBLIC proof path (live scope-page fetch, verbatim quote);
+(2) the same public target WITH --lab behaves identically — lab mode
+buys no public-target privilege, the verdict and entry are the same
+and the proof page is still fetched; (3) same via the env channel;
+(4) a private target without lab mode is refused loudly with ZERO
+requests sent; (5) a private target WITH lab mode and a self-hosted
+registry entry passes as the operator's own host; (6) a lookalike
+domain (evilginandjuice.shop) stays OUTSIDE the dot-bounded suffix
+match; (7) a public target whose live page dropped the pinned quote is
+refused even with lab mode on. The demo route (src/app/api/demo/scan/
+route.ts) stays pinned: DEMO_TARGET_URL is the hardcoded fixture
+(127.0.0.1:8777), the POST handler never reads the request body or
+search params, and the spawn block contains only the constant plus
+fixed flags (--allow-private --lab for the loopback fixture, per
+r19-2.5) — no client-controlled input anywhere in the spawn.
+
+MERGE-DAY LEDGER (2026-11-16, all under the standing 30/30-green-
+with-macOS full-SHA rule): #115 → #120 (e3d863c8) → #121 (c178e930,
+after update-branch to e6e6315) → #122 (25f9c442, after update-branch
+to 569a3d13). PR #119 branch updated onto main 25f9c442 → head
+8bf7eff (merge commit, CI re-run observed 30/30). #119 NOT merged
+(held per owner order); #126 NOT merged (out of authorization; an
+owner-side review comment documents that the "Nuclei: 0 findings"
+line in its comparison artifact was in fact an FTL abort — no
+templates loaded — while the earlier same-lineage run produced real
+nuclei findings 16/10/19/21; the rc-gate `case 0|1` passes nuclei's
+FTL exit 1 and the fail-closed check only asserts ZAP report files).
+Mutation campaign run8 on the final #119 code (905 mutants over
+ownership.py + authorized_targets.py + lab_mode.py, gate suite of 63
+tests, manual trampoline runner after mutmut 3.x's integrated run
+choked on the full test tree): results recorded alongside this file's
+download evidence pack (kill rate and per-mutant ledger in
+mutation-run8-results.json; the survivor review below).
+
+This entry is the in-repo continuation of the owner's appeal-file
+requirement: STATE.md (this file) is the repository's ordered record;
+the working-session notes under download/ are the working copies.
